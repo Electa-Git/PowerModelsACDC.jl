@@ -1,5 +1,5 @@
 julia 0.6
 
 JuMP 0.17 0.19-
-PowerModels 0.3 0.4
+PowerModels 0.3 0.4 0.5
 Compat 0.17
