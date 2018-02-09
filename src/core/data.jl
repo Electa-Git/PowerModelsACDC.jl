@@ -9,6 +9,12 @@ function process_additional_data!(data)
                 PowerModels.apply_func(conv, "Pdcset", rescale)
                 PowerModels.apply_func(conv, "Q_g", rescale)
                 PowerModels.apply_func(conv, "LossA", rescale)
+                PowerModels.apply_func(conv, "Pacmax", rescale)
+                PowerModels.apply_func(conv, "Pacmin", rescale)
+                PowerModels.apply_func(conv, "Qacmax", rescale)
+                PowerModels.apply_func(conv, "Qacmin", rescale)
+                conv["Pacrated"] = max(abs(conv["Pacmax"]),abs(conv["Pacmin"]))
+                conv["Qacrated"] = max(abs(conv["Qacmax"]),abs(conv["Qacmin"]))
                 convbus = conv["busdc_i"]
                 for (i, bus) in data["busdc"]
                     bus_id = bus["busdc_i"]
@@ -40,6 +46,12 @@ function process_additional_data!(data)
                     PowerModels.apply_func(conv, "Pdcset", rescale)
                     PowerModels.apply_func(conv, "Q_g", rescale)
                     PowerModels.apply_func(conv, "LossA", rescale)
+                    PowerModels.apply_func(conv, "Pacmax", rescale)
+                    PowerModels.apply_func(conv, "Pacmin", rescale)
+                    PowerModels.apply_func(conv, "Qacmax", rescale)
+                    PowerModels.apply_func(conv, "Qacmin", rescale)
+                    conv["Pacrated"] = max(abs(conv["Pacmax"]),abs(conv["Pacmin"]))
+                    conv["Qacrated"] = max(abs(conv["Qacmax"]),abs(conv["Qacmin"]))
                     convbus = conv["busdc_i"]
                     for (i, bus) in data["nw"][n]["busdc"]
                         bus_id = bus["busdc_i"]

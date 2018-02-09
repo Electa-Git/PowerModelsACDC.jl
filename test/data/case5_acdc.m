@@ -51,19 +51,19 @@ mpc.branch = [
 mpc.dcpol=2;
 % numbers of poles (1=monopolar grid, 2=bipolar grid)
 %% bus data
-%column_names%   busdc_i busac_i grid    Pdc     Vdc     basekVdc    Vdcmax  Vdcmin  Cdc 
+%column_names%   busdc_i grid    Pdc     Vdc     basekVdc    Vdcmax  Vdcmin  Cdc 
 mpc.busdc = [
-    1       2       1       0       1       345         1.1     0.9     0;
-    2       3       1       0       1       345         1.1     0.9     0;  
-	3       5       1       0       1       345         1.1     0.9     0;
+    1              1       0       1       345         1.1     0.9     0;
+    2              1       0       1       345         1.1     0.9     0;  
+	3              1       0       1       345         1.1     0.9     0;
 ];
 
 %% converters
-%column_names%   busdc_i type_dc type_ac P_g   Q_g   Vtar    rtf     xtf     bf     rc      xc     basekVac    Vmmax   Vmmin   Imax    status   LossA LossB  LossCrec LossCinv  droop      Pdcset    Vdcset  dVdcset
+%column_names%   busdc_i busac_i type_dc type_ac P_g   Q_g   Vtar    rtf xtf     bf     rc      xc     basekVac    Vmmax   Vmmin   Imax    status   LossA LossB  LossCrec LossCinv  droop      Pdcset    Vdcset  dVdcset Pacmax Pacmin Qacmax Qacmin 
 mpc.convdc = [ 
-    1       3       1       -60    -40    1     0.0015  0.1121  0.0887 0.0001   0.16428  345         1.1     0.9     1.1     1       1.103 0.887  2.885    4.371      0.0050    -58.6274   1.0079   0;
-    2       3       2       0       0     1     0.0015  0.1121  0.0887 0.0001   0.16428  345         1.1     0.9     1.1     1       1.103 0.887  2.885    4.371      0.0070     21.9013   1.0000   0;
-    3       3       1       35       5    1     0.0015  0.1121  0.0887 0.0001   0.16428  345         1.1     0.9     1.1     1       1.103 0.887  2.885    4.371      0.0050     36.1856   0.9978   0;
+    1       2   3       1       -60    -40    1     0.0015  0.1121  0.0887 0.0001   0.16428  345         1.1     0.9     1.1     1       1.103 0.887  2.885    4.371      0.0050    -58.6274   1.0079   0 100 -100 50 -50;
+    2       3   3       2       0       0     1     0.0015  0.1121  0.0887 0.0001   0.16428  345         1.1     0.9     1.1     1       1.103 0.887  2.885    4.371      0.0070     21.9013   1.0000   0 100 -100 50 -50;
+    3       5   3       1       35       5    1     0.0015  0.1121  0.0887 0.0001   0.16428  345         1.1     0.9     1.1     1       1.103 0.887  2.885    4.371      0.0050     36.1856   0.9978   0 100 -100 50 -50;
 ];
 
 %% branches
