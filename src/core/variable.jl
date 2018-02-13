@@ -43,14 +43,14 @@ end
 
 "variable: `iconv_dc[j]` for `j` in `convdc`"
 function variable_acside_current(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    pm.var[:nw][n][:iconv_dc] = @variable(pm.model,
+    pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_dc",
         lowerbound = 0,
         upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacrated"]^2) / sqrt(3) # assuming rated voltage = 1pu
     )
 end
 
-"variable: `v[i]` for `i` in `bus`es"
+"variable: `vdcm[i]` for `i` in `dcbus`es"
 function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
     pm.var[:nw][n][:vdcm] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:busdc])], basename="$(n)_vdcm",
