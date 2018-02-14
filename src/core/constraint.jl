@@ -15,8 +15,8 @@ function constraint_kcl_shunt(pm::GenericPowerModel, n::Int, i::Int, bus_arcs, b
     pconv_ac = pm.var[:nw][n][:pconv_ac]
     qconv_ac = pm.var[:nw][n][:qconv_ac]
 
-    pm.con[:nw][n][:kcl_p][i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) + sum(pconv_ac[c] for c in bus_convs_ac) == sum(pg[g] for g in bus_gens)  - pd - gs*vm^2)
-    pm.con[:nw][n][:kcl_q][i] = @constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) + sum(qconv_ac[c] for c in bus_convs_ac) == sum(qg[g] for g in bus_gens)  - qd + bs*vm^2)
+    pm.con[:nw][n][:kcl_p][i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) + sum(pconv_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - pd  - gs*vm^2)
+    pm.con[:nw][n][:kcl_q][i] = @constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) + sum(qconv_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - qd + bs*vm^2)
 end
 
 
@@ -63,7 +63,7 @@ function constraint_converter_losses(pm::GenericPowerModel, n::Int, i::Int, a, b
     pconv_dc = pm.var[:nw][n][:pconv_dc][i]
     iconv = pm.var[:nw][n][:iconv_ac][i]
 
-    @NLconstraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv^2)
+    pm.con[:nw][n][:conv_loss][i] = @NLconstraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv^2)
 end
 
 
@@ -80,5 +80,23 @@ function constraint_converter_current(pm::GenericPowerModel, n::Int, i::Int, bus
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
     iconv = pm.var[:nw][n][:iconv_ac][i]
 
-    @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == 3 * vm^2 * iconv^2)
+    pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == 3 * vm^2 * iconv^2)
+end
+
+"`pconv[i] == pconv`"
+function constraint_active_conv_setpoint(pm::GenericPowerModel, n::Int, i, pconv)
+    pconv_var = pm.var[:nw][n][:pconv_ac][i]
+    pm.con[:nw][n][:conv_pac][i] = @constraint(pm.model, pconv_var == -pconv)
+end
+
+"`qconv[i] == qconv`"
+function constraint_reactive_conv_setpoint(pm::GenericPowerModel, n::Int, i, qconv)
+    qconv_var = pm.var[:nw][n][:qconv_ac][i]
+    pm.con[:nw][n][:conv_qac][i] = @constraint(pm.model, qconv_var == -qconv)
+end
+
+"`vdc[i] == vdcm`"
+function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, n::Int, i, vdcm)
+    v = pm.var[:nw][n][:vdcm][i]
+    pm.con[:nw][n][:v_dc][i] = @constraint(pm.model, v == vdcm)
 end

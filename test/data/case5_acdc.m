@@ -29,7 +29,7 @@ mpc.bus = [
 %	bus	Pg      Qg	Qmax	Qmin	Vg	mBase       status	Pmax	Pmin	pc1 pc2 qlcmin qlcmax qc2min qc2max ramp_agc ramp_10 ramp_30 ramp_q apf
 mpc.gen = [
 	1	0       0	500      -500    1.06	100       1       250     10 0 0 0 0 0 0 0 0 0 0 0;
-  	2	40      0	300      -300    1      100       1       300     10 0 0 0 0 0 0 0 0 0 0 0;
+  2	40      0	300      -300    1      100       1       300     10 0 0 0 0 0 0 0 0 0 0 0;
 ];
 
 %% branch data
@@ -51,26 +51,38 @@ mpc.branch = [
 mpc.dcpol=2;
 % numbers of poles (1=monopolar grid, 2=bipolar grid)
 %% bus data
-%column_names%   busdc_i grid    Pdc     Vdc     basekVdc    Vdcmax  Vdcmin  Cdc 
+%column_names%   busdc_i grid    Pdc     Vdc     basekVdc    Vdcmax  Vdcmin  Cdc
 mpc.busdc = [
     1              1       0       1       345         1.1     0.9     0;
-    2              1       0       1       345         1.1     0.9     0;  
+    2              1       0       1       345         1.1     0.9     0;
 	3              1       0       1       345         1.1     0.9     0;
 ];
 
 %% converters
-%column_names%   busdc_i busac_i type_dc type_ac P_g   Q_g   Vtar    rtf xtf     bf     rc      xc     basekVac    Vmmax   Vmmin   Imax    status   LossA LossB  LossCrec LossCinv  droop      Pdcset    Vdcset  dVdcset Pacmax Pacmin Qacmax Qacmin 
-mpc.convdc = [ 
-    1       2   3       1       -60    -40    1     0.0015  0.1121  0.0887 0.0001   0.16428  345         1.1     0.9     1.1     1       1.103 0.887  2.885    4.371      0.0050    -58.6274   1.0079   0 100 -100 50 -50;
-    2       3   3       2       0       0     1     0.0015  0.1121  0.0887 0.0001   0.16428  345         1.1     0.9     1.1     1       1.103 0.887  2.885    4.371      0.0070     21.9013   1.0000   0 100 -100 50 -50;
-    3       5   3       1       35       5    1     0.0015  0.1121  0.0887 0.0001   0.16428  345         1.1     0.9     1.1     1       1.103 0.887  2.885    4.371      0.0050     36.1856   0.9978   0 100 -100 50 -50;
+%column_names%   busdc_i busac_i type_dc type_ac P_g   Q_g   Vtar    rtf xtf     bf     rc      xc     basekVac    Vmmax   Vmmin   Imax    status   LossA LossB  LossCrec LossCinv  droop      Pdcset    Vdcset  dVdcset Pacmax Pacmin Qacmax Qacmin
+mpc.convdc = [
+    1       2   1       1       -60    -40    1     0.0001  0.0001  0.0001 0.0001   0.0001  345         1.1     0.9     1.1     1       1.103 0.887  2.885    2.885      0.0050    -58.6274   1.0079   0 100 -100 50 -50;
+    2       3   2       1       0       0     1     0.0001  0.0001  0.0001 0.0001   0.0001 345         1.1     0.9     1.1     1       1.103 0.887  2.885    2.885      0.0070     21.9013   1.0000   0 100 -100 50 -50;
+    3       5   1       1       35       5    1     0.0001  0.0001  0.0001 0.0001   0.0001  345         1.1     0.9     1.1     1       1.103 0.887  2.885    2.885      0.0050     36.1856   0.9978   0 100 -100 50 -50;
 ];
+%mpc.convdc = [
+%    1       2   1       1       -60    -40    1     0.0001  0.0001  0.0001 0.0001   0.0001  345         1.1     0.9     1.1     1       1 0  0    0      0.0050    -58.6274   1.0079   0 100 -100 50 -50;
+%    2       3   2       1       0       0     1     0.0001  0.0001  0.0001 0.0001   0.0001 345         1.1     0.9     1.1     1        1 0  0    0      0.0070     21.9013   1.0000   0 100 -100 50 -50;
+%    3       5   1       1       35       5    1     0.0001  0.0001  0.0001 0.0001   0.0001  345         1.1     0.9     1.1     1       1 0  0    0      0.0050     36.1856   0.9978   0 100 -100 50 -50;
+%];
+
+
+%mpc.convdc = [
+%    1       2   1       1       -60    -40    1     0.0001  0.0001  0.0001 0.0001   0.0001  345         1.1     0.9     1.1     1       1.103 0.887  2.885    2.885      0.0050    -58.6274   1.0079   0 100 -100 50 -50;
+%    2       3   2       1       0       0     1     0.0001  0.0001  0.0001 0.0001   0.0001 345         1.1     0.9     1.1     1       1.103 0.887  2.885    2.885      0.0070     21.9013   1.0000   0 100 -100 50 -50;
+%    3       5   1       1       35       5    1     0.0001  0.0001  0.0001 0.0001   0.0001  345         1.1     0.9     1.1     1       1.103 0.887  2.885    2.885      0.0050     36.1856   0.9978   0 100 -100 50 -50;
+%];
 
 %% branches
 %column_names%   fbusdc  tbusdc  r      l        c   rateA   rateB   rateC   status
-mpc.branchdc = [  
+mpc.branchdc = [
     1       2       0.052   0   0    100     100     100     1;
-    2       3       0.052   0   0    100     100     100     1;    
+    2       3       0.052   0   0    100     100     100     1;
     1       3       0.073   0   0    100     100     100     1;
  ];
 
@@ -78,6 +90,6 @@ mpc.branchdc = [
 %	1	startup	shutdown	n	x1	y1	...	xn	yn
 %	2	startup	shutdown	n	c(n-1)	...	c0
 mpc.gencost = [
-	2	0	0	2	14	0;
-	2	0	0	2	15	0;
+	2	0	0	2	 1	0;
+	2	0	0	2	 2	0;
 ];

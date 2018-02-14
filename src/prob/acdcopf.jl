@@ -17,8 +17,6 @@ function post_acdcopf(pm::GenericPowerModel)
     variable_active_dcbranch_flow(pm)
     variable_dc_converter(pm)
     variable_dcgrid_voltage_magnitude(pm)
-    display(pm.var)
-    #variable_transformation(pm)
 
     PowerModels.objective_min_fuel_cost(pm)
 
@@ -28,12 +26,8 @@ function post_acdcopf(pm::GenericPowerModel)
     end
 
     for i in PowerModels.ids(pm, :bus)
-        constraint_kcl_shunt(pm, i)  # this one needs to be redefined condidering converter injections
+        constraint_kcl_shunt(pm, i)
     end
-
-    # for i in PowerModels.ids(pm, :dcbus)
-    #     constraint_dcgrid_kcl_shunt(pm, i)
-    # end
 
     for i in PowerModels.ids(pm, :branch)
         PowerModels.constraint_ohms_yt_from(pm, i)
@@ -44,13 +38,14 @@ function post_acdcopf(pm::GenericPowerModel)
         PowerModels.constraint_thermal_limit_to(pm, i)
     end
     for i in PowerModels.ids(pm, :busdc)
-        constraint_kcl_shunt_dcgrid(pm, i)  # this one needs to be redefined condidering converter injections
+        constraint_kcl_shunt_dcgrid(pm, i)
     end
     for i in PowerModels.ids(pm, :branchdc)
         constraint_ohms_dc_branch(pm, i)
     end
     for i in PowerModels.ids(pm, :convdc)
         constraint_converter_losses(pm, i)
+        constraint_converter_current(pm, i)
     end
     for i in PowerModels.ids(pm, :dcline)
         PowerModels.constraint_dcline(pm, i)

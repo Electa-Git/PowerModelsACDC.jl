@@ -28,6 +28,9 @@ end
 constraint_kcl_shunt_dcgrid(pm::GenericPowerModel, i::Int) = constraint_kcl_shunt_dcgrid(pm, pm.cnw, i::Int)
 
 function constraint_ohms_dc_branch(pm::GenericPowerModel, n::Int, i::Int)
+    if !haskey(pm.con[:nw][n], :dc_branch)
+        pm.con[:nw][n][:dc_branch] = Dict{Int,ConstraintRef}()
+    end
     branch = ref(pm, n, :branchdc, i)
     f_bus = branch["fbusdc"]
     t_bus = branch["tbusdc"]
@@ -42,6 +45,9 @@ end
 constraint_ohms_dc_branch(pm::GenericPowerModel, i::Int) = constraint_ohms_dc_branch(pm, pm.cnw, i)
 
 function constraint_converter_losses(pm::GenericPowerModel, n::Int, i::Int)
+    if !haskey(pm.con[:nw][n], :conv_loss)
+        pm.con[:nw][n][:conv_loss] = Dict{Int,ConstraintRef}()
+    end
     conv = ref(pm, n, :convdc, i)
     a = conv["LossA"]
     b = conv["LossB"]
@@ -52,8 +58,41 @@ constraint_converter_losses(pm::GenericPowerModel, i::Int) = constraint_converte
 
 
 function constraint_converter_current(pm::GenericPowerModel, n::Int, i::Int)
+    if !haskey(pm.con[:nw][n], :conv_i)
+        pm.con[:nw][n][:conv_i] = Dict{Int,ConstraintRef}()
+    end
     conv = ref(pm, n, :convdc, i)
     bus_ac = conv["busac_i"]
     constraint_converter_current(pm, n, i, bus_ac)
 end
 constraint_converter_current(pm::GenericPowerModel, i::Int) = constraint_converter_current(pm, pm.cnw, i::Int)
+
+""
+function constraint_active_conv_setpoint(pm::GenericPowerModel, n::Int, i::Int)
+    if !haskey(pm.con[:nw][n], :conv_pac)
+        pm.con[:nw][n][:conv_pac] = Dict{Int,ConstraintRef}()
+    end
+    conv = ref(pm, n, :convdc, i)
+    constraint_active_conv_setpoint(pm, n, conv["index"], conv["P_g"])
+end
+constraint_active_conv_setpoint(pm::GenericPowerModel, i::Int) = constraint_active_conv_setpoint(pm, pm.cnw, i::Int)
+
+""
+function constraint_reactive_conv_setpoint(pm::GenericPowerModel, n::Int, i::Int)
+    if !haskey(pm.con[:nw][n], :conv_qac)
+        pm.con[:nw][n][:conv_qac] = Dict{Int,ConstraintRef}()
+    end
+    conv = ref(pm, n, :convdc, i)
+    constraint_reactive_conv_setpoint(pm, n, conv["index"], conv["Q_g"])
+end
+constraint_reactive_conv_setpoint(pm::GenericPowerModel, i::Int) = constraint_reactive_conv_setpoint(pm, pm.cnw, i::Int)
+
+""
+function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, n::Int, i::Int)
+    if !haskey(pm.con[:nw][n], :v_dc)
+        pm.con[:nw][n][:v_dc] = Dict{Int,ConstraintRef}()
+    end
+    conv = ref(pm, n, :convdc, i)
+    constraint_dc_voltage_magnitude_setpoint(pm, n, conv["busdc_i"], conv["Vdcset"])
+end
+constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, i::Int) = constraint_dc_voltage_magnitude_setpoint(pm, pm.cnw, i::Int)

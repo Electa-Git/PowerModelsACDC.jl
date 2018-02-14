@@ -8,6 +8,7 @@ using PowerModels
 PMs = PowerModels
 
 include("prob/acdcopf.jl")
+include("prob/acdcpf.jl")
 include("core/solution.jl")
 include("core/data.jl")
 include("core/variable.jl")

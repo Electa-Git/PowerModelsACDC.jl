@@ -26,5 +26,28 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
         push!(bus_convs_dc[conv["busdc_i"]], i)
     end
     pm.ref[:nw][n][:bus_convs_dc] = bus_convs_dc
+
+    # Add DC reference buses
+    ref_buses_dc = Dict()
+    for (k,v) in pm.ref[:nw][n][:convdc]
+        if v["type_dc"] == 2
+            ref_buses_dc[k] = v
+        end
+    end
+
+    if length(ref_buses_dc) == 0
+        for (k,v) in pm.ref[:nw][n][:convdc]
+            if v["type_ac"] == 2
+                ref_buses_dc[k] = v
+            end
+        end
+        warn("no reference DC bus found, setting bus as reference based on generator AC bus type)")
+    end
+
+    if length(ref_buses_dc) > 1
+        warn("multiple reference buses found, $(keys(ref_buses_dc)), this can cause infeasibility if they are in the same connected component")
+    end
+
+    pm.ref[:nw][n][:ref_buses_dc] = ref_buses_dc
 end
 add_ref_dcgrid!(pm::GenericPowerModel) = add_ref_dcgrid!(pm::GenericPowerModel, pm.cnw)
