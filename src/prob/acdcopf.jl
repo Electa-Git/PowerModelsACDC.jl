@@ -21,6 +21,8 @@ function post_acdcopf(pm::GenericPowerModel)
     PowerModels.objective_min_fuel_cost(pm)
 
     PowerModels.constraint_voltage(pm)
+    constraint_voltage_dc(pm)
+
     for i in PowerModels.ids(pm, :ref_buses)
         PowerModels.constraint_theta_ref(pm, i)
     end

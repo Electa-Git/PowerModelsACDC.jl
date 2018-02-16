@@ -19,6 +19,8 @@ function post_acdcpf(pm::GenericPowerModel)
     variable_dcgrid_voltage_magnitude(pm, bounded = false)
 
     PowerModels.constraint_voltage(pm)
+    constraint_voltage_dc(pm)
+
 
     for (i,bus) in ref(pm, :ref_buses)
         @assert bus["bus_type"] == 3

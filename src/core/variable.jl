@@ -94,3 +94,93 @@ function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel, n::Int=pm.cnw;
         )
     end
 end
+
+
+"variable: `iconv_dc[j]` for `j` in `convdc`"
+function variable_acside_current{T <: PowerModels.AbstractWRForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true)
+    pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_dc",
+    lowerbound = 0,
+    upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacrated"]^2) / sqrt(3) # assuming rated voltage = 1pu
+    )
+    pm.var[:nw][n][:iconv_ac_sq] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_dc_sq",
+    lowerbound = 0,
+    upperbound = (pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacrated"]^2) / (3) # assuming rated voltage = 1pu
+    )
+end
+
+
+"variable: `vdcm[i]` for `i` in `dcbus`es"
+function variable_dcgrid_voltage_magnitude{T <: PowerModels.AbstractWRForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true)
+    if bounded
+        pm.var[:nw][n][:wdc] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:busdc])], basename="$(n)_wdc",
+        lowerbound = pm.ref[:nw][n][:busdc][i]["Vdcmin"]^2,
+        upperbound = pm.ref[:nw][n][:busdc][i]["Vdcmax"]^2,
+        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
+        )
+        print()
+        pm.var[:nw][n][:wdcr] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:buspairsdc])], basename="$(n)_wdcr",
+        lowerbound = 0,
+        upperbound = pm.ref[:nw][n][:buspairsdc][i]["vm_fr_max"]*pm.ref[:nw][n][:buspairsdc][i]["vm_to_max"],
+        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
+        )
+    else
+        pm.var[:nw][n][:wdc] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:busdc])], basename="$(n)_wdc",
+        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
+        )
+        pm.var[:nw][n][:wdcr] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:buspairsdc])], basename="$(n)_wdcr",
+        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
+        )
+
+    end
+end
+
+
+"variable: `iconv_dc[j]` for `j` in `convdc`"
+function variable_acside_current{T <: PowerModels.AbstractWRMForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true)
+    pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_dc",
+    lowerbound = 0,
+    upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacrated"]^2) / sqrt(3) # assuming rated voltage = 1pu
+    )
+    pm.var[:nw][n][:iconv_ac_sq] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_dc_sq",
+    lowerbound = 0,
+    upperbound = (pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacrated"]^2) / (3) # assuming rated voltage = 1pu
+    )
+end
+
+
+"variable: `vdcm[i]` for `i` in `dcbus`es"
+function variable_dcgrid_voltage_magnitude{T <: PowerModels.AbstractWRMForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true)
+    if bounded
+        pm.var[:nw][n][:wdc] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:busdc])], basename="$(n)_wdc",
+        lowerbound = pm.ref[:nw][n][:busdc][i]["Vdcmin"]^2,
+        upperbound = pm.ref[:nw][n][:busdc][i]["Vdcmax"]^2,
+        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
+        )
+        print()
+        pm.var[:nw][n][:wdcr] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:buspairsdc])], basename="$(n)_wdcr",
+        lowerbound = 0,
+        upperbound = pm.ref[:nw][n][:buspairsdc][i]["vm_fr_max"]*pm.ref[:nw][n][:buspairsdc][i]["vm_to_max"],
+        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
+        )
+    else
+        pm.var[:nw][n][:wdc] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:busdc])], basename="$(n)_wdc",
+        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
+        )
+        pm.var[:nw][n][:wdcr] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:buspairsdc])], basename="$(n)_wdcr",
+        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
+        )
+
+    end
+end

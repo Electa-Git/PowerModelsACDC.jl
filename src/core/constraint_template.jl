@@ -1,3 +1,8 @@
+
+constraint_voltage_dc(pm::GenericPowerModel) = constraint_voltage_dc(pm, pm.cnw)
+# no data, so no further templating is needed, constraint goes directly to the formulations
+
+
 function constraint_kcl_shunt(pm::GenericPowerModel, n::Int, i::Int)
     if !haskey(pm.con[:nw][n], :kcl_p)
         pm.con[:nw][n][:kcl_p] = Dict{Int,ConstraintRef}()

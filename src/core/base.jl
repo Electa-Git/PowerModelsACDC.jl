@@ -49,5 +49,32 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
     end
 
     pm.ref[:nw][n][:ref_buses_dc] = ref_buses_dc
+    pm.ref[:nw][n][:buspairsdc] = buspair_parameters_dc(pm.ref[:nw][n][:arcs_dcgrid_from], pm.ref[:nw][n][:branchdc], pm.ref[:nw][n][:busdc])
+
 end
 add_ref_dcgrid!(pm::GenericPowerModel) = add_ref_dcgrid!(pm::GenericPowerModel, pm.cnw)
+
+
+"compute bus pair level structures"
+function buspair_parameters_dc(arcs_dcgrid_from, branches, buses)
+    buspair_indexes = collect(Set([(i,j) for (l,i,j) in arcs_dcgrid_from]))
+
+    bp_branch = Dict([(bp, Inf) for bp in buspair_indexes])
+
+    for (l,branch) in branches
+        i = branch["fbusdc"]
+        j = branch["tbusdc"]
+
+        bp_branch[(i,j)] = min(bp_branch[(i,j)], l)
+    end
+
+    buspairs = Dict([((i,j), Dict(
+        "branch"=>bp_branch[(i,j)],
+        "vm_fr_min"=>buses[i]["Vdcmin"],
+        "vm_fr_max"=>buses[i]["Vdcmax"],
+        "vm_to_min"=>buses[j]["Vdcmin"],
+        "vm_to_max"=>buses[j]["Vdcmax"]
+        )) for (i,j) in buspair_indexes])
+
+    return buspairs
+end
