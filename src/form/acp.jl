@@ -61,7 +61,7 @@ Links converter power & current
 pconv_ac[i]^2 + pconv_dc[i]^2 == 3 * vm[i]^2 * iconv_ac[i]^2
 ```
 """
-function constraint_converter_current(pm::GenericPowerModel, n::Int, i::Int, bus_ac)
+function constraint_converter_current(pm::GenericPowerModel, n::Int, i::Int, bus_ac, Umax)
     vm = pm.var[:nw][n][:vm][bus_ac]
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]

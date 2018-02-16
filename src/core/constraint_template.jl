@@ -65,10 +65,13 @@ constraint_converter_losses(pm::GenericPowerModel, i::Int) = constraint_converte
 function constraint_converter_current(pm::GenericPowerModel, n::Int, i::Int)
     if !haskey(pm.con[:nw][n], :conv_i)
         pm.con[:nw][n][:conv_i] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_i_sqrt] = Dict{Int,ConstraintRef}()
     end
     conv = ref(pm, n, :convdc, i)
     bus_ac = conv["busac_i"]
-    constraint_converter_current(pm, n, i, bus_ac)
+    bus = ref(pm, n, :bus, bus_ac)
+    Vmax = bus["vmax"]
+    constraint_converter_current(pm, n, i, bus_ac, Vmax)
 end
 constraint_converter_current(pm::GenericPowerModel, i::Int) = constraint_converter_current(pm, pm.cnw, i::Int)
 

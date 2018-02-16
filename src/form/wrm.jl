@@ -72,17 +72,22 @@ end
 Links converter power & current
 
 ```
-pconv_ac[i]^2 + pconv_dc[i]^2 <= 3 * vm[i]^2 * iconv_ac[i]^2
+pconv_ac[i]^2 + pconv_dc[i]^2 <= 3 * vm[i]^2 * iconv_ac_sqr[i]
+pconv_ac[i]^2 + pconv_dc[i]^2 <= 3 * Umax[i]^2 * iconv_ac[i]^2
 ```
 """
-function constraint_converter_current{T <: PowerModels.AbstractWRMForm}(pm::GenericPowerModel{T}, n::Int, i::Int, bus_ac)
+function constraint_converter_current{T <: PowerModels.AbstractWRMForm}(pm::GenericPowerModel{T}, n::Int, i::Int, bus_ac,Umax)
     w_index = pm.ext[:nw][n][:lookup_w_index][i]
     wac = pm.var[:nw][n][:WR][w_index, w_index]
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
-    iconv = pm.var[:nw][n][:iconv_ac_sq][i]
+    iconv_sq = pm.var[:nw][n][:iconv_ac_sq][i]
+    iconv = pm.var[:nw][n][:iconv_ac][i]
 
-    pm.con[:nw][n][:conv_i][i] = @constraint(pm.model, norm([2pconv_ac;2qconv_ac; 3*(wac-iconv)]) <= 3 *(wac+iconv))
+
+    pm.con[:nw][n][:conv_i][i] = @constraint(pm.model, norm([2pconv_ac;2qconv_ac; 3*(wac-iconv_sq)]) <= 3 *(wac+iconv_sq))
+    pm.con[:nw][n][:conv_i_sqrt][i] = @constraint(pm.model, norm([pconv_ac;qconv_ac]) <= sqrt(3 *(Umax)^2)* iconv)
+
 end
 
 "`vdc[i] == vdcm`"
