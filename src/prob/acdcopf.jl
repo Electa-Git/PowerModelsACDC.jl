@@ -1,9 +1,16 @@
 export run_acdcopf
 
+
 ""
-function run_acdcopf(data, model_constructor, solver; kwargs...)
+function run_acdcopf(file::String, model_constructor, solver; kwargs...)
+    data = PowerModels.parse_file(file)
+    PowerModelsACDC.process_additional_data!(data)
+    return run_acdcopf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
+end
+
+""
+function run_acdcopf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
     pm = PowerModels.build_generic_model(data, model_constructor, post_acdcopf; kwargs...)
-    display(pm)
     return PowerModels.solve_generic_model(pm, solver; solution_builder = get_solution_acdc)
 end
 
