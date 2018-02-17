@@ -1,7 +1,7 @@
 """
 ```
-sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[g] for g in bus_gens) + sum(pconvac[c] for c in bus_convs) - pd - gs*v^2
-sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*v^2
+sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[g] for g in bus_gens) + sum(pconvac[c] for c in bus_convs) - pd - gs*1^2
+sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*1^2
 ```
 """
 function constraint_kcl_shunt{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, pd, qd, gs, bs)
@@ -18,7 +18,7 @@ end
 Creates Ohms constraints for DC branches
 
 ```
-p[f_idx] + p[t_idx] == p * g[l] * vmdc[f_bus] * (vmdc[f_bus] - vmdc[t_bus])
+p[f_idx] + p[t_idx] == 0)
 ```
 """
 function constraint_ohms_dc_branch{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int, f_bus, t_bus, f_idx, t_idx, g, p)
@@ -33,7 +33,7 @@ end
 Creates lossy converter model between AC and DC grid
 
 ```
-pconv_ac[i] + pconv_dc[i] == a + bI + cI^2
+pconv_ac[i] + pconv_dc[i] == a 
 ```
 """
 function constraint_converter_losses{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int, i::Int, a, b, c)
@@ -45,13 +45,7 @@ function constraint_converter_losses{T <: PowerModels.AbstractDCPForm}(pm::Gener
 end
 
 
-"""
-Links converter power & current
-
-```
-pconv_ac[i]^2 + pconv_dc[i]^2 == 3 * vm[i]^2 * iconv_ac[i]^2
-```
-"""
+""
 function constraint_converter_current{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int, i::Int, bus_ac, Umax)
     # not used
 end

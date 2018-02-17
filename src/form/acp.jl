@@ -24,7 +24,7 @@ end
 Creates Ohms constraints for DC branches
 
 ```
-p[f_idx] + p[t_idx] == p * g[l] * vmdc[f_bus] * (vmdc[f_bus] - vmdc[t_bus])
+p[f_idx] == p * g[l] * vmdc[f_bus] * (vmdc[f_bus] - vmdc[t_bus])
 ```
 """
 function constraint_ohms_dc_branch{T <: PowerModels.AbstractACPForm}(pm::GenericPowerModel{T}, n::Int, f_bus, t_bus, f_idx, t_idx, g, p)
