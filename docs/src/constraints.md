@@ -1,4 +1,5 @@
 # Constraints
+All the OPF constraints for the AC grids have been re-used from PowerModels.jl, and are therefore not repeated here. 
 
 ```@meta
 CurrentModule = PowerModelsACDC
@@ -8,54 +9,48 @@ CurrentModule = PowerModelsACDC
 
 ```@docs
 constraint_active_load_gen_aggregation
-constraint_reactive_load_gen_aggregation
-constraint_active_load_gen_aggregation_sheddable
-constraint_reactive_load_gen_aggregation_sheddable
-constraint_flexible_active_load
-constraint_flexible_reactive_load
-constraint_fixed_active_load
-constraint_fixed_reactive_load
-constraint_flexible_active_gen
-constraint_flexible_reactive_gen
-constraint_redispatch_active_power_gen
-constraint_redispatch_reactive_power_gen
-constraint_second_stage_redispatch_active_power_gen
-constraint_second_stage_redispatch_reactive_power_gen
-constraint_redispatch_active_power_load
-constraint_redispatch_reactive_power_load
-constraint_second_stage_redispatch_active_power_load
-constraint_second_stage_redispatch_reactive_power_load
-constraint_tan_phi_load
-constraint_active_power_gen_contingency
-constraint_reactive_power_gen_contingency
-constraint_active_power_branch_contingency
-constraint_reactive_power_branch_contingency
 ```
 
-## Bus Constraints
+## DC Bus Constraints
 
 ### Setpoint Constraints
 
 ```@docs
-constraint_voltage_reference_ub
+constraint_dc_voltage_magnitude_setpoint
 ```
 
 ### KCL Constraints
 
 ```@docs
-constraint_kcl_shunt_ub
+constraint_kcl_shunt
 ```
 
-## Branch Constraints
+## DC Branch Constraints
 
 ### Ohm's Law Constraints
 
 ```@docs
-constraint_ohms_ub
+constraint_ohms_dc_branch
+constraint_kcl_shunt_dcgrid
+```
+
+
+## ACDC Converter Constraints
+
+### Ohm's Law Constraints
+
+```@docs
+constraint_converter_losses
 ```
 
 ### Current
 
 ```@docs
-constraint_branch_limit_ub
+constraint_converter_current
+```
+
+### Setpoint Constraints
+
+```@docs
+constraint_active_conv_setpoint
 ```

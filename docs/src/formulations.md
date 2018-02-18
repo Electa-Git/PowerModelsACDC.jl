@@ -14,8 +14,29 @@ Extending PowerModels,  formulations for balanced  OPF in DC grids have been imp
 - QCWRTriPowerModel
 
 
+Note that from the perspective of OPF convex relaxation for DC grids, applying the same assumptions as the AC equivalent, the same formulation (and variable space) is obtained for - SOCWRPowerModel,  SDPWRMPowerModel,  QCWRPowerModel and  QCWRTriPowerModel. These are referred to as formulations in the AC WR(M) variable space.
+
 # Formulation details
-## ACPPowerModel
+The formulations are categorized as Bus Injection Model (BIM) or Branch Flow Model (BFM).
+- Applied, to DC grids, the BIM uses series conductance notation, and adds separate equations for the to and from line flow.
+- Conversely, BFM uses series resistance parameters, and adds only a single equation per line, representing $P_{ij} + P_{ji} = P_{ij}^{loss} = P_{ji}^{loss}$.
+
+Note that in a DC grid, under the static power flow assumption, power is purely active, impedance is purely resistance, and voltages and currents are purely defined by their magnitude.
+
+
+Parameters used:
+- $g^{series}=\frac{1}{r^{series}}$, dc line series impedance
+- $p \in \{1,2\}$ for single ($1$) or bipole ($2$) DC lines
+- $U_i^{max}$ maximum AC node voltage
+- $a$ constant power converter loss
+- $b$ converter loss proportional to current magnitude
+- $c$ converter loss proportional to square of current magnitude
+
+Note that generally, $a \geq 0, b \geq 0, c \geq 0$
+
+
+
+## ACPPowerModel (BIM)
 ### DC lines
 - Active power flow from side: $P^{dc}_{ij}$ = $p \cdot g^{series}_{ij} \cdot U^{dc}_i \cdot (U^{dc}_i - U^{dc}_j)$.
 - Active power flow to side: $P^{dc}_{ji}$ = $p \cdot g^{series}_{ij} \cdot U^{dc}_j \cdot (U^{dc}_j - U^{dc}_i)$.
@@ -26,7 +47,8 @@ Extending PowerModels,  formulations for balanced  OPF in DC grids have been imp
 - Current variable model: $(P^{conv,ac}_{ij})^2$ + $(Q^{conv,ac}_{ij})^2$ = $3 \cdot U_i^2 \cdot  (I^{conv, ac})^2$.
 
 
-## DCPPowerModel
+## DCPPowerModel (NF)
+Due to the absence of voltage angles in DC grids, the DC power flow model reduces to network flow (NF) under the 'DC' assumptions
 ### DC lines
 - Network flow model: $P^{dc}_{ij}$ + $P^{dc}_{ji}$ = $0$
 
@@ -34,10 +56,31 @@ Extending PowerModels,  formulations for balanced  OPF in DC grids have been imp
 ### ACDC converters
 - Network flow model: $P^{conv, ac}_{ij}$ + $P^{conv, dc}_{ji}$ = $a$
 
+Under the same assumptions as MATPOWER ($U_i \approx 1$), $P^{conv, ac}_{ij} \approx I^{conv, ac}$ allowing the converter model to be extended to:
+- MATPOWER: $P^{conv, ac}_{ij}$ + $P^{conv, dc}_{ji}$ = $a + b P^{conv, ac}_{ij}$
 
 
 
-## SOCWRPowerModel, SDPWRMPowerModel,  QCWRPowerModel and QCWRTriPowerModel
+## AC WR(M) variable space.  (BFM)
+For the SDP formulation, the norm syntax is used to represent the SOC expressions below.
+
+
+### DC lines
+The variable $u^{dc}_{ii}$ represents $(U^{dc}_{i})^2$ and $i^{dc}_{ij}$ represents $(I^{dc}_{ij})^2$.
+- Active power flow from side: $P^{dc}_{ij} + P^{dc}_{ji}$ = $p \cdot r^{series} \cdot i^{dc}_{ij}$.
+- Convex relaxation of power definition: $(P^{dc}_{ij})^2 \leq u^{dc}_{ii} \cdot i^{dc}_{ij}$.
+- Lifted KVL: $u^{dc}_{jj} = u^{dc}_{ii} -2 p \cdot r^{series} P^{dc}_{ij} + (r^{series})^2 i^{dc}_{ij}$
+
+### ACDC converters
+Two separate current variables, $I^{conv, ac}$ and $i^{conv, ac, sq}$ are defined, the nonconvex relation $i^{conv, ac, sq} = (I^{conv, ac})^2$ is convexified, using $U_i \leq U_i^{max}$:
+- Power balance: $P^{conv, ac}_{ij} + P^{conv, dc}_{ji}$ = $a + b\cdot I^{conv, ac} + c\cdot i^{conv, ac, sq}$.
+- Squared current: $(P^{conv, ac}_{ij})^2 + (Q^{conv, ac}_{ij})^2 \leq 3 \cdot u_{ii} \cdot  i^{conv, ac, sq}$
+- Linear current: $(P^{conv, ac}_{ij})^2 + (Q^{conv, ac}_{ij})^2 \leq 3 \cdot (U_i^{max})^2 \cdot  (I^{conv, ac})^2$
+- Linking both current variables: $(I^{conv, ac})^2$ $\leq$ $i^{conv, ac, sq}$
+
+
+
+## AC WR(M) variable space.  (BIM)
 For the SDP formulation, the norm syntax is used to represent the SOCs.
 
 
@@ -48,9 +91,9 @@ The variable $u^{dc}_{ii}$ represents $(U^{dc}_{i})^2$ and $u^{dc}_{ij}$ represe
 - Convex relaxation of voltage products: $(u^{dc}_{ij})^2 \leq u^{dc}_{ii} \cdot u^{dc}_{jj}$.
 
 
-### ACDC converters
-Two separate current variables, $I^{conv, ac}$ and $i^{conv, ac, sq}$ are defined, the nonconvex relation $i^{conv, ac, sq} = (I^{conv, ac})^2$ is convexified, using $U_i \leq U_i^{max}$:
-- Power balance: $P^{conv, ac}_{ij} + P^{conv, dc}_{ji}$ = $a + b\cdot I^{conv, ac} + c\cdot i^{conv, ac, sq}$.
-- Squared current: $(P^{conv, ac}_{ij})^2 + (Q^{conv, ac}_{ij})^2 \leq 3 \cdot u_{ii} \cdot  i^{conv, ac, sq}$
-- Linear current: $(P^{conv, ac}_{ij})^2 + (Q^{conv, ac}_{ij})^2 \leq 3 \cdot (U_i^{max})^2 \cdot  (I^{conv, ac})^2$
-- Linking both current variables: $(I^{conv, ac})^2$ $\leq$ $i^{conv, ac, sq}$
+A ACDC converter model in BIM is not derived.
+
+
+## MATPOWER dcline
+Two 'DC' converters + a single line in 'DC'
+TODO: Derive mapping of matpower parameters to this model
