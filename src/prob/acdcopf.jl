@@ -21,6 +21,10 @@ function post_acdcopf(pm::GenericPowerModel)
     PowerModels.variable_generation(pm)
     PowerModels.variable_branch_flow(pm)
     PowerModels.variable_dcline_flow(pm)
+
+    variable_active_converter_flow(pm, bounded = false)
+    variable_reactive_converter_flow(pm, bounded = false)
+
     variable_active_dcbranch_flow(pm)
     variable_dc_converter(pm)
     variable_dcgrid_voltage_magnitude(pm)

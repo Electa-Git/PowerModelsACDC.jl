@@ -21,6 +21,40 @@ function variable_dc_converter(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
     variable_acside_current(pm, n; kwargs...)
 end
 
+"variable: `p_conv[l,i,j]` for `(l,i,j)` in `conv_arcs_acdc`"
+function variable_active_converter_flow(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    if bounded
+        pm.var[:nw][n][:p_conv] = @variable(pm.model,
+        [(l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]], basename="$(n)_pconv",
+        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"],
+        upperbound = pm.ref[:nw][n][:convdc][i]["Pacmax"]
+        )
+    else
+        pm.var[:nw][n][:p_conv] = @variable(pm.model,
+        [(l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]], basename="$(n)_pconv",
+        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "P_g")
+        )
+    end
+    display(pm.var[:nw][n][:p_conv])
+end
+
+function variable_reactive_converter_flow(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    if bounded
+        pm.var[:nw][n][:q_conv] = @variable(pm.model,
+        [(l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]], basename="$(n)_qconv",
+        lowerbound = pm.ref[:nw][n][:convdc][i]["Qacmin"],
+        upperbound = pm.ref[:nw][n][:convdc][i]["Qacmax"]
+        )
+    else
+        pm.var[:nw][n][:q_conv] = @variable(pm.model,
+        [(l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]], basename="$(n)_qconv",
+        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Q_g")
+        )
+    end
+    display(pm.var[:nw][n][:q_conv])
+end
+
+
 "variable: `pconv_ac[j]` for `j` in `convdc`"
 function variable_acside_active_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
     if bounded

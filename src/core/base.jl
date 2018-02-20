@@ -3,6 +3,7 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
     pm.ref[:nw][n][:arcs_dcgrid_from] = [(i,branch["fbusdc"],branch["tbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]
     pm.ref[:nw][n][:arcs_dcgrid_to]   = [(i,branch["tbusdc"],branch["fbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]
     pm.ref[:nw][n][:arcs_dcgrid] = [pm.ref[:nw][n][:arcs_dcgrid_from]; pm.ref[:nw][n][:arcs_dcgrid_to]]
+    pm.ref[:nw][n][:arcs_conv_acdc] = [(i,conv["busac_i"],conv["busdc_i"]) for (i,conv) in pm.ref[:nw][n][:convdc]]
 
     #bus arcs of the DC grid
     bus_arcs_dcgrid = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
@@ -11,6 +12,19 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
     end
     pm.ref[:nw][n][:bus_arcs_dcgrid] = bus_arcs_dcgrid
 
+    #bus arcs of the DC grid
+    conv_arcs_ac = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:bus]])
+    for (l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]
+        push!(conv_arcs_ac[i], (l,i,j))
+    end
+    pm.ref[:nw][n][:conv_arcs_ac] = conv_arcs_ac
+
+    #bus arcs of the DC grid
+    conv_arcs_dc = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
+    for (l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]
+        push!(conv_arcs_dc[j], (l,i,j))
+    end
+    pm.ref[:nw][n][:conv_arcs_dc] = conv_arcs_dc
 
     # bus_convs for AC side power injection of DC converters
     bus_convs_ac = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:bus]])
