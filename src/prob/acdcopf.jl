@@ -59,6 +59,7 @@ function post_acdcopf(pm::GenericPowerModel)
     for i in PowerModels.ids(pm, :convdc)
         constraint_converter_losses(pm, i)
         constraint_converter_current(pm, i)
+        constraint_converter_filter_transformer_reactor(pm, i)
     end
     for i in PowerModels.ids(pm, :dcline)
         PowerModels.constraint_dcline(pm, i)

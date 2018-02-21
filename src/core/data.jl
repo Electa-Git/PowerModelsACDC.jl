@@ -1,10 +1,18 @@
 function process_additional_data!(data)
+    assert(data["baseMVA"]>0)
     mva_basedc = data["baseMVA"]
     rescale = x -> x/mva_basedc
     rescale_cost = x -> mva_basedc * x
     if data["multinetwork"] == false
         if haskey(data, "convdc")
             for (i, conv) in data["convdc"]
+                assert(conv["LossA"]>=0)
+                assert(conv["LossB"]>=0)
+                assert(conv["LossCrec"]>=0)
+                assert(conv["LossCinv"]>=0)
+                assert(conv["Pacmax"]>=conv["Pacmin"])
+                assert(conv["Qacmax"]>=conv["Qacmin"])
+
                 PowerModels.apply_func(conv, "P_g", rescale)
                 PowerModels.apply_func(conv, "Pdcset", rescale)
                 PowerModels.apply_func(conv, "Q_g", rescale)
@@ -33,6 +41,10 @@ function process_additional_data!(data)
         end
         if haskey(data, "branchdc")
             for (i, branch) in data["branchdc"]
+                assert(branch["rateA"]>=0)
+                assert(branch["rateB"]>=0)
+                assert(branch["rateC"]>=0)
+
                 PowerModels.apply_func(branch, "rateA", rescale)
                 PowerModels.apply_func(branch, "rateB", rescale)
                 PowerModels.apply_func(branch, "rateC", rescale)
@@ -42,6 +54,13 @@ function process_additional_data!(data)
         for (n, network) in data["nw"]
             if haskey(data["nw"][n], "convdc")
                 for (i, conv) in data["nw"][n]["convdc"]
+                    assert(conv["LossA"]>=0)
+                    assert(conv["LossB"]>=0)
+                    assert(conv["LossCrec"]>=0)
+                    assert(conv["LossCinv"]>=0)
+                    assert(conv["Pacmax"]>=conv["Pacmin"])
+                    assert(conv["Qacmax"]>=conv["Qacmin"])
+
                     PowerModels.apply_func(conv, "P_g", rescale)
                     PowerModels.apply_func(conv, "Pdcset", rescale)
                     PowerModels.apply_func(conv, "Q_g", rescale)
@@ -69,6 +88,9 @@ function process_additional_data!(data)
             end
             if haskey(data["nw"][n], "branchdc")
                 for (i, branch) in data["nw"][n]["branchdc"]
+                    assert(branch["rateA"]>=0)
+                    assert(branch["rateB"]>=0)
+                    assert(branch["rateC"]>=0)
                     PowerModels.apply_func(branch, "rateA", rescale)
                     PowerModels.apply_func(branch, "rateB", rescale)
                     PowerModels.apply_func(branch, "rateC", rescale)

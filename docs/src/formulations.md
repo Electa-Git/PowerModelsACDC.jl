@@ -46,6 +46,9 @@ Note that generally, $a \geq 0, b \geq 0, c \geq 0$
 - Power balance: $P^{conv, ac}_{ij} + P^{conv, dc}_{ji}$ = $a + b \cdot I^{conv, ac} + c \cdot (I^{conv, ac})^2$.
 - Current variable model: $(P^{conv,ac}_{ij})^2$ + $(Q^{conv,ac}_{ij})^2$ = $3 \cdot U_i^2 \cdot  (I^{conv, ac})^2$.
 
+### Transformer, filter and phase reactor of converters
+TODO
+
 
 ## DCPPowerModel (NF)
 Due to the absence of voltage angles in DC grids, the DC power flow model reduces to network flow (NF) under the 'DC' assumptions
@@ -54,11 +57,13 @@ Due to the absence of voltage angles in DC grids, the DC power flow model reduce
 
 
 ### ACDC converters
-- Network flow model: $P^{conv, ac}_{ij}$ + $P^{conv, dc}_{ji}$ = $a$
+Under the same assumptions as MATPOWER ($U_i \approx 1$), $P^{conv, ac}_{ij} \approx I^{conv, ac}$ allowing the converter model to be formulated as:
+- Network flow model: $P^{conv, ac}_{ij}$ + $P^{conv, dc}_{ji}$ = $a + b P^{conv, ac}_{ij}$
 
-Under the same assumptions as MATPOWER ($U_i \approx 1$), $P^{conv, ac}_{ij} \approx I^{conv, ac}$ allowing the converter model to be extended to:
-- MATPOWER: $P^{conv, ac}_{ij}$ + $P^{conv, dc}_{ji}$ = $a + b P^{conv, ac}_{ij}$
 
+
+### Transformer, filter and phase reactor of converters
+TODO
 
 
 ## AC WR(M) variable space.  (BFM)
@@ -91,9 +96,12 @@ The variable $u^{dc}_{ii}$ represents $(U^{dc}_{i})^2$ and $u^{dc}_{ij}$ represe
 - Convex relaxation of voltage products: $(u^{dc}_{ij})^2 \leq u^{dc}_{ii} \cdot u^{dc}_{jj}$.
 
 
-A ACDC converter model in BIM is not derived.
+### ACDC converters
+An ACDC converter model in BIM is not derived.
 
 
-## MATPOWER dcline
-Two 'DC' converters + a single line in 'DC'
-TODO: Derive mapping of matpower parameters to this model
+### Transformer, filter and phase reactor of converters
+TODO
+
+!!! note
+    MATPOWER's dclines should be modeled as two 'DC' converters + a single line in 'DC'

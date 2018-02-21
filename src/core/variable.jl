@@ -15,11 +15,17 @@ function variable_active_dcbranch_flow(pm::GenericPowerModel, n::Int=pm.cnw; bou
 end
 
 function variable_dc_converter(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
-    variable_acside_active_power(pm, n; kwargs...)
-    variable_acside_reactive_power(pm, n; kwargs...)
+    variable_converter_active_power(pm, n; kwargs...)
+    variable_converter_reactive_power(pm, n; kwargs...)
     variable_dcside_power(pm, n; kwargs...)
     variable_acside_current(pm, n; kwargs...)
+    variable_converter_filter_voltage(pm, n; kwargs...)
+    variable_converter_internal_voltage(pm, n; kwargs...)
+    variable_converter_to_grid_active_power(pm, n; kwargs...)
+    variable_converter_to_grid_reactive_power(pm, n; kwargs...)
 end
+
+
 
 "variable: `p_conv[l,i,j]` for `(l,i,j)` in `conv_arcs_acdc`"
 function variable_active_converter_flow(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
@@ -56,7 +62,7 @@ end
 
 
 "variable: `pconv_ac[j]` for `j` in `convdc`"
-function variable_acside_active_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_active_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
     if bounded
         pm.var[:nw][n][:pconv_ac] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_ac",
@@ -72,7 +78,7 @@ function variable_acside_active_power(pm::GenericPowerModel, n::Int=pm.cnw; boun
 end
 
 "variable: `qconv_ac[j]` for `j` in `convdc`"
-function variable_acside_reactive_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_reactive_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
     if bounded
         pm.var[:nw][n][:qconv_ac] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_ac",
@@ -86,6 +92,43 @@ function variable_acside_reactive_power(pm::GenericPowerModel, n::Int=pm.cnw; bo
         )
     end
 end
+
+
+
+"variable: `pconv_grid_ac[j]` for `j` in `convdc`"
+function variable_converter_to_grid_active_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    bigM = 1.2
+    if bounded
+        pm.var[:nw][n][:pconv_grid_ac] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_ac",
+        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"]/bigM,
+        upperbound = pm.ref[:nw][n][:convdc][i]["Pacmax"]*bigM
+        )
+    else
+        pm.var[:nw][n][:pconv_grid_ac] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_ac",
+        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "P_g")
+        )
+    end
+end
+
+"variable: `qconv_grid_ac[j]` for `j` in `convdc`"
+function variable_converter_to_grid_reactive_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    bigM = 1.2
+    if bounded
+        pm.var[:nw][n][:qconv_grid_ac] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_ac",
+        lowerbound = pm.ref[:nw][n][:convdc][i]["Qacmin"]/bigM,
+        upperbound = pm.ref[:nw][n][:convdc][i]["Qacmax"]*bigM
+        )
+    else
+        pm.var[:nw][n][:qconv_grid_ac] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_ac",
+        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Q_g")
+        )
+    end
+end
+
 
 "variable: `pconv_dc[j]` for `j` in `convdc`"
 function variable_dcside_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
@@ -103,12 +146,107 @@ function variable_dcside_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = t
     end
 end
 
-"variable: `iconv_dc[j]` for `j` in `convdc`"
+"variable: `iconv_ac[j]` for `j` in `convdc`"
 function variable_acside_current(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
     pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_dc",
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_ac",
     lowerbound = 0,
-    upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacrated"]^2) / sqrt(3) # assuming rated voltage = 1pu
+    upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacmax"]^2) / sqrt(3) # assuming rated voltage = 1pu
+    )
+end
+
+function variable_converter_filter_voltage(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
+    variable_converter_filter_voltage_magnitude(pm, n; kwargs...)
+    variable_converter_filter_voltage_angle(pm, n; kwargs...)
+end
+
+
+"variable: `vmf_ac[j]` for `j` in `convdc`"
+function variable_converter_filter_voltage_magnitude(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    bigM = 1.2; # only internal converter voltage is strictly regulated
+    pm.var[:nw][n][:vmf_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vmf_ac",
+    lowerbound = pm.ref[:nw][n][:convdc][i]["Vmmin"]/bigM,
+    upperbound = pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM
+    )
+end
+
+
+"variable: `vaf_ac[j]` for `j` in `convdc`"
+function variable_converter_filter_voltage_angle(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    bigM = 2*pi; #
+    pm.var[:nw][n][:vaf_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vaf_ac",
+    lowerbound = -bigM,
+    upperbound = bigM
+    )
+end
+
+
+function variable_converter_internal_voltage(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
+    variable_converter_internal_voltage_magnitude(pm, n; kwargs...)
+    variable_converter_internal_voltage_angle(pm, n; kwargs...)
+end
+
+
+"variable: `vmc_ac[j]` for `j` in `convdc`"
+function variable_converter_internal_voltage_magnitude(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    pm.var[:nw][n][:vmc_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vmc_ac",
+    lowerbound = pm.ref[:nw][n][:convdc][i]["Vmmin"],
+    upperbound = pm.ref[:nw][n][:convdc][i]["Vmmax"]
+    )
+end
+
+"variable: `vac_ac[j]` for `j` in `convdc`"
+function variable_converter_internal_voltage_angle(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    bigM = 2*pi; #
+    pm.var[:nw][n][:vac_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vac_ac",
+    lowerbound = -bigM,
+    upperbound = bigM
+    )
+end
+
+
+
+"variable: `wf_ac[j]` for `j` in `convdc`"
+function variable_converter_filter_voltage_wr_wrm(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    bigM = 1.2; # only internal converter voltage is strictly regulated
+    pm.var[:nw][n][:wf_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wf_ac",
+    lowerbound = (pm.ref[:nw][n][:convdc][i]["Vmmin"]/bigM)^2,
+    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2
+    )
+    pm.var[:nw][n][:wrf_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wrf_ac",
+    lowerbound = 0,
+    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2
+    )
+    pm.var[:nw][n][:wif_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wif_ac",
+    lowerbound = -(pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2,
+    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2
+    )
+end
+
+"variable: `wf_ac[j]` for `j` in `convdc`"
+function variable_converter_internal_voltage_wr_wrm(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    bigM = 1.2; # only internal converter voltage is strictly regulated
+    pm.var[:nw][n][:wc_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wc_ac",
+    lowerbound = (pm.ref[:nw][n][:convdc][i]["Vmmin"])^2,
+    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"])^2
+    )
+    pm.var[:nw][n][:wrc_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wrc_ac",
+    lowerbound = 0,
+    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2
+    )
+    pm.var[:nw][n][:wic_ac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wic_ac",
+    lowerbound = -(pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2,
+    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2
     )
 end
 

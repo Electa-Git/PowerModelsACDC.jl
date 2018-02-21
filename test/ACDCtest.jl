@@ -5,22 +5,32 @@ using Ipopt
 using SCS
 
 file = "./test/data/case5_acdc.m"
-#data = PowerModels.parse_file(file)
-#PowerModelsACDC.process_additional_data!(data)
+data = PowerModels.parse_file(file)
+PowerModelsACDC.process_additional_data!(data)
+#scs = SCSSolver(max_iters=100000, verbose=0);
+scs = SCSSolver(max_iters=100000);
+ipopt = IpoptSolver(tol=1e-6, print_level=0)
+s = Dict("output" => Dict("branch_flows" => true), "zthresh" => 0.0011)
 
-resultAConlyAC = run_opf(file, ACPPowerModel, IpoptSolver(); setting = Dict("output" => Dict("branch_flows" => true)))
+resultAC = run_acdcopf(file, ACPPowerModel, ipopt; setting = s)
 
-resultAC = run_acdcopf(file, ACPPowerModel, IpoptSolver(); setting = Dict("output" => Dict("branch_flows" => true)))
+resultQC = run_acdcopf(file, QCWRPowerModel, ipopt; setting = s)
+#
+resultQCTri = run_acdcopf(file, QCWRTriPowerModel, ipopt; setting = s)
+#
+resultSOC = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
+#
+resultSDP = run_acdcopf(file, SDPWRMPowerModel, scs; setting = s)
+#
+resultDC = run_acdcopf(file, DCPPowerModel, ipopt; setting = s)
 
-resultQC = run_acdcopf(file, QCWRPowerModel, IpoptSolver(); setting = Dict("output" => Dict("branch_flows" => true)))
+### other tests
 
-resultQCTri = run_acdcopf(file, QCWRTriPowerModel, IpoptSolver(); setting = Dict("output" => Dict("branch_flows" => true)))
-
-resultSOC = run_acdcopf(file, SOCWRPowerModel, IpoptSolver(); setting = Dict("output" => Dict("branch_flows" => true)))
-
-resultSDP = run_acdcopf(file, SDPWRMPowerModel, SCSSolver(); setting = Dict("output" => Dict("branch_flows" => true)))
-
-resultDC = run_acdcopf(file, DCPPowerModel, IpoptSolver(); setting = Dict("output" => Dict("branch_flows" => true)))
+resultACPF = run_acdcpf(file, ACPPowerModel, IpoptSolver(); setting = s)
+#
+resultAConlyAC = run_opf(file, ACPPowerModel, IpoptSolver(); setting = s)
+#
+#
 
 # implement PF problem for validation:
 # (2) Converter setpoints as constraint (constraint_active_gen_setpoint, constraint_reactive_gen_setpoint)

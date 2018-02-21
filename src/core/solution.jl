@@ -12,10 +12,13 @@ end
 
 function add_dcconverter_setpoint(sol, pm::GenericPowerModel)
     mva_base = pm.data["baseMVA"]
-    PowerModels.add_setpoint(sol, pm, "convdc", "pac", :pconv_ac)
-    PowerModels.add_setpoint(sol, pm, "convdc", "qac", :qconv_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "pgrid", :pconv_grid_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "qgrid", :qconv_grid_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "pconv", :pconv_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "qconv", :qconv_ac)
     PowerModels.add_setpoint(sol, pm, "convdc", "pdc", :pconv_dc)
-    PowerModels.add_setpoint(sol, pm, "convdc", "iac", :iconv_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "iconv", :iconv_ac)
+    add_converter_voltage_setpoint(sol, pm)
 end
 
 function add_dcgrid_flow_setpoint(sol, pm::GenericPowerModel)
@@ -26,4 +29,11 @@ end
 
 function add_dc_bus_voltage_setpoint(sol, pm::GenericPowerModel)
     PowerModels.add_setpoint(sol, pm, "busdc", "vm", :vdcm)
+end
+
+function add_converter_voltage_setpoint(sol, pm::GenericPowerModel)
+    PowerModels.add_setpoint(sol, pm, "convdc", "vmconv", :vmc_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "vaconv", :vac_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "vmfilt", :vmf_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "vafilt", :vaf_ac)
 end

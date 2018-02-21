@@ -30,19 +30,53 @@ end
 
 
 """
-Creates lossy converter model between AC and DC grid
+Creates lossy converter model between AC and DC grid, assuming U_i is approximatley 1 numerically
 
 ```
-pconv_ac[i] + pconv_dc[i] == a 
+pconv_ac[i] + pconv_dc[i] == a + b*pconv_ac
 ```
 """
 function constraint_converter_losses{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int, i::Int, a, b, c)
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     pconv_dc = pm.var[:nw][n][:pconv_dc][i]
 
-    warn(a<0, ": dc line losses are negative")
-    pm.con[:nw][n][:conv_loss][i] = @constraint(pm.model, pconv_ac + pconv_dc == a )
+    pm.con[:nw][n][:conv_loss][i] = @constraint(pm.model, pconv_ac + pconv_dc == a + b*pconv_ac )
 end
+
+"""
+Creates transformer, filter and phase reactor model at ac side of converter
+
+```
+pconv_ac[i]
+```
+"""
+function constraint_converter_filter_transformer_reactor{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus; zthresh = 0.0015)
+    assert(zthresh>=0)#
+    pconv_ac      = pm.var[:nw][n][:pconv_ac][i]
+    pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
+    #filter voltage
+    vaf_ac = pm.var[:nw][n][:vaf_ac][i]
+    #converter voltage
+    vac_ac = pm.var[:nw][n][:vac_ac][i]
+    va = pm.var[:nw][n][:va][acbus]
+
+    if abs(xtf) > zthresh
+        ytf = 1/(im*xtf)
+        btf = imag(ytf)
+        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, pconv_grid_ac == -btf*(va-vaf_ac))
+    else
+        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf_ac)
+    end
+    if abs(xc) > zthresh
+        yc = 1/(im*xc)
+        bc = imag(yc)
+        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, -pconv_ac == -bc*(vac_ac-vaf_ac))
+    else
+        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, vac_ac == vaf_ac)
+    end
+    pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,  pconv_ac == pconv_grid_ac )
+end
+
 
 
 ""
@@ -60,6 +94,20 @@ function variable_dcgrid_voltage_magnitude{T <: PowerModels.AbstractDCPForm}(pm:
 end
 
 function variable_dc_converter{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...)
-    variable_acside_active_power(pm, n; kwargs...)
+    variable_converter_active_power(pm, n; kwargs...)
     variable_dcside_power(pm, n; kwargs...)
+    variable_converter_filter_voltage(pm, n; kwargs...)
+    variable_converter_internal_voltage(pm, n; kwargs...)
+    variable_converter_to_grid_active_power(pm, n; kwargs...)
+
+end
+
+
+function variable_converter_filter_voltage{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...)
+    variable_converter_filter_voltage_angle(pm, n; kwargs...)
+end
+
+
+function variable_converter_internal_voltage{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...)
+    variable_converter_internal_voltage_angle(pm, n; kwargs...)
 end

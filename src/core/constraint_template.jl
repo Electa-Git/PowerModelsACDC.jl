@@ -104,3 +104,26 @@ function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, n::Int,
     constraint_dc_voltage_magnitude_setpoint(pm, n, conv["busdc_i"], conv["Vdcset"])
 end
 constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, i::Int) = constraint_dc_voltage_magnitude_setpoint(pm, pm.cnw, i::Int)
+
+
+
+
+function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel, n::Int, i::Int)
+    if haskey(pm.setting,"zthresh")
+        zth = pm.setting["zthresh"]
+    else
+        zth = 0
+    end
+
+    if !haskey(pm.con[:nw][n], :conv_tf_p)
+        pm.con[:nw][n][:conv_tf_p] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_tf_q] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_pr_p] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_pr_q] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_kcl_p] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_kcl_q] = Dict{Int,ConstraintRef}()
+    end
+    conv = ref(pm, n, :convdc, i)
+    constraint_converter_filter_transformer_reactor(pm, n, i, conv["rtf"], conv["xtf"], conv["bf"], conv["rc"], conv["xc"], conv["busac_i"], zthresh = zth)
+end
+constraint_converter_filter_transformer_reactor(pm::GenericPowerModel, i::Int) = constraint_converter_filter_transformer_reactor(pm, pm.cnw, i::Int)
