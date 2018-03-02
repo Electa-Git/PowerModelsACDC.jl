@@ -62,8 +62,7 @@ Creates transformer, filter and phase reactor model at ac side of converter
 pconv_ac[i]
 ```
 """
-function constraint_converter_filter_transformer_reactor{T <: PowerModels.AbstractACPForm}(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus; zthresh = 0.0015)
-    assert(zthresh>=0)#
+function constraint_converter_filter_transformer_reactor{T <: PowerModels.AbstractACPForm}(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, filter, reactor)
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
@@ -79,18 +78,19 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
     va = pm.var[:nw][n][:va][acbus]
 
     ztf = rtf + im*xtf
-    if abs(ztf) > zthresh
+    if transformer
         ytf = 1/(rtf + im*xtf)
         gtf = real(ytf)
         btf = imag(ytf)
-        pm.con[:nw][n][:conv_tf_p][i] = @NLconstraint(pm.model, pconv_grid_ac == gtf*vm^2 + -gtf*vm*vmf_ac*cos(va-vaf_ac) + -btf*vm*vmf_ac*sin(va-vaf_ac))
-        pm.con[:nw][n][:conv_tf_q][i] = @NLconstraint(pm.model, qconv_grid_ac ==-btf*vm^2 +  btf*vm*vmf_ac*cos(va-vaf_ac) + -gtf*vm*vmf_ac*sin(va-vaf_ac))
+        pm.con[:nw][n][:conv_tf_p][i] = @NLconstraint(pm.model, pconv_grid_ac ==  gtf*vm^2 + -gtf*vm*vmf_ac*cos(va-vaf_ac) + -btf*vm*vmf_ac*sin(va-vaf_ac))
+        pm.con[:nw][n][:conv_tf_q][i] = @NLconstraint(pm.model, qconv_grid_ac == -btf*vm^2 +  btf*vm*vmf_ac*cos(va-vaf_ac) + -gtf*vm*vmf_ac*sin(va-vaf_ac))
     else
         pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf_ac)
         pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, vm == vmf_ac)
     end
+
     zc = rc + im*xc
-    if abs(zc) > zthresh
+    if reactor
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)
@@ -100,8 +100,11 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
         pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, vac_ac == vaf_ac)
         pm.con[:nw][n][:conv_pr_q][i] = @constraint(pm.model, vmc_ac == vmf_ac)
     end
+    display(pm.con[:nw][n][:conv_pr_p][i])
+    display(pm.con[:nw][n][:conv_pr_q][i])
 
-    if abs(ztf) > zthresh && abs(zc) > zthresh
+
+    if transformer && reactor
         pm.con[:nw][n][:conv_kcl_p][i] = @NLconstraint(pm.model,
         gtf*vmf_ac^2 + -gtf*vmf_ac*vm    *cos(vaf_ac - va)     + -btf*vmf_ac*vm    *sin(vaf_ac - va) +
         gc *vmf_ac^2 + -gc *vmf_ac*vmc_ac*cos(vaf_ac - vac_ac) + -bc *vmf_ac*vmc_ac*sin(vaf_ac - vac_ac) == 0 )
@@ -109,7 +112,7 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
         -btf*vmf_ac^2 +  btf*vmf_ac*vm*    cos(vaf_ac - va)     + -gtf*vmf_ac*vm    *sin(vaf_ac - va) +
         -bc *vmf_ac^2 +  bc *vmf_ac*vmc_ac*cos(vaf_ac - vac_ac) + -gc *vmf_ac*vmc_ac*sin(vaf_ac - vac_ac) +
         -bv *vmf_ac^2 ==0)
-    elseif abs(ztf) <= zthresh && abs(zc) > zthresh
+    elseif !transformer && reactor
         pm.con[:nw][n][:conv_kcl_p][i] = @NLconstraint(pm.model,
         -pconv_grid_ac +
         gc *vmf_ac^2 + -gc *vmf_ac*vmc_ac*cos(vaf_ac - vac_ac) + -bc *vmf_ac*vmc_ac*sin(vaf_ac - vac_ac) == 0 )
@@ -117,7 +120,7 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
         -qconv_grid_ac +
         -bc *vmf_ac^2 +  bc *vmf_ac*vmc_ac*cos(vaf_ac - vac_ac) + -gc *vmf_ac*vmc_ac*sin(vaf_ac - vac_ac) +
         -bv *vmf_ac^2 ==0)
-    elseif abs(ztf) > zthresh && abs(zc) <= zthresh
+    elseif transformer && !reactor
         pm.con[:nw][n][:conv_kcl_p][i] = @NLconstraint(pm.model,
         gtf*vmf_ac^2 + -gtf*vmf_ac*vm    *cos(vaf_ac - va)     + -btf*vmf_ac*vm    *sin(vaf_ac - va) +
         pconv_ac == 0 )
@@ -125,7 +128,7 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
         -btf*vmf_ac^2 +  btf*vmf_ac*vm*    cos(vaf_ac - va)     + -gtf*vmf_ac*vm    *sin(vaf_ac - va) +
         qconv_ac +
         -bv *vmf_ac^2 ==0)
-    elseif abs(ztf) <= zthresh && abs(zc) <= zthresh
+    elseif !transformer && !reactor
         pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,
         -pconv_grid_ac +
         pconv_ac == 0 )

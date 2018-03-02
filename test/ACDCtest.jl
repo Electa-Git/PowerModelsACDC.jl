@@ -24,13 +24,13 @@ resultSDP = run_acdcopf(file, SDPWRMPowerModel, scs; setting = s)
 #
 resultDC = run_acdcopf(file, DCPPowerModel, ipopt; setting = s)
 
-### other tests
+## other tests
 
 resultACPF = run_acdcpf(file, ACPPowerModel, IpoptSolver(); setting = s)
 #
 resultAConlyAC = run_opf(file, ACPPowerModel, IpoptSolver(); setting = s)
-#
-#
+
+
 
 # implement PF problem for validation:
 # (2) Converter setpoints as constraint (constraint_active_gen_setpoint, constraint_reactive_gen_setpoint)

@@ -64,8 +64,7 @@ Creates transformer, filter and phase reactor model at ac side of converter
 pconv_ac[i]
 ```
 """
-function constraint_converter_filter_transformer_reactor{T <: PowerModels.AbstractWRForm}(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus; zthresh = 0.0015)
-    assert(zthresh>=0)
+function constraint_converter_filter_transformer_reactor{T <: PowerModels.AbstractWRForm}(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, filter, reactor)
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
@@ -85,7 +84,7 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
     ztf = rtf + im*xtf
     zc  = rc  + im*xc
 
-    if abs(ztf) > zthresh
+    if transformer
         ytf = 1/(rtf + im*xtf)
         gtf = real(ytf)
         btf = imag(ytf)
@@ -102,7 +101,7 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
         qconv_grid_ac_ji = -qconv_grid_ac
     end
 
-    if abs(zc) > zthresh
+    if reactor
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)

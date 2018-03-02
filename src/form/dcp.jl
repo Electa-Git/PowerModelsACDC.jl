@@ -50,8 +50,7 @@ Creates transformer, filter and phase reactor model at ac side of converter
 pconv_ac[i]
 ```
 """
-function constraint_converter_filter_transformer_reactor{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus; zthresh = 0.0015)
-    assert(zthresh>=0)#
+function constraint_converter_filter_transformer_reactor{T <: PowerModels.AbstractDCPForm}(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, filter, reactor)
     pconv_ac      = pm.var[:nw][n][:pconv_ac][i]
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
     #filter voltage
@@ -60,14 +59,14 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
     vac_ac = pm.var[:nw][n][:vac_ac][i]
     va = pm.var[:nw][n][:va][acbus]
 
-    if abs(xtf) > zthresh
+    if transformer
         ytf = 1/(im*xtf)
         btf = imag(ytf)
         pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, pconv_grid_ac == -btf*(va-vaf_ac))
     else
         pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf_ac)
     end
-    if abs(xc) > zthresh
+    if reactor
         yc = 1/(im*xc)
         bc = imag(yc)
         pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, -pconv_ac == -bc*(vac_ac-vaf_ac))

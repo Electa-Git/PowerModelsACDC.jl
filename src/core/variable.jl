@@ -41,7 +41,6 @@ function variable_active_converter_flow(pm::GenericPowerModel, n::Int=pm.cnw; bo
         start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "P_g")
         )
     end
-    display(pm.var[:nw][n][:p_conv])
 end
 
 function variable_reactive_converter_flow(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
@@ -57,7 +56,6 @@ function variable_reactive_converter_flow(pm::GenericPowerModel, n::Int=pm.cnw; 
         start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Q_g")
         )
     end
-    display(pm.var[:nw][n][:q_conv])
 end
 
 

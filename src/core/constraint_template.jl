@@ -122,8 +122,9 @@ function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel, 
         pm.con[:nw][n][:conv_pr_q] = Dict{Int,ConstraintRef}()
         pm.con[:nw][n][:conv_kcl_p] = Dict{Int,ConstraintRef}()
         pm.con[:nw][n][:conv_kcl_q] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_dummy] = Dict{Int,ConstraintRef}()
     end
     conv = ref(pm, n, :convdc, i)
-    constraint_converter_filter_transformer_reactor(pm, n, i, conv["rtf"], conv["xtf"], conv["bf"], conv["rc"], conv["xc"], conv["busac_i"], zthresh = zth)
+    constraint_converter_filter_transformer_reactor(pm, n, i, conv["rtf"], conv["xtf"], conv["bf"], conv["rc"], conv["xc"], conv["busac_i"], Bool(conv["transformer"]), Bool(conv["filter"]), Bool(conv["reactor"]))
 end
 constraint_converter_filter_transformer_reactor(pm::GenericPowerModel, i::Int) = constraint_converter_filter_transformer_reactor(pm, pm.cnw, i::Int)
