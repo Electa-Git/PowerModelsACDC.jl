@@ -1,4 +1,7 @@
 function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
+    # Filter converters & DC branches with status 0 as well as wrong bus numbers
+    pm.ref[:nw][n][:convdc] = filter((i, conv) -> conv["status"] == 1 && conv["busdc_i"] in keys(pm.ref[:nw][n][:busdc]) && conv["busac_i"] in keys(pm.ref[:nw][n][:bus]), pm.ref[:nw][n][:convdc])
+    pm.ref[:nw][n][:branchdc] = filter((i, branchdc) -> branchdc["status"] == 1 && branchdc["fbusdc"] in keys(pm.ref[:nw][n][:busdc]) && branchdc["tbusdc"] in keys(pm.ref[:nw][n][:busdc]), pm.ref[:nw][n][:branchdc])
     # DC grid arcs for DC grid branches
     pm.ref[:nw][n][:arcs_dcgrid_from] = [(i,branch["fbusdc"],branch["tbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]
     pm.ref[:nw][n][:arcs_dcgrid_to]   = [(i,branch["tbusdc"],branch["fbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]

@@ -76,7 +76,8 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
 
     vm = pm.var[:nw][n][:vm][acbus]
     va = pm.var[:nw][n][:va][acbus]
-
+    display(bv)
+    display(filter)
     ztf = rtf + im*xtf
     if transformer
         ytf = 1/(rtf + im*xtf)
@@ -111,7 +112,7 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
         pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model,
         -btf*vmf_ac^2 +  btf*vmf_ac*vm*    cos(vaf_ac - va)     + -gtf*vmf_ac*vm    *sin(vaf_ac - va) +
         -bc *vmf_ac^2 +  bc *vmf_ac*vmc_ac*cos(vaf_ac - vac_ac) + -gc *vmf_ac*vmc_ac*sin(vaf_ac - vac_ac) +
-        -bv *vmf_ac^2 ==0)
+        -bv * filter *vmf_ac^2 ==0)
     elseif !transformer && reactor
         pm.con[:nw][n][:conv_kcl_p][i] = @NLconstraint(pm.model,
         -pconv_grid_ac +
@@ -119,7 +120,7 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
         pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model,
         -qconv_grid_ac +
         -bc *vmf_ac^2 +  bc *vmf_ac*vmc_ac*cos(vaf_ac - vac_ac) + -gc *vmf_ac*vmc_ac*sin(vaf_ac - vac_ac) +
-        -bv *vmf_ac^2 ==0)
+        -bv * filter *vmf_ac^2 ==0)
     elseif transformer && !reactor
         pm.con[:nw][n][:conv_kcl_p][i] = @NLconstraint(pm.model,
         gtf*vmf_ac^2 + -gtf*vmf_ac*vm    *cos(vaf_ac - va)     + -btf*vmf_ac*vm    *sin(vaf_ac - va) +
@@ -127,7 +128,7 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
         pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model,
         -btf*vmf_ac^2 +  btf*vmf_ac*vm*    cos(vaf_ac - va)     + -gtf*vmf_ac*vm    *sin(vaf_ac - va) +
         qconv_ac +
-        -bv *vmf_ac^2 ==0)
+        -bv * filter *vmf_ac^2 ==0)
     elseif !transformer && !reactor
         pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,
         -pconv_grid_ac +
@@ -135,9 +136,8 @@ function constraint_converter_filter_transformer_reactor{T <: PowerModels.Abstra
         pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model,
         -qconv_grid_ac +
         qconv_ac +
-        -bv *vmf_ac^2 ==0)
+        -bv * filter *vmf_ac^2 ==0)
     end
-
 end
 
 

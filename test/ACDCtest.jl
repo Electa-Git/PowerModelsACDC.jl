@@ -13,6 +13,7 @@ ipopt = IpoptSolver(tol=1e-6, print_level=0)
 s = Dict("output" => Dict("branch_flows" => true), "zthresh" => 0.0011)
 
 resultAC = run_acdcopf(file, ACPPowerModel, ipopt; setting = s)
+resultACPF = run_acdcpf(file, ACPPowerModel, ipopt; setting = s)
 
 resultQC = run_acdcopf(file, QCWRPowerModel, ipopt; setting = s)
 #

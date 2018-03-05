@@ -16,12 +16,12 @@ end
 
 "`pconv[i] == pconv`"
 function constraint_active_conv_setpoint(pm::GenericPowerModel, n::Int, i, pconv)
-    pconv_var = pm.var[:nw][n][:pconv_ac][i]
+    pconv_var = pm.var[:nw][n][:pconv_grid_ac][i]
     pm.con[:nw][n][:conv_pac][i] = @constraint(pm.model, pconv_var == -pconv)
 end
 
 "`qconv[i] == qconv`"
 function constraint_reactive_conv_setpoint(pm::GenericPowerModel, n::Int, i, qconv)
-    qconv_var = pm.var[:nw][n][:qconv_ac][i]
+    qconv_var = pm.var[:nw][n][:qconv_grid_ac][i]
     pm.con[:nw][n][:conv_qac][i] = @constraint(pm.model, qconv_var == -qconv)
 end
