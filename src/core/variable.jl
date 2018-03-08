@@ -99,7 +99,7 @@ function variable_converter_to_grid_active_power(pm::GenericPowerModel, n::Int=p
     if bounded
         pm.var[:nw][n][:pconv_grid_ac] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_ac",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"]/bigM,
+        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"]*bigM,
         upperbound = pm.ref[:nw][n][:convdc][i]["Pacmax"]*bigM
         )
     else
@@ -116,7 +116,7 @@ function variable_converter_to_grid_reactive_power(pm::GenericPowerModel, n::Int
     if bounded
         pm.var[:nw][n][:qconv_grid_ac] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_ac",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Qacmin"]/bigM,
+        lowerbound = pm.ref[:nw][n][:convdc][i]["Qacmin"]*bigM,
         upperbound = pm.ref[:nw][n][:convdc][i]["Qacmax"]*bigM
         )
     else
@@ -130,11 +130,12 @@ end
 
 "variable: `pconv_dc[j]` for `j` in `convdc`"
 function variable_dcside_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    bigM = 1.2; # to account for losses, maximum losses to be derived
     if bounded
         pm.var[:nw][n][:pconv_dc] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_dc",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"],
-        upperbound = pm.ref[:nw][n][:convdc][i]["Pacmax"]
+        lowerbound = -pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM,
+        upperbound =  pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM #TODO derive maximum losses
         )
     else
         pm.var[:nw][n][:pconv_dc] = @variable(pm.model,
@@ -151,6 +152,8 @@ function variable_acside_current(pm::GenericPowerModel, n::Int=pm.cnw; bounded =
     lowerbound = 0,
     upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacmax"]^2) / sqrt(3) # assuming rated voltage = 1pu
     )
+    display(sqrt(pm.ref[:nw][n][:convdc][1]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][1]["Qacrated"]^2) / sqrt(3))
+    display(sqrt(pm.ref[:nw][n][:convdc][2]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][2]["Qacrated"]^2) / sqrt(3))
 end
 
 function variable_converter_filter_voltage(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
