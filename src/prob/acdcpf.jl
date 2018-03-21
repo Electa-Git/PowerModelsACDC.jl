@@ -20,7 +20,7 @@ function post_acdcpf(pm::GenericPowerModel)
     PowerModels.variable_voltage(pm, bounded = false)
     PowerModels.variable_generation(pm, bounded = false)
     PowerModels.variable_branch_flow(pm, bounded = false)
-    PowerModels.variable_dcline_flow(pm, bounded = false)
+    #PowerModels.variable_dcline_flow(pm, bounded = false)
     variable_active_dcbranch_flow(pm, bounded = false)
     variable_dc_converter(pm, bounded = false)
     variable_dcgrid_voltage_magnitude(pm, bounded = false)
@@ -61,7 +61,7 @@ function post_acdcpf(pm::GenericPowerModel)
     for i in PowerModels.ids(pm, :branchdc)
         constraint_ohms_dc_branch(pm, i)
     end
-    for (c, conv) in ref(pm, :convdc)
+    for (c, conv) in PowerModels.ref(pm, :convdc)
         if conv["type_dc"] == 2
             constraint_dc_voltage_magnitude_setpoint(pm, c)
             constraint_reactive_conv_setpoint(pm, c)
@@ -77,20 +77,20 @@ function post_acdcpf(pm::GenericPowerModel)
         constraint_converter_current(pm, c)
     end
 
-    for (i,dcline) in ref(pm, :dcline)
-        #constraint_dcline(pm, i) not needed, active power flow fully defined by dc line setpoints
-        PowerModels.constraint_active_dcline_setpoint(pm, i)
-
-        f_bus = ref(pm, :bus)[dcline["f_bus"]]
-        if f_bus["bus_type"] == 1
-            PowerModels.constraint_voltage_magnitude_setpoint(pm, f_bus["index"])
-        end
-
-        t_bus = ref(pm, :bus)[dcline["t_bus"]]
-        if t_bus["bus_type"] == 1
-            PowerModels.constraint_voltage_magnitude_setpoint(pm, t_bus["index"])
-        end
-    end
+    # for (i,dcline) in PowerModels.ref(pm, :dcline)
+    #     #constraint_dcline(pm, i) not needed, active power flow fully defined by dc line setpoints
+    #     PowerModels.constraint_active_dcline_setpoint(pm, i)
+    #
+    #     f_bus = ref(pm, :bus)[dcline["f_bus"]]
+    #     if f_bus["bus_type"] == 1
+    #         PowerModels.constraint_voltage_magnitude_setpoint(pm, f_bus["index"])
+    #     end
+    #
+    #     t_bus = ref(pm, :bus)[dcline["t_bus"]]
+    #     if t_bus["bus_type"] == 1
+    #         PowerModels.constraint_voltage_magnitude_setpoint(pm, t_bus["index"])
+    #     end
+    # end
 end
 
 

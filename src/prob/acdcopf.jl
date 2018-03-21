@@ -20,7 +20,7 @@ function post_acdcopf(pm::GenericPowerModel)
     PowerModels.variable_voltage(pm)
     PowerModels.variable_generation(pm)
     PowerModels.variable_branch_flow(pm)
-    PowerModels.variable_dcline_flow(pm)
+    #PowerModels.variable_dcline_flow(pm)
 
     variable_active_converter_flow(pm, bounded = false)
     variable_reactive_converter_flow(pm, bounded = false)
@@ -61,7 +61,7 @@ function post_acdcopf(pm::GenericPowerModel)
         constraint_converter_current(pm, i)
         constraint_converter_filter_transformer_reactor(pm, i)
     end
-    for i in PowerModels.ids(pm, :dcline)
-        PowerModels.constraint_dcline(pm, i)
-    end
+    # for i in PowerModels.ids(pm, :dcline)
+    #     PowerModels.constraint_dcline(pm, i)
+    # end
 end

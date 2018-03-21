@@ -270,7 +270,7 @@ end
 
 
 "variable: `iconv_dc[j]` for `j` in `convdc`"
-function variable_acside_current{T <: PowerModels.AbstractWRForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true)
+function variable_acside_current(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true) where {T <: PowerModels.AbstractWRForm}
     pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
     [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_dc",
     lowerbound = 0,
@@ -285,7 +285,7 @@ end
 
 
 "variable: `vdcm[i]` for `i` in `dcbus`es"
-function variable_dcgrid_voltage_magnitude{T <: PowerModels.AbstractWRForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true)
+function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true) where {T <: PowerModels.AbstractWRForm}
     if bounded
         pm.var[:nw][n][:wdc] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:busdc])], basename="$(n)_wdc",
@@ -315,7 +315,7 @@ end
 
 
 "variable: `iconv_dc[j]` for `j` in `convdc`"
-function variable_acside_current{T <: PowerModels.AbstractWRMForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true)
+function variable_acside_current(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true) where {T <: PowerModels.AbstractWRMForm}
     pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
     [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_dc",
     lowerbound = 0,
@@ -330,7 +330,7 @@ end
 
 
 "variable: `vdcm[i]` for `i` in `dcbus`es"
-function variable_dcgrid_voltage_magnitude{T <: PowerModels.AbstractWRMForm}(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true)
+function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true) where {T <: PowerModels.AbstractWRMForm}
     if bounded
         pm.var[:nw][n][:wdc] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:busdc])], basename="$(n)_wdc",

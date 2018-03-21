@@ -31,8 +31,6 @@ resultACPF = run_acdcpf(file, ACPPowerModel, IpoptSolver(); setting = s)
 #
 resultAConlyAC = run_opf(file, ACPPowerModel, IpoptSolver(); setting = s)
 
-
-
 # implement PF problem for validation:
 # (2) Converter setpoints as constraint (constraint_active_gen_setpoint, constraint_reactive_gen_setpoint)
 # (3) Voltage magnitude setpoints for the DC buses
