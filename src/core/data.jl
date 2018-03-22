@@ -1,17 +1,36 @@
 
 function get_pu_bases(MVAbase, kVbase)
-    Zbase = (kVbase*1000)^2 / (MVAbase*1e6)
-    Ibase = (MVAbase*1e6)   / (kVbase*1000)
-    dollarbase = 1 #
+    eurobase = 1 #
     hourbase = 1 #
-    MWhbase = MVAbase * hourbase
-    return Zbase, Ibase
+
+    Sbase = MVAbase * 1e6
+    Vbase = kVbase  * 1e3
+    Zbase = (Vbase)^2 / (Sbase)
+    Ibase = (Sbase)   / (Vbase)
+    timebase = hourbase*3600
+    Ebase = Sbase * timebase
+
+    bases = Dict(
+    "Z" => Zbase,         # Impedance (Ω)
+    "I" => Ibase,         # Current (A)
+    "€" => eurobase,      # Currency (€)
+    "t" => timebase,      # Time (s)
+    "S" => Sbase,         # Power (W)
+    "V" => Vbase,         # Voltage (V)
+    "E" => Ebase          # Energy (J)
+    )
+    return bases
 end
 
 function process_additional_data!(data)
+    # make sure everything is set up correctly
     fix_data!(data)
     MVAbase = data["baseMVA"]
+
+    #convert dcline to 2 converters, 2 dc buses, 1 branchdc
     convert_matpowerdcline_to_branchdc!(data, MVAbase)
+
+    #set data in correct base
     to_pu!(data, MVAbase)
 end
 
@@ -32,7 +51,8 @@ function to_pu_single_network!(data, MVAbase)
         for (i, conv) in data["convdc"]
             dcbus = conv["busdc_i"]
             kVbase = data["busdc"]["$dcbus"]["basekVdc"]
-            Zbase, Ibase = get_pu_bases(MVAbase, kVbase)
+            Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
+            Ibase = get_pu_bases(MVAbase, kVbase)["I"]
 
             set_conv_pu_power(conv, MVAbase)
             set_conv_pu_volt(conv, kVbase)
