@@ -10,7 +10,6 @@ end
 ""
 function run_acdcopf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
     pm = PowerModels.build_generic_model(data, model_constructor, post_acdcopf; kwargs...)
-    #display(pm.model)
     return PowerModels.solve_generic_model(pm, solver; solution_builder = get_solution_acdc)
 end
 
@@ -22,14 +21,11 @@ function post_acdcopf(pm::GenericPowerModel)
     PowerModels.variable_branch_flow(pm)
     #PowerModels.variable_dcline_flow(pm)
 
-    variable_active_converter_flow(pm, bounded = false)
-    variable_reactive_converter_flow(pm, bounded = false)
-
     variable_active_dcbranch_flow(pm)
     variable_dc_converter(pm)
     variable_dcgrid_voltage_magnitude(pm)
 
-    PowerModels.objective_min_fuel_cost(pm)
+    objective_min_fuel_cost(pm)
 
     PowerModels.constraint_voltage(pm)
     constraint_voltage_dc(pm)

@@ -76,8 +76,6 @@ function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel{T
 
     vm = pm.var[:nw][n][:vm][acbus]
     va = pm.var[:nw][n][:va][acbus]
-    display(bv)
-    display(filter)
     ztf = rtf + im*xtf
     if transformer
         ytf = 1/(rtf + im*xtf)
@@ -101,8 +99,6 @@ function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel{T
         pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, vac_ac == vaf_ac)
         pm.con[:nw][n][:conv_pr_q][i] = @constraint(pm.model, vmc_ac == vmf_ac)
     end
-    display(pm.con[:nw][n][:conv_pr_p][i])
-    display(pm.con[:nw][n][:conv_pr_q][i])
 
 
     if transformer && reactor

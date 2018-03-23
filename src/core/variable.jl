@@ -25,40 +25,6 @@ function variable_dc_converter(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
     variable_converter_to_grid_reactive_power(pm, n; kwargs...)
 end
 
-
-
-"variable: `p_conv[l,i,j]` for `(l,i,j)` in `conv_arcs_acdc`"
-function variable_active_converter_flow(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    if bounded
-        pm.var[:nw][n][:p_conv] = @variable(pm.model,
-        [(l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]], basename="$(n)_pconv",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"],
-        upperbound = pm.ref[:nw][n][:convdc][i]["Pacmax"]
-        )
-    else
-        pm.var[:nw][n][:p_conv] = @variable(pm.model,
-        [(l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]], basename="$(n)_pconv",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "P_g")
-        )
-    end
-end
-
-function variable_reactive_converter_flow(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    if bounded
-        pm.var[:nw][n][:q_conv] = @variable(pm.model,
-        [(l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]], basename="$(n)_qconv",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Qacmin"],
-        upperbound = pm.ref[:nw][n][:convdc][i]["Qacmax"]
-        )
-    else
-        pm.var[:nw][n][:q_conv] = @variable(pm.model,
-        [(l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]], basename="$(n)_qconv",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Q_g")
-        )
-    end
-end
-
-
 "variable: `pconv_ac[j]` for `j` in `convdc`"
 function variable_converter_active_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
     if bounded
@@ -95,12 +61,11 @@ end
 
 "variable: `pconv_grid_ac[j]` for `j` in `convdc`"
 function variable_converter_to_grid_active_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    bigM = 1.2
     if bounded
         pm.var[:nw][n][:pconv_grid_ac] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_ac",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"]*bigM,
-        upperbound = pm.ref[:nw][n][:convdc][i]["Pacmax"]*bigM
+        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"],
+        upperbound = pm.ref[:nw][n][:convdc][i]["Pacmax"]
         )
     else
         pm.var[:nw][n][:pconv_grid_ac] = @variable(pm.model,
@@ -112,12 +77,11 @@ end
 
 "variable: `qconv_grid_ac[j]` for `j` in `convdc`"
 function variable_converter_to_grid_reactive_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    bigM = 1.2
     if bounded
         pm.var[:nw][n][:qconv_grid_ac] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_ac",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Qacmin"]*bigM,
-        upperbound = pm.ref[:nw][n][:convdc][i]["Qacmax"]*bigM
+        lowerbound = pm.ref[:nw][n][:convdc][i]["Qacmin"],
+        upperbound = pm.ref[:nw][n][:convdc][i]["Qacmax"]
         )
     else
         pm.var[:nw][n][:qconv_grid_ac] = @variable(pm.model,
@@ -152,8 +116,6 @@ function variable_acside_current(pm::GenericPowerModel, n::Int=pm.cnw; bounded =
     lowerbound = 0,
     upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacmax"]^2) / sqrt(3) # assuming rated voltage = 1pu
     )
-    display(sqrt(pm.ref[:nw][n][:convdc][1]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][1]["Qacrated"]^2) / sqrt(3))
-    display(sqrt(pm.ref[:nw][n][:convdc][2]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][2]["Qacrated"]^2) / sqrt(3))
 end
 
 function variable_converter_filter_voltage(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)

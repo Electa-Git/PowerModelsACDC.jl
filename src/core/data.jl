@@ -10,7 +10,7 @@ function get_pu_bases(MVAbase, kVbase)
     timebase = hourbase*3600
     Ebase = Sbase * timebase
 
-    bases = Dict(
+    bases = Dict{String, Any}(
     "Z" => Zbase,         # Impedance (Ω)
     "I" => Ibase,         # Current (A)
     "€" => eurobase,      # Currency (€)
@@ -27,26 +27,27 @@ function process_additional_data!(data)
     fix_data!(data)
     MVAbase = data["baseMVA"]
 
+    #set data in correct base
+    to_pu!(data)
+
     #convert dcline to 2 converters, 2 dc buses, 1 branchdc
     convert_matpowerdcline_to_branchdc!(data, MVAbase)
-
-    #set data in correct base
-    to_pu!(data, MVAbase)
 end
 
 function is_single_network(data)
     return data["multinetwork"] == false
 end
 
-function to_pu!(data, MVAbase)
+function to_pu!(data)
     if is_single_network(data)
-        to_pu_single_network!(data, MVAbase)
+        to_pu_single_network!(data)
     else
-        to_pu_multinetwork!(data, MVAbase)
+        to_pu_multinetwork!(data)
     end
 end
 
-function to_pu_single_network!(data, MVAbase)
+function to_pu_single_network!(data)
+    MVAbase = data["baseMVA"]
     if haskey(data, "convdc")
         for (i, conv) in data["convdc"]
             dcbus = conv["busdc_i"]
@@ -81,13 +82,13 @@ end
 function convert_matpowerdcline_to_branchdc_single_network!(data, MVAbase)
     if haskey(data, "dcline") && haskey(data["dcline"], "1")
         if !haskey(data, "convdc")
-            data["convdc"] = Dict()
+            data["convdc"] = Dict{String, Any}()
         end
         if !haskey(data, "branchdc")
-            data["branchdc"] = Dict()
+            data["branchdc"] = Dict{String, Any}()
         end
         if !haskey(data, "busdc")
-            data["busdc"] = Dict()
+            data["busdc"] = Dict{String, Any}()
         end
         conv_i = length(data["convdc"])
         branch_i = length(data["branchdc"])
@@ -117,7 +118,7 @@ function convert_matpowerdcline_to_branchdc_single_network!(data, MVAbase)
 
             branch_i = branch_i + 1
             conv_i = conv_i + 1
-            converter1, converter2, branchdc = convert_to_dcbranch_and_converters(dcline, branch_i, conv_i, bus_i, bus_i+1)
+            converter1, converter2, branchdc = convert_to_dcbranch_and_converters(data, dcline, branch_i, conv_i, bus_i-1, bus_i)
             data["branchdc"]["$branch_i"] = branchdc
             data["convdc"]["$conv_i"] = converter1
             conv_i = conv_i + 1
@@ -232,7 +233,7 @@ end
 
 
 function get_branchdc(matpowerdcline, branch_i, fbusdc, tbusdc)
-    branchdc = Dict()
+    branchdc = Dict{String, Any}()
     branchdc["index"] = branch_i
     branchdc["fbusdc"] = fbusdc
     branchdc["tbusdc"] = tbusdc
@@ -247,7 +248,7 @@ function get_branchdc(matpowerdcline, branch_i, fbusdc, tbusdc)
 end
 
 function get_busdc(bus_i)
-    busdc = Dict()
+    busdc = Dict{String, Any}()
     busdc["index"] = bus_i
     busdc["busdc_i"] = bus_i
     busdc["grid"] = 1
@@ -260,7 +261,7 @@ function get_busdc(bus_i)
 end
 
 function get_converter(conv_i, dcbus, acbus, kVbaseAC, vmax, vmin, status, pac, qac, qmaxac, qminac, vmac, Imax, lossA, lossB, pmaxac, pminac)
-    conv = Dict()
+    conv = Dict{String, Any}()
     conv["index"] = conv_i
     conv["busdc_i"] = dcbus
     conv["busac_i"] = acbus
@@ -282,8 +283,8 @@ function get_converter(conv_i, dcbus, acbus, kVbaseAC, vmax, vmin, status, pac, 
     conv["Vmmin"] =  vmin
     conv["Imax"] =  Imax # assuming 1pu
     conv["status"] = status
-    conv["LossA"] = dcline["loss0"]
-    conv["LossB"] = dcline["loss1"]
+    conv["LossA"] = lossA
+    conv["LossB"] = lossB
     conv["LossCrec"] = 0
     conv["LossCinv"] = 0
     conv["droop"] = 0
@@ -299,28 +300,29 @@ function get_converter(conv_i, dcbus, acbus, kVbaseAC, vmax, vmin, status, pac, 
 end
 
 
-function convert_to_dcbranch_and_converters(dcline, branchdc_id, conv_i, fbusdc, tbusdc)
+function convert_to_dcbranch_and_converters(data, dcline, branchdc_id, conv_i, fbusdc, tbusdc)
     # make one more DC branch
     branchdc = get_branchdc(dcline, branchdc_id, fbusdc, tbusdc)
-
+    #pminf, pmaxf, pmint, pmaxt = converter_bounds(dcline["Pmin"], dcline["Pmax"], dcline["loss0"], dcline["loss1"])
     # converter 1
     #conv_i = conv_i + 1
     pac = dcline["pf"]
     qac = dcline["qf"]
     vmac = dcline["vf"]
     acbus = dcline["f_bus"]
-    kVbaseAC = data["bus"]["$fbus"]["base_kv"]
-    vmax = data["bus"]["$fbus"]["vmax"]
-    vmin = data["bus"]["$fbus"]["vmin"]
+    kVbaseAC = data["bus"]["$fbusdc"]["base_kv"]
+    vmax = data["bus"]["$fbusdc"]["vmax"]
+    vmin = data["bus"]["$fbusdc"]["vmin"]
     Imax = max(dcline["pmaxf"], dcline["pmaxt"]) / sqrt(3) #assuming 1pu
     status = dcline["br_status"]
     qmaxac = dcline["qmaxf"]
     qminac = dcline["qminf"]
-    lossA = 0
-    lossB = 0
-    pmaxac = 1 #TODO
-    pminac = -1 #TODO
-    converter1 =  get_converter(conv_i, bus_i, acbus, kVbaseAC, vmax, vmin, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
+    lossA = dcline["loss0"] /2
+    lossB = dcline["loss1"]
+    vac = 1
+    pmaxac = dcline["pmaxf"]
+    pminac = dcline["pminf"]
+    converter1 =  get_converter(conv_i, fbusdc, acbus, kVbaseAC, vmax, vmin, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
 
 
     # converter 2
@@ -329,18 +331,46 @@ function convert_to_dcbranch_and_converters(dcline, branchdc_id, conv_i, fbusdc,
     pac = dcline["pt"]
     qac = dcline["qt"]
     vmac = dcline["vt"]
-    kVbaseAC = data["bus"]["$tbus"]["base_kv"]
-    vmax =  data["bus"]["$tbus"]["vmax"]
-    vmin =  data["bus"]["$tbus"]["vmin"]
+    kVbaseAC = data["bus"]["$tbusdc"]["base_kv"]
+    vmax =  data["bus"]["$tbusdc"]["vmax"]
+    vmin =  data["bus"]["$tbusdc"]["vmin"]
     Imax =  max(dcline["pmaxf"], dcline["pmaxt"]) / (sqrt(3)) # assuming 1pu
     status = dcline["br_status"]
-    lossA = dcline["loss0"]
-    lossB = dcline["loss1"]
-    pmaxac =  max(abs(dcline["pmaxt"]), abs(dcline["pmaxf"]))
-    pminac = -min(abs(dcline["pmint"]), abs(dcline["pminf"]))
+    lossA = dcline["loss0"] / 2
+    lossB = 0
+    pmaxac =  dcline["pmaxt"]
+    pminac =  dcline["pmint"]
     qmaxac = dcline["qmaxt"]
     qminac = dcline["qmint"]
-    converter2 =  get_converter(conv_i, bus_i, acbus, kVbaseAC, vmax, vmin, status, pac, qac, qmaxac, qminac, vmac, Imax, lossA, lossB, pmaxac, pminac)
+    converter2 =  get_converter(conv_i, tbusdc, acbus, kVbaseAC, vmax, vmin, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
 
     return converter1, converter2, branchdc
+end
+
+function converter_bounds(pmin, pmax, loss0, loss1)
+    if pmin >= 0 && pmax >=0
+        pminf = pmin
+        pmaxf = pmax
+        pmint = loss0 - pmaxf * (1 - loss1)
+        pmaxt = loss0 - pminf * (1 - loss1)
+    end
+    if pmin >= 0 && pmax < 0
+        pminf = pmin
+        pmint = pmax
+        pmaxf = (-pmint + loss0) / (1-loss1)
+        pmaxt = loss0 - pminf * (1 - loss1)
+    end
+    if pmin < 0 && pmax >= 0
+        pmaxt = -pmin
+        pmaxf = pmax
+        pminf = (-pmaxt + loss0) / (1-loss1)
+        pmint = loss0 - pmaxf * (1 - loss1)
+    end
+    if pmin < 0 && pmax < 0
+        pmaxt = -pmin
+        pmint = pmax
+        pmaxf = (-pmint + loss0) / (1-loss1)
+        pminf = (-pmaxt + loss0) / (1-loss1)
+    end
+    return pminf, pmaxf, pmint, pmaxt
 end

@@ -62,6 +62,7 @@ function post_acdcpf(pm::GenericPowerModel)
         constraint_ohms_dc_branch(pm, i)
     end
     for (c, conv) in PowerModels.ref(pm, :convdc)
+        constraint_converter_filter_transformer_reactor(pm, c)
         if conv["type_dc"] == 2
             constraint_dc_voltage_magnitude_setpoint(pm, c)
             constraint_reactive_conv_setpoint(pm, c)

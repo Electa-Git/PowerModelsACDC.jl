@@ -1,24 +1,25 @@
-"""
-```
-sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[g] for g in bus_gens) + sum(pconvac[c] for c in bus_convs) - pd - gs*w
-sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*w
-```
-"""
-function constraint_kcl_shunt(pm::GenericPowerModel{T}, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, pd, qd, gs, bs) where {T <: PowerModels.AbstractWRMForm}
-    w_index = pm.ext[:nw][n][:lookup_w_index][i]
-    w = pm.var[:nw][n][:WR][w_index, w_index]
-    p = pm.var[:nw][n][:p]
-    q = pm.var[:nw][n][:q]
-    pg = pm.var[:nw][n][:pg]
-    qg = pm.var[:nw][n][:qg]
-    pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac]
-    qconv_grid_ac = pm.var[:nw][n][:qconv_grid_ac]
-
-    #pm.con[:nw][n][:kcl_p][i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - pd  - gs*w)
-    #pm.con[:nw][n][:kcl_q][i] = @constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - qd  + bs*w)
-    pm.con[:nw][n][:kcl_p][i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - pd  - gs*w)
-    pm.con[:nw][n][:kcl_q][i] = @constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - qd  + bs*w)
-end
+# """
+# ```
+# sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[g] for g in bus_gens) + sum(pconvac[c] for c in bus_convs) - pd - gs*w
+# sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*w
+# ```
+# """
+# function constraint_kcl_shunt(pm::GenericPowerModel{T}, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, pd, qd, gs, bs) where {T <: PowerModels.AbstractWRMForm}
+#     #w_index = pm.ext[:nw][n][:lookup_w_index][i]
+#     #w = pm.var[:nw][n][:WR][w_index, w_index]
+#     w = pm.var[:nw][n][:w][i]
+#     p = pm.var[:nw][n][:p]
+#     q = pm.var[:nw][n][:q]
+#     pg = pm.var[:nw][n][:pg]
+#     qg = pm.var[:nw][n][:qg]
+#     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac]
+#     qconv_grid_ac = pm.var[:nw][n][:qconv_grid_ac]
+#
+#     #pm.con[:nw][n][:kcl_p][i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - pd  - gs*w)
+#     #pm.con[:nw][n][:kcl_q][i] = @constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - qd  + bs*w)
+#     pm.con[:nw][n][:kcl_p][i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - pd  - gs*w)
+#     pm.con[:nw][n][:kcl_q][i] = @constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - qd  + bs*w)
+# end
 
 
 
@@ -71,8 +72,9 @@ function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel{T
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
     qconv_grid_ac = pm.var[:nw][n][:qconv_grid_ac][i]
 
-    w_index = pm.ext[:nw][n][:lookup_w_index][acbus]
-    w = pm.var[:nw][n][:WR][w_index, w_index] # vm^2
+    # w_index = pm.ext[:nw][n][:lookup_w_index][acbus]
+    # w = pm.var[:nw][n][:WR][w_index, w_index] # vm^2
+    w = pm.var[:nw][n][:w][acbus]
     #filter voltage
     wf_ac = pm.var[:nw][n][:wf_ac][i]   # vmf_ac * vmf_ac
     wrf_ac = pm.var[:nw][n][:wrf_ac][i] # vm*vmf_ac*cos(va-vaf_ac) =  vmf_ac*vm*cos(vaf_ac-va)
@@ -150,8 +152,9 @@ pconv_ac[i]^2 + pconv_dc[i]^2 <= 3 * (Umax)^2] * (iconv_ac[i])^2
 ```
 """
 function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, bus_ac, Umax) where {T <: PowerModels.AbstractWRMForm}
-    w_index = pm.ext[:nw][n][:lookup_w_index][i]
-    wac = pm.var[:nw][n][:WR][w_index, w_index]
+    # w_index = pm.ext[:nw][n][:lookup_w_index][i]
+    # wac = pm.var[:nw][n][:WR][w_index, w_index]
+    wac = pm.var[:nw][n][:w][i]
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
     iconv_sq = pm.var[:nw][n][:iconv_ac_sq][i]
