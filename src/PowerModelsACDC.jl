@@ -15,10 +15,14 @@ include("core/variable.jl")
 include("core/base.jl")
 include("core/constraint.jl")
 include("core/objective.jl")
+
 include("form/acp.jl")
 include("form/dcp.jl")
+
 include("form/wr.jl")
 include("form/wrm.jl")
+include("form/wi.jl")
+
 include("form/shared.jl")
 include("core/constraint_template.jl")
 end

@@ -21,7 +21,9 @@ resultQC = run_acdcopf(file, QCWRPowerModel, ipopt; setting = s)
 #
 resultQCTri = run_acdcopf(file, QCWRTriPowerModel, ipopt; setting = s)
 #
-resultSOC = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
+resultSOCBIM = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
+#
+resultSOCBFM = run_acdcopf(file, SOCWIPowerModel, ipopt; setting = s)
 #
 resultSDP = run_acdcopf(file, SDPWRMPowerModel, scs; setting = s)
 #
@@ -32,6 +34,11 @@ resultDC = run_acdcopf(file, DCPPowerModel, ipopt; setting = s)
 resultACPF = run_acdcpf(file, ACPPowerModel, IpoptSolver(); setting = s)
 #
 resultAConlyAC = run_opf(file, ACPPowerModel, IpoptSolver(); setting = s)
+
+resultSOCBFMonlyAC = run_opf(file, SOCWIPowerModel, IpoptSolver(); setting = s)
+
+resultSOCBIMonlyAC = run_opf(file, SOCWRPowerModel, IpoptSolver(); setting = s)
+
 # matpower style dc line
 resultDCMP = run_acdcopf(file1, DCPPowerModel, ipopt; setting = s)
 
