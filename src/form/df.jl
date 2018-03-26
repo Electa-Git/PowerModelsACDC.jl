@@ -1,8 +1,8 @@
-#AbstractWIForm = AbstractWRForm
-#AbstractWForms = Union{AbstractWRForms, AbstractWIForm}
+#AbstractDFForm = AbstractWRForm
+#AbstractWForms = Union{AbstractWRForms, AbstractDFForm}
 
 
-function variable_converter_filter_voltage(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractWIForm}
+function variable_converter_filter_voltage(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractDFForm}
     variable_converter_filter_voltage_magnitude_sqr(pm, n; kwargs...)
     variable_conv_transformer_current_sqr(pm, n; kwargs...)
 
@@ -11,7 +11,7 @@ function variable_converter_filter_voltage(pm::GenericPowerModel{T}, n::Int=pm.c
 end
 
 
-function variable_converter_internal_voltage(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractWIForm}
+function variable_converter_internal_voltage(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractDFForm}
     variable_converter_internal_voltage_magnitude_sqr(pm, n; kwargs...)
     variable_conv_reactor_current_sqr(pm, n; kwargs...)
     variable_conv_reactor_active_power_from(pm, n; kwargs...)
@@ -25,7 +25,7 @@ Creates transformer, filter and phase reactor model at ac side of converter
 pconv_ac[i]
 ```
 """
-function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, filter, reactor) where {T <: PowerModels.AbstractWIForm}
+function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, filter, reactor) where {T <: PowerModels.AbstractDFForm}
     w = pm.var[:nw][n][:w][acbus] # vm^2
     itf = pm.var[:nw][n][:itf_sq][i]
     #filter voltage
@@ -84,7 +84,7 @@ pconv_ac[i]^2 + pconv_dc[i]^2 <= 3 * wdc[i] * iconv_ac_sq[i]
 pconv_ac[i]^2 + pconv_dc[i]^2 <= 3 * (Umax)^2] * (iconv_ac[i])^2
 ```
 """
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, bus_ac, Umax) where {T <: PowerModels.AbstractWIForm}
+function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, bus_ac, Umax) where {T <: PowerModels.AbstractDFForm}
     wac = pm.var[:nw][n][:w][bus_ac]
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]

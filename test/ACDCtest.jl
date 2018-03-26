@@ -23,7 +23,7 @@ resultQCTri = run_acdcopf(file, QCWRTriPowerModel, ipopt; setting = s)
 #
 resultSOCBIM = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
 #
-resultSOCBFM = run_acdcopf(file, SOCWIPowerModel, ipopt; setting = s)
+resultSOCBFM = run_acdcopf(file, SOCDFPowerModel, ipopt; setting = s)
 #
 resultSDP = run_acdcopf(file, SDPWRMPowerModel, scs; setting = s)
 #
