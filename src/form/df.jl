@@ -1,54 +1,24 @@
-#AbstractDFForm = AbstractWRForm
-#AbstractWForms = Union{AbstractWRForms, AbstractDFForm}
-
-
 function variable_converter_filter_voltage(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractDFForm}
     variable_converter_filter_voltage_magnitude_sqr(pm, n; kwargs...)
     variable_conv_transformer_current_sqr(pm, n; kwargs...)
-
-    variable_conv_transformer_active_power_to(pm, n; kwargs...)
-    variable_conv_transformer_reactive_power_to(pm, n; kwargs...)
 end
 
 
 function variable_converter_internal_voltage(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractDFForm}
     variable_converter_internal_voltage_magnitude_sqr(pm, n; kwargs...)
     variable_conv_reactor_current_sqr(pm, n; kwargs...)
-    variable_conv_reactor_active_power_from(pm, n; kwargs...)
-    variable_conv_reactor_reactive_power_from(pm, n; kwargs...)
 end
 
-"""
-Creates transformer, filter and phase reactor model at ac side of converter
-
-```
-pconv_ac[i]
-```
-"""
-function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, filter, reactor) where {T <: PowerModels.AbstractDFForm}
+function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, transformer) where {T <: PowerModels.AbstractDFForm}
     w = pm.var[:nw][n][:w][acbus] # vm^2
     itf = pm.var[:nw][n][:itf_sq][i]
     #filter voltage
-    wf = pm.var[:nw][n][:wf_ac][i]   # vmf_ac * vmf_ac
-    #converter voltage
-    ipr = pm.var[:nw][n][:irc_sq][i]
-    wc = pm.var[:nw][n][:wc_ac][i]   # vmc_ac * vmc_ac
-
-    #qf = -bv*wf
+    wf = pm.var[:nw][n][:wf_ac][i]   # vmf * vmf
 
     ptf_fr = pm.var[:nw][n][:pconv_grid_ac][i]
     qtf_fr = pm.var[:nw][n][:qconv_grid_ac][i]
     ptf_to = pm.var[:nw][n][:pconv_grid_ac_to][i]
     qtf_to = pm.var[:nw][n][:qconv_grid_ac_to][i]
-    ppr_to = -pm.var[:nw][n][:pconv_ac][i]
-    qpr_to = -pm.var[:nw][n][:qconv_ac][i]
-    ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
-    qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
-
-    # ppr_to = -pconv_ac
-    # qpr_to = -qconv_ac
-    # ppr_fr = -ptf_to
-    # qpr_fr = -qtf_to - qf
 
     if transformer
         pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, ptf_fr + ptf_to ==  rtf*itf)
@@ -61,6 +31,19 @@ function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel{T
         @constraint(pm.model, w ==  wf)
     end
 
+end
+
+function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractDFForm}
+    wf = pm.var[:nw][n][:wf_ac][i]   # vmf * vmf
+    #converter voltage
+    ipr = pm.var[:nw][n][:irc_sq][i]
+    wc = pm.var[:nw][n][:wc_ac][i]   # vmc * vmc
+
+    ppr_to = -pm.var[:nw][n][:pconv_ac][i]
+    qpr_to = -pm.var[:nw][n][:qconv_ac][i]
+    ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
+    qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
+
     if reactor
         pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
         pm.con[:nw][n][:conv_pr_q][i] = @constraint(pm.model, qpr_fr + qpr_to == xc*ipr)
@@ -70,8 +53,16 @@ function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel{T
     else
         pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, ppr_fr + ppr_to == 0)
         pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, qpr_fr + qpr_to == 0)
-        @constraint(pm.model, wc ==  wf)
+        @constraint(pm.model, wc == wf)
     end
+end
+
+function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, reactor, filter) where {T <: PowerModels.AbstractDFForm}
+    ptf_to = pm.var[:nw][n][:pconv_grid_ac_to][i]
+    qtf_to = pm.var[:nw][n][:qconv_grid_ac_to][i]
+    ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
+    qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
+    wf = pm.var[:nw][n][:wf_ac][i]   # vmf * vmf
     @constraint(pm.model, ptf_to + ppr_fr         == 0)
     @constraint(pm.model, qtf_to + qpr_fr + wf*bv == 0)
 end

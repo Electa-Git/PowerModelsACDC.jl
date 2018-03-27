@@ -20,7 +20,13 @@ function post_acdcpf(pm::GenericPowerModel)
     PowerModels.variable_voltage(pm, bounded = false)
     PowerModels.variable_generation(pm, bounded = false)
     PowerModels.variable_branch_flow(pm, bounded = false)
-    #PowerModels.variable_dcline_flow(pm, bounded = false)
+
+    # dirty, should be improved in the future TODO
+    print(typeof(pm) <: PowerModels.SOCDFPowerModel)
+    if typeof(pm) <: PowerModels.SOCDFPowerModel
+        PowerModels.variable_branch_current(pm, bounded = false)
+    end
+
     variable_active_dcbranch_flow(pm, bounded = false)
     variable_dc_converter(pm, bounded = false)
     variable_dcgrid_voltage_magnitude(pm, bounded = false)
@@ -45,15 +51,19 @@ function post_acdcpf(pm::GenericPowerModel)
             for j in ref(pm, :bus_gens, i)
                 PowerModels.constraint_active_gen_setpoint(pm, j)
             end
-            # for c in ref(pm, :bus_convs_ac, i)
-            #     constraint_active_conv_setpoint(pm, c)
-            # end
         end
     end
 
     for i in PowerModels.ids(pm, :branch)
-        PowerModels.constraint_ohms_yt_from(pm, i)
-        PowerModels.constraint_ohms_yt_to(pm, i)
+        # dirty, should be improved in the future TODO
+        if typeof(pm) <: PowerModels.SOCDFPowerModel
+            PowerModels.constraint_flow_losses(pm, i)
+            PowerModels.constraint_voltage_magnitude_difference(pm, i)
+            PowerModels.constraint_branch_current(pm, i)
+        else
+            PowerModels.constraint_ohms_yt_from(pm, i)
+            PowerModels.constraint_ohms_yt_to(pm, i)
+        end
     end
     for i in PowerModels.ids(pm, :busdc)
         constraint_kcl_shunt_dcgrid(pm, i)
@@ -62,7 +72,10 @@ function post_acdcpf(pm::GenericPowerModel)
         constraint_ohms_dc_branch(pm, i)
     end
     for (c, conv) in PowerModels.ref(pm, :convdc)
-        constraint_converter_filter_transformer_reactor(pm, c)
+        #constraint_converter_filter_transformer_reactor(pm, c)
+        constraint_conv_transformer(pm, c)
+        constraint_conv_reactor(pm, c)
+        constraint_conv_filter(pm, c)
         if conv["type_dc"] == 2
             constraint_dc_voltage_magnitude_setpoint(pm, c)
             constraint_reactive_conv_setpoint(pm, c)
@@ -77,25 +90,4 @@ function post_acdcpf(pm::GenericPowerModel)
         constraint_converter_losses(pm, c)
         constraint_converter_current(pm, c)
     end
-
-    # for (i,dcline) in PowerModels.ref(pm, :dcline)
-    #     #constraint_dcline(pm, i) not needed, active power flow fully defined by dc line setpoints
-    #     PowerModels.constraint_active_dcline_setpoint(pm, i)
-    #
-    #     f_bus = ref(pm, :bus)[dcline["f_bus"]]
-    #     if f_bus["bus_type"] == 1
-    #         PowerModels.constraint_voltage_magnitude_setpoint(pm, f_bus["index"])
-    #     end
-    #
-    #     t_bus = ref(pm, :bus)[dcline["t_bus"]]
-    #     if t_bus["bus_type"] == 1
-    #         PowerModels.constraint_voltage_magnitude_setpoint(pm, t_bus["index"])
-    #     end
-    # end
 end
-
-
-#
-# for (i,bus_dc) in ref(pm, :ref_buses_dc) # TODO Change naming, it's actually a converter
-#     constraint_dc_voltage_magnitude_setpoint(pm, i)
-# end

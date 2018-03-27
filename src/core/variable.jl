@@ -1,3 +1,30 @@
+"All converter variables"
+function variable_dc_converter(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
+    variable_conv_tranformer_flow(pm, n; kwargs...)
+    variable_conv_reactor_flow(pm, n; kwargs...)
+
+    variable_converter_active_power(pm, n; kwargs...)
+    variable_converter_reactive_power(pm, n; kwargs...)
+    variable_acside_current(pm, n; kwargs...)
+    variable_dcside_power(pm, n; kwargs...)
+
+    variable_converter_filter_voltage(pm, n; kwargs...)
+    variable_converter_internal_voltage(pm, n; kwargs...)
+
+    variable_converter_to_grid_active_power(pm, n; kwargs...)
+    variable_converter_to_grid_reactive_power(pm, n; kwargs...)
+end
+
+
+function variable_conv_tranformer_flow(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
+    variable_conv_transformer_active_power_to(pm, n; kwargs...)
+    variable_conv_transformer_reactive_power_to(pm, n; kwargs...)
+end
+
+function variable_conv_reactor_flow(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
+    variable_conv_reactor_active_power_from(pm, n; kwargs...)
+    variable_conv_reactor_reactive_power_from(pm, n; kwargs...)
+end
 
 "variable: `vdcm[i]` for `i` in `dcbus`es"
 function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
@@ -62,20 +89,7 @@ function variable_active_dcbranch_flow(pm::GenericPowerModel, n::Int=pm.cnw; bou
     end
 end
 
-"All converter variables"
-function variable_dc_converter(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
-    variable_converter_active_power(pm, n; kwargs...)
-    variable_converter_reactive_power(pm, n; kwargs...)
 
-    variable_dcside_power(pm, n; kwargs...)
-    variable_acside_current(pm, n; kwargs...)
-
-    variable_converter_filter_voltage(pm, n; kwargs...)
-    variable_converter_internal_voltage(pm, n; kwargs...)
-
-    variable_converter_to_grid_active_power(pm, n; kwargs...)
-    variable_converter_to_grid_reactive_power(pm, n; kwargs...)
-end
 
 "variable: `pconv_ac[j]` for `j` in `convdc`"
 function variable_converter_active_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
@@ -283,22 +297,22 @@ function variable_converter_filter_voltage(pm::GenericPowerModel, n::Int=pm.cnw;
 end
 
 
-"variable: `vmf_ac[j]` for `j` in `convdc`"
+"variable: `vmf[j]` for `j` in `convdc`"
 function variable_converter_filter_voltage_magnitude(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
     bigM = 1.2; # only internal converter voltage is strictly regulated
-    pm.var[:nw][n][:vmf_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vmf_ac",
+    pm.var[:nw][n][:vmf] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vmf",
     lowerbound = pm.ref[:nw][n][:convdc][i]["Vmmin"]/bigM,
     upperbound = pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM
     )
 end
 
 
-"variable: `vaf_ac[j]` for `j` in `convdc`"
+"variable: `vaf[j]` for `j` in `convdc`"
 function variable_converter_filter_voltage_angle(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
     bigM = 2*pi; #
-    pm.var[:nw][n][:vaf_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vaf_ac",
+    pm.var[:nw][n][:vaf] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vaf",
     lowerbound = -bigM,
     upperbound = bigM
     )
@@ -311,20 +325,20 @@ function variable_converter_internal_voltage(pm::GenericPowerModel, n::Int=pm.cn
 end
 
 
-"variable: `vmc_ac[j]` for `j` in `convdc`"
+"variable: `vmc[j]` for `j` in `convdc`"
 function variable_converter_internal_voltage_magnitude(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    pm.var[:nw][n][:vmc_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vmc_ac",
+    pm.var[:nw][n][:vmc] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vmc",
     lowerbound = pm.ref[:nw][n][:convdc][i]["Vmmin"],
     upperbound = pm.ref[:nw][n][:convdc][i]["Vmmax"]
     )
 end
 
-"variable: `vac_ac[j]` for `j` in `convdc`"
+"variable: `vac[j]` for `j` in `convdc`"
 function variable_converter_internal_voltage_angle(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
     bigM = 2*pi; #
-    pm.var[:nw][n][:vac_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vac_ac",
+    pm.var[:nw][n][:vac] = @variable(pm.model,
+    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vac",
     lowerbound = -bigM,
     upperbound = bigM
     )

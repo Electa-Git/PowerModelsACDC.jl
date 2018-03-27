@@ -4,7 +4,7 @@ end
 
 """
 ```
-sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == 0
+sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == pd
 ```
 """
 function constraint_kcl_shunt_dcgrid(pm::GenericPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_convs_dc, pd)

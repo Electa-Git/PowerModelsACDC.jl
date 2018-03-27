@@ -6,7 +6,6 @@ using SCS
 
 file = "./test/data/case5_acdc.m"
 file1 ="./test/data/case5_dc.m"
-file2 ="./test/data/case5_2grids.m"
 data = PowerModels.parse_file(file1)
 PowerModelsACDC.process_additional_data!(data)
 display(data)
@@ -17,26 +16,24 @@ s = Dict("output" => Dict("branch_flows" => true))
 
 resultAC = run_acdcopf(file, ACPPowerModel, ipopt; setting = s)
 resultACPF = run_acdcpf(file, ACPPowerModel, ipopt; setting = s)
-
+#
 resultQC = run_acdcopf(file, QCWRPowerModel, ipopt; setting = s)
-#
+# #
 resultQCTri = run_acdcopf(file, QCWRTriPowerModel, ipopt; setting = s)
-#
+# #
 resultSOCBIM = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
-#
+# #
 resultSOCBFM = run_acdcopf(file, SOCDFPowerModel, ipopt; setting = s)
-#
+# #
 resultSDP = run_acdcopf(file, SDPWRMPowerModel, scs; setting = s)
-#
+# #
 resultDC = run_acdcopf(file, DCPPowerModel, ipopt; setting = s)
+# #
 #
-
 # other tests
 resultACPF = run_acdcpf(file, ACPPowerModel, IpoptSolver(); setting = s)
 #
 resultAConlyAC = run_opf(file, ACPPowerModel, IpoptSolver(); setting = s)
-
-resultSOCBFMonlyAC = run_opf(file, SOCDFPowerModel, IpoptSolver(); setting = s)
 
 resultSOCBIMonlyAC = run_opf(file, SOCWRPowerModel, IpoptSolver(); setting = s)
 

@@ -33,7 +33,7 @@ function add_dcbranch_losses(sol, pm::GenericPowerModel)
     for (i, branchdc) in sol["branchdc"]
         pf = branchdc["pf"]
         pt = branchdc["pt"]
-        sol["branchdc"]["$i"]["ploss"] = abs(pf + pt)
+        sol["branchdc"]["$i"]["ploss"] = pf + pt
     end
 end
 
@@ -41,7 +41,7 @@ function add_dcconv_losses(sol, pm::GenericPowerModel)
     for (i, convdc) in sol["convdc"]
         pf = convdc["pdc"]
         pt = convdc["pgrid"]
-        sol["convdc"]["$i"]["ploss"] = abs(pf + pt)
+        sol["convdc"]["$i"]["ploss"] = pf + pt
     end
 end
 
@@ -51,8 +51,8 @@ function add_dc_bus_voltage_setpoint(sol, pm::GenericPowerModel)
 end
 
 function add_converter_voltage_setpoint(sol, pm::GenericPowerModel)
-    PowerModels.add_setpoint(sol, pm, "convdc", "vmconv", :vmc_ac)
-    PowerModels.add_setpoint(sol, pm, "convdc", "vaconv", :vac_ac)
-    PowerModels.add_setpoint(sol, pm, "convdc", "vmfilt", :vmf_ac)
-    PowerModels.add_setpoint(sol, pm, "convdc", "vafilt", :vaf_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "vmconv", :vmc)
+    PowerModels.add_setpoint(sol, pm, "convdc", "vaconv", :vac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "vmfilt", :vmf)
+    PowerModels.add_setpoint(sol, pm, "convdc", "vafilt", :vaf)
 end

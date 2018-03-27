@@ -7,10 +7,8 @@ sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[
 function constraint_kcl_shunt(pm::GenericPowerModel{T}, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, pd, qd, gs, bs) where {T <: PowerModels.AbstractDCPForm}
     p = pm.var[:nw][n][:p]
     pg = pm.var[:nw][n][:pg]
-    #p_dc = pm.var[:nw][n][:p_dc]
     pconv_ac = pm.var[:nw][n][:pconv_ac]
 
-#    pm.con[:nw][n][:kcl_p][i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) + sum(pconv_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - pd  - gs*1^2)
     pm.con[:nw][n][:kcl_p][i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - pd  - gs*1^2)
 end
 
@@ -55,28 +53,65 @@ function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel{T
     pconv_ac      = pm.var[:nw][n][:pconv_ac][i]
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
     #filter voltage
-    vaf_ac = pm.var[:nw][n][:vaf_ac][i]
+    vaf = pm.var[:nw][n][:vaf][i]
     #converter voltage
-    vac_ac = pm.var[:nw][n][:vac_ac][i]
+    vac = pm.var[:nw][n][:vac][i]
     va = pm.var[:nw][n][:va][acbus]
 
     if transformer
         ytf = 1/(im*xtf)
         btf = imag(ytf)
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, pconv_grid_ac == -btf*(va-vaf_ac))
+        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, pconv_grid_ac == -btf*(va-vaf))
     else
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf_ac)
+        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf)
     end
     if reactor
         yc = 1/(im*xc)
         bc = imag(yc)
-        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, -pconv_ac == -bc*(vac_ac-vaf_ac))
+        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, -pconv_ac == -bc*(vac-vaf))
     else
-        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, vac_ac == vaf_ac)
+        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, vac == vaf)
     end
     pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,  pconv_ac == pconv_grid_ac )
 end
 
+function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, transformer) where {T <: PowerModels.AbstractDCPForm}
+    pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
+    #filter voltage
+    vaf = pm.var[:nw][n][:vaf][i]
+    #acbus voltage
+    va = pm.var[:nw][n][:va][acbus]
+
+    if transformer
+        ytf = 1/(im*xtf)
+        btf = imag(ytf)
+        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, pconv_grid_ac == -btf*(va-vaf))
+    else
+        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf)
+    end
+end
+
+function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractDCPForm}
+    pconv_ac      = pm.var[:nw][n][:pconv_ac][i]
+    #filter voltage
+    vaf = pm.var[:nw][n][:vaf][i]
+    #converter voltage
+    vac = pm.var[:nw][n][:vac][i]
+
+    if reactor
+        yc = 1/(im*xc)
+        bc = imag(yc)
+        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, -pconv_ac == -bc*(vac-vaf))
+    else
+        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, vac == vaf)
+    end
+end
+
+function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, reactor, filter) where {T <: PowerModels.AbstractDCPForm}
+    pconv_ac      = pm.var[:nw][n][:pconv_ac][i]
+    pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
+    pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,  pconv_ac == pconv_grid_ac )
+end
 
 
 ""
@@ -100,8 +135,9 @@ function variable_dc_converter(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs..
     variable_converter_internal_voltage(pm, n; kwargs...)
     variable_converter_to_grid_active_power(pm, n; kwargs...)
 
+    variable_conv_transformer_active_power_to(pm, n; kwargs...)
+    variable_conv_reactor_active_power_from(pm, n; kwargs...)
 end
-
 
 function variable_converter_filter_voltage(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractDCPForm}
     variable_converter_filter_voltage_angle(pm, n; kwargs...)

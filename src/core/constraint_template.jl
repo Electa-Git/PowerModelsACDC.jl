@@ -106,25 +106,32 @@ function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, n::Int,
 end
 constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, i::Int) = constraint_dc_voltage_magnitude_setpoint(pm, pm.cnw, i::Int)
 
-
-
-
-function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel, n::Int, i::Int)
-    if haskey(pm.setting,"zthresh")
-        zth = pm.setting["zthresh"]
-    else
-        zth = 0
-    end
-
-    if !haskey(pm.con[:nw][n], :conv_tf_p)
-        pm.con[:nw][n][:conv_tf_p] = Dict{Int,ConstraintRef}()
-        pm.con[:nw][n][:conv_tf_q] = Dict{Int,ConstraintRef}()
+function constraint_conv_reactor(pm::GenericPowerModel, n::Int, i::Int)
+    if !haskey(pm.con[:nw][n], :conv_pr_p)
         pm.con[:nw][n][:conv_pr_p] = Dict{Int,ConstraintRef}()
         pm.con[:nw][n][:conv_pr_q] = Dict{Int,ConstraintRef}()
+    end
+    conv = ref(pm, n, :convdc, i)
+    constraint_conv_reactor(pm, n, i, conv["rc"], conv["xc"], Bool(conv["reactor"]))
+end
+constraint_conv_reactor(pm::GenericPowerModel, i::Int) = constraint_conv_reactor(pm, pm.cnw, i::Int)
+
+function constraint_conv_filter(pm::GenericPowerModel, n::Int, i::Int)
+    if !haskey(pm.con[:nw][n], :conv_kcl_p)
         pm.con[:nw][n][:conv_kcl_p] = Dict{Int,ConstraintRef}()
         pm.con[:nw][n][:conv_kcl_q] = Dict{Int,ConstraintRef}()
     end
     conv = ref(pm, n, :convdc, i)
-    constraint_converter_filter_transformer_reactor(pm, n, i, conv["rtf"], conv["xtf"], conv["bf"], conv["rc"], conv["xc"], conv["busac_i"], Bool(conv["transformer"]), Bool(conv["filter"]), Bool(conv["reactor"]))
+    constraint_conv_filter(pm, n, i, conv["rtf"], conv["xtf"], conv["bf"], conv["rc"], conv["xc"], conv["busac_i"], Bool(conv["transformer"]), Bool(conv["reactor"]), Bool(conv["filter"]) )
 end
-constraint_converter_filter_transformer_reactor(pm::GenericPowerModel, i::Int) = constraint_converter_filter_transformer_reactor(pm, pm.cnw, i::Int)
+constraint_conv_filter(pm::GenericPowerModel, i::Int) = constraint_conv_filter(pm, pm.cnw, i::Int)
+
+function constraint_conv_transformer(pm::GenericPowerModel, n::Int, i::Int)
+    if !haskey(pm.con[:nw][n], :conv_tf_p)
+        pm.con[:nw][n][:conv_tf_p] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_tf_q] = Dict{Int,ConstraintRef}()
+    end
+    conv = ref(pm, n, :convdc, i)
+    constraint_conv_transformer(pm, n, i, conv["rtf"], conv["xtf"], conv["busac_i"], Bool(conv["transformer"]))
+end
+constraint_conv_transformer(pm::GenericPowerModel, i::Int) = constraint_conv_transformer(pm, pm.cnw, i::Int)

@@ -19,10 +19,16 @@ function post_acdcopf(pm::GenericPowerModel)
     PowerModels.variable_voltage(pm)
     PowerModels.variable_generation(pm)
     PowerModels.variable_branch_flow(pm)
-    #PowerModels.variable_dcline_flow(pm)
+
+    # dirty, should be improved in the future TODO
+    if typeof(pm) <: PowerModels.SOCDFPowerModel
+        PowerModels.variable_branch_current(pm)
+    end
 
     variable_active_dcbranch_flow(pm)
+
     variable_dc_converter(pm)
+
     variable_dcgrid_voltage_magnitude(pm)
 
     objective_min_fuel_cost(pm)
@@ -39,8 +45,16 @@ function post_acdcopf(pm::GenericPowerModel)
     end
 
     for i in PowerModels.ids(pm, :branch)
-        PowerModels.constraint_ohms_yt_from(pm, i)
-        PowerModels.constraint_ohms_yt_to(pm, i)
+        # dirty, should be improved in the future TODO
+        if typeof(pm) <: PowerModels.SOCDFPowerModel
+            PowerModels.constraint_flow_losses(pm, i)
+            PowerModels.constraint_voltage_magnitude_difference(pm, i)
+            PowerModels.constraint_branch_current(pm, i)
+        else
+            PowerModels.constraint_ohms_yt_from(pm, i)
+            PowerModels.constraint_ohms_yt_to(pm, i)
+        end
+
         PowerModels.constraint_voltage_angle_difference(pm, i)
 
         PowerModels.constraint_thermal_limit_from(pm, i)
@@ -55,9 +69,9 @@ function post_acdcopf(pm::GenericPowerModel)
     for i in PowerModels.ids(pm, :convdc)
         constraint_converter_losses(pm, i)
         constraint_converter_current(pm, i)
-        constraint_converter_filter_transformer_reactor(pm, i)
+        #constraint_converter_filter_transformer_reactor(pm, i)
+        constraint_conv_transformer(pm, i)
+        constraint_conv_reactor(pm, i)
+        constraint_conv_filter(pm, i)
     end
-    # for i in PowerModels.ids(pm, :dcline)
-    #     PowerModels.constraint_dcline(pm, i)
-    # end
 end
