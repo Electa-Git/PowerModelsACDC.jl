@@ -132,6 +132,7 @@ function constraint_conv_transformer(pm::GenericPowerModel, n::Int, i::Int)
         pm.con[:nw][n][:conv_tf_q] = Dict{Int,ConstraintRef}()
     end
     conv = ref(pm, n, :convdc, i)
-    constraint_conv_transformer(pm, n, i, conv["rtf"], conv["xtf"], conv["busac_i"], Bool(conv["transformer"]))
+    tap = 1
+    constraint_conv_transformer(pm, n, i, conv["rtf"], conv["xtf"], conv["busac_i"], tap, Bool(conv["transformer"]))
 end
 constraint_conv_transformer(pm::GenericPowerModel, i::Int) = constraint_conv_transformer(pm, pm.cnw, i::Int)

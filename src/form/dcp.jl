@@ -42,40 +42,7 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, i::Int, a
     pm.con[:nw][n][:conv_loss][i] = @constraint(pm.model, pconv_ac + pconv_dc == a + b*pconv_ac )
 end
 
-"""
-Creates transformer, filter and phase reactor model at ac side of converter
-
-```
-pconv_ac[i]
-```
-"""
-function constraint_converter_filter_transformer_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, filter, reactor) where {T <: PowerModels.AbstractDCPForm}
-    pconv_ac      = pm.var[:nw][n][:pconv_ac][i]
-    pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
-    #filter voltage
-    vaf = pm.var[:nw][n][:vaf][i]
-    #converter voltage
-    vac = pm.var[:nw][n][:vac][i]
-    va = pm.var[:nw][n][:va][acbus]
-
-    if transformer
-        ytf = 1/(im*xtf)
-        btf = imag(ytf)
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, pconv_grid_ac == -btf*(va-vaf))
-    else
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf)
-    end
-    if reactor
-        yc = 1/(im*xc)
-        bc = imag(yc)
-        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, -pconv_ac == -bc*(vac-vaf))
-    else
-        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, vac == vaf)
-    end
-    pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,  pconv_ac == pconv_grid_ac )
-end
-
-function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, transformer) where {T <: PowerModels.AbstractDCPForm}
+function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tap, transformer) where {T <: PowerModels.AbstractDCPForm}
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
     #filter voltage
     vaf = pm.var[:nw][n][:vaf][i]

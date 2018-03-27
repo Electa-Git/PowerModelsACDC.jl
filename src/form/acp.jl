@@ -51,9 +51,7 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, i::Int, a
     pm.con[:nw][n][:conv_loss][i] = @NLconstraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv^2)
 end
 
-function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, transformer) where {T <: PowerModels.AbstractACPForm}
-    pconv_ac = pm.var[:nw][n][:pconv_ac][i]
-    qconv_ac = pm.var[:nw][n][:qconv_ac][i]
+function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractACPForm}
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
     qconv_grid_ac = pm.var[:nw][n][:qconv_grid_ac][i]
 
@@ -69,11 +67,11 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
         ytf = 1/(rtf + im*xtf)
         gtf = real(ytf)
         btf = imag(ytf)
-        pm.con[:nw][n][:conv_tf_p][i] = @NLconstraint(pm.model, pconv_grid_ac ==  gtf*vm^2 + -gtf*vm*vmf*cos(va-vaf) + -btf*vm*vmf*sin(va-vaf))
-        pm.con[:nw][n][:conv_tf_q][i] = @NLconstraint(pm.model, qconv_grid_ac == -btf*vm^2 +  btf*vm*vmf*cos(va-vaf) + -gtf*vm*vmf*sin(va-vaf))
+        pm.con[:nw][n][:conv_tf_p][i] = @NLconstraint(pm.model, pconv_grid_ac ==  gtf/(tm^2)*vm^2 + -gtf/(tm)*vm*vmf*cos(va-vaf) + -btf/(tm)*vm*vmf*sin(va-vaf))
+        pm.con[:nw][n][:conv_tf_q][i] = @NLconstraint(pm.model, qconv_grid_ac == -btf/(tm^2)*vm^2 +  btf/(tm)*vm*vmf*cos(va-vaf) + -gtf/(tm)*vm*vmf*sin(va-vaf))
     else
         pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf)
-        pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, vm == vmf)
+        pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, vm/(tm) == vmf)
     end
 end
 
@@ -103,6 +101,7 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
 end
 
 function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, reactor, filter) where {T <: PowerModels.AbstractACPForm}
+    tm = 1 #TODO parse
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
@@ -126,10 +125,10 @@ function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, x
         bc = imag(yc)
 
         pm.con[:nw][n][:conv_kcl_p][i] = @NLconstraint(pm.model,
-        gtf*vmf^2 + -gtf*vmf*vm    *cos(vaf - va)     + -btf*vmf*vm    *sin(vaf - va) +
+        gtf*vmf^2 + -gtf/(tm)*vmf*vm    *cos(vaf - va)     + -btf/(tm)*vmf*vm    *sin(vaf - va) +
         gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac) == 0 )
         pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model,
-        -btf*vmf^2 +  btf*vmf*vm*    cos(vaf - va)     + -gtf*vmf*vm    *sin(vaf - va) +
+        -btf*vmf^2 +  btf/(tm)*vmf*vm*    cos(vaf - va)     + -gtf/(tm)*vmf*vm    *sin(vaf - va) +
         -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac) +
         -bv * filter *vmf^2 ==0)
     elseif !transformer && reactor
@@ -150,7 +149,7 @@ function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, x
         btf = imag(ytf)
 
         pm.con[:nw][n][:conv_kcl_p][i] = @NLconstraint(pm.model,
-        gtf*vmf^2 + -gtf*vmf*vm    *cos(vaf - va)     + -btf*vmf*vm    *sin(vaf - va) +
+        gtf*vmf^2 + -gtf/(tm)*vmf*vm    *cos(vaf - va)     + -btf/(tm)*vmf*vm    *sin(vaf - va) +
         pconv_ac == 0 )
         pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model,
         -btf*vmf^2 +  btf*vmf*vm*    cos(vaf - va)     + -gtf*vmf*vm    *sin(vaf - va) +

@@ -1,3 +1,40 @@
+
+"""
+Creates Ohms constraints for DC branches
+
+```
+p[f_idx] + p[t_idx] == p * g[l] * (wdc[f_bus] - wdcr[f_bus,t_bus])
+```
+"""
+function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, f_bus, t_bus, f_idx, t_idx, g, p) where {T <: PowerModels.AbstractDFForm}
+    p_dc_fr = pm.var[:nw][n][:p_dcgrid][f_idx]
+    p_dc_to = pm.var[:nw][n][:p_dcgrid][t_idx]
+
+    wdc_fr = pm.var[:nw][n][:wdc][f_bus]
+    wdc_to = pm.var[:nw][n][:wdc][t_bus]
+    wdc_frto = pm.var[:nw][n][:wdcr][(f_bus, t_bus)]
+
+    #TODO change model to include squared current value
+    @constraint(pm.model, p_dc_fr == p * g *  (wdc_fr - wdc_frto))
+    @constraint(pm.model, p_dc_to == p * g *  (wdc_to - wdc_frto))
+end
+
+"""
+Model to approximate cross products of node voltages
+
+```
+wdcr[(i,j)] <= wdc[i]*wdc[j]
+```
+"""
+function constraint_voltage_dc(pm::GenericPowerModel{T}, n::Int) where {T <: PowerModels.AbstractDFForm}
+    wdc = pm.var[:nw][n][:wdc]
+    wdcr = pm.var[:nw][n][:wdcr]
+
+    for (i,j) in keys(pm.ref[:nw][n][:buspairsdc])
+        PowerModels.relaxation_complex_product(pm.model, wdc[i], wdc[j], wdcr[(i,j)], 0) #TODO
+    end
+end
+
 function variable_converter_filter_voltage(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractDFForm}
     variable_converter_filter_voltage_magnitude_sqr(pm, n; kwargs...)
     variable_conv_transformer_current_sqr(pm, n; kwargs...)
@@ -9,7 +46,7 @@ function variable_converter_internal_voltage(pm::GenericPowerModel{T}, n::Int=pm
     variable_conv_reactor_current_sqr(pm, n; kwargs...)
 end
 
-function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, transformer) where {T <: PowerModels.AbstractDFForm}
+function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tap, transformer) where {T <: PowerModels.AbstractDFForm}
     w = pm.var[:nw][n][:w][acbus] # vm^2
     itf = pm.var[:nw][n][:itf_sq][i]
     #filter voltage

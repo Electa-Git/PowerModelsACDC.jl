@@ -1,4 +1,4 @@
-function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, transformer) where {T <: PowerModels.AbstractWRForm}
+function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tap, transformer) where {T <: PowerModels.AbstractWRForm}
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
     qconv_grid_ac = pm.var[:nw][n][:qconv_grid_ac][i]
     pconv_grid_ac_to = pm.var[:nw][n][:pconv_grid_ac_to][i]
