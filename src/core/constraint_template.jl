@@ -28,7 +28,8 @@ function constraint_kcl_shunt_dcgrid(pm::GenericPowerModel, n::Int, i::Int)
 
     bus_arcs_dcgrid = ref(pm, n, :bus_arcs_dcgrid, i)
     bus_convs_dc = ref(pm, n, :bus_convs_dc, i)
-    constraint_kcl_shunt_dcgrid(pm, n, i, bus_arcs_dcgrid, bus_convs_dc)
+    pd = ref(pm, n, :busdc, i)["Pdc"]
+    constraint_kcl_shunt_dcgrid(pm, n, i, bus_arcs_dcgrid, bus_convs_dc, pd)
 end
 constraint_kcl_shunt_dcgrid(pm::GenericPowerModel, i::Int) = constraint_kcl_shunt_dcgrid(pm, pm.cnw, i::Int)
 
@@ -56,7 +57,7 @@ function constraint_converter_losses(pm::GenericPowerModel, n::Int, i::Int)
     conv = ref(pm, n, :convdc, i)
     a = conv["LossA"]
     b = conv["LossB"]
-    c = conv["LossCrec"]  #TODO check this (or is it dependent on PF direction)
+    c = conv["LossCinv"]
     constraint_converter_losses(pm, n, i, a, b, c)
 end
 constraint_converter_losses(pm::GenericPowerModel, i::Int) = constraint_converter_losses(pm, pm.cnw, i::Int)

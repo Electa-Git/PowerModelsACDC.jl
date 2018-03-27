@@ -45,26 +45,59 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
     pm.ref[:nw][n][:bus_convs_dc] = bus_convs_dc
 
     # Add DC reference buses
-    ref_buses_dc = Dict()
+    ref_buses_dc = Dict{String, Any}()
     for (k,v) in pm.ref[:nw][n][:convdc]
         if v["type_dc"] == 2
-            ref_buses_dc[k] = v
+            ref_buses_dc["$k"] = v
         end
     end
 
     if length(ref_buses_dc) == 0
         for (k,v) in pm.ref[:nw][n][:convdc]
             if v["type_ac"] == 2
-                ref_buses_dc[k] = v
+                ref_buses_dc["$k"] = v
             end
         end
-        warn("no reference DC bus found, setting bus as reference based on generator AC bus type)")
+        warn(PowerModels.LOGGER, "no reference DC bus found, setting reference bus based on AC bus type")
+    end
+
+    for (k,conv) in pm.ref[:nw][n][:convdc]
+        conv_id = conv["index"]
+        if conv["type_ac"] == 2 && conv["type_dc"] == 1
+            warn(PowerModels.LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+        elseif conv["type_ac"] == 1 && conv["type_dc"] == 1
+            warn(PowerModels.LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+        end
+        convbus_ac = conv["busac_i"]
+        if conv["Vmmax"] < pm.ref[:nw][n][:bus][convbus_ac]["vmin"]
+            warn(PowerModels.LOGGER, "The maximum AC side voltage of converter $conv_id is smaller than the minimum AC bus voltage")
+        end
+        if conv["Vmmin"] > pm.ref[:nw][n][:bus][convbus_ac]["vmax"]
+            warn(PowerModels.LOGGER, "The miximum AC side voltage of converter $conv_id is larger than the maximum AC bus voltage")
+        end
     end
 
     if length(ref_buses_dc) > 1
-        warn("multiple reference buses found, $(keys(ref_buses_dc)), this can cause infeasibility if they are in the same connected component")
+        ref_buses_warn = ""
+        for (rb) in keys(ref_buses_dc)
+            ref_buses_warn = ref_buses_warn*rb*", "
+        end
+        warn(PowerModels.LOGGER, "multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
     end
+    ACgrids = find_all_ac_grids(pm.ref[:nw][n][:branch], pm.ref[:nw][n][:bus])
 
+
+    for (i, grid) in ACgrids
+        a = 0
+        for (j, bus) in pm.ref[:nw][n][:ref_buses]
+            if (bus["bus_i"] in grid["Buses"])
+                a = 1
+            end
+        end
+        if a == 0
+            warn(PowerModels.LOGGER, "Grid $i does not have any voltage reference bus, this might cause infeasibility")
+        end
+    end
     pm.ref[:nw][n][:ref_buses_dc] = ref_buses_dc
     pm.ref[:nw][n][:buspairsdc] = buspair_parameters_dc(pm.ref[:nw][n][:arcs_dcgrid_from], pm.ref[:nw][n][:branchdc], pm.ref[:nw][n][:busdc])
 
@@ -86,12 +119,67 @@ function buspair_parameters_dc(arcs_dcgrid_from, branches, buses)
     end
 
     buspairs = Dict([((i,j), Dict(
-        "branch"=>bp_branch[(i,j)],
-        "vm_fr_min"=>buses[i]["Vdcmin"],
-        "vm_fr_max"=>buses[i]["Vdcmax"],
-        "vm_to_min"=>buses[j]["Vdcmin"],
-        "vm_to_max"=>buses[j]["Vdcmax"]
-        )) for (i,j) in buspair_indexes])
+    "branch"=>bp_branch[(i,j)],
+    "vm_fr_min"=>buses[i]["Vdcmin"],
+    "vm_fr_max"=>buses[i]["Vdcmax"],
+    "vm_to_min"=>buses[j]["Vdcmin"],
+    "vm_to_max"=>buses[j]["Vdcmax"]
+    )) for (i,j) in buspair_indexes])
 
     return buspairs
+end
+
+function find_all_ac_grids(branches_ac, buses_ac)
+    ACgrids = Dict{String, Any}()
+    ACgrids["1"] = Dict{String, Any}()
+    ACgrids["1"]["Buses"] = [branches_ac[1]["f_bus"] branches_ac[1]["t_bus"]]
+    closed_buses = [branches_ac[1]["f_bus"] branches_ac[1]["t_bus"]]
+    closed_branches = [1]
+    connections = []
+    buses = []
+    for (i, bus) in buses_ac
+        buses = cat(1,buses,bus["index"])
+    end
+    grid_id = 1
+    iter_id = 1
+    branch_iter = 1
+    while length(closed_buses) != length(buses) && iter_id < 10
+        while branch_iter <= length(branches_ac)
+            for (i, branch) in branches_ac
+                for (index, grid) in ACgrids
+                    if (branch["t_bus"] in grid["Buses"]) && (branch["f_bus"] in grid["Buses"])
+                        if !(branch["index"] in closed_branches)
+                            closed_branches = [closed_branches branch["index"]]
+                        end
+                    elseif (branch["f_bus"] in grid["Buses"])
+                        if !(branch["t_bus"] in grid["Buses"])
+                            ACgrids["$index"]["Buses"] = [grid["Buses"] branch["t_bus"]]
+                            closed_buses = [closed_buses branch["t_bus"]]
+                            closed_branches = [closed_branches branch["index"]]
+                        end
+                    elseif (branch["t_bus"] in grid["Buses"])
+                        if !(branch["f_bus"] in grid["Buses"])
+                            ACgrids["$index"]["Buses"] = [grid["Buses"] branch["f_bus"]]
+                            closed_buses = [closed_buses branch["f_bus"]]
+                            closed_branches = [closed_branches branch["index"]]
+                        end
+                    end
+                end
+            end
+            branch_iter = branch_iter + 1
+        end
+        if length(closed_branches) < length(branches_ac)
+            grid_id = grid_id + 1
+            branch_iter = 1
+            ACgrids["$grid_id"] = Dict{String, Any}()
+            for (i, branch) in branches_ac
+                if !(branch["index"] in closed_branches) && isempty(ACgrids["$grid_id"])
+                    ACgrids["$grid_id"]["Buses"] = [branch["f_bus"] branch["t_bus"]]
+                    closed_branches = [closed_branches branch["index"]]
+                end
+            end
+        end
+        iter_id = iter_id + 1 # to avoid infinite loop -> if not all subgrids detected
+    end
+    return ACgrids
 end

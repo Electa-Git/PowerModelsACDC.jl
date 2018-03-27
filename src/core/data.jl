@@ -65,6 +65,11 @@ function to_pu_single_network!(data)
             set_branchdc_pu(branchdc, MVAbase)
         end
     end
+    if haskey(data, "busdc")
+        for (i, busdc) in data["busdc"]
+            set_busdc_pu(busdc, MVAbase)
+        end
+    end
 end
 
 function to_pu_multinetwork!(data, MVAbase)
@@ -193,6 +198,11 @@ function set_branchdc_pu(branchdc, MVAbase)
     PowerModels.apply_func(branchdc, "rateC", rescale_power)
 end
 
+function set_busdc_pu(busdc, MVAbase)
+    rescale_power = x -> x/MVAbase
+    PowerModels.apply_func(busdc, "Pdc", rescale_power)
+end
+
 function set_conv_pu_power(conv, MVAbase)
     rescale_power = x -> x/MVAbase
     PowerModels.apply_func(conv, "P_g", rescale_power)
@@ -225,6 +235,10 @@ function check_conv_parameters(conv)
     assert(conv["LossB"]>=0)
     assert(conv["LossCrec"]>=0)
     assert(conv["LossCinv"]>=0)
+    conv_id = conv["index"]
+    if conv["LossCrec"] != conv["LossCinv"]
+        warn(PowerModels.LOGGER, "The losses of converter $conv_id are different in inverter and rectifier mode, inverter losses are used.")
+    end
     assert(conv["Pacmax"]>=conv["Pacmin"])
     assert(conv["Qacmax"]>=conv["Qacmin"])
     assert(conv["Pacrated"]>=0)

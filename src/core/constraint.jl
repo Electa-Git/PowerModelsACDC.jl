@@ -7,11 +7,11 @@ end
 sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == 0
 ```
 """
-function constraint_kcl_shunt_dcgrid(pm::GenericPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_convs_dc)
+function constraint_kcl_shunt_dcgrid(pm::GenericPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_convs_dc, pd)
     p_dcgrid = pm.var[:nw][n][:p_dcgrid]
     pconv_dc = pm.var[:nw][n][:pconv_dc]
 
-    pm.con[:nw][n][:kcl_dcgrid][i] = @constraint(pm.model, sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == 0)
+    pm.con[:nw][n][:kcl_dcgrid][i] = @constraint(pm.model, sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == (-pd))
 end
 
 "`pconv[i] == pconv`"

@@ -6,6 +6,7 @@ using SCS
 
 file = "./test/data/case5_acdc.m"
 file1 ="./test/data/case5_dc.m"
+file2 ="./test/data/case5_2grids.m"
 data = PowerModels.parse_file(file1)
 PowerModelsACDC.process_additional_data!(data)
 display(data)
@@ -35,7 +36,7 @@ resultACPF = run_acdcpf(file, ACPPowerModel, IpoptSolver(); setting = s)
 #
 resultAConlyAC = run_opf(file, ACPPowerModel, IpoptSolver(); setting = s)
 
-resultSOCBFMonlyAC = run_opf(file, SOCWIPowerModel, IpoptSolver(); setting = s)
+resultSOCBFMonlyAC = run_opf(file, SOCDFPowerModel, IpoptSolver(); setting = s)
 
 resultSOCBIMonlyAC = run_opf(file, SOCWRPowerModel, IpoptSolver(); setting = s)
 
