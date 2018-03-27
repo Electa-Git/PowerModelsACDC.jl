@@ -6,6 +6,8 @@ function get_solution_acdc(pm::GenericPowerModel, sol::Dict{String,Any})
     add_dc_bus_voltage_setpoint(sol, pm)
     add_dcconverter_setpoint(sol, pm)
     add_dcgrid_flow_setpoint(sol,pm)
+    add_dcbranch_losses(sol, pm)
+    add_dcconv_losses(sol, pm)
     return sol
 end
 
@@ -26,6 +28,23 @@ function add_dcgrid_flow_setpoint(sol, pm::GenericPowerModel)
     PowerModels.add_setpoint(sol, pm, "branchdc", "pf", :p_dcgrid; extract_var = (var,idx,item) -> var[(idx, item["fbusdc"], item["tbusdc"])])
     PowerModels.add_setpoint(sol, pm, "branchdc", "pt", :p_dcgrid; extract_var = (var,idx,item) -> var[(idx, item["tbusdc"], item["fbusdc"])])
 end
+
+function add_dcbranch_losses(sol, pm::GenericPowerModel)
+    for (i, branchdc) in sol["branchdc"]
+        pf = branchdc["pf"]
+        pt = branchdc["pt"]
+        sol["branchdc"]["$i"]["ploss"] = abs(pf + pt)
+    end
+end
+
+function add_dcconv_losses(sol, pm::GenericPowerModel)
+    for (i, convdc) in sol["convdc"]
+        pf = convdc["pdc"]
+        pt = convdc["pgrid"]
+        sol["convdc"]["$i"]["ploss"] = abs(pf + pt)
+    end
+end
+
 
 function add_dc_bus_voltage_setpoint(sol, pm::GenericPowerModel)
     PowerModels.add_setpoint(sol, pm, "busdc", "vm", :vdcm)
