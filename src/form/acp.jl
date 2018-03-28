@@ -52,8 +52,10 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, i::Int, a
 end
 
 function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractACPForm}
-    pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
-    qconv_grid_ac = pm.var[:nw][n][:qconv_grid_ac][i]
+    ptf_fr = pm.var[:nw][n][:pconv_grid_ac][i]
+    qtf_fr = pm.var[:nw][n][:qconv_grid_ac][i]
+    ptf_to = pm.var[:nw][n][:pconv_grid_ac_to][i]
+    qtf_to = pm.var[:nw][n][:qconv_grid_ac_to][i]
 
     # ac bus voltage
     vm = pm.var[:nw][n][:vm][acbus]
@@ -67,11 +69,16 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
         ytf = 1/(rtf + im*xtf)
         gtf = real(ytf)
         btf = imag(ytf)
-        pm.con[:nw][n][:conv_tf_p][i] = @NLconstraint(pm.model, pconv_grid_ac ==  gtf/(tm^2)*vm^2 + -gtf/(tm)*vm*vmf*cos(va-vaf) + -btf/(tm)*vm*vmf*sin(va-vaf))
-        pm.con[:nw][n][:conv_tf_q][i] = @NLconstraint(pm.model, qconv_grid_ac == -btf/(tm^2)*vm^2 +  btf/(tm)*vm*vmf*cos(va-vaf) + -gtf/(tm)*vm*vmf*sin(va-vaf))
+        pm.con[:nw][n][:conv_tf_p][i] = @NLconstraint(pm.model, ptf_fr ==  gtf/(tm^2)*vm^2 + -gtf/(tm)*vm*vmf*cos(va-vaf) + -btf/(tm)*vm*vmf*sin(va-vaf))
+        pm.con[:nw][n][:conv_tf_q][i] = @NLconstraint(pm.model, qtf_fr == -btf/(tm^2)*vm^2 +  btf/(tm)*vm*vmf*cos(va-vaf) + -gtf/(tm)*vm*vmf*sin(va-vaf))
+        @NLconstraint(pm.model, ptf_to ==  gtf*vmf^2 + -gtf/(tm)*vmf*vm    *cos(vaf - va)     + -btf/(tm)*vmf*vm    *sin(vaf - va))
+        @NLconstraint(pm.model, qtf_to == -btf*vmf^2 +  btf/(tm)*vmf*vm*    cos(vaf - va)     + -gtf/(tm)*vmf*vm    *sin(vaf - va))
+
     else
         pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf)
         pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, vm/(tm) == vmf)
+        @constraint(pm.model, ptf_fr + ptf_to == 0)
+        @constraint(pm.model, qtf_fr + qtf_to == 0)
     end
 end
 
@@ -79,7 +86,8 @@ end
 function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractACPForm}
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
-
+    ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
+    qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
     #filter voltage
     vmf = pm.var[:nw][n][:vmf][i]
     vaf = pm.var[:nw][n][:vaf][i]
@@ -94,73 +102,31 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
         bc = imag(yc)
         pm.con[:nw][n][:conv_pr_p][i] = @NLconstraint(pm.model, -pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf))
         pm.con[:nw][n][:conv_pr_q][i] = @NLconstraint(pm.model, -qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf))
+        @NLconstraint(pm.model, ppr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac))
+        @NLconstraint(pm.model, qpr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac))
     else
-        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, vac == vaf)
-        pm.con[:nw][n][:conv_pr_q][i] = @constraint(pm.model, vmc == vmf)
+        ppr_to = -pconv_ac
+        qpr_to = -qconv_ac
+        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, ppr_fr + ppr_to == 0)
+        pm.con[:nw][n][:conv_pr_q][i] = @constraint(pm.model, qpr_fr + qpr_to == 0)
+        @constraint(pm.model, vac == vaf)
+        @constraint(pm.model, vmc == vmf)
+
     end
 end
 
-function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, reactor, filter) where {T <: PowerModels.AbstractACPForm}
-    tm = 1 #TODO parse
-    pconv_ac = pm.var[:nw][n][:pconv_ac][i]
-    qconv_ac = pm.var[:nw][n][:qconv_ac][i]
-    pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
-    qconv_grid_ac = pm.var[:nw][n][:qconv_grid_ac][i]
+function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, bv, filter) where {T <: PowerModels.AbstractACPForm}
+    ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
+    qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
+    ptf_to = pm.var[:nw][n][:pconv_grid_ac_to][i]
+    qtf_to = pm.var[:nw][n][:qconv_grid_ac_to][i]
+
     # filter voltage
     vmf = pm.var[:nw][n][:vmf][i]
     vaf = pm.var[:nw][n][:vaf][i]
-    # converter voltage
-    vmc = pm.var[:nw][n][:vmc][i]
-    vac = pm.var[:nw][n][:vac][i]
-    # ac bus voltage
-    vm = pm.var[:nw][n][:vm][acbus]
-    va = pm.var[:nw][n][:va][acbus]
 
-    if transformer && reactor
-        ytf = 1/(rtf + im*xtf)
-        gtf = real(ytf)
-        btf = imag(ytf)
-        yc = 1/(rc + im*xc)
-        gc = real(yc)
-        bc = imag(yc)
-
-        pm.con[:nw][n][:conv_kcl_p][i] = @NLconstraint(pm.model,
-        gtf*vmf^2 + -gtf/(tm)*vmf*vm    *cos(vaf - va)     + -btf/(tm)*vmf*vm    *sin(vaf - va) +
-        gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac) == 0 )
-        pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model,
-        -btf*vmf^2 +  btf/(tm)*vmf*vm*    cos(vaf - va)     + -gtf/(tm)*vmf*vm    *sin(vaf - va) +
-        -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac) +
-        -bv * filter *vmf^2 ==0)
-    elseif !transformer && reactor
-        yc = 1/(rc + im*xc)
-        gc = real(yc)
-        bc = imag(yc)
-
-        pm.con[:nw][n][:conv_kcl_p][i] = @NLconstraint(pm.model,
-        -pconv_grid_ac +
-        gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac) == 0 )
-        pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model,
-        -qconv_grid_ac +
-        -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac) +
-        -bv * filter *vmf^2 ==0)
-    elseif transformer && !reactor
-        ytf = 1/(rtf + im*xtf)
-        gtf = real(ytf)
-        btf = imag(ytf)
-
-        pm.con[:nw][n][:conv_kcl_p][i] = @NLconstraint(pm.model,
-        gtf*vmf^2 + -gtf/(tm)*vmf*vm    *cos(vaf - va)     + -btf/(tm)*vmf*vm    *sin(vaf - va) +
-        pconv_ac == 0 )
-        pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model,
-        -btf*vmf^2 +  btf*vmf*vm*    cos(vaf - va)     + -gtf*vmf*vm    *sin(vaf - va) +
-        qconv_ac +
-        -bv * filter *vmf^2 ==0)
-    elseif !transformer && !reactor
-        pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,
-        -pconv_grid_ac + pconv_ac == 0 )
-        pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model,
-        -qconv_grid_ac + qconv_ac +  -bv * filter *vmf^2 ==0)
-    end
+    pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,   ppr_fr + ptf_to == 0 )
+    pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model, qpr_fr + qtf_to +  (-bv) * filter *vmf^2 ==0)
 end
 
 

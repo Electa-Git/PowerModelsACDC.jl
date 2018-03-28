@@ -28,6 +28,7 @@ function post_acdcpf(pm::GenericPowerModel)
     end
 
     variable_active_dcbranch_flow(pm, bounded = false)
+    variable_dcbranch_current(pm, bounded = false)
     variable_dc_converter(pm, bounded = false)
     variable_dcgrid_voltage_magnitude(pm, bounded = false)
 

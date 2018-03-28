@@ -122,7 +122,7 @@ function constraint_conv_filter(pm::GenericPowerModel, n::Int, i::Int)
         pm.con[:nw][n][:conv_kcl_q] = Dict{Int,ConstraintRef}()
     end
     conv = ref(pm, n, :convdc, i)
-    constraint_conv_filter(pm, n, i, conv["rtf"], conv["xtf"], conv["bf"], conv["rc"], conv["xc"], conv["busac_i"], Bool(conv["transformer"]), Bool(conv["reactor"]), Bool(conv["filter"]) )
+    constraint_conv_filter(pm, n, i, conv["bf"], Bool(conv["filter"]) )
 end
 constraint_conv_filter(pm::GenericPowerModel, i::Int) = constraint_conv_filter(pm, pm.cnw, i::Int)
 

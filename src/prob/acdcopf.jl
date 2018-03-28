@@ -26,9 +26,8 @@ function post_acdcopf(pm::GenericPowerModel)
     end
 
     variable_active_dcbranch_flow(pm)
-
+    variable_dcbranch_current(pm)
     variable_dc_converter(pm)
-
     variable_dcgrid_voltage_magnitude(pm)
 
     objective_min_fuel_cost(pm)
