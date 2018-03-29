@@ -82,7 +82,7 @@ function add_converter_voltage_setpoint(sol, pm::GenericPowerModel{T}) where {T 
 end
 
 
-function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, reactor, filter) where {T <: PowerModels.AbstractWForms}
+function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, bv, filter) where {T <: PowerModels.AbstractWForms}
     ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
     qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
     ptf_to = pm.var[:nw][n][:pconv_grid_ac_to][i]

@@ -7,16 +7,17 @@ p[f_idx] + p[t_idx] == p * g[l] * (wdc[f_bus] - wdcr[f_bus,t_bus])
 ```
 """
 function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, f_bus, t_bus, f_idx, t_idx, g, p) where {T <: PowerModels.AbstractDFForm}
+    l = f_idx[1];
     p_dc_fr = pm.var[:nw][n][:p_dcgrid][f_idx]
     p_dc_to = pm.var[:nw][n][:p_dcgrid][t_idx]
+    ccm_dcgrid = pm.var[:nw][n][:ccm_dcgrid][l]
 
     wdc_fr = pm.var[:nw][n][:wdc][f_bus]
-    wdc_to = pm.var[:nw][n][:wdc][t_bus]
-    wdc_frto = pm.var[:nw][n][:wdcr][(f_bus, t_bus)]
 
-    #TODO change model to include squared current value
-    @constraint(pm.model, p_dc_fr == p * g *  (wdc_fr - wdc_frto))
-    @constraint(pm.model, p_dc_to == p * g *  (wdc_to - wdc_frto))
+    r = 1/g
+
+    @constraint(pm.model, p_dc_fr + p_dc_to == p * r * ccm_dcgrid)
+    @NLconstraint(pm.model, p_dc_fr^2 <= wdc_fr*ccm_dcgrid)
 end
 
 """
@@ -40,13 +41,17 @@ function variable_converter_filter_voltage(pm::GenericPowerModel{T}, n::Int=pm.c
     variable_conv_transformer_current_sqr(pm, n; kwargs...)
 end
 
+function variable_dcbranch_current(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractDFForm}
+    variable_dcbranch_current_sqr(pm, n; kwargs...)
+end
+
 
 function variable_converter_internal_voltage(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractDFForm}
     variable_converter_internal_voltage_magnitude_sqr(pm, n; kwargs...)
     variable_conv_reactor_current_sqr(pm, n; kwargs...)
 end
 
-function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tap, transformer) where {T <: PowerModels.AbstractDFForm}
+function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractDFForm}
     w = pm.var[:nw][n][:w][acbus] # vm^2
     itf = pm.var[:nw][n][:itf_sq][i]
     #filter voltage
@@ -60,14 +65,13 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
     if transformer
         pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, ptf_fr + ptf_to ==  rtf*itf)
         pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, qtf_fr + qtf_to ==  xtf*itf)
-        @NLconstraint(pm.model, ptf_fr^2 + qtf_fr^2 <= w * itf)
-        @constraint(pm.model, wf == w -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf)
+        @NLconstraint(pm.model, ptf_fr^2 + qtf_fr^2 <= w/tm^2 * itf)
+        @constraint(pm.model, wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf)
     else
         pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
         pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
-        @constraint(pm.model, w ==  wf)
+        @constraint(pm.model, wf == w/tm^2 )
     end
-
 end
 
 function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractDFForm}
@@ -94,14 +98,14 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
     end
 end
 
-function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, reactor, filter) where {T <: PowerModels.AbstractDFForm}
+function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, bv, filter) where {T <: PowerModels.AbstractDFForm}
     ptf_to = pm.var[:nw][n][:pconv_grid_ac_to][i]
     qtf_to = pm.var[:nw][n][:qconv_grid_ac_to][i]
     ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
     qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
     wf = pm.var[:nw][n][:wf_ac][i]   # vmf * vmf
-    @constraint(pm.model, ptf_to + ppr_fr         == 0)
-    @constraint(pm.model, qtf_to + qpr_fr + wf*bv == 0)
+    @constraint(pm.model, ptf_to + ppr_fr  == 0)
+    @constraint(pm.model, qtf_to + qpr_fr - filter*wf*bv == 0)
 end
 
 """

@@ -42,7 +42,7 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, i::Int, a
     pm.con[:nw][n][:conv_loss][i] = @constraint(pm.model, pconv_ac + pconv_dc == a + b*pconv_ac )
 end
 
-function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tap, transformer) where {T <: PowerModels.AbstractDCPForm}
+function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractDCPForm}
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
     #filter voltage
     vaf = pm.var[:nw][n][:vaf][i]
@@ -50,9 +50,9 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
     va = pm.var[:nw][n][:va][acbus]
 
     if transformer
-        ytf = 1/(im*xtf)
-        btf = imag(ytf)
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, pconv_grid_ac == -btf*(va-vaf))
+        btf = imag(1/(im*xtf)) # classic DC approach to obtain susceptance form
+        v = 1 # assumption DC approximation
+        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, pconv_grid_ac == -btf*(v^2)/tm*(va-vaf))
     else
         pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf)
     end
@@ -74,7 +74,7 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
     end
 end
 
-function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, bv, rc, xc, acbus, transformer, reactor, filter) where {T <: PowerModels.AbstractDCPForm}
+function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, bv, filter)where {T <: PowerModels.AbstractDCPForm}
     pconv_ac      = pm.var[:nw][n][:pconv_ac][i]
     pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
     pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,  pconv_ac == pconv_grid_ac )
