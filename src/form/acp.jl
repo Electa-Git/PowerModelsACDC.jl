@@ -69,17 +69,27 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
         ytf = 1/(rtf + im*xtf)
         gtf = real(ytf)
         btf = imag(ytf)
-        pm.con[:nw][n][:conv_tf_p][i] = @NLconstraint(pm.model, ptf_fr ==  gtf/(tm^2)*vm^2 + -gtf/(tm)*vm*vmf*cos(va-vaf) + -btf/(tm)*vm*vmf*sin(va-vaf))
-        pm.con[:nw][n][:conv_tf_q][i] = @NLconstraint(pm.model, qtf_fr == -btf/(tm^2)*vm^2 +  btf/(tm)*vm*vmf*cos(va-vaf) + -gtf/(tm)*vm*vmf*sin(va-vaf))
-        @NLconstraint(pm.model, ptf_to ==  gtf*vmf^2 + -gtf/(tm)*vmf*vm    *cos(vaf - va)     + -btf/(tm)*vmf*vm    *sin(vaf - va))
-        @NLconstraint(pm.model, qtf_to == -btf*vmf^2 +  btf/(tm)*vmf*vm*    cos(vaf - va)     + -gtf/(tm)*vmf*vm    *sin(vaf - va))
+        gtf_sh = 0
+        c1, c2, c3, c4 = ac_power_flow_constraints(pm.model, gtf, btf, gtf_sh, vm, vmf, va, vaf, ptf_fr, ptf_to, qtf_fr, qtf_to, tm)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = c1
+        pm.con[:nw][n][:conv_tf_q_fr][i] = c2
 
+        pm.con[:nw][n][:conv_tf_p_to][i] = c3
+        pm.con[:nw][n][:conv_tf_q_to][i] = c4
     else
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf)
-        pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, vm/(tm) == vmf)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, va == vaf)
+        pm.con[:nw][n][:conv_tf_q_fr][i] = @constraint(pm.model, vm/(tm) == vmf)
         @constraint(pm.model, ptf_fr + ptf_to == 0)
         @constraint(pm.model, qtf_fr + qtf_to == 0)
     end
+end
+
+function ac_power_flow_constraints(model, g, b, gsh_fr, vm_fr, vm_to, va_fr, va_to, p_fr, p_to, q_fr, q_to, tm)
+    c1 = @NLconstraint(model, p_fr ==  g/(tm^2)*vm_fr^2 + -g/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -b/(tm)*vm_fr*vm_to*sin(va_fr-va_to))
+    c2 = @NLconstraint(model, q_fr == -b/(tm^2)*vm_fr^2 +  b/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -g/(tm)*vm_fr*vm_to*sin(va_fr-va_to))
+    c3 = @NLconstraint(model, p_to ==  g*vm_to^2 + -g/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -b/(tm)*vm_to*vm_fr    *sin(va_to - va_fr))
+    c4 = @NLconstraint(model, q_to == -b*vm_to^2 +  b/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g/(tm)*vm_to*vm_fr    *sin(va_to - va_fr))
+    return c1, c2, c3, c4
 end
 
 
@@ -134,16 +144,17 @@ end
 Links converter power & current
 
 ```
-pconv_ac[i]^2 + pconv_dc[i]^2 == 3 * vm[i]^2 * iconv_ac[i]^2
+pconv_ac[i]^2 + pconv_dc[i]^2 == vmc[i]^2 * iconv_ac[i]^2
 ```
 """
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, bus_ac, Umax) where {T <: PowerModels.AbstractACPForm}
-    vm = pm.var[:nw][n][:vm][bus_ac]
+function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, Umax) where {T <: PowerModels.AbstractACPForm}
+    vmc = pm.var[:nw][n][:vmc][i]
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
     iconv = pm.var[:nw][n][:iconv_ac][i]
 
-    pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == 3 * vm^2 * iconv^2)
+    #pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == 3 * vm^2 * iconv^2)
+    pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == vmc^2 * iconv^2)
 end
 
 "`vdc[i] == vdcm`"

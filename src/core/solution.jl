@@ -20,6 +20,8 @@ function add_dcconverter_setpoint(sol, pm::GenericPowerModel)
     PowerModels.add_setpoint(sol, pm, "convdc", "qconv", :qconv_ac)
     PowerModels.add_setpoint(sol, pm, "convdc", "pdc", :pconv_dc)
     PowerModels.add_setpoint(sol, pm, "convdc", "iconv", :iconv_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "ptf_fr", :pconv_grid_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "ptf_to", :pconv_grid_ac_to)
     add_converter_voltage_setpoint(sol, pm)
 end
 
@@ -41,7 +43,11 @@ function add_dcconv_losses(sol, pm::GenericPowerModel)
     for (i, convdc) in sol["convdc"]
         pf = convdc["pdc"]
         pt = convdc["pgrid"]
-        sol["convdc"]["$i"]["ploss"] = pf + pt
+        ptf_fr = convdc["ptf_fr"]
+        ptf_to = convdc["ptf_to"]
+        sol["convdc"]["$i"]["ploss_tot"] = pf + pt
+        sol["convdc"]["$i"]["ploss_tf"] = ptf_fr + ptf_to
+        sol["convdc"]["$i"]["ploss_conv"] = sol["convdc"]["$i"]["ploss_tot"] - sol["convdc"]["$i"]["ploss_tf"] # TODO update later with filter etc..
     end
 end
 

@@ -63,13 +63,13 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
     qtf_to = pm.var[:nw][n][:qconv_grid_ac_to][i]
 
     if transformer
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, ptf_fr + ptf_to ==  rtf*itf)
-        pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, qtf_fr + qtf_to ==  xtf*itf)
-        @NLconstraint(pm.model, ptf_fr^2 + qtf_fr^2 <= w/tm^2 * itf)
-        @constraint(pm.model, wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, ptf_fr + ptf_to ==  rtf*itf)
+        pm.con[:nw][n][:conv_tf_q_fr][i] = @constraint(pm.model, qtf_fr + qtf_to ==  xtf*itf)
+        pm.con[:nw][n][:conv_tf_p_to][i] = @NLconstraint(pm.model, ptf_fr^2 + qtf_fr^2 <= w/tm^2 * itf)
+        pm.con[:nw][n][:conv_tf_q_to][i] = @constraint(pm.model, wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf)
     else
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
-        pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
+        pm.con[:nw][n][:conv_tf_q_fr][i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
         @constraint(pm.model, wf == w/tm^2 )
     end
 end
@@ -112,17 +112,19 @@ end
 Links converter power & current
 
 ```
-pconv_ac[i]^2 + pconv_dc[i]^2 <= 3 * wdc[i] * iconv_ac_sq[i]
-pconv_ac[i]^2 + pconv_dc[i]^2 <= 3 * (Umax)^2] * (iconv_ac[i])^2
+pconv_ac[i]^2 + pconv_dc[i]^2 <= wc[i] * iconv_ac_sq[i]
+pconv_ac[i]^2 + pconv_dc[i]^2 <= (Umax)^2 * (iconv_ac[i])^2
 ```
 """
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, bus_ac, Umax) where {T <: PowerModels.AbstractDFForm}
-    wac = pm.var[:nw][n][:w][bus_ac]
+function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, Umax) where {T <: PowerModels.AbstractDFForm}
+    wc = pm.var[:nw][n][:wc_ac][i]
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
     iconv_sq = pm.var[:nw][n][:iconv_ac_sq][i]
     iconv = pm.var[:nw][n][:iconv_ac][i]
 
-    pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model,      pconv_ac^2 + qconv_ac^2 <= 3 * wac * iconv_sq)
-    pm.con[:nw][n][:conv_i_sqrt][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= 3 * (Umax)^2 * iconv^2)
+    pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model,      pconv_ac^2 + qconv_ac^2 <=  wc * iconv_sq)
+    pm.con[:nw][n][:conv_i_sqrt][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= (Umax)^2 * iconv^2)
+    # pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model,      pconv_ac^2 + qconv_ac^2 <= 3 * wac * iconv_sq)
+    # pm.con[:nw][n][:conv_i_sqrt][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= 3 * (Umax)^2 * iconv^2)
 end

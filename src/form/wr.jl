@@ -16,14 +16,14 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
         ytf = 1/(rtf + im*xtf)
         gtf = real(ytf)
         btf = imag(ytf)
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, pconv_grid_ac ==  gtf*w/tm^2 + -gtf*wrf/tm + -btf*wif/tm)
-        pm.con[:nw][n][:conv_tf_q][i] = @constraint(pm.model, qconv_grid_ac == -btf*w/tm^2 +  btf*wrf/tm + -gtf*wif/tm)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, pconv_grid_ac ==  gtf*w/tm^2 + -gtf*wrf/tm + -btf*wif/tm)
+        pm.con[:nw][n][:conv_tf_q_fr][i] = @constraint(pm.model, qconv_grid_ac == -btf*w/tm^2 +  btf*wrf/tm + -gtf*wif/tm)
         #PowerModels.relaxation_complex_product(pm.model, w/tm^2, wf, wrf/tm, wif/tm)
         @constraint(pm.model, (wrf/tm)^2 + (wif/tm)^2 <= wf*w/tm^2)
-        @constraint(pm.model, pconv_grid_ac_to ==  gtf*wf + -gtf*wrf/tm     + -btf*(-wif)/tm)
-        @constraint(pm.model, qconv_grid_ac_to == -btf*wf +  btf*wrf/tm     + -gtf*(-wif)/tm)
+        pm.con[:nw][n][:conv_tf_p_to][i] = @constraint(pm.model, pconv_grid_ac_to ==  gtf*wf + -gtf*wrf/tm     + -btf*(-wif)/tm)
+        pm.con[:nw][n][:conv_tf_q_to][i] = @constraint(pm.model, qconv_grid_ac_to == -btf*wf +  btf*wrf/tm     + -gtf*(-wif)/tm)
     else
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, w/tm^2 ==  wf)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, w/tm^2 ==  wf)
         @constraint(pm.model, wrf ==  wf)
         @constraint(pm.model, wif ==  0)
         @constraint(pm.model, pconv_grid_ac + pconv_grid_ac_to == 0)
@@ -86,17 +86,18 @@ end
 Links converter power & current
 
 ```
-pconv_ac[i]^2 + pconv_dc[i]^2 <= 3 * wdc[i] * iconv_ac_sq[i]
-pconv_ac[i]^2 + pconv_dc[i]^2 <= 3 * (Umax)^2] * (iconv_ac[i])^2
+pconv_ac[i]^2 + pconv_dc[i]^2 <= wc[i] * iconv_ac_sq[i]
+pconv_ac[i]^2 + pconv_dc[i]^2 <= (Umax)^2 * (iconv_ac[i])^2
 ```
 """
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, bus_ac, Umax) where {T <: PowerModels.AbstractWRForm}
-    wac = pm.var[:nw][n][:w][bus_ac]
+function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, Umax) where {T <: PowerModels.AbstractWRForm}
+    wc = pm.var[:nw][n][:wc_ac][i]
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
     iconv_sq = pm.var[:nw][n][:iconv_ac_sq][i]
     iconv = pm.var[:nw][n][:iconv_ac][i]
-
-    pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= 3 * wac * iconv_sq)
-    pm.con[:nw][n][:conv_i_sqrt][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= 3 * (Umax)^2 * iconv^2)
+    # pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= 3 * wac * iconv_sq)
+    # pm.con[:nw][n][:conv_i_sqrt][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= 3 * (Umax)^2 * iconv^2)
+    pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= wc * iconv_sq)
+    pm.con[:nw][n][:conv_i_sqrt][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= (Umax)^2 * iconv^2)
 end

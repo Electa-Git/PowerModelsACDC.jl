@@ -22,7 +22,6 @@ function post_acdcpf(pm::GenericPowerModel)
     PowerModels.variable_branch_flow(pm, bounded = false)
 
     # dirty, should be improved in the future TODO
-    print(typeof(pm) <: PowerModels.SOCDFPowerModel)
     if typeof(pm) <: PowerModels.SOCDFPowerModel
         PowerModels.variable_branch_current(pm, bounded = false)
     end

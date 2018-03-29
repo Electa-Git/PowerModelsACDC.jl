@@ -69,10 +69,10 @@ function constraint_converter_current(pm::GenericPowerModel, n::Int, i::Int)
         pm.con[:nw][n][:conv_i_sqrt] = Dict{Int,ConstraintRef}()
     end
     conv = ref(pm, n, :convdc, i)
-    bus_ac = conv["busac_i"]
-    bus = ref(pm, n, :bus, bus_ac)
-    Vmax = bus["vmax"]
-    constraint_converter_current(pm, n, i, bus_ac, Vmax)
+    bus = ref(pm, n, :bus, conv["busac_i"])
+    tm = 1 # TODO replace when tap in data model
+    Vmax = bus["vmax"] / tm
+    constraint_converter_current(pm, n, i, Vmax)
 end
 constraint_converter_current(pm::GenericPowerModel, i::Int) = constraint_converter_current(pm, pm.cnw, i::Int)
 
@@ -128,8 +128,10 @@ constraint_conv_filter(pm::GenericPowerModel, i::Int) = constraint_conv_filter(p
 
 function constraint_conv_transformer(pm::GenericPowerModel, n::Int, i::Int)
     if !haskey(pm.con[:nw][n], :conv_tf_p)
-        pm.con[:nw][n][:conv_tf_p] = Dict{Int,ConstraintRef}()
-        pm.con[:nw][n][:conv_tf_q] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_tf_p_fr] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_tf_q_fr] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_tf_p_to] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_tf_q_to] = Dict{Int,ConstraintRef}()
     end
     conv = ref(pm, n, :convdc, i)
     tap = 1

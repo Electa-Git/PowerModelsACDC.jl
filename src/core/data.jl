@@ -58,11 +58,8 @@ function to_pu_single_network!(data)
             Ibase = get_pu_bases(MVAbase, kVbase)["I"]
 
             set_conv_pu_power(conv, MVAbase)
-            display(conv["LossA"])
             set_conv_pu_volt(conv, kVbase*sqrt(3))
-            display((conv["index"],conv["LossB"]))
             set_conv_pu_ohm(conv, Zbase)
-            display((conv["index"],conv["LossCinv"]))
         end
     end
     if haskey(data, "branchdc")

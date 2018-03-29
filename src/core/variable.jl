@@ -15,6 +15,8 @@ function variable_dc_converter(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
     variable_converter_to_grid_reactive_power(pm, n; kwargs...)
 end
 
+function variable_dcbranch_current(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
+end
 
 function variable_conv_tranformer_flow(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
     variable_conv_transformer_active_power_to(pm, n; kwargs...)
@@ -53,7 +55,6 @@ function variable_dcgrid_voltage_magnitude_sqr(pm::GenericPowerModel, n::Int=pm.
         upperbound = pm.ref[:nw][n][:busdc][i]["Vdcmax"]^2,
         start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
         )
-        print()
         pm.var[:nw][n][:wdcr] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:buspairsdc])], basename="$(n)_wdcr",
         lowerbound = 0,
@@ -89,6 +90,22 @@ function variable_active_dcbranch_flow(pm::GenericPowerModel, n::Int=pm.cnw; bou
     end
 end
 
+"variable: `ccm_dcgrid[l]` for `(l)` in `branchdc`"
+function variable_dcbranch_current_sqr(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    vpu = 0.9
+    if bounded
+        pm.var[:nw][n][:ccm_dcgrid] = @variable(pm.model,
+        [l in keys(pm.ref[:nw][n][:branchdc])], basename="$(n)_ccm_dcgrid",
+        lowerbound = 0,
+        upperbound = pm.ref[:nw][n][:branchdc][l]["rateA"]/vpu
+        )
+    else
+        pm.var[:nw][n][:ccm_dcgrid] = @variable(pm.model,
+        [l in pm.ref[:nw][n][:branchdc]], basename="$(n)_ccm_dcgrid",
+        start = PowerModels.getstart(pm.ref[:nw][n][:branchdc], l, "p_start", 0.0)/vpu
+        )
+    end
+end
 
 
 "variable: `pconv_ac[j]` for `j` in `convdc`"
@@ -167,7 +184,7 @@ function variable_conv_reactor_active_power_from(pm::GenericPowerModel, n::Int=p
         upperbound =  pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM #TODO derive maximum losses
         )
     else
-        pm.var[:nw][n][:pconv_grid_ac_to] = @variable(pm.model,
+        pm.var[:nw][n][:pconv_pr_from] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_pr_from",
         start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "P_g")
         )
@@ -184,7 +201,7 @@ function variable_conv_reactor_reactive_power_from(pm::GenericPowerModel, n::Int
         upperbound =  pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM #TODO derive maximum losses
         )
     else
-        pm.var[:nw][n][:qconv_grid_ac_to] = @variable(pm.model,
+        pm.var[:nw][n][:qconv_pr_from] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_pr_from",
         start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Q_g")
         )

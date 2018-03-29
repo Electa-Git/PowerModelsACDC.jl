@@ -52,9 +52,9 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
     if transformer
         btf = imag(1/(im*xtf)) # classic DC approach to obtain susceptance form
         v = 1 # assumption DC approximation
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, pconv_grid_ac == -btf*(v^2)/tm*(va-vaf))
+        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, pconv_grid_ac == -btf*(v^2)/tm*(va-vaf))
     else
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, va == vaf)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, va == vaf)
     end
 end
 
@@ -82,7 +82,7 @@ end
 
 
 ""
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, bus_ac, Umax) where {T <: PowerModels.AbstractDCPForm}
+function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, Umax) where {T <: PowerModels.AbstractDCPForm}
     # not used
 end
 
