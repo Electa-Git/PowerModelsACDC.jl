@@ -1,52 +1,6 @@
-################################################################################
-# This file is to defines commonly used constraints for power flow models
-# This will hopefully make everything more compositional
-################################################################################
-
-"""
-Checks that all cost models are present and of the same type
-"""
-function check_cost_models(pm::GenericPowerModel, nws)
-    model = nothing
-
-    for n in nws
-        ref = pm.ref[:nw][n]
-        for (i,gen) in ref[:gen]
-            if haskey(gen, "cost")
-                if model == nothing
-                    model = gen["model"]
-                else
-                    if gen["model"] != model
-                        error("cost models are inconsistent, the typical model is $(model) however model $(gen["model"]) is given on generator $(i)")
-                    end
-                end
-            else
-                error("no cost given for generator $(i)")
-            end
-        end
-        for (i,dcline) in ref[:dcline]
-            if haskey(dcline, "model")
-                if model == nothing
-                    model = dcline["model"]
-                else
-                    if dcline["model"] != model
-                        error("cost models are inconsistent, the typical model is $(model) however model $(dcline["model"]) is given on dcline $(i)")
-                    end
-                end
-            else
-                error("no cost given for dcline $(i)")
-            end
-        end
-    end
-
-    return model
-end
-
-
-
 ""
 function objective_min_fuel_cost(pm::GenericPowerModel, nws=[pm.cnw])
-    model = check_cost_models(pm, nws)
+    model = PowerModels.check_cost_models(pm, nws)
 
     if model == 1
         return objective_min_pwl_fuel_cost(pm, nws)
@@ -58,36 +12,12 @@ function objective_min_fuel_cost(pm::GenericPowerModel, nws=[pm.cnw])
 
 end
 
-
-
-"""
-Checks that all cost models are polynomials, quadratic or less
-"""
-function check_polynomial_cost_models(pm::GenericPowerModel, nws)
-    for n in nws
-        ref = pm.ref[:nw][n]
-        for (i,gen) in ref[:gen]
-            @assert gen["model"] == 2
-            if length(gen["cost"]) > 3
-                error("only cost models of degree 3 or less are supported at this time, given cost model of degree $(length(gen["cost"])) on generator $(i)")
-            end
-        end
-        for (i,dcline) in ref[:dcline]
-            @assert dcline["model"] == 2
-            if length(dcline["cost"]) > 3
-                error("only cost models of degree 3 or less are supported at this time, given cost model of degree $(length(dcline["cost"])) on dcline $(i)")
-            end
-        end
-    end
-end
-
-
 ""
 function objective_min_polynomial_fuel_cost(pm::GenericPowerModel, nws=[pm.cnw])
-    check_polynomial_cost_models(pm, nws)
+    PowerModels.check_polynomial_cost_models(pm, nws)
 
     pg = Dict(n => pm.var[:nw][n][:pg] for n in nws)
-    dc_p = Dict(n => pm.var[:nw][n][:pconv_grid_ac] for n in nws)
+    dc_p = Dict(n => pm.var[:nw][n][:pconv_tf_fr] for n in nws)
 
     from_idx = Dict()
     for n in nws
@@ -105,10 +35,10 @@ end
 
 ""
 function objective_min_polynomial_fuel_cost(pm::GenericPowerModel{T}, nws=[pm.cnw]) where {T <: PowerModels.AbstractConicPowerFormulation}
-    check_polynomial_cost_models(pm, nws)
+    PowerModels.check_polynomial_cost_models(pm, nws)
 
     pg = Dict(n => pm.var[:nw][n][:pg] for n in nws)
-    dc_p = Dict(n => pm.var[:nw][n][:pconv_grid_ac] for n in nws)
+    dc_p = Dict(n => pm.var[:nw][n][:pconv_tf_fr] for n in nws)
 
     from_idx = Dict()
     for n in nws
@@ -147,60 +77,12 @@ function objective_min_polynomial_fuel_cost(pm::GenericPowerModel{T}, nws=[pm.cn
     )
 end
 
-
-
-"""
-compute m and b from points pwl points
-"""
-function slope_intercepts{T <: Real}(points::Array{T,1})
-    line_data = []
-
-    for i in 3:2:length(points)
-        x1 = points[i-2]
-        y1 = points[i-1]
-        x2 = points[i-0]
-        y2 = points[i+1]
-
-        m = (y2 - y1)/(x2 - x1)
-        b = y1 - m * x1
-
-        line = Dict{String,Any}(
-            "slope" => m,
-            "intercept" => b
-        )
-        push!(line_data, line)
-    end
-
-    return line_data
-end
-
-
-"""
-compute lines in m and b from from pwl cost models
-data is a list of components
-"""
-function get_lines(data)
-    lines = Dict{Int,Any}()
-    for (i,comp) in data
-        @assert comp["model"] == 1
-        line_data = slope_intercepts(comp["cost"])
-        lines[i] = line_data
-        for i in 2:length(line_data)
-            if line_data[i-1]["slope"] > line_data[i]["slope"]
-                error("non-convex pwl function found in points $(comp["cost"])\nlines: $(line_data)")
-            end
-        end
-    end
-    return lines
-end
-
-
 ""
 function objective_min_pwl_fuel_cost(pm::GenericPowerModel, nws=[pm.cnw])
-    #check_polynomial_cost_models(pm, nws)
+    PowerModels.check_polynomial_cost_models(pm, nws)
 
     pg = Dict(n => pm.var[:nw][n][:pg] for n in nws)
-    dc_p = Dict(n => pm.var[:nw][n][:pconv_grid_ac] for n in nws)
+    dc_p = Dict(n => pm.var[:nw][n][:pconv_tf_fr] for n in nws)
 
     pg_cost = Dict()
     dc_p_cost = Dict()
@@ -210,7 +92,7 @@ function objective_min_pwl_fuel_cost(pm::GenericPowerModel, nws=[pm.cnw])
         )
 
         # pwl cost
-        gen_lines = get_lines(pm.ref[:nw][n][:gen])
+        gen_lines = PowerModels.get_lines(pm.ref[:nw][n][:gen])
         for (i, gen) in pm.ref[:nw][n][:gen]
             for line in gen_lines[i]
                 @constraint(pm.model, pg_cost[n][i] >= line["slope"]*pg[n][i] + line["intercept"])
@@ -222,7 +104,7 @@ function objective_min_pwl_fuel_cost(pm::GenericPowerModel, nws=[pm.cnw])
         )
 
         # pwl cost
-        dcline_lines = get_lines(pm.ref[:nw][n][:dcline])
+        dcline_lines = PowerModels.get_lines(pm.ref[:nw][n][:dcline])
         for (i, dcline) in pm.ref[:nw][n][:dcline]
             for line in dcline_lines[i]
                 @constraint(pm.model, dc_p_cost[n][i] >= line["slope"]*dc_p[n][i] + line["intercept"])
@@ -248,15 +130,15 @@ function objective_min_pwl_fuel_cost(pm::GenericPowerModel, nws=[pm.cnw])
     )
 end
 
-
-"Cost of building branches"
-function objective_tnep_cost(pm::GenericPowerModel, nws=[pm.cnw])
-    branch_ne = Dict(n => pm.var[:nw][n][:branch_ne] for n in nws)
-    branches = Dict(n => pm.ref[:nw][n][:ne_branch] for n in nws)
-
-    return @objective(pm.model, Min,
-        sum(
-            sum( branch["construction_cost"]*branch_ne[n][i] for (i,branch) in branches[n])
-        for n in nws)
-    )
-end
+#
+# "Cost of building branches"
+# function objective_tnep_cost(pm::GenericPowerModel, nws=[pm.cnw])
+#     branch_ne = Dict(n => pm.var[:nw][n][:branch_ne] for n in nws)
+#     branches = Dict(n => pm.ref[:nw][n][:ne_branch] for n in nws)
+#
+#     return @objective(pm.model, Min,
+#         sum(
+#             sum( branch["construction_cost"]*branch_ne[n][i] for (i,branch) in branches[n])
+#         for n in nws)
+#     )
+# end

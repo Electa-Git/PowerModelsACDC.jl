@@ -7,7 +7,8 @@ using SCS
 file = "./test/data/case5_acdc.m"
 file1 ="./test/data/case5_dc.m"
 file2 = "./test/data/case24_3zones_acdc.m"
-data = PowerModels.parse_file(file1)
+#file = file2
+data = PowerModels.parse_file(file)
 PowerModelsACDC.process_additional_data!(data)
 #display(data)
 #scs = SCSSolver(max_iters=100000, verbose=0);
@@ -30,11 +31,11 @@ resultSDP = run_acdcopf(file, SDPWRMPowerModel, scs; setting = s)
 resultDC = run_acdcopf(file, DCPPowerModel, ipopt; setting = s)
 #
 # other tests
-resultACPF = run_acdcpf(file2, ACPPowerModel, IpoptSolver(); setting = s)
+resultACPF = run_acdcpf(file2, ACPPowerModel, ipopt; setting = s)
 
-resultAConlyAC = run_opf(file, ACPPowerModel, IpoptSolver(); setting = s)
+resultAConlyAC = run_opf(file, ACPPowerModel, ipopt; setting = s)
 
-resultSOCBIMonlyAC = run_opf(file, SOCWRPowerModel, IpoptSolver(); setting = s)
+resultSOCBIMonlyAC = run_opf(file, SOCWRPowerModel, ipopt; setting = s)
 
 # matpower style dc line
 resultDCMP = run_acdcopf(file1, DCPPowerModel, ipopt; setting = s)

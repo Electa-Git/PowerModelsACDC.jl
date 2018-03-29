@@ -1,8 +1,8 @@
 function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractWRMForm}
-    pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac][i]
-    qconv_grid_ac = pm.var[:nw][n][:qconv_grid_ac][i]
-    pconv_grid_ac_to = pm.var[:nw][n][:pconv_grid_ac_to][i]
-    qconv_grid_ac_to = pm.var[:nw][n][:qconv_grid_ac_to][i]
+    ptf_fr = pm.var[:nw][n][:pconv_tf_fr][i]
+    qtf_fr = pm.var[:nw][n][:qconv_tf_fr][i]
+    ptf_to = pm.var[:nw][n][:pconv_tf_to][i]
+    qtf_to = pm.var[:nw][n][:qconv_tf_to][i]
 
     #ac bus voltage
     w = pm.var[:nw][n][:w][acbus] # vm^2
@@ -16,24 +16,26 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
         ytf = 1/(rtf + im*xtf)
         gtf = real(ytf)
         btf = imag(ytf)
-        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, pconv_grid_ac ==  gtf*w/tm^2 + -gtf*wrf/tm + -btf*wif/tm)
-        pm.con[:nw][n][:conv_tf_q_fr][i] = @constraint(pm.model, qconv_grid_ac == -btf*w/tm^2 +  btf*wrf/tm + -gtf*wif/tm)
+        c1, c2, c3, c4 = ac_power_flow_constraints_w(pm.model, gtf, btf, w, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to, tm)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = c1
+        pm.con[:nw][n][:conv_tf_q_fr][i] = c2
+        pm.con[:nw][n][:conv_tf_p_to][i] = c3
+        pm.con[:nw][n][:conv_tf_q_to][i] = c4
+
         @constraint(pm.model, norm([ 2*wrf/tm;  2*wif/tm; w/tm^2-wf ]) <= w/tm^2+wf )
 
-        pm.con[:nw][n][:conv_tf_p_to][i] = @constraint(pm.model, pconv_grid_ac_to ==  gtf*wf + -gtf*wrf/tm     + -btf*(-wif)/tm)
-        pm.con[:nw][n][:conv_tf_q_to][i] = @constraint(pm.model, qconv_grid_ac_to == -btf*wf +  btf*wrf/tm     + -gtf*(-wif)/tm)
     else
-        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, w/tm^2 ==  wf)
+        @constraint(pm.model, w/tm^2 ==  wf)
         @constraint(pm.model, wrf ==  wf)
         @constraint(pm.model, wif ==  0)
-        @constraint(pm.model, pconv_grid_ac + pconv_grid_ac_to == 0)
-        @constraint(pm.model, qconv_grid_ac + qconv_grid_ac_to == 0)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
+        pm.con[:nw][n][:conv_tf_q_to][i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
     end
 end
 
 function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractWRMForm}
-    ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
-    qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
+    ppr_fr = pm.var[:nw][n][:pconv_pr_fr][i]
+    qpr_fr = pm.var[:nw][n][:qconv_pr_fr][i]
     ppr_to = -pm.var[:nw][n][:pconv_ac][i]
     qpr_to = -pm.var[:nw][n][:qconv_ac][i]
 
@@ -51,14 +53,10 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)
-        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, ppr_to == gc*wc + -gc*wrc + -bc*wic)
-        pm.con[:nw][n][:conv_pr_q][i] = @constraint(pm.model, qpr_to ==-bc*wc +  bc*wrc + -gc*wic)
-        # PowerModels.relaxation_complex_product(pm.model, wf, wc, wrc, wic)
+        c1, c2, c3, c4 = ac_power_flow_constraints_w(pm.model, gc, bc, wf, wc, wrc, wic, ppr_fr, ppr_to, qpr_fr, qpr_to, 1)
         @constraint(pm.model, norm([ 2*wrc;  2*wic; wf-wc ]) <= wf+wc )
-        @constraint(pm.model, ppr_fr ==  gc *wf + -gc *wrc     + -bc *(-wic))
-        @constraint(pm.model, qpr_fr == -bc *wf +  bc *wrc     + -gc *(-wic))
     else
-        pm.con[:nw][n][:conv_tf_p][i] = @constraint(pm.model, wc ==  wf)
+        @constraint(pm.model, wc ==  wf)
         @constraint(pm.model, wrc ==  wc)
         @constraint(pm.model, wic ==  0)
         @constraint(pm.model, ppr_fr + ppr_to == 0)
