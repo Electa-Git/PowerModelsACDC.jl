@@ -78,7 +78,7 @@ function post_acdcpf(pm::GenericPowerModel)
         constraint_conv_filter(pm, c)
         if conv["type_dc"] == 2
             constraint_dc_voltage_magnitude_setpoint(pm, c)
-            constraint_reactive_conv_setpoint(pm, c)
+            # constraint_reactive_conv_setpoint(pm, c)
         else
             if conv["type_ac"] == 2
                 constraint_active_conv_setpoint(pm, c)

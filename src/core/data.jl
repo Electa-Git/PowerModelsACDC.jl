@@ -5,7 +5,9 @@ function get_pu_bases(MVAbase, kVbase)
 
     Sbase = MVAbase * 1e6
     Vbase = kVbase  * 1e3
-    Zbase = (Vbase)^2 / (Sbase)
+    #Zbase = (Vbase)^2 / (Sbase) # TODO
+    kAbase = MVAbase / (sqrt(3) * kVbase)
+    Zbase = 1/(kAbase^2 / MVAbase)
     Ibase = (Sbase)   / (Vbase)
     timebase = hourbase*3600
     Ebase = Sbase * timebase
@@ -51,13 +53,16 @@ function to_pu_single_network!(data)
     if haskey(data, "convdc")
         for (i, conv) in data["convdc"]
             dcbus = conv["busdc_i"]
-            kVbase = data["busdc"]["$dcbus"]["basekVdc"]
+            kVbase = conv["basekVac"]
             Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
             Ibase = get_pu_bases(MVAbase, kVbase)["I"]
 
             set_conv_pu_power(conv, MVAbase)
-            set_conv_pu_volt(conv, kVbase)
+            display(conv["LossA"])
+            set_conv_pu_volt(conv, kVbase*sqrt(3))
+            display((conv["index"],conv["LossB"]))
             set_conv_pu_ohm(conv, Zbase)
+            display((conv["index"],conv["LossCinv"]))
         end
     end
     if haskey(data, "branchdc")
@@ -218,12 +223,12 @@ function set_conv_pu_power(conv, MVAbase)
 end
 
 function set_conv_pu_volt(conv, kVbase)
-    rescale_volt = x -> x/kVbase
+    rescale_volt = x -> x  / (kVbase)
     PowerModels.apply_func(conv, "LossB", rescale_volt)
 end
 
 function set_conv_pu_ohm(conv, Zbase)
-    rescale_ohm = x -> x/Zbase
+    rescale_ohm = x -> x / Zbase
     PowerModels.apply_func(conv, "LossCrec", rescale_ohm)
     PowerModels.apply_func(conv, "LossCinv", rescale_ohm)
 end

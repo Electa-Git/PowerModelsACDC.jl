@@ -243,15 +243,23 @@ function variable_dcside_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = t
     end
 end
 
+# "variable: `iconv_ac[j]` for `j` in `convdc`"
+# function variable_acside_current(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+#     pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
+#     [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_ac",
+#     lowerbound = 0,
+#     upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacmax"]^2) / sqrt(3) # assuming rated voltage = 1pu
+#     )
+# end
+
 "variable: `iconv_ac[j]` for `j` in `convdc`"
 function variable_acside_current(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
     pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
     [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_ac",
     lowerbound = 0,
-    upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacmax"]^2) / sqrt(3) # assuming rated voltage = 1pu
+    upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacmax"]^2) # assuming rated voltage = 1pu
     )
 end
-
 
 "variable: `iconv_ac[j]` and `iconv_ac_sq[j]` for `j` in `convdc`"
 function variable_acside_current(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true) where {T <: PowerModels.AbstractWForms}
@@ -266,8 +274,6 @@ function variable_acside_current(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounde
     upperbound = (pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacrated"]^2) / (3) # assuming rated voltage = 1pu
     )
 end
-
-
 
 "variable: `itf_sq[j]` for `j` in `convdc`"
 function variable_conv_transformer_current_sqr(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true) where {T <: PowerModels.AbstractWForms}
