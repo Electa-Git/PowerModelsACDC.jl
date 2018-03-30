@@ -7,6 +7,7 @@ using SCS
 file_case5acdc = "./test/data/case5_acdc.m"
 file_case5dc ="./test/data/case5_dc.m"
 file_case24 = "./test/data/case24_3zones_acdc.m"
+file_case39 = "./test/data/case39_acdc.m"
 file = file_case5acdc
 data = PowerModels.parse_file(file_case24)
 PowerModelsACDC.process_additional_data!(data)
@@ -33,6 +34,7 @@ resultDC = run_acdcopf(file, DCPPowerModel, ipopt; setting = s)
 # other tests
 resultACPF24 = run_acdcpf(file_case24, ACPPowerModel, ipopt; setting = s)
 resultACPF5 = run_acdcpf(file_case5acdc, ACPPowerModel, ipopt; setting = s)
+resultAC39 = run_acdcopf(file_case39, ACPPowerModel, ipopt; setting = s)
 
 resultAConlyAC = run_opf(file, ACPPowerModel, ipopt; setting = s)
 
