@@ -22,13 +22,15 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
         pm.con[:nw][n][:conv_tf_p_to][i] = c3
         pm.con[:nw][n][:conv_tf_q_to][i] = c4
 
-        @constraint(pm.model, (wrf/tm)^2 + (wif/tm)^2 <= wf*w/tm^2)
+        @constraint(pm.model, (wrf)^2 + (wif)^2 <= wf*w)
     else
-        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, w/tm^2 ==  wf)
-        @constraint(pm.model, wrf ==  wf)
-        @constraint(pm.model, wif ==  0)
-        @constraint(pm.model, ptf_fr + ptf_to == 0)
-        @constraint(pm.model, qtf_fr + qtf_to == 0)
+        pcon, qcon = constraint_lossless_section(pm, w/tm^2, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to)
+
+        # pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, w/tm^2 ==  wf)
+        # @constraint(pm.model, wrf ==  wf)
+        # @constraint(pm.model, wif ==  0)
+        # @constraint(pm.model, ptf_fr + ptf_to == 0)
+        # @constraint(pm.model, qtf_fr + qtf_to == 0)
     end
 end
 
@@ -66,11 +68,14 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
         pm.con[:nw][n][:conv_pr_p][i] = c1
         pm.con[:nw][n][:conv_pr_q][i] = c2
     else
-        @constraint(pm.model, wc ==  wf)
-        @constraint(pm.model, wrc ==  wc)
-        @constraint(pm.model, wic ==  0)
-        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, ppr_fr + ppr_to == 0)
-        pm.con[:nw][n][:conv_pr_q][i] = @constraint(pm.model, qpr_fr + qpr_to == 0)
+        pcon, qcon = constraint_lossless_section(pm, wf, wc, wrc, wic, ppr_fr, ppr_to, qpr_fr, qpr_to)
+        # @constraint(pm.model, wc ==  wf)
+        # @constraint(pm.model, wrc ==  wc)
+        # @constraint(pm.model, wic ==  0)
+        # pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, ppr_fr + ppr_to == 0)
+        # pm.con[:nw][n][:conv_pr_q][i] = @constraint(pm.model, qpr_fr + qpr_to == 0)
+        pm.con[:nw][n][:conv_pr_p][i] = pcon
+        pm.con[:nw][n][:conv_pr_q][i] = qcon
     end
 end
 

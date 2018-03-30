@@ -22,14 +22,16 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
         pm.con[:nw][n][:conv_tf_p_to][i] = c3
         pm.con[:nw][n][:conv_tf_q_to][i] = c4
 
-        @constraint(pm.model, norm([ 2*wrf/tm;  2*wif/tm; w/tm^2-wf ]) <= w/tm^2+wf )
+        @constraint(pm.model, norm([ 2*wrf;  2*wif; w-wf ]) <= w+wf )
 
     else
-        @constraint(pm.model, w/tm^2 ==  wf)
-        @constraint(pm.model, wrf ==  wf)
-        @constraint(pm.model, wif ==  0)
-        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
-        pm.con[:nw][n][:conv_tf_q_to][i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
+        pcon, qcon = constraint_lossless_section(pm, w/tm^2, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to)
+        #
+        # @constraint(pm.model, w/tm^2 ==  wf)
+        # @constraint(pm.model, wrf ==  wf)
+        # @constraint(pm.model, wif ==  0)
+        # pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
+        # pm.con[:nw][n][:conv_tf_q_to][i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
     end
 end
 
@@ -56,11 +58,13 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
         c1, c2, c3, c4 = ac_power_flow_constraints_w(pm.model, gc, bc, wf, wc, wrc, wic, ppr_fr, ppr_to, qpr_fr, qpr_to, 1)
         @constraint(pm.model, norm([ 2*wrc;  2*wic; wf-wc ]) <= wf+wc )
     else
-        @constraint(pm.model, wc ==  wf)
-        @constraint(pm.model, wrc ==  wc)
-        @constraint(pm.model, wic ==  0)
-        @constraint(pm.model, ppr_fr + ppr_to == 0)
-        @constraint(pm.model, qpr_fr + qpr_to == 0)
+        pcon, qcon = constraint_lossless_section(pm, wf, wc, wrc, wic, ppr_fr, ppr_to, qpr_fr, qpr_to)
+        #
+        # @constraint(pm.model, wc ==  wf)
+        # @constraint(pm.model, wrc ==  wc)
+        # @constraint(pm.model, wic ==  0)
+        # @constraint(pm.model, ppr_fr + ppr_to == 0)
+        # @constraint(pm.model, qpr_fr + qpr_to == 0)
     end
 end
 
@@ -98,6 +102,4 @@ function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, 
     iconv = pm.var[:nw][n][:iconv_ac][i]
     pm.con[:nw][n][:conv_i][i] = @constraint(pm.model, norm([2pconv_ac;2qconv_ac; (wc-iconv_sq)]) <= (wc+iconv_sq))
     pm.con[:nw][n][:conv_i_sqrt][i] = @constraint(pm.model, norm([pconv_ac;qconv_ac]) <= (Umax* iconv))
-    # pm.con[:nw][n][:conv_i][i] = @constraint(pm.model, norm([2pconv_ac;2qconv_ac; 3*(wac-iconv_sq)]) <= 3 *(wac+iconv_sq))
-    # pm.con[:nw][n][:conv_i_sqrt][i] = @constraint(pm.model, norm([pconv_ac;qconv_ac]) <= sqrt(3 *(Umax)^2)* iconv)
 end

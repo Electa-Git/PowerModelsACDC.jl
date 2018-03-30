@@ -93,3 +93,13 @@ function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, bv, fi
     pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model, ppr_fr + ptf_to == 0 )
     pm.con[:nw][n][:conv_kcl_q][i] = @constraint(pm.model, qpr_fr + qtf_to + -bv*filter*wf == 0)
 end
+
+function constraint_lossless_section(pm, w_fr, w_to, wr, wi, p_fr, p_to, q_fr, q_to) where {T <: PowerModels.AbstractWForms}
+    @constraint(pm.model, w_fr ==  w_to)
+    @constraint(pm.model, wr   ==  w_fr)
+    @constraint(pm.model, wi   ==  0)
+
+    pcon = @constraint(pm.model, p_fr + p_to == 0)
+    qcon = @constraint(pm.model, q_fr + q_to == 0)
+    return pcon, qcon
+end
