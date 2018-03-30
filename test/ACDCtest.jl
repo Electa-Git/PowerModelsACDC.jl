@@ -31,12 +31,20 @@ resultSDP = run_acdcopf(file_case5acdc, SDPWRMPowerModel, scs; setting = s)
 resultDC = run_acdcopf(file_case5acdc, DCPPowerModel, ipopt; setting = s)
 #
 # other tests
+<<<<<<< HEAD
 resultACPF_24 = run_acdcpf(file_case24, ACPPowerModel, IpoptSolver(); setting = s)
 resultACPF_9 = run_acdcopf(file_case9, ACPPowerModel, IpoptSolver(); setting = s)
 
 resultAConlyAC = run_opf(file_case5acdc, ACPPowerModel, IpoptSolver(); setting = s)
 
 resultSOCBIMonlyAC = run_opf(file_case5acdc, SOCWRPowerModel, IpoptSolver(); setting = s)
+=======
+resultACPF = run_acdcpf(file2, ACPPowerModel, ipopt; setting = s)
+
+resultAConlyAC = run_opf(file, ACPPowerModel, ipopt; setting = s)
+
+resultSOCBIMonlyAC = run_opf(file, SOCWRPowerModel, ipopt; setting = s)
+>>>>>>> 4291f9ea559301132b245ad5dec7975492f79f1d
 
 # matpower style dc line
 resultDCMP = run_acdcopf(file_case5dc, DCPPowerModel, ipopt; setting = s)

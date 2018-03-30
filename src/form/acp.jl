@@ -10,8 +10,8 @@ function constraint_kcl_shunt(pm::GenericPowerModel{T}, n::Int, i::Int, bus_arcs
     q = pm.var[:nw][n][:q]
     pg = pm.var[:nw][n][:pg]
     qg = pm.var[:nw][n][:qg]
-    pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac]
-    qconv_grid_ac = pm.var[:nw][n][:qconv_grid_ac]
+    pconv_grid_ac = pm.var[:nw][n][:pconv_tf_fr]
+    qconv_grid_ac = pm.var[:nw][n][:qconv_tf_fr]
 
     pm.con[:nw][n][:kcl_p][i] = @NLconstraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - pd - gs*vm^2)
     pm.con[:nw][n][:kcl_q][i] = @NLconstraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - qd + bs*vm^2)
@@ -77,10 +77,10 @@ end
 
 
 function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractACPForm}
-    ptf_fr = pm.var[:nw][n][:pconv_grid_ac][i]
-    qtf_fr = pm.var[:nw][n][:qconv_grid_ac][i]
-    ptf_to = pm.var[:nw][n][:pconv_grid_ac_to][i]
-    qtf_to = pm.var[:nw][n][:qconv_grid_ac_to][i]
+    ptf_fr = pm.var[:nw][n][:pconv_tf_fr][i]
+    qtf_fr = pm.var[:nw][n][:qconv_tf_fr][i]
+    ptf_to = pm.var[:nw][n][:pconv_tf_to][i]
+    qtf_to = pm.var[:nw][n][:qconv_tf_to][i]
 
     # ac bus voltage
     vm = pm.var[:nw][n][:vm][acbus]
@@ -102,13 +102,14 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
         pm.con[:nw][n][:conv_tf_p_to][i] = c3
         pm.con[:nw][n][:conv_tf_q_to][i] = c4
     else
-        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, va == vaf)
-        pm.con[:nw][n][:conv_tf_q_fr][i] = @constraint(pm.model, vm/(tm) == vmf)
-        @constraint(pm.model, ptf_fr + ptf_to == 0)
-        @constraint(pm.model, qtf_fr + qtf_to == 0)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
+        pm.con[:nw][n][:conv_tf_q_fr][i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
+        @constraint(pm.model, va == vaf)
+        @constraint(pm.model, vm/(tm) == vmf)
     end
 end
 
+"constraints for a voltage magnitude transformer + series impedance"
 function ac_power_flow_constraints(model, g, b, gsh_fr, vm_fr, vm_to, va_fr, va_to, p_fr, p_to, q_fr, q_to, tm)
     c1 = @NLconstraint(model, p_fr ==  g/(tm^2)*vm_fr^2 + -g/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -b/(tm)*vm_fr*vm_to*sin(va_fr-va_to))
     c2 = @NLconstraint(model, q_fr == -b/(tm^2)*vm_fr^2 +  b/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -g/(tm)*vm_fr*vm_to*sin(va_fr-va_to))
@@ -121,8 +122,8 @@ end
 function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractACPForm}
     pconv_ac = pm.var[:nw][n][:pconv_ac][i]
     qconv_ac = pm.var[:nw][n][:qconv_ac][i]
-    ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
-    qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
+    ppr_fr = pm.var[:nw][n][:pconv_pr_fr][i]
+    qpr_fr = pm.var[:nw][n][:qconv_pr_fr][i]
     #filter voltage
     vmf = pm.var[:nw][n][:vmf][i]
     vaf = pm.var[:nw][n][:vaf][i]
@@ -151,15 +152,38 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
 end
 
 function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, bv, filter) where {T <: PowerModels.AbstractACPForm}
-    ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
-    qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
-    ptf_to = pm.var[:nw][n][:pconv_grid_ac_to][i]
-    qtf_to = pm.var[:nw][n][:qconv_grid_ac_to][i]
+    ppr_fr = pm.var[:nw][n][:pconv_pr_fr][i]
+    qpr_fr = pm.var[:nw][n][:qconv_pr_fr][i]
+    ptf_to = pm.var[:nw][n][:pconv_tf_to][i]
+    qtf_to = pm.var[:nw][n][:qconv_tf_to][i]
 
     # filter voltage
     vmf = pm.var[:nw][n][:vmf][i]
     vaf = pm.var[:nw][n][:vaf][i]
 
     pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,   ppr_fr + ptf_to == 0 )
-    pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model, qpr_fr + qtf_to +  (-bv) * filter *vmf^2 ==0)
+    pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model, qpr_fr + qtf_to +  (-bv) * filter *vmf^2 == 0)
+end
+
+
+"""
+Links converter power & current
+
+```
+pconv_ac[i]^2 + pconv_dc[i]^2 == vmc[i]^2 * iconv_ac[i]^2
+```
+"""
+function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, Umax) where {T <: PowerModels.AbstractACPForm}
+    vmc = pm.var[:nw][n][:vmc][i]
+    pconv_ac = pm.var[:nw][n][:pconv_ac][i]
+    qconv_ac = pm.var[:nw][n][:qconv_ac][i]
+    iconv = pm.var[:nw][n][:iconv_ac][i]
+
+    pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == vmc^2 * iconv^2)
+end
+
+"`vdc[i] == vdcm`"
+function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel{T}, n::Int, i, vdcm) where {T <: PowerModels.AbstractACPForm}
+    v = pm.var[:nw][n][:vdcm][i]
+    pm.con[:nw][n][:v_dc][i] = @constraint(pm.model, v == vdcm)
 end

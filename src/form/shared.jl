@@ -24,8 +24,8 @@ function constraint_kcl_shunt(pm::GenericPowerModel{T}, n::Int, i::Int, bus_arcs
     q = pm.var[:nw][n][:q]
     pg = pm.var[:nw][n][:pg]
     qg = pm.var[:nw][n][:qg]
-    pconv_grid_ac = pm.var[:nw][n][:pconv_grid_ac]
-    qconv_grid_ac = pm.var[:nw][n][:qconv_grid_ac]
+    pconv_grid_ac = pm.var[:nw][n][:pconv_tf_fr]
+    qconv_grid_ac = pm.var[:nw][n][:qconv_tf_fr]
 
     pm.con[:nw][n][:kcl_p][i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - pd  - gs*w)
     pm.con[:nw][n][:kcl_q][i] = @constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - qd  + bs*w)
@@ -83,13 +83,13 @@ end
 
 
 function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, bv, filter) where {T <: PowerModels.AbstractWForms}
-    ppr_fr = pm.var[:nw][n][:pconv_pr_from][i]
-    qpr_fr = pm.var[:nw][n][:qconv_pr_from][i]
-    ptf_to = pm.var[:nw][n][:pconv_grid_ac_to][i]
-    qtf_to = pm.var[:nw][n][:qconv_grid_ac_to][i]
+    ppr_fr = pm.var[:nw][n][:pconv_pr_fr][i]
+    qpr_fr = pm.var[:nw][n][:qconv_pr_fr][i]
+    ptf_to = pm.var[:nw][n][:pconv_tf_to][i]
+    qtf_to = pm.var[:nw][n][:qconv_tf_to][i]
 
-    wf_ac = pm.var[:nw][n][:wf_ac][i]   # vmf * vmf
+    wf = pm.var[:nw][n][:wf_ac][i]   # vmf * vmf
 
     pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model, ppr_fr + ptf_to == 0 )
-    pm.con[:nw][n][:conv_kcl_q][i] = @constraint(pm.model, qpr_fr + qtf_to + -bv*filter*wf_ac == 0)
+    pm.con[:nw][n][:conv_kcl_q][i] = @constraint(pm.model, qpr_fr + qtf_to + -bv*filter*wf == 0)
 end

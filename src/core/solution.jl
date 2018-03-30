@@ -14,14 +14,14 @@ end
 
 function add_dcconverter_setpoint(sol, pm::GenericPowerModel)
     mva_base = pm.data["baseMVA"]
-    PowerModels.add_setpoint(sol, pm, "convdc", "pgrid", :pconv_grid_ac)
-    PowerModels.add_setpoint(sol, pm, "convdc", "qgrid", :qconv_grid_ac)
+    PowerModels.add_setpoint(sol, pm, "convdc", "pgrid", :pconv_tf_fr)
+    PowerModels.add_setpoint(sol, pm, "convdc", "qgrid", :qconv_tf_fr)
     PowerModels.add_setpoint(sol, pm, "convdc", "pconv", :pconv_ac)
     PowerModels.add_setpoint(sol, pm, "convdc", "qconv", :qconv_ac)
     PowerModels.add_setpoint(sol, pm, "convdc", "pdc", :pconv_dc)
     PowerModels.add_setpoint(sol, pm, "convdc", "iconv", :iconv_ac)
-    PowerModels.add_setpoint(sol, pm, "convdc", "ptf_fr", :pconv_grid_ac)
-    PowerModels.add_setpoint(sol, pm, "convdc", "ptf_to", :pconv_grid_ac_to)
+    PowerModels.add_setpoint(sol, pm, "convdc", "ptf_fr", :pconv_tf_fr)
+    PowerModels.add_setpoint(sol, pm, "convdc", "ptf_to", :pconv_tf_to)
     add_converter_voltage_setpoint(sol, pm)
 end
 
