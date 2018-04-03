@@ -131,55 +131,63 @@ end
 
 function find_all_ac_grids(branches_ac, buses_ac)
     ACgrids = Dict{String, Any}()
-    ACgrids["1"] = Dict{String, Any}()
-    ACgrids["1"]["Buses"] = [branches_ac[1]["f_bus"] branches_ac[1]["t_bus"]]
-    closed_buses = [branches_ac[1]["f_bus"] branches_ac[1]["t_bus"]]
-    closed_branches = [1]
-    connections = []
-    buses = []
-    for (i, bus) in buses_ac
-        buses = cat(1,buses,bus["index"])
-    end
-    grid_id = 1
-    iter_id = 1
-    branch_iter = 1
-    while length(closed_buses) != length(buses) && iter_id < 10
-        while branch_iter <= length(branches_ac)
-            for (i, branch) in branches_ac
-                for (index, grid) in ACgrids
-                    if (branch["t_bus"] in grid["Buses"]) && (branch["f_bus"] in grid["Buses"])
-                        if !(branch["index"] in closed_branches)
-                            closed_branches = [closed_branches branch["index"]]
-                        end
-                    elseif (branch["f_bus"] in grid["Buses"])
-                        if !(branch["t_bus"] in grid["Buses"])
-                            ACgrids["$index"]["Buses"] = [grid["Buses"] branch["t_bus"]]
-                            closed_buses = [closed_buses branch["t_bus"]]
-                            closed_branches = [closed_branches branch["index"]]
-                        end
-                    elseif (branch["t_bus"] in grid["Buses"])
-                        if !(branch["f_bus"] in grid["Buses"])
-                            ACgrids["$index"]["Buses"] = [grid["Buses"] branch["f_bus"]]
-                            closed_buses = [closed_buses branch["f_bus"]]
-                            closed_branches = [closed_branches branch["index"]]
+
+    if isempty(branches_ac)
+        for (i, bus) in buses_ac
+            ACgrids["$i"] = Dict{String, Any}()
+            ACgrids["$i"]["Buses"] = bus["index"]
+        end
+    else
+        ACgrids["1"] = Dict{String, Any}()
+        ACgrids["1"]["Buses"] = [branches_ac[1]["f_bus"] branches_ac[1]["t_bus"]]
+        closed_buses = [branches_ac[1]["f_bus"] branches_ac[1]["t_bus"]]
+        closed_branches = [1]
+        connections = []
+        buses = []
+        for (i, bus) in buses_ac
+            buses = cat(1,buses,bus["index"])
+        end
+        grid_id = 1
+        iter_id = 1
+        branch_iter = 1
+        while length(closed_buses) != length(buses) && iter_id < 10
+            while branch_iter <= length(branches_ac)
+                for (i, branch) in branches_ac
+                    for (index, grid) in ACgrids
+                        if (branch["t_bus"] in grid["Buses"]) && (branch["f_bus"] in grid["Buses"])
+                            if !(branch["index"] in closed_branches)
+                                closed_branches = [closed_branches branch["index"]]
+                            end
+                        elseif (branch["f_bus"] in grid["Buses"])
+                            if !(branch["t_bus"] in grid["Buses"])
+                                ACgrids["$index"]["Buses"] = [grid["Buses"] branch["t_bus"]]
+                                closed_buses = [closed_buses branch["t_bus"]]
+                                closed_branches = [closed_branches branch["index"]]
+                            end
+                        elseif (branch["t_bus"] in grid["Buses"])
+                            if !(branch["f_bus"] in grid["Buses"])
+                                ACgrids["$index"]["Buses"] = [grid["Buses"] branch["f_bus"]]
+                                closed_buses = [closed_buses branch["f_bus"]]
+                                closed_branches = [closed_branches branch["index"]]
+                            end
                         end
                     end
                 end
+                branch_iter = branch_iter + 1
             end
-            branch_iter = branch_iter + 1
-        end
-        if length(closed_branches) < length(branches_ac)
-            grid_id = grid_id + 1
-            branch_iter = 1
-            ACgrids["$grid_id"] = Dict{String, Any}()
-            for (i, branch) in branches_ac
-                if !(branch["index"] in closed_branches) && isempty(ACgrids["$grid_id"])
-                    ACgrids["$grid_id"]["Buses"] = [branch["f_bus"] branch["t_bus"]]
-                    closed_branches = [closed_branches branch["index"]]
+            if length(closed_branches) < length(branches_ac)
+                grid_id = grid_id + 1
+                branch_iter = 1
+                ACgrids["$grid_id"] = Dict{String, Any}()
+                for (i, branch) in branches_ac
+                    if !(branch["index"] in closed_branches) && isempty(ACgrids["$grid_id"])
+                        ACgrids["$grid_id"]["Buses"] = [branch["f_bus"] branch["t_bus"]]
+                        closed_branches = [closed_branches branch["index"]]
+                    end
                 end
             end
+            iter_id = iter_id + 1 # to avoid infinite loop -> if not all subgrids detected
         end
-        iter_id = iter_id + 1 # to avoid infinite loop -> if not all subgrids detected
     end
     return ACgrids
 end

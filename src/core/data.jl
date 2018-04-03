@@ -306,6 +306,7 @@ function get_converter(conv_i, dcbus, acbus, kVbaseAC, vmax, vmin, status, pac, 
     conv["droop"] = 0
     conv["Pdcset"] = 0
     conv["Vdcset"] = 1
+    conv["tm"] = 1
     conv["dVdcSet"] = 0
     conv["Qacmax"] = qmaxac
     conv["Qacmin"] = qminac

@@ -70,7 +70,7 @@ function constraint_converter_current(pm::GenericPowerModel, n::Int, i::Int)
     end
     conv = ref(pm, n, :convdc, i)
     bus = ref(pm, n, :bus, conv["busac_i"])
-    tm = 1 # TODO replace when tap in data model
+    tm = conv["tm"]
     Vmax = bus["vmax"] / tm
     constraint_converter_current(pm, n, i, Vmax)
 end
@@ -134,7 +134,6 @@ function constraint_conv_transformer(pm::GenericPowerModel, n::Int, i::Int)
         pm.con[:nw][n][:conv_tf_q_to] = Dict{Int,ConstraintRef}()
     end
     conv = ref(pm, n, :convdc, i)
-    tap = 1
-    constraint_conv_transformer(pm, n, i, conv["rtf"], conv["xtf"], conv["busac_i"], tap, Bool(conv["transformer"]))
+    constraint_conv_transformer(pm, n, i, conv["rtf"], conv["xtf"], conv["busac_i"], conv["tm"], Bool(conv["transformer"]))
 end
 constraint_conv_transformer(pm::GenericPowerModel, i::Int) = constraint_conv_transformer(pm, pm.cnw, i::Int)
