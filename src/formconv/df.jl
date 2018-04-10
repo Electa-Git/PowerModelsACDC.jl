@@ -22,7 +22,7 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
     if transformer
         pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model,   ptf_fr + ptf_to ==  rtf*itf)
         pm.con[:nw][n][:conv_tf_q_fr][i] = @constraint(pm.model,   qtf_fr + qtf_to ==  xtf*itf)
-        pm.con[:nw][n][:conv_tf_p_to][i] = @constraint(pm.model,   ptf_fr^2 + qtf_fr^2 <= w/tm^2 * itf)
+        pm.con[:nw][n][:conv_tf_p_to][i] = @NLconstraint(pm.model, ptf_fr^2 + qtf_fr^2 <= w/tm^2 * itf)
         pm.con[:nw][n][:conv_tf_q_to][i] = @constraint(pm.model,   wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf)
     else
         pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
@@ -45,7 +45,7 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
     if reactor
         pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
         pm.con[:nw][n][:conv_pr_q][i] = @constraint(pm.model, qpr_fr + qpr_to == xc*ipr)
-        @constraint(pm.model, ppr_fr^2 + qpr_fr^2 <= wf * ipr)
+        @NLconstraint(pm.model, ppr_fr^2 + qpr_fr^2 <= wf * ipr)
         @constraint(pm.model, wc == wf -2*(rc*ppr_fr + xc*qpr_fr) + (rc^2 + xc^2)*ipr)
 
     else
@@ -72,4 +72,6 @@ function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, 
 
     pm.con[:nw][n][:conv_i][i] = @NLconstraint(pm.model,      pconv_ac^2 + qconv_ac^2 <=  wc * iconv_sq)
     pm.con[:nw][n][:conv_i_sqrt][i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= (Umax)^2 * iconv^2)
+    @NLconstraint(pm.model, iconv^2 <= iconv_sq)
+
 end

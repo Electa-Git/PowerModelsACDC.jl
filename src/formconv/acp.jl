@@ -113,7 +113,7 @@ function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, bv, fi
 
     # filter voltage
     vmf = pm.var[:nw][n][:vmf][i]
-    vaf = pm.var[:nw][n][:vaf][i]
+    #vaf = pm.var[:nw][n][:vaf][i]
 
     pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,   ppr_fr + ptf_to == 0 )
     pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model, qpr_fr + qtf_to +  (-bv) * filter *vmf^2 == 0)

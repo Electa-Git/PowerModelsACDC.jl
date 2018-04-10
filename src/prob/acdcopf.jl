@@ -10,6 +10,7 @@ end
 ""
 function run_acdcopf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
     pm = PowerModels.build_generic_model(data, model_constructor, post_acdcopf; kwargs...)
+    #print(pm.model)
     return PowerModels.solve_generic_model(pm, solver; solution_builder = get_solution_acdc)
 end
 

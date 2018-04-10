@@ -7,7 +7,8 @@ mpc.baseMVA = 100;
 %% bus data
 %	bus_i	type	Pd	Qd	Gs	Bs	area	Vm      Va	baseKV	zone	Vmax	Vmin
 mpc.bus = [
-	1       3       0	0	0   0   1       1	0	345     1       1.1     0.9;
+1       3       0	0	0   0   1       1	0	345     1       1.1     0.9;
+2       3       0	0	0   0   1       1	0	345     1       1.1     0.9;
 ];
 
 %% generator data
@@ -33,7 +34,7 @@ mpc.busdc = [
     1              1       0       1       345         1.1     0.9     0;
     2              1       100       1       345         1.1     0.9     0;
 	3              1       50       1       345         1.1     0.9     0;
-    4              1       -100       1       345         1.1     0.9     0;   
+    4              1       -100       1       345         1.1     0.9     0;
 ];
 
 %% converters

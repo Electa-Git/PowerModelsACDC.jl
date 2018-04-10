@@ -77,9 +77,7 @@ function constraint_converter_current(pm::GenericPowerModel, n::Int, i::Int)
         pm.con[:nw][n][:conv_i_sqrt] = Dict{Int,ConstraintRef}()
     end
     conv = ref(pm, n, :convdc, i)
-    bus = ref(pm, n, :bus, conv["busac_i"])
-    tm = conv["tm"]
-    Vmax = bus["vmax"] / tm
+    Vmax = conv["Vmmax"]
     constraint_converter_current(pm, n, i, Vmax)
 end
 constraint_converter_current(pm::GenericPowerModel, i::Int) = constraint_converter_current(pm, pm.cnw, i::Int)

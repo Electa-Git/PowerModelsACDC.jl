@@ -11,7 +11,7 @@ file_case39 = "./test/data/case39_acdc.m"
 file_case3120 = "./test/data/case3120sp_acdc.m"
 file_case5dcgrid = "./test/data/case5_dcgrid.m"
 file = file_case5acdc
-data = PowerModels.parse_file(file_case24)
+data = PowerModels.parse_file(file)
 PowerModelsACDC.process_additional_data!(data)
 #display(data)
 #scs = SCSSolver(max_iters=100000, verbose=0);
