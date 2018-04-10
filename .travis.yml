@@ -1,0 +1,34 @@
+language: julia
+os:
+  - linux
+  - osx
+julia:
+  - 0.6
+  - nightly
+matrix:
+  allow_failures:
+    - julia: nightly
+cache:
+ directories:
+   - /home/travis/.julia
+sudo: false
+addons:
+  apt_packages:
+    - gfortran
+    - liblapack-dev
+    - libgmp-dev
+    - libglpk-dev
+
+before_install:
+    # don't keep an old version of the code in the cache
+  - julia -e 'if "PowerModelsACDC" in keys(Pkg.installed()) Pkg.rm("PowerModelsACDC"); Pkg.rm("PowerModelsACDC") end'
+  - julia -e 'Pkg.update()' #make sure we get the latest version of METADATA
+  - julia -e 'if !("Documenter" in keys(Pkg.installed())) Pkg.add("Documenter") end'
+
+script:
+  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - julia -e 'Pkg.clone(pwd())'
+  - julia -e 'Pkg.test("PowerModelsACDC", coverage=true)'
+
+after_success:
+  - julia -e 'cd(Pkg.dir("PowerModelsACDC")); include(joinpath("docs", "make.jl"))'
