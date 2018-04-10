@@ -31,4 +31,5 @@ Pkg.clone("https://github.com/hakanergun/PowerModelsACDC.jl.git")
 ```
 
 !!! note
-    This is a research-grade optimization package.
+    This is a research-grade optimization package. Eventually, we hope to make this a
+    stable julia package. 

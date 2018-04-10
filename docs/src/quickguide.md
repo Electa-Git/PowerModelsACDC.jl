@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Once PowerModelsACDC is installed, Ipopt is installed, and an ACDC network data file (e.g. `"case5_acdc.m"`) has been acquired, an ACDC Optimal Power Flow can be executed with,
+Once PowerModelsACDC is installed, Ipopt is installed, and an AC/DC network data file (e.g. `"case5_acdc.m"`) has been acquired, an AC/DC Optimal Power Flow can be executed with,
 
 ```julia
 using PowerModelsACDC
@@ -21,7 +21,7 @@ result["solution"]["branch"]["2"]
 
 
 ## Remark
-Note that `run_ac_opf` still works and runs a classic AC OPF on only the AC part of the described grid.
+Note that PowerModels' `run_ac_opf` still works and runs a classic AC OPF on *only* the AC part of the described grid.
 
 ```julia
 result = run_ac_opf("case5_acdc.m", IpoptSolver())

@@ -4,18 +4,13 @@ using Memento
 
 # Suppress warnings during testing.
 setlevel!(getlogger(InfrastructureModels), "error")
+setlevel!(getlogger(PowerModelsACDC), "error")
 setlevel!(getlogger(PowerModels), "error")
 
 using Ipopt
 using Pajarito
 using GLPKMathProgInterface
 using SCS
-
-# needed for Non-convex OTS tests
-if (Pkg.installed("AmplNLWriter") != nothing && Pkg.installed("CoinOptServices") != nothing)
-    using AmplNLWriter
-    using CoinOptServices
-end
 
 using Base.Test
 

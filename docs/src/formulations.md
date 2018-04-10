@@ -19,9 +19,9 @@ Note that from the perspective of OPF convex relaxation for DC grids, applying t
 # Formulation details
 The formulations are categorized as Bus Injection Model (BIM) or Branch Flow Model (BFM).
 - Applied, to DC grids, the BIM uses series conductance notation, and adds separate equations for the to and from line flow.
-- Conversely, BFM uses series resistance parameters, and adds only a single equation per line, representing $P_{ij} + P_{ji} = P_{ij}^{loss} = P_{ji}^{loss}$.
+- Conversely, BFM uses series resistance parameters, and adds only a single equation per line, representing $P_{lij} + P_{lji} = P_{l}^{loss}.
 
-Note that in a DC grid, under the static power flow assumption, power is purely active, impedance is purely resistance, and voltages and currents are purely defined by their magnitude.
+Note that in a DC grid, under the static power flow assumption, power is purely active, impedance reduces to resistance, and voltages and currents are purely defined by their magnitude.
 
 
 Parameters used:
@@ -102,6 +102,3 @@ An ACDC converter model in BIM is not derived.
 
 ### Transformer, filter and phase reactor of converters
 TODO
-
-!!! note
-    MATPOWER's dclines should be modeled as two 'DC' converters + a single line in 'DC'
