@@ -28,27 +28,10 @@ function exctract_info(dict)
     return Dict("obj" => dict["objective"], "solve_time" => dict["solve_time"], "result" => dict )
 end
 
-#
-function fix_things!(data)
-    # fix number of poles
-    data["dcpol"] = 1
-    #tap = 1
-    for (i,conv) in data["convdc"]
-        # remove transformer and phase reactor from relaxation
-        # conv["reactor"] = 0
-        #conv["transformer"] = 0
-        #conv["filter"] = 0
-        #conv["tm"] = 1
-        #conv["LossA"] = 0
-        #conv["LossB"] = 0
-        #conv["LossC"] = 0
-    end
-end
 
 for file in files
     data = PowerModels.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    fix_things!(data)
 
     case = Dict{String, Any}()
 
@@ -67,8 +50,12 @@ for file in files
     resultSOCBFM = run_acdcopf(data, SOCDFPowerModel, ipopt; setting = s)
     case["BFM SOC"] = exctract_info(resultSOCBFM)
     # #
-    resultSDP = run_acdcopf(data, SDPWRMPowerModel, mosek; setting = s)
-    case["BIM SDP"] = exctract_info(resultSDP)
+    if file == files[6]
+        case["BIM SDP"] = Dict{String,Any}()
+    else
+        resultSDP = run_acdcopf(data, SDPWRMPowerModel, mosek; setting = s)
+        case["BIM SDP"] = exctract_info(resultSDP)
+    end
     # # #
     resultDC = run_acdcopf(data, DCPPowerModel, mosek; setting = s)
     case["DC LP"] = exctract_info(resultDC)

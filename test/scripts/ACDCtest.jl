@@ -10,6 +10,7 @@ file_case24 = "./test/data/case24_3zones_acdc.m"
 file_case39 = "./test/data/case39_acdc.m"
 file_case3120 = "./test/data/case3120sp_acdc.m"
 file_case5dcgrid = "./test/data/case5_dcgrid.m"
+file_case5_b2bdc = "./test/data/case5_b2bdc.m"
 file = file_case5acdc
 data = PowerModels.parse_file(file)
 PowerModelsACDC.process_additional_data!(data)
@@ -36,6 +37,7 @@ resultDC = run_acdcopf(file, DCPPowerModel, ipopt; setting = s)
 # other tests
 resultACPF24 = run_acdcpf(file_case24, ACPPowerModel, ipopt; setting = s)
 resultACPF5 = run_acdcpf(file_case5acdc, ACPPowerModel, ipopt; setting = s)
+resultAC5b2b = run_acdcopf(file_case5_b2bdc, ACPPowerModel, ipopt; setting = s)
 resultAC39 = run_acdcopf(file_case39, ACPPowerModel, ipopt; setting = s)
 resultAC3120 = run_acdcopf(file_case3120, ACPPowerModel, ipopt; setting = s)
 resultBFM3120 = run_acdcopf(file_case3120, SOCDFPowerModel, ipopt; setting = s)
