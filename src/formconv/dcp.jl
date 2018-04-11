@@ -77,3 +77,7 @@ end
 function variable_converter_internal_voltage(pm::GenericPowerModel{T}, n::Int=pm.cnw; kwargs...) where {T <: PowerModels.AbstractDCPForm}
     variable_converter_internal_voltage_angle(pm, n; kwargs...)
 end
+
+"`qconv[i] == qconv`"
+function constraint_reactive_conv_setpoint(pm::GenericPowerModel{T}, n::Int, i, qconv) where {T <: PowerModels.AbstractDCPForm}
+end

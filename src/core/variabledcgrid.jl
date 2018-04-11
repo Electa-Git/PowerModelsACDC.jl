@@ -39,11 +39,13 @@ function variable_dcgrid_voltage_magnitude_sqr(pm::GenericPowerModel, n::Int=pm.
     else
         pm.var[:nw][n][:wdc] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:busdc])], basename="$(n)_wdc",
-        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
+        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2,
+        lowerbound = 0
         )
         pm.var[:nw][n][:wdcr] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:buspairsdc])], basename="$(n)_wdcr",
-        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2
+        start = PowerModels.getstart(pm.ref[:nw][n][:busdc], i, "Vdc", 1.0)^2,
+        lowerbound = 0
         )
 
     end
@@ -77,7 +79,8 @@ function variable_dcbranch_current_sqr(pm::GenericPowerModel, n::Int=pm.cnw; bou
     else
         pm.var[:nw][n][:ccm_dcgrid] = @variable(pm.model,
         [l in pm.ref[:nw][n][:branchdc]], basename="$(n)_ccm_dcgrid",
-        start = PowerModels.getstart(pm.ref[:nw][n][:branchdc], l, "p_start", 0.0)/vpu
+        start = PowerModels.getstart(pm.ref[:nw][n][:branchdc], l, "p_start", 0.0)/vpu,
+        lowerbound = 0
         )
     end
 end
