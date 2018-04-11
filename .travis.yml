@@ -21,6 +21,7 @@ addons:
 
 before_install:
     # don't keep an old version of the code in the cache
+  - julia -e 'if "PowerModels" in keys(Pkg.installed()) Pkg.rm("PowerModels"); Pkg.rm("PowerModels"); Pkg.clone("https://github.com/lanl-ansi/PowerModels.jl.git") end'
   - julia -e 'if "PowerModelsACDC" in keys(Pkg.installed()) Pkg.rm("PowerModelsACDC"); Pkg.rm("PowerModelsACDC") end'
   - julia -e 'Pkg.update()' #make sure we get the latest version of METADATA
   - julia -e 'if !("Documenter" in keys(Pkg.installed())) Pkg.add("Documenter") end'
@@ -28,7 +29,7 @@ before_install:
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.clone(pwd())'
-  - julia -e 'Pkg.test("PowerModelsACDC", coverage=true)'
+  - julia -e 'Pkg.test("PowerModelsACDC")'
 
 after_success:
   - julia -e 'cd(Pkg.dir("PowerModelsACDC")); include(joinpath("docs", "make.jl"))'
