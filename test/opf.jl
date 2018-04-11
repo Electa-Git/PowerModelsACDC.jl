@@ -58,7 +58,7 @@ end
         result = run_acdcopf("../test/data/case24_3zones_acdc.m", SOCWRPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"], 150580.80; atol = 1e0)
+        @test isapprox(result["objective"], 150485.68; atol = 1e0)
     end
 end
 
@@ -79,7 +79,7 @@ end
         result = run_acdcopf("../test/data/case24_3zones_acdc.m", SOCDFPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"], 151208.37; atol = 1e0)
+        @test isapprox(result["objective"], 150485.7; atol = 1e0)
     end
 end
 
@@ -94,7 +94,7 @@ end
         result = run_acdcopf("../test/data/case24_3zones_acdc.m", QCWRPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"], 150580.81; atol = 1e0)
+        @test isapprox(result["objective"], 150485.69; atol = 1e0)
     end
 end
 
@@ -109,7 +109,7 @@ end
         result = run_acdcopf("../test/data/case24_3zones_acdc.m", QCWRTriPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"],  150591; atol = 1e0)
+        @test isapprox(result["objective"],  150496.31; atol = 1e0)
     end
 end
 
@@ -126,6 +126,6 @@ end
     #    result = run_acdcopf("../test/data/case24_3zones_acdc.m", SDPWRMPowerModel, scs_solver)
     #
     #    @test result["status"] == :Optimal
-    #    @test isapprox(result["objective"], 151574.34; atol = 1e0)
+    #    @test isapprox(result["objective"], 151288.77; atol = 1e0)
     # end
 end

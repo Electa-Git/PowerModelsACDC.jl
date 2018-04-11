@@ -17,9 +17,9 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, f_bus, t_bu
 
     r = 1/g
 
-    @constraint(pm.model, p_dc_fr + p_dc_to == p * r * ccm_dcgrid)
+    @constraint(pm.model, p_dc_fr + p_dc_to ==  r/p * ccm_dcgrid)
     @NLconstraint(pm.model, p_dc_fr^2 <= wdc_fr*ccm_dcgrid)
-    @constraint(pm.model, wdc_to == wdc_fr - 2*(p*r)*p_dc_fr + (p*r)^2*ccm_dcgrid)
+    @constraint(pm.model, wdc_to == wdc_fr - 2*(r/p)*p_dc_fr + (r/p)^2*ccm_dcgrid)
 end
 
 """
