@@ -87,7 +87,7 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
         bc = imag(yc)
 #        PowerModels.relaxation_complex_product(pm.model, wf, wc, wrc, wic)
         constraint_voltage_product_converter(pm, wrc, wic, wf, wc)
-        c1, c2, c3, c4 = ac_power_flow_constraints_w(pm, gc, bc, wf, wc, wrc, wic, ppr_fr, ppr_to, ppr_to, qpr_to, 1)
+        c1, c2, c3, c4 = ac_power_flow_constraints_w(pm, gc, bc, wf, wc, wrc, wic, ppr_fr, ppr_to, qpr_fr, qpr_to, 1)
         pm.con[:nw][n][:conv_pr_p][i] = c1
         pm.con[:nw][n][:conv_pr_q][i] = c2
     else

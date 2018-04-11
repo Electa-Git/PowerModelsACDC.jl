@@ -12,7 +12,7 @@ files =
 "./test/data/case5_dcgrid.m";
 "./test/data/case24_3zones_acdc.m";
 "./test/data/case39_acdc.m";
-#"./test/data/case3120sp_acdc.m";
+"./test/data/case3120sp_acdc.m";
 ]
 
 
@@ -35,12 +35,12 @@ function fix_things!(data)
     #tap = 1
     for (i,conv) in data["convdc"]
         # remove transformer and phase reactor from relaxation
-        conv["reactor"] = 0
+        # conv["reactor"] = 0
         #conv["transformer"] = 0
         #conv["filter"] = 0
         #conv["tm"] = 1
-        conv["LossA"] = 0
-        conv["LossB"] = 0
+        #conv["LossA"] = 0
+        #conv["LossB"] = 0
         #conv["LossC"] = 0
     end
 end

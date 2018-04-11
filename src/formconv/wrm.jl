@@ -17,6 +17,7 @@ function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, 
     iconv_sq = pm.var[:nw][n][:iconv_ac_sq][i]
     iconv = pm.var[:nw][n][:iconv_ac][i]
     pm.con[:nw][n][:conv_i][i] = @constraint(pm.model, norm([2pconv_ac;2qconv_ac; (wc-iconv_sq)]) <= (wc+iconv_sq))
-    pm.con[:nw][n][:conv_i_sqrt][i] = @constraint(pm.model, norm([2*pconv_ac;2*qconv_ac; Umax*iconv-1]) <= Umax*iconv+1)
-    @constraint(pm.model, norm([2*iconv; iconv_sq-1]) <= iconv_sq+1)
+    pm.con[:nw][n][:conv_i_sqrt][i] = @constraint(pm.model, norm([2*pconv_ac; 2*qconv_ac]) <= 2*Umax*iconv)
+    #pm.con[:nw][n][:conv_i_sqrt][i] = @constraint(pm.model, norm([2*pconv_ac;2*qconv_ac; Umax*iconv-1]) <= Umax*iconv+1)
+    @constraint(pm.model, norm([2*iconv; iconv_sq-1]) <= iconv_sq + 1)
 end
