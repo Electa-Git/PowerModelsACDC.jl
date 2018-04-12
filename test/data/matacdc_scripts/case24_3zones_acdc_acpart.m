@@ -1,21 +1,21 @@
 function [baseMVA, bus, gen, branch] = case24_ieee_rts1996_3zones_mod
 
-%CASE24_IEEE_RTS1996_3zones  Power flow data for system based on the 
+%CASE24_IEEE_RTS1996_3zones  Power flow data for system based on the
 %IEEE RELIABILITY TEST SYSTEM.
 %   Please see CASEFORMAT for details on the case file format.
 %
 %   This system data is based on the MATPOWER case file CASE24_IEEE_RTS
 %   which is based on the IEEE RELIABILITY TEST SYSTEM
 %
-%   The data has been adopted to corresponding with the 
+%   The data has been adopted to corresponding with the
 %   IEEE Two Area RTS-96 data from...
 %   IEEE Reliability Test System Task Force of Applications of
 %   Probability Methods Subcommittee, "IEEE reliability test system-96,"
 %   IEEE Transactions on Power Systems, Vol. 14, No. 3, Aug. 1999,
 %   pp. 1010-1020.
 %
-%   The IEEE Two Area RTS-96 network has been extended and now includes 3 
-%   asynchronous zones (node numbers 1xx, 2xx and 3xx). 
+%   The IEEE Two Area RTS-96 network has been extended and now includes 3
+%   asynchronous zones (node numbers 1xx, 2xx and 3xx).
 %   Data on zone 1 and 2 taken from the IEEE Two Area RTS-96 with following
 %   adaptations:
 %   - nodes renumbered according to IEEE Two Area RTS-96 data
@@ -24,12 +24,12 @@ function [baseMVA, bus, gen, branch] = case24_ieee_rts1996_3zones_mod
 %   - slack node zone 2: node 213
 %   - lines 107-203, 113-215, 123-217 removed (commented)
 %   Data on zone 3 added:
-%   - nodes 301 and 302 
-%   - gen at node 302 
+%   - nodes 301 and 302
+%   - gen at node 302
 %   - line 301-302
 %
 %   MATPOWER case file data provided by Bruce Wollenberg
-%   (MATPOWER file case24_ieee_rts.m) and adapted for use with MatACDC 
+%   (MATPOWER file case24_ieee_rts.m) and adapted for use with MatACDC
 %   by Jef Beerten.
 
 
@@ -179,7 +179,7 @@ branch = [
 	103	124     0.002	0.084	0       400     510     600     1.015	0	1	-360	360;
 	104	109     0.027	0.104	0.028	175     208     220     0       0	1	-360	360;
 	105	110     0.022	0.088	0.024	175     208     220 	0       0	1	-360	360;
-	106	110     0.014	0.061	2.459	175     193     200     0       0	1	-360	360;
+	106	110     0.014	0.061	2.459	400     193     200     0       0	1	-360	360; % limit changed for feasibility of OPF
 	107	108     0.016	0.061	0.017	175     208     220     0       0	1	-360	360;
 	108	109     0.043	0.165	0.045	175     208     220 	0       0	1	-360	360;
 	108	110     0.043	0.165	0.045	175     208     220 	0       0	1	-360	360;
@@ -217,7 +217,7 @@ branch = [
 	203	224     0.002	0.084	0       400     510     600     1.015	0	1	-360	360;
 	204	209     0.027	0.104	0.028	175     208     220     0       0	1	-360	360;
 	205	210     0.022	0.088	0.024	175     208     220 	0       0	1	-360	360;
-	206	210     0.014	0.061	2.459	175     193     200     0       0	1	-360	360;
+	206	210     0.014	0.061	2.459	400     193     200     0       0	1	-360	360; % line limit changed for feasibility
 	207	208     0.016	0.061	0.017	175     208     220     0       0	1	-360	360;
 	208	209     0.043	0.165	0.045	175     208     220 	0       0	1	-360	360;
 	208	210     0.043	0.165	0.045	175     208     220 	0       0	1	-360	360;

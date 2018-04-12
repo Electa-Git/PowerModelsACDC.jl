@@ -14,8 +14,7 @@
     @testset "24-bus rts ac dc case with three zones" begin
         result = run_acdcopf("../test/data/case24_3zones_acdc.m", ACPPowerModel, ipopt_solver)
 
-        @test result["status"] == :LocalInfeasible
-        #@test isapprox(result["objective"], 79805; atol = 1e0)
+    @test isapprox(result["objective"], 150239.92; atol = 1e0)
     end
 end
 
@@ -58,7 +57,7 @@ end
         result = run_acdcopf("../test/data/case24_3zones_acdc.m", SOCWRPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"], 150485.68; atol = 1e0)
+        @test isapprox(result["objective"], 150168.02; atol = 1e0)
     end
 end
 
@@ -79,7 +78,7 @@ end
         result = run_acdcopf("../test/data/case24_3zones_acdc.m", SOCDFPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"], 150485.7; atol = 1e0)
+        @test isapprox(result["objective"], 150168.04; atol = 1e0)
     end
 end
 
@@ -94,7 +93,7 @@ end
         result = run_acdcopf("../test/data/case24_3zones_acdc.m", QCWRPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"], 150485.69; atol = 1e0)
+        @test isapprox(result["objective"], 150168.03; atol = 1e0)
     end
 end
 
@@ -109,7 +108,7 @@ end
         result = run_acdcopf("../test/data/case24_3zones_acdc.m", QCWRTriPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"],  150496.31; atol = 1e0)
+        @test isapprox(result["objective"],  150168.03; atol = 1e0)
     end
 end
 
