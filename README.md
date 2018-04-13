@@ -1,5 +1,10 @@
 # PowerModelsACDC.jl
 
+Dev:
+[![Build Status](https://travis-ci.org/hakanergun/PowerModelsACDC.jl.svg?branch=master)](https://travis-ci.org/hakanergun/PowerModelsACDC.jl)
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://hakanergun.github.io/PowerModelsACDC.jl/latest)
+
+
 PowerModelsACDC.jl is a Julia/JuMP/PowerModels package with models for DC lines, meshed DC networks, and AC DC converters.
 Building upon the PowerModels architecture, the code is engineered to decouple problem specifications (e.g. Power Flow, Optimal Power Flow, ...) from the power network formulations (e.g. AC, DC-approximation, SOC-relaxation, ...).
 
@@ -27,7 +32,7 @@ AC/DC converter stations, connecting ac nodes and dc nodes, are composed of a tr
 * Matpower-style ".m" files, including matpower's dcline extenstions.
 * PTI
 
-Note that the matpower-style `dcline` is transformed internally to two converters + a dcline connecting them. Such a transformation is exact for the 'dc'-style linearized models, but not for the AC models. 
+Note that the matpower-style `dcline` is transformed internally to two converters + a dcline connecting them. Such a transformation is exact for the 'dc'-style linearized models, but not for the AC models.
 
 For further information, consult the PowerModels [documentation](https://lanl-ansi.github.io/PowerModels.jl/stable/).
 
