@@ -6,7 +6,7 @@ Creates Ohms constraints for DC branches
 p[f_idx] + p[t_idx] == p * g[l] * (wdc[f_bus] - wdcr[f_bus,t_bus])
 ```
 """
-function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, f_bus, t_bus, f_idx, t_idx, g, p) where {T <: PowerModels.AbstractDFForm}
+function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, f_bus, t_bus, f_idx, t_idx, r, p) where {T <: PowerModels.AbstractDFForm}
     l = f_idx[1];
     p_dc_fr = pm.var[:nw][n][:p_dcgrid][f_idx]
     p_dc_to = pm.var[:nw][n][:p_dcgrid][t_idx]
@@ -14,8 +14,6 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, f_bus, t_bu
 
     wdc_fr = pm.var[:nw][n][:wdc][f_bus]
     wdc_to = pm.var[:nw][n][:wdc][t_bus]
-
-    r = 1/g
 
     @constraint(pm.model, p_dc_fr + p_dc_to ==  r/p * ccm_dcgrid)
     @NLconstraint(pm.model, p_dc_fr^2 <= wdc_fr*ccm_dcgrid)

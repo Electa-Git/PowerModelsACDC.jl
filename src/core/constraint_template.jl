@@ -51,10 +51,9 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel, n::Int, i::Int)
     f_idx = (i, f_bus, t_bus)
     t_idx = (i, t_bus, f_bus)
 
-    g = 1 / branch["r"]
     p = ref(pm, n, :dcpol)
 
-    constraint_ohms_dc_branch(pm, n, f_bus, t_bus, f_idx, t_idx, g, p)
+    constraint_ohms_dc_branch(pm, n, f_bus, t_bus, f_idx, t_idx, branch["r"], p)
 end
 constraint_ohms_dc_branch(pm::GenericPowerModel, i::Int) = constraint_ohms_dc_branch(pm, pm.cnw, i)
 

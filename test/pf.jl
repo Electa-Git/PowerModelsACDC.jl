@@ -1,4 +1,23 @@
 @testset "test ac polar pf" begin
+    # @testset "3-bus case" begin
+    #     result = run_acdcpf("../test/data/case3.m", ACPPowerModel, ipopt_solver, setting = Dict("output" => Dict("branch_flows" => true)))
+    #
+    #     @test result["status"] == :LocalOptimal
+    #     @test isapprox(result["objective"], 0; atol = 1e-2)
+    #
+    #     @test isapprox(result["solution"]["gen"]["2"]["pg"], 1.600063; atol = 1e-3)
+    #     @test isapprox(result["solution"]["gen"]["3"]["pg"], 0.0; atol = 1e-3)
+    #
+    #     @test isapprox(result["solution"]["bus"]["1"]["vm"], 1.10000; atol = 1e-3)
+    #     @test isapprox(result["solution"]["bus"]["1"]["va"], 0.00000; atol = 1e-3)
+    #     @test isapprox(result["solution"]["bus"]["2"]["vm"], 0.92617; atol = 1e-3)
+    #     @test isapprox(result["solution"]["bus"]["3"]["vm"], 0.90000; atol = 1e-3)
+    #
+    #     @test isapprox(result["solution"]["dcline"]["1"]["pf"],  0.10; atol = 1e-5)
+    #     @test isapprox(result["solution"]["dcline"]["1"]["pt"], -0.10; atol = 1e-5)
+    #     @test isapprox(result["solution"]["dcline"]["1"]["qf"], -0.403045; atol = 1e-5)
+    #     @test isapprox(result["solution"]["dcline"]["1"]["qt"],  0.0647562; atol = 1e-5)
+    # end
     @testset "5-bus ac dc case" begin
         result = run_acdcpf("../test/data/case5_acdc.m", ACPPowerModel, ipopt_solver, setting = Dict("output" => Dict("branch_flows" => true)))
 
@@ -60,6 +79,18 @@ end
 
 
 @testset "test dc pf" begin
+    # @testset "3-bus case" begin
+    #     result = run_acdcpf("../test/data/case3.m", DCPPowerModel, ipopt_solver)
+    #
+    #     @test result["status"] == :LocalOptimal
+    #     @test isapprox(result["objective"], 0; atol = 1e-2)
+    #
+    #     @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.54994; atol = 1e-3)
+    #
+    #     @test isapprox(result["solution"]["bus"]["1"]["va"],  0.00000; atol = 1e-5)
+    #     @test isapprox(result["solution"]["bus"]["2"]["va"],  0.09147654582; atol = 1e-5)
+    #     @test isapprox(result["solution"]["bus"]["3"]["va"], -0.28291891895; atol = 1e-5)
+    # end
     @testset "5-bus ac dc case" begin
         result = run_acdcpf("../test/data/case5_acdc.m", DCPPowerModel, ipopt_solver)
 

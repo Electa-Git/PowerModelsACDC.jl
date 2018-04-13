@@ -1,106 +1,123 @@
 function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
-    # Filter converters & DC branches with status 0 as well as wrong bus numbers
-    pm.ref[:nw][n][:convdc] = filter((i, conv) -> conv["status"] == 1 && conv["busdc_i"] in keys(pm.ref[:nw][n][:busdc]) && conv["busac_i"] in keys(pm.ref[:nw][n][:bus]), pm.ref[:nw][n][:convdc])
-    pm.ref[:nw][n][:branchdc] = filter((i, branchdc) -> branchdc["status"] == 1 && branchdc["fbusdc"] in keys(pm.ref[:nw][n][:busdc]) && branchdc["tbusdc"] in keys(pm.ref[:nw][n][:busdc]), pm.ref[:nw][n][:branchdc])
-    # DC grid arcs for DC grid branches
-    pm.ref[:nw][n][:arcs_dcgrid_from] = [(i,branch["fbusdc"],branch["tbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]
-    pm.ref[:nw][n][:arcs_dcgrid_to]   = [(i,branch["tbusdc"],branch["fbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]
-    pm.ref[:nw][n][:arcs_dcgrid] = [pm.ref[:nw][n][:arcs_dcgrid_from]; pm.ref[:nw][n][:arcs_dcgrid_to]]
-    pm.ref[:nw][n][:arcs_conv_acdc] = [(i,conv["busac_i"],conv["busdc_i"]) for (i,conv) in pm.ref[:nw][n][:convdc]]
+    if haskey(pm.ref[:nw][n], :convdc)
+        # Filter converters & DC branches with status 0 as well as wrong bus numbers
+        pm.ref[:nw][n][:convdc] = filter((i, conv) -> conv["status"] == 1 && conv["busdc_i"] in keys(pm.ref[:nw][n][:busdc]) && conv["busac_i"] in keys(pm.ref[:nw][n][:bus]), pm.ref[:nw][n][:convdc])
+        pm.ref[:nw][n][:branchdc] = filter((i, branchdc) -> branchdc["status"] == 1 && branchdc["fbusdc"] in keys(pm.ref[:nw][n][:busdc]) && branchdc["tbusdc"] in keys(pm.ref[:nw][n][:busdc]), pm.ref[:nw][n][:branchdc])
+        # DC grid arcs for DC grid branches
+        pm.ref[:nw][n][:arcs_dcgrid_from] = [(i,branch["fbusdc"],branch["tbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]
+        pm.ref[:nw][n][:arcs_dcgrid_to]   = [(i,branch["tbusdc"],branch["fbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]
+        pm.ref[:nw][n][:arcs_dcgrid] = [pm.ref[:nw][n][:arcs_dcgrid_from]; pm.ref[:nw][n][:arcs_dcgrid_to]]
+        pm.ref[:nw][n][:arcs_conv_acdc] = [(i,conv["busac_i"],conv["busdc_i"]) for (i,conv) in pm.ref[:nw][n][:convdc]]
 
-    #bus arcs of the DC grid
-    bus_arcs_dcgrid = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
-    for (l,i,j) in pm.ref[:nw][n][:arcs_dcgrid]
-        push!(bus_arcs_dcgrid[i], (l,i,j))
-    end
-    pm.ref[:nw][n][:bus_arcs_dcgrid] = bus_arcs_dcgrid
-
-    # #converter arcs of the DC grid
-    # conv_arcs_ac = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:bus]])
-    # for (l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]
-    #     push!(conv_arcs_ac[i], (l,i,j))
-    # end
-    # pm.ref[:nw][n][:conv_arcs_ac] = conv_arcs_ac
-    #
-    # #bus arcs of the DC grid
-    # conv_arcs_dc = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
-    # for (l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]
-    #     push!(conv_arcs_dc[j], (l,i,j))
-    # end
-    # pm.ref[:nw][n][:conv_arcs_dc] = conv_arcs_dc
-
-    # bus_convs for AC side power injection of DC converters
-    bus_convs_ac = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:bus]])
-    for (i,conv) in pm.ref[:nw][n][:convdc]
-        push!(bus_convs_ac[conv["busac_i"]], i)
-    end
-    pm.ref[:nw][n][:bus_convs_ac] = bus_convs_ac
-
-
-    # bus_convs for AC side power injection of DC converters
-    bus_convs_dc = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
-    for (i,conv) in pm.ref[:nw][n][:convdc]
-        push!(bus_convs_dc[conv["busdc_i"]], i)
-    end
-    pm.ref[:nw][n][:bus_convs_dc] = bus_convs_dc
-
-    # Add DC reference buses
-    ref_buses_dc = Dict{String, Any}()
-    for (k,v) in pm.ref[:nw][n][:convdc]
-        if v["type_dc"] == 2
-            ref_buses_dc["$k"] = v
+        #bus arcs of the DC grid
+        bus_arcs_dcgrid = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
+        for (l,i,j) in pm.ref[:nw][n][:arcs_dcgrid]
+            push!(bus_arcs_dcgrid[i], (l,i,j))
         end
-    end
+        pm.ref[:nw][n][:bus_arcs_dcgrid] = bus_arcs_dcgrid
 
-    if length(ref_buses_dc) == 0
+        # #converter arcs of the DC grid
+        # conv_arcs_ac = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:bus]])
+        # for (l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]
+        #     push!(conv_arcs_ac[i], (l,i,j))
+        # end
+        # pm.ref[:nw][n][:conv_arcs_ac] = conv_arcs_ac
+        #
+        # #bus arcs of the DC grid
+        # conv_arcs_dc = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
+        # for (l,i,j) in pm.ref[:nw][n][:arcs_conv_acdc]
+        #     push!(conv_arcs_dc[j], (l,i,j))
+        # end
+        # pm.ref[:nw][n][:conv_arcs_dc] = conv_arcs_dc
+
+        # bus_convs for AC side power injection of DC converters
+        bus_convs_ac = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:bus]])
+        for (i,conv) in pm.ref[:nw][n][:convdc]
+            push!(bus_convs_ac[conv["busac_i"]], i)
+        end
+        pm.ref[:nw][n][:bus_convs_ac] = bus_convs_ac
+
+
+        # bus_convs for AC side power injection of DC converters
+        bus_convs_dc = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
+        for (i,conv) in pm.ref[:nw][n][:convdc]
+            push!(bus_convs_dc[conv["busdc_i"]], i)
+        end
+        pm.ref[:nw][n][:bus_convs_dc] = bus_convs_dc
+
+        # Add DC reference buses
+        ref_buses_dc = Dict{String, Any}()
         for (k,v) in pm.ref[:nw][n][:convdc]
-            if v["type_ac"] == 2
+            if v["type_dc"] == 2
                 ref_buses_dc["$k"] = v
             end
         end
-        warn(PowerModels.LOGGER, "no reference DC bus found, setting reference bus based on AC bus type")
-    end
 
-    for (k,conv) in pm.ref[:nw][n][:convdc]
-        conv_id = conv["index"]
-        if conv["type_ac"] == 2 && conv["type_dc"] == 1
-            warn(PowerModels.LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
-        elseif conv["type_ac"] == 1 && conv["type_dc"] == 1
-            warn(PowerModels.LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+        if length(ref_buses_dc) == 0
+            for (k,v) in pm.ref[:nw][n][:convdc]
+                if v["type_ac"] == 2
+                    ref_buses_dc["$k"] = v
+                end
+            end
+            warn(PowerModels.LOGGER, "no reference DC bus found, setting reference bus based on AC bus type")
         end
-        convbus_ac = conv["busac_i"]
-        if conv["Vmmax"] < pm.ref[:nw][n][:bus][convbus_ac]["vmin"]
-            warn(PowerModels.LOGGER, "The maximum AC side voltage of converter $conv_id is smaller than the minimum AC bus voltage")
-        end
-        if conv["Vmmin"] > pm.ref[:nw][n][:bus][convbus_ac]["vmax"]
-            warn(PowerModels.LOGGER, "The miximum AC side voltage of converter $conv_id is larger than the maximum AC bus voltage")
-        end
-    end
 
-    if length(ref_buses_dc) > 1
-        ref_buses_warn = ""
-        for (rb) in keys(ref_buses_dc)
-            ref_buses_warn = ref_buses_warn*rb*", "
-        end
-        warn(PowerModels.LOGGER, "multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
-    end
-    ACgrids = find_all_ac_grids(pm.ref[:nw][n][:branch], pm.ref[:nw][n][:bus])
-
-
-    for (i, grid) in ACgrids
-        a = 0
-        for (j, bus) in pm.ref[:nw][n][:ref_buses]
-            if (bus["bus_i"] in grid["Buses"])
-                a = 1
+        for (k,conv) in pm.ref[:nw][n][:convdc]
+            conv_id = conv["index"]
+            if conv["type_ac"] == 2 && conv["type_dc"] == 1
+                warn(PowerModels.LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+            elseif conv["type_ac"] == 1 && conv["type_dc"] == 1
+                warn(PowerModels.LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+            end
+            convbus_ac = conv["busac_i"]
+            if conv["Vmmax"] < pm.ref[:nw][n][:bus][convbus_ac]["vmin"]
+                warn(PowerModels.LOGGER, "The maximum AC side voltage of converter $conv_id is smaller than the minimum AC bus voltage")
+            end
+            if conv["Vmmin"] > pm.ref[:nw][n][:bus][convbus_ac]["vmax"]
+                warn(PowerModels.LOGGER, "The miximum AC side voltage of converter $conv_id is larger than the maximum AC bus voltage")
             end
         end
-        if a == 0
-            warn(PowerModels.LOGGER, "Grid $i does not have any voltage reference bus, this might cause infeasibility")
-        end
-    end
-    pm.ref[:nw][n][:ref_buses_dc] = ref_buses_dc
-    pm.ref[:nw][n][:buspairsdc] = buspair_parameters_dc(pm.ref[:nw][n][:arcs_dcgrid_from], pm.ref[:nw][n][:branchdc], pm.ref[:nw][n][:busdc])
 
+        if length(ref_buses_dc) > 1
+            ref_buses_warn = ""
+            for (rb) in keys(ref_buses_dc)
+                ref_buses_warn = ref_buses_warn*rb*", "
+            end
+            warn(PowerModels.LOGGER, "multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
+        end
+        ACgrids = find_all_ac_grids(pm.ref[:nw][n][:branch], pm.ref[:nw][n][:bus])
+
+
+        for (i, grid) in ACgrids
+            a = 0
+            for (j, bus) in pm.ref[:nw][n][:ref_buses]
+                if (bus["bus_i"] in grid["Buses"])
+                    a = 1
+                end
+            end
+            if a == 0
+                warn(PowerModels.LOGGER, "Grid $i does not have any voltage reference bus, this might cause infeasibility")
+            end
+        end
+        pm.ref[:nw][n][:ref_buses_dc] = ref_buses_dc
+        pm.ref[:nw][n][:buspairsdc] = buspair_parameters_dc(pm.ref[:nw][n][:arcs_dcgrid_from], pm.ref[:nw][n][:branchdc], pm.ref[:nw][n][:busdc])
+    else
+        pm.ref[:nw][n][:convdc] = Dict{String, Any}()
+        pm.ref[:nw][n][:busdc] = Dict{String, Any}()
+        pm.ref[:nw][n][:branchdc] = Dict{String, Any}()
+        # DC grid arcs for DC grid branches
+        pm.ref[:nw][n][:arcs_dcgrid] = Dict{String, Any}()
+        pm.ref[:nw][n][:arcs_conv_acdc] = Dict{String, Any}()
+        pm.ref[:nw][n][:bus_arcs_dcgrid] = Dict{String, Any}()
+        bus_convs_ac = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:bus]])
+        for (i,conv) in pm.ref[:nw][n][:convdc]
+            push!(bus_convs_ac[conv["busac_i"]], i)
+        end
+        pm.ref[:nw][n][:bus_convs_ac] = bus_convs_ac
+        pm.ref[:nw][n][:bus_convs_dc] = Dict{String, Any}()
+        pm.ref[:nw][n][:ref_buses_dc] = Dict{String, Any}()
+        pm.ref[:nw][n][:buspairsdc] = Dict{String, Any}()
+    end
 end
 add_ref_dcgrid!(pm::GenericPowerModel) = add_ref_dcgrid!(pm::GenericPowerModel, pm.cnw)
 

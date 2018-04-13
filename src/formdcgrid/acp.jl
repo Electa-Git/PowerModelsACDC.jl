@@ -24,14 +24,19 @@ Creates Ohms constraints for DC branches
 p[f_idx] == p * g[l] * vmdc[f_bus] * (vmdc[f_bus] - vmdc[t_bus])
 ```
 """
-function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, f_bus, t_bus, f_idx, t_idx, g, p) where {T <: PowerModels.AbstractACPForm}
+function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, f_bus, t_bus, f_idx, t_idx, r, p) where {T <: PowerModels.AbstractACPForm}
     p_dc_fr = pm.var[:nw][n][:p_dcgrid][f_idx]
     p_dc_to = pm.var[:nw][n][:p_dcgrid][t_idx]
     vmdc_fr = pm.var[:nw][n][:vdcm][f_bus]
     vmdc_to = pm.var[:nw][n][:vdcm][t_bus]
 
-    @NLconstraint(pm.model, p_dc_fr == p * g * vmdc_fr * (vmdc_fr - vmdc_to))
-    @NLconstraint(pm.model, p_dc_to == p * g * vmdc_to * (vmdc_to - vmdc_fr))
+    if r == 0
+        @constraint(pm.model, p_dc_fr + p_dc_to == 0)
+    else
+        g = 1 / r
+        @NLconstraint(pm.model, p_dc_fr == p * g * vmdc_fr * (vmdc_fr - vmdc_to))
+        @NLconstraint(pm.model, p_dc_to == p * g * vmdc_to * (vmdc_to - vmdc_fr))
+    end
 end
 
 "`vdc[i] == vdcm`"

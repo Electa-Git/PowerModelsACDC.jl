@@ -3,11 +3,13 @@ function get_solution_acdc(pm::GenericPowerModel, sol::Dict{String,Any})
     PowerModels.add_generator_power_setpoint(sol, pm)
     PowerModels.add_branch_flow_setpoint(sol, pm)
     PowerModels.add_dcline_flow_setpoint(sol, pm)
-    add_dc_bus_voltage_setpoint(sol, pm)
-    add_dcconverter_setpoint(sol, pm)
-    add_dcgrid_flow_setpoint(sol,pm)
-    add_dcbranch_losses(sol, pm)
-    add_dcconv_losses(sol, pm)
+    if haskey(pm.data, "convdc")
+        add_dc_bus_voltage_setpoint(sol, pm)
+        add_dcconverter_setpoint(sol, pm)
+        add_dcgrid_flow_setpoint(sol,pm)
+        add_dcbranch_losses(sol, pm)
+        add_dcconv_losses(sol, pm)
+    end
     return sol
 end
 

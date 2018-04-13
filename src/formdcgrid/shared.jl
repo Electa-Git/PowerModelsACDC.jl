@@ -31,16 +31,20 @@ Creates Ohms constraints for DC branches
 p[f_idx] + p[t_idx] == p * g[l] * (wdc[f_bus] - wdcr[f_bus,t_bus])
 ```
 """
-function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, f_bus, t_bus, f_idx, t_idx, g, p) where {T <: PowerModels.AbstractWRForms}
+function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, f_bus, t_bus, f_idx, t_idx, r, p) where {T <: PowerModels.AbstractWRForms}
     p_dc_fr = pm.var[:nw][n][:p_dcgrid][f_idx]
     p_dc_to = pm.var[:nw][n][:p_dcgrid][t_idx]
 
     wdc_fr = pm.var[:nw][n][:wdc][f_bus]
     wdc_to = pm.var[:nw][n][:wdc][t_bus]
     wdc_frto = pm.var[:nw][n][:wdcr][(f_bus, t_bus)]
-
-    @constraint(pm.model, p_dc_fr == p * g *  (wdc_fr - wdc_frto))
-    @constraint(pm.model, p_dc_to == p * g *  (wdc_to - wdc_frto))
+    if r == 0
+        @constraint(pm.model, p_dc_fr + p_dc_to == 0)
+    else
+        g = 1 / r
+        @constraint(pm.model, p_dc_fr == p * g *  (wdc_fr - wdc_frto))
+        @constraint(pm.model, p_dc_to == p * g *  (wdc_to - wdc_frto))
+    end
 end
 
 "`wdc[i] == vdcm^2`"

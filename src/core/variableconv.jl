@@ -67,8 +67,8 @@ function variable_conv_transformer_active_power_to(pm::GenericPowerModel, n::Int
         pm.var[:nw][n][:pconv_tf_to] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_tf_to",
 #        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"],
-        lowerbound = -pm.ref[:nw][n][:convdc][i]["Pacmax"]*bigM,
-        upperbound =  pm.ref[:nw][n][:convdc][i]["Pacmax"]*bigM
+        lowerbound = -pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM,
+        upperbound =  pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM
         )
     else
         pm.var[:nw][n][:pconv_tf_to] = @variable(pm.model,
@@ -84,9 +84,8 @@ function variable_conv_transformer_reactive_power_to(pm::GenericPowerModel, n::I
     if bounded
         pm.var[:nw][n][:qconv_tf_to] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_tf_to",
-        #lowerbound = pm.ref[:nw][n][:convdc][i]["Qacmin"],
-        lowerbound = -pm.ref[:nw][n][:convdc][i]["Qacmax"]*bigM,
-        upperbound =  pm.ref[:nw][n][:convdc][i]["Qacmax"]*bigM
+        lowerbound = -pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM,
+        upperbound =  pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM
         )
     else
         pm.var[:nw][n][:qconv_tf_to] = @variable(pm.model,
@@ -135,11 +134,12 @@ end
 
 "variable: `pconv_grid_ac[j]` for `j` in `convdc`"
 function variable_converter_to_grid_active_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    bigM = 2
     if bounded
         pm.var[:nw][n][:pconv_tf_fr] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_ac",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"],
-        upperbound = pm.ref[:nw][n][:convdc][i]["Pacmax"]
+        lowerbound = -pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM,
+        upperbound =  pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM #TODO derive maximum losses
         )
     else
         pm.var[:nw][n][:pconv_tf_fr] = @variable(pm.model,
@@ -151,11 +151,12 @@ end
 
 "variable: `qconv_grid_ac[j]` for `j` in `convdc`"
 function variable_converter_to_grid_reactive_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    bigM = 2
     if bounded
         pm.var[:nw][n][:qconv_tf_fr] = @variable(pm.model,
         [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_ac",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Qacmin"],
-        upperbound = pm.ref[:nw][n][:convdc][i]["Qacmax"]
+        lowerbound = -pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM,
+        upperbound =  pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM #TODO derive maximum losses
         )
     else
         pm.var[:nw][n][:qconv_tf_fr] = @variable(pm.model,
