@@ -7,15 +7,15 @@ using Mosek
 
 files =
 [
-# "./test/data/case5_2grids.m";
-# "./test/data/case5_acdc.m";
-# "./test/data/case5_b2bdc.m";
-# #"./test/data/case5_dc.m"; #Don't use normally
-# "./test/data/case5_dcgrid.m";
+"./test/data/case5_2grids.m";
+"./test/data/case5_acdc.m";
+"./test/data/case5_b2bdc.m";
+#"./test/data/case5_dc.m"; #Don't use normally
+"./test/data/case5_dcgrid.m";
 "./test/data/case5_dcgrid_b0.m";
-# "./test/data/case24_3zones_acdc.m";
-# "./test/data/case39_acdc.m";
-#"./test/data/case3120sp_acdc.m";
+"./test/data/case24_3zones_acdc.m";
+"./test/data/case39_acdc.m";
+"./test/data/case3120sp_acdc.m";
 ]
 
 
@@ -45,7 +45,7 @@ end
 #
 function fix_things!(data)
     # fix number of poles
-    data["dcpol"] = 1
+    # data["dcpol"] = 1
     #tap = 1
     for (i,conv) in data["convdc"]
         # remove transformer and phase reactor from relaxation
@@ -101,7 +101,7 @@ function print_table_opt_gap(dict)
     for (filename, ff) in dict
         s = s*filename
         l = 5
-        l2 = 7
+        l2 = 8
         p = 100
         s = s *c*string(ff["AC NLP"]["obj"])[1:l2]
         s = s *c*string(ff["BIM SDP"]["obj"])[1:l2]
