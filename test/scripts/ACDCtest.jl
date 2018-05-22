@@ -3,7 +3,7 @@ using PowerModels
 using Ipopt
 #using CPLEX
 using SCS
-using Mosek
+#using Mosek
 
 file_case5acdc = "./test/data/case5_acdc.m"
 file_case5dc ="./test/data/case5_dc.m"
@@ -14,7 +14,7 @@ file_case39 = "./test/data/case39_acdc.m"
 file_case3120 = "./test/data/case3120sp_acdc.m"
 file_case5dcgrid = "./test/data/case5_dcgrid.m"
 file_case5_b2bdc = "./test/data/case5_b2bdc.m"
-file = file_case5dcgrid
+file = file_case3120
 
 data = PowerModels.parse_file(file)
 
@@ -23,7 +23,7 @@ PowerModelsACDC.process_additional_data!(data)
 #scs = SCSSolver(max_iters=100000, verbose=0);
 scs = SCSSolver(max_iters=100000);
 ipopt = IpoptSolver(tol=1e-6, print_level=0)
-mosek = MosekSolver()
+#mosek = MosekSolver()
 s = Dict("output" => Dict("branch_flows" => true))
 
 resultAC = run_acdcopf(file, ACPPowerModel, ipopt; setting = s)

@@ -1,5 +1,5 @@
 function constraint_voltage_product_converter(pm::GenericPowerModel{T}, wr, wi, w_fr, w_to) where {T <: PowerModels.AbstractWRForm}
-    PowerModels.relaxation_complex_product(pm.model, w_fr, w_to, wr, wi)
+    InfrastructureModels.relaxation_complex_product(pm.model, w_fr, w_to, wr, wi)
 #    @constraint(pm.model, (wrf)^2 + (wif)^2 <= w_fr*w_to)
 end
 

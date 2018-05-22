@@ -37,7 +37,7 @@ function process_additional_data!(data)
 end
 
 function is_single_network(data)
-    return data["multinetwork"] == false
+    return !haskey(data, "multinetwork") || data["multinetwork"] == false
 end
 
 function to_pu!(data)

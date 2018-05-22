@@ -3,7 +3,7 @@ using PowerModels
 using Ipopt
 #using CPLEX
 using SCS
-using Mosek
+#using Mosek
 
 files =
 [
@@ -22,7 +22,7 @@ files =
 
 scs = SCSSolver(max_iters=100000);
 ipopt = IpoptSolver(tol=1e-6, print_level=0)
-mosek = MosekSolver()
+#mosek = MosekSolver()
 s = Dict("output" => Dict("branch_flows" => true))
 
 objective = Dict{String, Any}()
@@ -81,11 +81,11 @@ for file in files
     resultSOCBFM = run_acdcopf(data, SOCDFPowerModel, ipopt; setting = s)
     case["BFM SOC"] = exctract_info(resultSOCBFM)
     # #
-    #resultSDP = run_acdcopf(data, SDPWRMPowerModel, mosek; setting = s)
+    #resultSDP = run_acdcopf(data, SDPWRMPowerModel, scs; setting = s)
     #case["BIM SDP"] = exctract_info(resultSDP)
     case["BIM SDP"] = exctract_info(resultSOCBFM)
     # # #
-    resultDC = run_acdcopf(data, DCPPowerModel, mosek; setting = s)
+    resultDC = run_acdcopf(data, DCPPowerModel, ipopt; setting = s)
     case["DC LP"] = exctract_info(resultDC)
     #
     objective[file] = case
@@ -100,27 +100,27 @@ function print_table_opt_gap(dict)
     s = s*"case"*c*"AC NLP"*c* "QC SOC" *c*c* "QCTri SOC" *c*c* "BIM SOC" *c*c* "BFM SOC" *c*c* "BIM SDP" *c*c* "DC LP"*c*raw"\ "[1]*raw"\ "* " \n"
     for (filename, ff) in dict
         s = s*filename
-        l = 5
+        l = 6
         l2 = 8
         p = 100
-        s = s *c*string(ff["AC NLP"]["obj"])[1:l2]
-        s = s *c*string(ff["BIM SDP"]["obj"])[1:l2]
-        s = s *c*string(p*ff["BIM SDP"]["gap"])[1:l]
-        s = s *c*string(ff["QC SOC"]["obj"])[1:l2]
-        s = s *c*string(p*ff["QC SOC"]["gap"])[1:l]
+        s = s *c*string(Base.signif(ff["AC NLP"]["obj"], l))
+        s = s *c*string(Base.signif(ff["BIM SDP"]["obj"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SDP"]["gap"], l))
+        s = s *c*string(Base.signif(ff["QC SOC"]["obj"], l))
+        s = s *c*string(Base.signif(p*ff["QC SOC"]["gap"], l))
         # s = s *c*string(ff["QCTri SOC"]["obj"])[1:l2]
         # s = s *c*string(p*ff["QCTri SOC"]["gap"])[1:l]
-        s = s *c*string(ff["BIM SOC"]["obj"])[1:l2]
-        s = s *c*string(p*ff["BIM SOC"]["gap"])[1:l]
-        s = s *c*string(ff["BFM SOC"]["obj"])[1:l2]
-        s = s *c*string(p*ff["BFM SOC"]["gap"])[1:l]
-        s = s *c*string(ff["DC LP"]["obj"])[1:l2]
-        s = s *c*string(p*ff["DC LP"]["gap"])[1:l]
+        s = s *c*string(Base.signif(ff["BIM SOC"]["obj"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SOC"]["gap"], l))
+        s = s *c*string(Base.signif(ff["BFM SOC"]["obj"], l))
+        s = s *c*string(Base.signif(p*ff["BFM SOC"]["gap"], l))
+        s = s *c*string(Base.signif(ff["DC LP"]["obj"], l))
+        s = s *c*string(Base.signif(p*ff["DC LP"]["gap"], l))
 
         s = s*raw"\ "[1]*raw"\ "*" \n"
     end
     return s
 end
-
+clearconsole()
 stt = print_table_opt_gap(objective)
 print(stt)

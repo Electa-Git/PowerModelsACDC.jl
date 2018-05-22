@@ -5,6 +5,8 @@ module PowerModelsACDC
 using Compat
 using JuMP
 using PowerModels
+using InfrastructureModels
+
 PMs = PowerModels
 
 include("prob/acdcopf.jl")

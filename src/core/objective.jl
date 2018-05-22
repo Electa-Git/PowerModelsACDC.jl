@@ -1,6 +1,6 @@
 ""
 function objective_min_fuel_cost(pm::GenericPowerModel, nws=[pm.cnw])
-    model = PowerModels.check_cost_models(pm, nws)
+    model = PowerModels.check_cost_models(pm)
 
     if model == 1
         return objective_min_pwl_fuel_cost(pm, nws)
@@ -14,7 +14,7 @@ end
 
 ""
 function objective_min_polynomial_fuel_cost(pm::GenericPowerModel, nws=[pm.cnw])
-    PowerModels.check_polynomial_cost_models(pm, nws)
+    PowerModels.check_polynomial_cost_models(pm)
 
     pg = Dict(n => pm.var[:nw][n][:pg] for n in nws)
 #    dc_p = Dict(n => pm.var[:nw][n][:pconv_tf_fr] for n in nws)
