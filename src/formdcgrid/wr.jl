@@ -10,6 +10,6 @@ function constraint_voltage_dc(pm::GenericPowerModel{T}, n::Int) where {T <: Pow
     wdcr = pm.var[:nw][n][:wdcr]
 
     for (i,j) in keys(pm.ref[:nw][n][:buspairsdc])
-        PowerModels.relaxation_complex_product(pm.model, wdc[i], wdc[j], wdcr[(i,j)], 0)
+        InfrastructureModels.relaxation_complex_product(pm.model, wdc[i], wdc[j], wdcr[(i,j)], 0)
     end
 end
