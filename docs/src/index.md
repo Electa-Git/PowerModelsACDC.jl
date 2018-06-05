@@ -32,4 +32,9 @@ Pkg.clone("https://github.com/hakanergun/PowerModelsACDC.jl.git")
 
 !!! note
     This is a research-grade optimization package. Eventually, we hope to make this a
-    stable julia package. 
+    stable julia package.
+
+
+## Special Thanks To
+Jef Beerten (KU Leuven/EnergyVille) for his insights in AC/DC power flow modelling.
+Carleton Coffrin (Los Alamos National Laboratory) for his countless design tips.  

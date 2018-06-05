@@ -7,6 +7,7 @@ function variable_dc_converter(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
     variable_converter_reactive_power(pm, n; kwargs...)
     variable_acside_current(pm, n; kwargs...)
     variable_dcside_power(pm, n; kwargs...)
+    variable_converter_firing_angle(pm, n; kwargs...)
 
     variable_converter_filter_voltage(pm, n; kwargs...)
     variable_converter_internal_voltage(pm, n; kwargs...)
@@ -184,6 +185,21 @@ function variable_dcside_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = t
     end
 end
 
+"variable: `pconv_dc[j]` for `j` in `convdc`"
+function variable_converter_firing_angle(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+    if bounded
+        pm.var[:nw][n][:phiconv] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_phiconv",
+        lowerbound = 0,
+        upperbound =  pi
+        )
+    else
+        pm.var[:nw][n][:phiconv] = @variable(pm.model,
+        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_phiconv",
+        start =  acos( PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Pdcset") / sqrt(PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Pacrated")^2 + PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Qacrated")^2) )
+        )
+    end
+end
 # "variable: `iconv_ac[j]` for `j` in `convdc`"
 # function variable_acside_current(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
 #     pm.var[:nw][n][:iconv_ac] = @variable(pm.model,

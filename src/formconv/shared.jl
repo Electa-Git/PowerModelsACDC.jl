@@ -126,3 +126,11 @@ function add_converter_voltage_setpoint(sol, pm::GenericPowerModel{T}) where {T 
     PowerModels.add_setpoint(sol, pm, "convdc", "vmconv", :wc_ac; scale = (x,item) -> sqrt(x))
     PowerModels.add_setpoint(sol, pm, "convdc", "vmfilt", :wf_ac; scale = (x,item) -> sqrt(x))
 end
+
+function constraint_conv_firing_angle(pm::GenericPowerModel{T}, n::Int, i::Int, S, P1, Q1, P2, Q2) where {T <: PowerModels.AbstractWForms}
+    pc = pm.var[:nw][n][:pconv_ac][i]
+    qc = pm.var[:nw][n][:qconv_ac][i]
+    coeff = (Q2-Q1)/(P2-P1)
+
+    pm.con[:nw][n][:conv_socphi][i] = @constraint(pm.model, qc >= Q1 + (pc-P1) * coeff )
+end

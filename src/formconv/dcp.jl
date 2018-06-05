@@ -81,3 +81,6 @@ end
 "`qconv[i] == qconv`"
 function constraint_reactive_conv_setpoint(pm::GenericPowerModel{T}, n::Int, i, qconv) where {T <: PowerModels.AbstractDCPForm}
 end
+
+function constraint_conv_firing_angle(pm::GenericPowerModel{T}, n::Int, i::Int, S, P1, Q1, P2, Q2) where {T <: PowerModels.AbstractDCPForm}
+end

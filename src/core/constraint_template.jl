@@ -132,7 +132,7 @@ end
 constraint_conv_filter(pm::GenericPowerModel, i::Int) = constraint_conv_filter(pm, pm.cnw, i::Int)
 
 function constraint_conv_transformer(pm::GenericPowerModel, n::Int, i::Int)
-    if !haskey(pm.con[:nw][n], :conv_tf_p)
+    if !haskey(pm.con[:nw][n], :conv_tf_p_fr)
         pm.con[:nw][n][:conv_tf_p_fr] = Dict{Int,ConstraintRef}()
         pm.con[:nw][n][:conv_tf_q_fr] = Dict{Int,ConstraintRef}()
         pm.con[:nw][n][:conv_tf_p_to] = Dict{Int,ConstraintRef}()
@@ -142,3 +142,21 @@ function constraint_conv_transformer(pm::GenericPowerModel, n::Int, i::Int)
     constraint_conv_transformer(pm, n, i, conv["rtf"], conv["xtf"], conv["busac_i"], conv["tm"], Bool(conv["transformer"]))
 end
 constraint_conv_transformer(pm::GenericPowerModel, i::Int) = constraint_conv_transformer(pm, pm.cnw, i::Int)
+
+function constraint_conv_firing_angle(pm::GenericPowerModel, n::Int, i::Int)
+    if !haskey(pm.con[:nw][n], :conv_cosphi)
+        pm.con[:nw][n][:conv_cosphi] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_sinphi] = Dict{Int,ConstraintRef}()
+    end
+    if !haskey(pm.con[:nw][n], :conv_socphi)
+        pm.con[:nw][n][:conv_socphi] = Dict{Int,ConstraintRef}()
+    end
+    conv = ref(pm, n, :convdc, i)
+    S = conv["Pacrated"]
+    P1 = cos(0) * S
+    Q1 = sin(0) * S
+    P2 = cos(pi) * S
+    Q2 = sin(pi) * S
+    constraint_conv_firing_angle(pm, n, i, S, P1, Q1, P2, Q2)
+end
+constraint_conv_firing_angle(pm::GenericPowerModel, i::Int) = constraint_conv_firing_angle(pm, pm.cnw, i::Int)

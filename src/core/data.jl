@@ -231,15 +231,25 @@ function set_conv_pu_ohm(conv, Zbase)
 end
 
 function check_conv_parameters(conv)
-    conv["Pacrated"] = max(abs(conv["Pacmax"]),abs(conv["Pacmin"]))
-    conv["Qacrated"] = max(abs(conv["Qacmax"]),abs(conv["Qacmin"]))
     assert(conv["LossA"]>=0)
     assert(conv["LossB"]>=0)
     assert(conv["LossCrec"]>=0)
     assert(conv["LossCinv"]>=0)
     conv_id = conv["index"]
+    conv["Pacrated"] = max(abs(conv["Pacmax"]),abs(conv["Pacmin"]))
+    conv["Qacrated"] = max(abs(conv["Qacmax"]),abs(conv["Qacmin"]))
+    if conv["Imax"] < sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
+        warn(PowerModels.LOGGER, "Inconsistent current limit for converter $conv_id, it will be updated.")
+        conv["Imax"] = sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
+    end
     if conv["LossCrec"] != conv["LossCinv"]
         warn(PowerModels.LOGGER, "The losses of converter $conv_id are different in inverter and rectifier mode, inverter losses are used.")
+    end
+    if conv["islcc"] == 1
+        warn(PowerModels.LOGGER, "Converter $conv_id is an LCC, reactive power limits might be updated.")
+        conv["Qacmax"] = conv["Pacrated"]
+        conv["Qacrated"] = conv["Pacrated"]
+        conv["Qacmin"] =  0
     end
     assert(conv["Pacmax"]>=conv["Pacmin"])
     assert(conv["Qacmax"]>=conv["Qacmin"])
@@ -304,6 +314,7 @@ function get_converter(conv_i, dcbus, acbus, kVbaseAC, vmax, vmin, status, pac, 
     conv["LossCrec"] = 0
     conv["LossCinv"] = 0
     conv["droop"] = 0
+    conv["islcc"] = 0
     conv["Pdcset"] = 0
     conv["Vdcset"] = 1
     conv["tm"] = 1

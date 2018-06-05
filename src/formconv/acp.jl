@@ -118,3 +118,12 @@ function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, bv, fi
     pm.con[:nw][n][:conv_kcl_p][i] = @constraint(pm.model,   ppr_fr + ptf_to == 0 )
     pm.con[:nw][n][:conv_kcl_q][i] = @NLconstraint(pm.model, qpr_fr + qtf_to +  (-bv) * filter *vmf^2 == 0)
 end
+
+function constraint_conv_firing_angle(pm::GenericPowerModel{T}, n::Int, i::Int, S, P1, Q1, P2, Q2) where {T <: PowerModels.AbstractACPForm}
+    p = pm.var[:nw][n][:pconv_ac][i]
+    q = pm.var[:nw][n][:qconv_ac][i]
+    phi = pm.var[:nw][n][:phiconv][i]
+
+    pm.con[:nw][n][:conv_cosphi][i] = @NLconstraint(pm.model,   p == cos(phi) * S)
+    pm.con[:nw][n][:conv_sinphi][i] = @NLconstraint(pm.model,   q == sin(phi) * S)
+end

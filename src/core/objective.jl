@@ -39,7 +39,7 @@ end
 
 ""
 function objective_min_polynomial_fuel_cost(pm::GenericPowerModel{T}, nws=[pm.cnw]) where {T <: PowerModels.AbstractConicPowerFormulation}
-    PowerModels.check_polynomial_cost_models(pm, nws)
+    PowerModels.check_polynomial_cost_models(pm)
 
     pg = Dict(n => pm.var[:nw][n][:pg] for n in nws)
 #    dc_p = Dict(n => pm.var[:nw][n][:pconv_tf_fr] for n in nws)

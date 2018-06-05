@@ -8,7 +8,9 @@ function get_solution_acdc(pm::GenericPowerModel, sol::Dict{String,Any})
         add_dcconverter_setpoint(sol, pm)
         add_dcgrid_flow_setpoint(sol,pm)
         add_dcbranch_losses(sol, pm)
-        add_dcconv_losses(sol, pm)
+        add_dcconverter_losses(sol, pm)
+        add_dcconverter_voltage_setpoint(sol, pm)
+        add_dcconverter_firing_angle(sol, pm)
     end
     return sol
 end
@@ -24,7 +26,7 @@ function add_dcconverter_setpoint(sol, pm::GenericPowerModel)
     PowerModels.add_setpoint(sol, pm, "convdc", "iconv", :iconv_ac)
     PowerModels.add_setpoint(sol, pm, "convdc", "ptf_fr", :pconv_tf_fr)
     PowerModels.add_setpoint(sol, pm, "convdc", "ptf_to", :pconv_tf_to)
-    add_converter_voltage_setpoint(sol, pm)
+    add_dcconverter_voltage_setpoint(sol, pm)
 end
 
 function add_dcgrid_flow_setpoint(sol, pm::GenericPowerModel)
@@ -41,7 +43,7 @@ function add_dcbranch_losses(sol, pm::GenericPowerModel)
     end
 end
 
-function add_dcconv_losses(sol, pm::GenericPowerModel)
+function add_dcconverter_losses(sol, pm::GenericPowerModel)
     for (i, convdc) in sol["convdc"]
         pf = convdc["pdc"]
         pt = convdc["pgrid"]
@@ -58,9 +60,13 @@ function add_dc_bus_voltage_setpoint(sol, pm::GenericPowerModel)
     PowerModels.add_setpoint(sol, pm, "busdc", "vm", :vdcm)
 end
 
-function add_converter_voltage_setpoint(sol, pm::GenericPowerModel)
+function add_dcconverter_voltage_setpoint(sol, pm::GenericPowerModel)
     PowerModels.add_setpoint(sol, pm, "convdc", "vmconv", :vmc)
     PowerModels.add_setpoint(sol, pm, "convdc", "vaconv", :vac)
     PowerModels.add_setpoint(sol, pm, "convdc", "vmfilt", :vmf)
     PowerModels.add_setpoint(sol, pm, "convdc", "vafilt", :vaf)
+end
+
+function add_dcconverter_firing_angle(sol, pm::GenericPowerModel)
+    PowerModels.add_setpoint(sol, pm, "convdc", "phi", :phiconv)
 end

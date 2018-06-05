@@ -9,6 +9,7 @@ files =
 [
 "./test/data/case5_2grids.m";
 "./test/data/case5_acdc.m";
+"./test/data/case5_lcc.m";
 "./test/data/case5_b2bdc.m";
 #"./test/data/case5_dc.m"; #Don't use normally
 "./test/data/case5_dcgrid.m";
