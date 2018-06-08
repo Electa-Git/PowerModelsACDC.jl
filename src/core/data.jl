@@ -247,6 +247,13 @@ function check_conv_parameters(conv)
     end
     if conv["islcc"] == 1
         warn(PowerModels.LOGGER, "Converter $conv_id is an LCC, reactive power limits might be updated.")
+        if abs(conv["Pacmax"]) >= abs(conv["Pacmin"])
+            conv["phimin"] = 0
+            conv["phimax"] = acos(conv["Pacmin"] / conv["Pacmax"])
+        else
+            conv["phimin"] = pi - acos(conv["Pacmax"] / conv["Pacmin"])
+            conv["phimax"] = pi
+        end
         conv["Qacmax"] = conv["Pacrated"]
         conv["Qacrated"] = conv["Pacrated"]
         conv["Qacmin"] =  0
