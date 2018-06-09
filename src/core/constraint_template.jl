@@ -77,7 +77,8 @@ function constraint_converter_current(pm::GenericPowerModel, n::Int, i::Int)
     end
     conv = ref(pm, n, :convdc, i)
     Vmax = conv["Vmmax"]
-    constraint_converter_current(pm, n, i, Vmax)
+    Imax = conv["Imax"]
+    constraint_converter_current(pm, n, i, Vmax, Imax)
 end
 constraint_converter_current(pm::GenericPowerModel, i::Int) = constraint_converter_current(pm, pm.cnw, i::Int)
 

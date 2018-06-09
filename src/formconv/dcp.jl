@@ -53,7 +53,7 @@ end
 
 
 ""
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, Umax) where {T <: PowerModels.AbstractDCPForm}
+function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, i::Int, Umax, Imax) where {T <: PowerModels.AbstractDCPForm}
     # not used
 end
 
