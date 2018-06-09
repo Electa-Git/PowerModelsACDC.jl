@@ -1,13 +1,13 @@
 # Type Hierarchy
 The original type hierarchy of PowerModels is used.
 
-For details on `GenericPowerModel`, see PowerModels.jl documentation.
+For details on `GenericPowerModel`, see PowerModels.jl [documentation](https://lanl-ansi.github.io/PowerModels.jl/stable/).
 
 #  Formulations overview
 
-Extending PowerModels,  formulations for balanced  OPF in DC grids have been implemented for these corresponding AC grid formulations
-- DCPPowerModel
+Extending PowerModels,  formulations for balanced  OPF in DC grids have been implemented and mapped to the following AC grid formulations:
 - ACPPowerModel
+- DCPPowerModel
 - SOCWRPowerModel
 - SDPWRMPowerModel
 - QCWRPowerModel
@@ -18,10 +18,10 @@ Note that from the perspective of OPF convex relaxation for DC grids, applying t
 
 # Formulation details
 The formulations are categorized as Bus Injection Model (BIM) or Branch Flow Model (BFM).
-- Applied, to DC grids, the BIM uses series conductance notation, and adds separate equations for the to and from line flow.
-- Conversely, BFM uses series resistance parameters, and adds only a single equation per line, representing $P_{lij} + P_{lji} = P_{l}^{loss}.
+- Applied to DC grids, the BIM uses series conductance notation, and adds separate equations for the to and from line flow.
+- Conversely, BFM uses series resistance parameters, and adds only a single equation per line, representing $P_{lij} + P_{lji} = P_{l}^{loss}$.
 
-Note that in a DC grid, under the static power flow assumption, power is purely active, impedance reduces to resistance, and voltages and currents are purely defined by their magnitude.
+Note that in a DC grid, under the static power flow assumption, power is purely active, impedance reduces to resistance, and voltages and currents are defined by magnitude and direction.
 
 
 Parameters used:
@@ -32,7 +32,7 @@ Parameters used:
 - $b$ converter loss proportional to current magnitude
 - $c$ converter loss proportional to square of current magnitude
 
-Note that generally, $a \geq 0, b \geq 0, c \geq 0$
+Note that generally, $a \geq 0, b \geq 0, c \geq 0$ as physical losses are positive.
 
 
 
@@ -44,11 +44,7 @@ Note that generally, $a \geq 0, b \geq 0, c \geq 0$
 
 ### ACDC converters
 - Power balance: $P^{conv, ac}_{ij} + P^{conv, dc}_{ji}$ = $a + b \cdot I^{conv, ac} + c \cdot (I^{conv, ac})^2$.
-- Current variable model: $(P^{conv,ac}_{ij})^2$ + $(Q^{conv,ac}_{ij})^2$ = $3 \cdot U_i^2 \cdot  (I^{conv, ac})^2$.
-
-### Transformer, filter and phase reactor of converters
-TODO
-
+- Current variable model: $(P^{conv,ac}_{ij})^2$ + $(Q^{conv,ac}_{ij})^2$ = $U_i^2 \cdot  (I^{conv, ac})^2$.
 
 ## DCPPowerModel (NF)
 Due to the absence of voltage angles in DC grids, the DC power flow model reduces to network flow (NF) under the 'DC' assumptions
@@ -59,11 +55,6 @@ Due to the absence of voltage angles in DC grids, the DC power flow model reduce
 ### ACDC converters
 Under the same assumptions as MATPOWER ($U_i \approx 1$), $P^{conv, ac}_{ij} \approx I^{conv, ac}$ allowing the converter model to be formulated as:
 - Network flow model: $P^{conv, ac}_{ij}$ + $P^{conv, dc}_{ji}$ = $a + b P^{conv, ac}_{ij}$
-
-
-
-### Transformer, filter and phase reactor of converters
-TODO
 
 
 ## AC WR(M) variable space.  (BFM)
@@ -79,8 +70,8 @@ The variable $u^{dc}_{ii}$ represents $(U^{dc}_{i})^2$ and $i^{dc}_{ij}$ represe
 ### ACDC converters
 Two separate current variables, $I^{conv, ac}$ and $i^{conv, ac, sq}$ are defined, the nonconvex relation $i^{conv, ac, sq} = (I^{conv, ac})^2$ is convexified, using $U_i \leq U_i^{max}$:
 - Power balance: $P^{conv, ac}_{ij} + P^{conv, dc}_{ji}$ = $a + b\cdot I^{conv, ac} + c\cdot i^{conv, ac, sq}$.
-- Squared current: $(P^{conv, ac}_{ij})^2 + (Q^{conv, ac}_{ij})^2 \leq 3 \cdot u_{ii} \cdot  i^{conv, ac, sq}$
-- Linear current: $(P^{conv, ac}_{ij})^2 + (Q^{conv, ac}_{ij})^2 \leq 3 \cdot (U_i^{max})^2 \cdot  (I^{conv, ac})^2$
+- Squared current: $(P^{conv, ac}_{ij})^2 + (Q^{conv, ac}_{ij})^2 \leq  u_{ii} \cdot  i^{conv, ac, sq}$
+- Linear current: $(P^{conv, ac}_{ij})^2 + (Q^{conv, ac}_{ij})^2 \leq  (U_i^{max})^2 \cdot  (I^{conv, ac})^2$
 - Linking both current variables: $(I^{conv, ac})^2$ $\leq$ $i^{conv, ac, sq}$
 
 
@@ -98,7 +89,3 @@ The variable $u^{dc}_{ii}$ represents $(U^{dc}_{i})^2$ and $u^{dc}_{ij}$ represe
 
 ### ACDC converters
 An ACDC converter model in BIM is not derived.
-
-
-### Transformer, filter and phase reactor of converters
-TODO
