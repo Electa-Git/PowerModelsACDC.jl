@@ -44,7 +44,7 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
     if reactor
         bc = imag(1/(im*xc))
         v = 1 # pu, assumption DC approximation
-        pm.con[:nw][n][:conv_pr_p_fr][i] = @constraint(pm.model, ppr_fr == -bc*(v^2)*(vaf-vac))
+        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, ppr_fr == -bc*(v^2)*(vaf-vac))
         pm.con[:nw][n][:conv_pr_p_to][i] = @constraint(pm.model, pconv == -bc*(v^2)*(vac-vaf))
     else
         pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, vac == vaf)
