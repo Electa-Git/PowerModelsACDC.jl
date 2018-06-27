@@ -11,10 +11,12 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, i::Int, a
     v = 1 #pu, assumption to approximate current
     cm_conv_ac = pconv_ac/v # can actually be negative, not a very nice model...
     pm.con[:nw][n][:conv_loss][i] = @constraint(pm.model, pconv_ac + pconv_dc == a + b*cm_conv_ac )
+    #pm.con[:nw][n][:conv_loss][i] = @constraint(pm.model, pconv_ac + pconv_dc == a  )
 end
 
 function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractDCPForm}
     ptf_fr = pm.var[:nw][n][:pconv_tf_fr][i]
+    ptf_to = pm.var[:nw][n][:pconv_tf_to][i]
     #filter voltage angle
     vaf = pm.var[:nw][n][:vaf][i]
     #acbus voltage angle
@@ -24,13 +26,16 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, r
         btf = imag(1/(im*xtf)) # classic DC approach to obtain susceptance form
         v = 1 # pu, assumption DC approximation
         pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, ptf_fr == -btf*(v^2)/tm*(va-vaf))
+        pm.con[:nw][n][:conv_tf_p_to][i] = @constraint(pm.model, ptf_to == -btf*(v^2)/tm*(vaf-va))
     else
-        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, va == vaf)
+        pm.con[:nw][n][:conv_tf_p_to][i] = @constraint(pm.model, va == vaf)
+        pm.con[:nw][n][:conv_tf_p_fr][i] = @constraint(pm.model, ptf_fr + ptf_to  == 0)
     end
 end
 
 function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractDCPForm}
     ppr_fr = pm.var[:nw][n][:pconv_pr_fr][i]
+    pconv = pm.var[:nw][n][:pconv_ac][i]
     #filter voltage angle
     vaf = pm.var[:nw][n][:vaf][i]
     #converter voltage angle
@@ -39,7 +44,8 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
     if reactor
         bc = imag(1/(im*xc))
         v = 1 # pu, assumption DC approximation
-        pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, ppr_fr == -bc*(v^2)*(vaf-vac))
+        pm.con[:nw][n][:conv_pr_p_fr][i] = @constraint(pm.model, ppr_fr == -bc*(v^2)*(vaf-vac))
+        pm.con[:nw][n][:conv_pr_p_to][i] = @constraint(pm.model, pconv == -bc*(v^2)*(vac-vaf))
     else
         pm.con[:nw][n][:conv_pr_p][i] = @constraint(pm.model, vac == vaf)
     end
