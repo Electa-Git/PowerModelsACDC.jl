@@ -74,8 +74,32 @@ function to_pu_single_network!(data)
     end
 end
 
-function to_pu_multinetwork!(data, MVAbase)
-    #TODO
+function to_pu_multinetwork!(data)
+    MVAbase = data["baseMVA"]
+    for (n, network) in data["nw"]
+        if haskey(data["nw"][n], "convdc")
+            for (i, conv) in data["nw"][n]["convdc"]
+                dcbus = conv["busdc_i"]
+                kVbase = conv["basekVac"]
+                Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
+                Ibase = get_pu_bases(MVAbase, kVbase)["I"]
+
+                set_conv_pu_power(conv, MVAbase)
+                set_conv_pu_volt(conv, kVbase*sqrt(3))
+                set_conv_pu_ohm(conv, Zbase)
+            end
+        end
+        if haskey(data["nw"][n], "branchdc")
+            for (i, branchdc) in data["nw"][n]["branchdc"]
+                set_branchdc_pu(branchdc, MVAbase)
+            end
+        end
+        if haskey(data["nw"][n], "busdc")
+            for (i, busdc) in data["nw"][n]["busdc"]
+                set_busdc_pu(busdc, MVAbase)
+            end
+        end
+    end
 end
 
 function convert_matpowerdcline_to_branchdc!(data, MVAbase)
@@ -135,7 +159,53 @@ function convert_matpowerdcline_to_branchdc_single_network!(data, MVAbase)
 end
 
 function convert_matpowerdcline_to_branchdc_multinetwork!(data, MVAbase)
-    #TODO
+    for (n, network) in data["nw"]
+        if haskey(data["nw"][n], "dcline") && haskey(data["nw"][n]["dcline"], "1")
+            if !haskey(data["nw"][n], "convdc")
+                data["nw"][n]["convdc"] = Dict{String, Any}()
+            end
+            if !haskey(data["nw"][n], "branchdc")
+                data["nw"][n]["branchdc"] = Dict{String, Any}()
+            end
+            if !haskey(data["nw"][n], "busdc")
+                data["nw"][n]["busdc"] = Dict{String, Any}()
+            end
+            conv_i = length(data["nw"][n]["convdc"])
+            branch_i = length(data["nw"][n]["branchdc"])
+            bus_i = length(data["nw"][n]["busdc"])
+
+            for (i, dcline) in data["nw"][n]["dcline"]
+                # make DC bus from side
+                bus_i = bus_i + 1
+                data["nw"][n]["busdc"]["$bus_i"] = get_busdc(bus_i)
+
+                prev_bus = bus_i - 1
+                if haskey(data["nw"][n]["busdc"],["$prev_bus"])
+                    data["nw"][n]["busdc"]["$bus_i"]["basekVdc"] = data["nw"][n]["busdc"]["$prev_bus"]["basekVdc"]
+                else
+                    data["nw"][n]["busdc"]["$bus_i"]["basekVdc"] = 100 # arbitrary choice
+                end
+
+                # DC bus to
+                bus_i = bus_i + 1
+                data["nw"][n]["busdc"]["$bus_i"] = get_busdc(bus_i)
+                prev_bus = bus_i - 1
+                if haskey(data["nw"][n]["busdc"],["$prev_bus"])
+                    data["nw"][n]["busdc"]["$bus_i"]["basekVdc"] = data["nw"][n]["busdc"]["$prev_bus"]["basekVdc"]
+                else
+                    data["nw"][n]["busdc"]["$bus_i"]["basekVdc"] = 100 # arbitrary choice
+                end
+
+                branch_i = branch_i + 1
+                conv_i = conv_i + 1
+                converter1, converter2, branchdc = convert_to_dcbranch_and_converters(data["nw"][n], dcline, branch_i, conv_i, bus_i-1, bus_i)
+                data["nw"][n]["branchdc"]["$branch_i"] = branchdc
+                data["nw"][n]["convdc"]["$conv_i"] = converter1
+                conv_i = conv_i + 1
+                data["nw"][n]["convdc"]["$conv_i"] = converter2
+            end
+        end
+    end
 end
 
 
@@ -177,8 +247,7 @@ function fix_data_multinetwork!(data, MVAbase)
         end
         if haskey(data["nw"][n], "branchdc")
             for (i, branchdc) in data["nw"][n]["branchdc"]
-                check_branch_parameters(branchdc)
-                set_branch_pu(branchdc, rescale)
+                check_branchdc_parameters(branchdc)
             end
         end
         if !haskey(data["nw"][n], "dcpol")

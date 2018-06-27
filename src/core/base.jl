@@ -8,7 +8,6 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
         pm.ref[:nw][n][:arcs_dcgrid_to]   = [(i,branch["tbusdc"],branch["fbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]
         pm.ref[:nw][n][:arcs_dcgrid] = [pm.ref[:nw][n][:arcs_dcgrid_from]; pm.ref[:nw][n][:arcs_dcgrid_to]]
         pm.ref[:nw][n][:arcs_conv_acdc] = [(i,conv["busac_i"],conv["busdc_i"]) for (i,conv) in pm.ref[:nw][n][:convdc]]
-
         #bus arcs of the DC grid
         bus_arcs_dcgrid = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
         for (l,i,j) in pm.ref[:nw][n][:arcs_dcgrid]
