@@ -114,7 +114,7 @@ constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, i::Int) = constr
 
 function constraint_conv_reactor(pm::GenericPowerModel, n::Int, i::Int)
     if !haskey(pm.con[:nw][n], :conv_pr_p_fr)
-        pm.con[:nw][n][:conv_pr_p_fr] = Dict{Int,ConstraintRef}()
+        pm.con[:nw][n][:conv_pr_p] = Dict{Int,ConstraintRef}()
         pm.con[:nw][n][:conv_pr_p_to] = Dict{Int,ConstraintRef}()
         pm.con[:nw][n][:conv_pr_q] = Dict{Int,ConstraintRef}()
     end
