@@ -11,6 +11,8 @@ result["solution"]["busdc"]["1"]
 result["solution"]["convdc"]["1"]
 ```
 
+You can also find a test script in the folder `"./test/scripts"`.
+
 ## Modifying settings
 The flow AC and DC branch results are not written to the result by default. To inspect the flow results, pass a settings Dict
 ```julia
