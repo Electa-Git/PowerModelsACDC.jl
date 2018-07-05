@@ -1,5 +1,5 @@
 # Constraints
-All the OPF constraints for the AC grids have been re-used from PowerModels.jl, and are therefore not repeated here. 
+All the OPF constraints for the AC grids have been re-used from PowerModels.jl, and are therefore not repeated here.
 
 ```@meta
 CurrentModule = PowerModelsACDC
@@ -22,6 +22,12 @@ constraint_dc_voltage_magnitude_setpoint
 ### KCL Constraints
 
 ```@docs
+constraint_kcl_shunt_dcgrid
+```
+## AC Bus Constraints
+
+### KCL Constraints
+```@docs
 constraint_kcl_shunt
 ```
 
@@ -31,7 +37,7 @@ constraint_kcl_shunt
 
 ```@docs
 constraint_ohms_dc_branch
-constraint_kcl_shunt_dcgrid
+
 ```
 
 
@@ -49,8 +55,20 @@ constraint_converter_losses
 constraint_converter_current
 ```
 
-### Setpoint Constraints
+### Setpoint Constraints (PF only)
 
 ```@docs
 constraint_active_conv_setpoint
+```
+
+### Converter auxiliary constraints
+```@docs
+constraint_conv_transformer
+constraint_conv_reactor
+constraint_conv_filter
+```
+
+### Converter firing angle for LCC
+```@docs
+constraint_conv_firing_angle
 ```

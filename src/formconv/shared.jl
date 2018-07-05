@@ -24,6 +24,17 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, i::Int, a
     pm.con[:nw][n][:conv_loss][i] = @constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv_sq)
 end
 
+"""
+Converter transformer constraints
+
+```
+p_tf_fr ==  g/(tm^2)*w_fr + -g/(tm)*wr + -b/(tm)*wi)
+q_tf_fr == -b/(tm^2)*w_fr +  b/(tm)*wr + -g/(tm)*wi)
+p_tf_to ==  g*w_to + -g/(tm)*wr     + -b/(tm)*(-wi))
+q_tf_to == -b*w_to +  b/(tm)*wr     + -g/(tm)*(-wi))
+```
+"""
+
 function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractWRForms}
     ptf_fr = pm.var[:nw][n][:pconv_tf_fr][i]
     qtf_fr = pm.var[:nw][n][:qconv_tf_fr][i]
@@ -64,6 +75,16 @@ function ac_power_flow_constraints_w(pm::GenericPowerModel{T}, g, b, w_fr, w_to,
     return c1, c2, c3, c4
 end
 
+"""
+Converter reactor constraints
+
+```
+p_pr_fr ==  g/(tm^2)*w_fr + -g/(tm)*wr + -b/(tm)*wi)
+q_pr_fr == -b/(tm^2)*w_fr +  b/(tm)*wr + -g/(tm)*wi)
+p_pr_to ==  g*w_to + -g/(tm)*wr     + -b/(tm)*(-wi))
+q_pr_to == -b*w_to +  b/(tm)*wr     + -g/(tm)*(-wi))
+```
+"""
 
 function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractWRForms}
     ppr_fr = pm.var[:nw][n][:pconv_pr_fr][i]
@@ -97,6 +118,14 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, i::Int, rc, x
     end
 end
 
+"""
+Converter filter constraints
+
+```
+p_pr_fr + p_tf_to == 0
+q_pr_fr + q_tf_to + -bv*filter*wf == 0
+```
+"""
 
 function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, i::Int, bv, filter) where {T <: PowerModels.AbstractWForms}
     ppr_fr = pm.var[:nw][n][:pconv_pr_fr][i]
@@ -126,6 +155,19 @@ function add_converter_voltage_setpoint(sol, pm::GenericPowerModel{T}) where {T 
     PowerModels.add_setpoint(sol, pm, "convdc", "vmconv", :wc_ac; scale = (x,item) -> sqrt(x))
     PowerModels.add_setpoint(sol, pm, "convdc", "vmfilt", :wf_ac; scale = (x,item) -> sqrt(x))
 end
+
+"""
+LCC firing angle constraints
+
+```
+qconv_ac >= Q1 + (pconv_ac-P1) * (Q2-Q1)/(P2-P1)
+
+P1 = cos(0) * Srated
+Q1 = sin(0) * Srated
+P2 = cos(pi) * Srated
+Q2 = sin(pi) * Srated
+```
+"""
 
 function constraint_conv_firing_angle(pm::GenericPowerModel{T}, n::Int, i::Int, S, P1, Q1, P2, Q2) where {T <: PowerModels.AbstractWForms}
     pc = pm.var[:nw][n][:pconv_ac][i]
