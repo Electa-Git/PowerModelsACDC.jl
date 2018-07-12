@@ -22,7 +22,7 @@ function post_acdcpf(pm::GenericPowerModel)
     PowerModels.variable_branch_flow(pm, bounded = false)
 
     # dirty, should be improved in the future TODO
-    if typeof(pm) <: PowerModels.SOCDFPowerModel
+    if typeof(pm) <: PowerModels.SOCBFPowerModel
         PowerModels.variable_branch_current(pm, bounded = false)
     end
 
@@ -56,7 +56,7 @@ function post_acdcpf(pm::GenericPowerModel)
 
     for i in PowerModels.ids(pm, :branch)
         # dirty, should be improved in the future TODO
-        if typeof(pm) <: PowerModels.SOCDFPowerModel
+        if typeof(pm) <: PowerModels.SOCBFPowerModel
             PowerModels.constraint_flow_losses(pm, i)
             PowerModels.constraint_voltage_magnitude_difference(pm, i)
             PowerModels.constraint_branch_current(pm, i)

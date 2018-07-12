@@ -79,7 +79,7 @@ for file in files
     resultSOCBIM = run_acdcopf(data, SOCWRPowerModel, ipopt; setting = s)
     case["BIM SOC"] = exctract_info(resultSOCBIM)
     # #
-    resultSOCBFM = run_acdcopf(data, SOCDFPowerModel, ipopt; setting = s)
+    resultSOCBFM = run_acdcopf(data, SOCBFPowerModel, ipopt; setting = s)
     case["BFM SOC"] = exctract_info(resultSOCBFM)
     # #
     #resultSDP = run_acdcopf(data, SDPWRMPowerModel, scs; setting = s)

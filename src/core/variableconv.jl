@@ -1,132 +1,129 @@
 "All converter variables"
-function variable_dc_converter(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
-    variable_conv_tranformer_flow(pm, n; kwargs...)
-    variable_conv_reactor_flow(pm, n; kwargs...)
+function variable_dc_converter(pm::GenericPowerModel; kwargs...)
+    variable_conv_tranformer_flow(pm; kwargs...)
+    variable_conv_reactor_flow(pm; kwargs...)
 
-    variable_converter_active_power(pm, n; kwargs...)
-    variable_converter_reactive_power(pm, n; kwargs...)
-    variable_acside_current(pm, n; kwargs...)
-    variable_dcside_power(pm, n; kwargs...)
-    variable_converter_firing_angle(pm, n; kwargs...)
+    variable_converter_active_power(pm; kwargs...)
+    variable_converter_reactive_power(pm; kwargs...)
+    variable_acside_current(pm; kwargs...)
+    variable_dcside_power(pm; kwargs...)
+    variable_converter_firing_angle(pm; kwargs...)
 
-    variable_converter_filter_voltage(pm, n; kwargs...)
-    variable_converter_internal_voltage(pm, n; kwargs...)
+    variable_converter_filter_voltage(pm; kwargs...)
+    variable_converter_internal_voltage(pm; kwargs...)
 
-    variable_converter_to_grid_active_power(pm, n; kwargs...)
-    variable_converter_to_grid_reactive_power(pm, n; kwargs...)
+    variable_converter_to_grid_active_power(pm; kwargs...)
+    variable_converter_to_grid_reactive_power(pm; kwargs...)
 end
 
-function variable_conv_tranformer_flow(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
-    variable_conv_transformer_active_power_to(pm, n; kwargs...)
-    variable_conv_transformer_reactive_power_to(pm, n; kwargs...)
+function variable_conv_tranformer_flow(pm::GenericPowerModel; kwargs...)
+    variable_conv_transformer_active_power_to(pm; kwargs...)
+    variable_conv_transformer_reactive_power_to(pm; kwargs...)
 end
 
-function variable_conv_reactor_flow(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
-    variable_conv_reactor_active_power_from(pm, n; kwargs...)
-    variable_conv_reactor_reactive_power_from(pm, n; kwargs...)
+function variable_conv_reactor_flow(pm::GenericPowerModel; kwargs...)
+    variable_conv_reactor_active_power_from(pm; kwargs...)
+    variable_conv_reactor_reactive_power_from(pm; kwargs...)
 end
-
-
 
 "variable: `pconv_ac[j]` for `j` in `convdc`"
-function variable_converter_active_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_active_power(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     if bounded
-        pm.var[:nw][n][:pconv_ac] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_ac",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"],
-        upperbound = pm.ref[:nw][n][:convdc][i]["Pacmax"]
+        PowerModels.var(pm, nw, cnd)[:pconv_ac] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_pconv_ac",
+        lowerbound = PowerModels.ref(pm, nw, :convdc, i, "Pacmin", cnd),
+        upperbound = PowerModels.ref(pm, nw, :convdc, i, "Pacmax", cnd)
         )
     else
-        pm.var[:nw][n][:pconv_ac] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_ac",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "P_g")
+        PowerModels.var(pm, nw, cnd)[:pconv_ac] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_pconv_ac",
+        start = PowerModels.getval(ref(pm, nw, :convdc, i), "P_g", cnd, 1.0)
         )
     end
 end
 
 "variable: `qconv_ac[j]` for `j` in `convdc`"
-function variable_converter_reactive_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_reactive_power(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     if bounded
-        pm.var[:nw][n][:qconv_ac] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_ac",
-        lowerbound = pm.ref[:nw][n][:convdc][i]["Qacmin"],
-        upperbound = pm.ref[:nw][n][:convdc][i]["Qacmax"]
+        PowerModels.var(pm, nw, cnd)[:qconv_ac] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_qconv_ac",
+        lowerbound = PowerModels.ref(pm, nw, :convdc, i, "Qacmin", cnd),
+        upperbound = PowerModels.ref(pm, nw, :convdc, i, "Qacmax", cnd)
         )
     else
-        pm.var[:nw][n][:qconv_ac] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_ac",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Q_g")
+        PowerModels.var(pm, nw, cnd)[:qconv_ac] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_qconv_ac",
+        start = PowerModels.getval(ref(pm, nw, :convdc, i), "Q_g", cnd, 1.0)
         )
     end
 end
 
 
 "variable: `pconv_grid_ac_to[j]` for `j` in `convdc`"
-function variable_conv_transformer_active_power_to(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_conv_transformer_active_power_to(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 2;
     if bounded
-        pm.var[:nw][n][:pconv_tf_to] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_tf_to",
-#        lowerbound = pm.ref[:nw][n][:convdc][i]["Pacmin"],
-        lowerbound = -pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM,
-        upperbound =  pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM
+        PowerModels.var(pm, nw, cnd)[:pconv_tf_to] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_pconv_tf_to",
+        lowerbound = -PowerModels.ref(pm, nw, :convdc, i, "Pacrated", cnd) * bigM,
+        upperbound =  PowerModels.ref(pm, nw, :convdc, i, "Pacrated", cnd) * bigM
         )
     else
-        pm.var[:nw][n][:pconv_tf_to] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_tf_to",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "P_g")
+        PowerModels.var(pm, nw, cnd)[:pconv_tf_to] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_pconv_tf_to",
+        start = PowerModels.getval(ref(pm, nw, :convdc, i), "P_g", cnd, 1.0)
         )
     end
 end
 
 "variable: `qconv_grid_ac_to[j]` for `j` in `convdc`"
-function variable_conv_transformer_reactive_power_to(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_conv_transformer_reactive_power_to(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 2;
     if bounded
-        pm.var[:nw][n][:qconv_tf_to] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_tf_to",
-        lowerbound = -pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM,
-        upperbound =  pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM
+        PowerModels.var(pm, nw, cnd)[:qconv_tf_to] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_qconv_tf_to",
+        lowerbound = -PowerModels.ref(pm, nw, :convdc, i, "Qacrated", cnd) * bigM,
+        upperbound =  PowerModels.ref(pm, nw, :convdc, i, "Qacrated", cnd) * bigM
         )
     else
-        pm.var[:nw][n][:qconv_tf_to] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_tf_to",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Q_g")
+        PowerModels.var(pm, nw, cnd)[:qconv_tf_to] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_qconv_tf_to",
+        start = PowerModels.getval(ref(pm, nw, :convdc, i), "Q_g", cnd, 1.0)
         )
     end
 end
 
 
 "variable: `pconv_pr_from[j]` for `j` in `convdc`"
-function variable_conv_reactor_active_power_from(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    bigM = 2
+function variable_conv_reactor_active_power_from(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+    bigM = 2;
     if bounded
-        pm.var[:nw][n][:pconv_pr_fr] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_pr_from",
-        lowerbound = -pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM,
-        upperbound =  pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM #TODO derive maximum losses
+        PowerModels.var(pm, nw, cnd)[:pconv_pr_fr] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_pconv_pr_fr",
+        lowerbound = -PowerModels.ref(pm, nw, :convdc, i, "Pacrated", cnd) * bigM,
+        upperbound =  PowerModels.ref(pm, nw, :convdc, i, "Pacrated", cnd) * bigM
         )
     else
-        pm.var[:nw][n][:pconv_pr_fr] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_pr_from",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "P_g")
+        PowerModels.var(pm, nw, cnd)[:pconv_pr_fr] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_pconv_pr_fr",
+        start = PowerModels.getval(ref(pm, nw, :convdc, i), "P_g", cnd, 1.0)
         )
     end
 end
 
 "variable: `qconv_pr_from[j]` for `j` in `convdc`"
-function variable_conv_reactor_reactive_power_from(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    bigM = 2
+function variable_conv_reactor_reactive_power_from(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+    bigM = 2;
     if bounded
-        pm.var[:nw][n][:qconv_pr_fr] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_pr_from",
-        lowerbound = -pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM,
-        upperbound =  pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM #TODO derive maximum losses
+        PowerModels.var(pm, nw, cnd)[:qconv_pr_fr] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_qconv_pr_fr",
+        lowerbound = -PowerModels.ref(pm, nw, :convdc, i, "Qacrated", cnd) * bigM,
+        upperbound =  PowerModels.ref(pm, nw, :convdc, i, "Qacrated", cnd) * bigM
         )
     else
-        pm.var[:nw][n][:qconv_pr_fr] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_pr_from",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Q_g")
+        PowerModels.var(pm, nw, cnd)[:qconv_pr_fr] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_qconv_pr_fr",
+        start = PowerModels.getval(ref(pm, nw, :convdc, i), "Q_g", cnd, 1.0)
         )
     end
 end
@@ -134,227 +131,219 @@ end
 
 
 "variable: `pconv_grid_ac[j]` for `j` in `convdc`"
-function variable_converter_to_grid_active_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    bigM = 2
+function variable_converter_to_grid_active_power(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+    bigM = 2;
     if bounded
-        pm.var[:nw][n][:pconv_tf_fr] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_tf_fr",
-        lowerbound = -pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM,
-        upperbound =  pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM #TODO derive maximum losses
+        PowerModels.var(pm, nw, cnd)[:pconv_tf_fr] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_pconv_tf_fr",
+        lowerbound = -PowerModels.ref(pm, nw, :convdc, i, "Pacrated", cnd) * bigM,
+        upperbound =  PowerModels.ref(pm, nw, :convdc, i, "Pacrated", cnd) * bigM
         )
     else
-        pm.var[:nw][n][:pconv_tf_fr] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_tf_fr",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "P_g")
+        PowerModels.var(pm, nw, cnd)[:pconv_tf_fr] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_pconv_tf_fr",
+        start = PowerModels.getval(ref(pm, nw, :convdc, i), "P_g", cnd, 1.0)
         )
     end
 end
 
 "variable: `qconv_grid_ac[j]` for `j` in `convdc`"
-function variable_converter_to_grid_reactive_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    bigM = 2
+function variable_converter_to_grid_reactive_power(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+    bigM = 2;
     if bounded
-        pm.var[:nw][n][:qconv_tf_fr] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_tf_fr",
-        lowerbound = -pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM,
-        upperbound =  pm.ref[:nw][n][:convdc][i]["Qacrated"] * bigM #TODO derive maximum losses
+        PowerModels.var(pm, nw, cnd)[:qconv_tf_fr] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_qconv_tf_fr",
+        lowerbound = -PowerModels.ref(pm, nw, :convdc, i, "Qacrated", cnd) * bigM,
+        upperbound =  PowerModels.ref(pm, nw, :convdc, i, "Qacrated", cnd) * bigM
         )
     else
-        pm.var[:nw][n][:qconv_tf_fr] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_qconv_tf_fr",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Q_g")
+        PowerModels.var(pm, nw, cnd)[:qconv_tf_fr] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_qconv_tf_fr",
+        start = PowerModels.getval(ref(pm, nw, :convdc, i), "Q_g", cnd, 1.0)
         )
     end
 end
 
 
 "variable: `pconv_dc[j]` for `j` in `convdc`"
-function variable_dcside_power(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_dcside_power(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 1.2; # to account for losses, maximum losses to be derived
     if bounded
-        pm.var[:nw][n][:pconv_dc] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_dc",
-        lowerbound = -pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM,
-        upperbound =  pm.ref[:nw][n][:convdc][i]["Pacrated"] * bigM #TODO derive maximum losses
+        PowerModels.var(pm, nw, cnd)[:pconv_dc] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_pconv_dc",
+        lowerbound = -PowerModels.ref(pm, nw, :convdc, i, "Pacrated", cnd) * bigM,
+        upperbound =  PowerModels.ref(pm, nw, :convdc, i, "Pacrated", cnd) * bigM
         )
     else
-        pm.var[:nw][n][:pconv_dc] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_pconv_dc",
-        start = PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Pdcset")
+        PowerModels.var(pm, nw, cnd)[:pconv_dc] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_pconv_dc",
+        start = PowerModels.getval(ref(pm, nw, :convdc, i), "Pdcset", cnd, 1.0)
         )
     end
 end
 
 "variable: `pconv_dc[j]` for `j` in `convdc`"
-function variable_converter_firing_angle(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_firing_angle(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     if bounded
-        pm.var[:nw][n][:phiconv] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_phiconv",
+        PowerModels.var(pm, nw, cnd)[:phiconv] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_phiconv",
         lowerbound = 0,
-        upperbound =  pi
+        upperbound = pi
         )
     else
-        pm.var[:nw][n][:phiconv] = @variable(pm.model,
-        [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_phiconv",
-        start =  acos( PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Pdcset") / sqrt(PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Pacrated")^2 + PowerModels.getstart(pm.ref[:nw][n][:convdc], i, "Qacrated")^2) )
+        PowerModels.var(pm, nw, cnd)[:phiconv] = @variable(pm.model,
+        [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_phiconv",
+        start = acos(PowerModels.getval(ref(pm, nw, :convdc, i), "Pdcset", cnd, 1.0) / sqrt((PowerModels.getval(ref(pm, nw, :convdc, i), "Pacrated", cnd, 1.0))^2 + (PowerModels.getval(ref(pm, nw, :convdc, i), "Pacrated", cnd, 1.0))^2))
         )
     end
 end
-# "variable: `iconv_ac[j]` for `j` in `convdc`"
-# function variable_acside_current(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-#     pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
-#     [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_ac",
-#     lowerbound = 0,
-#     upperbound = sqrt(pm.ref[:nw][n][:convdc][i]["Pacrated"]^2 + pm.ref[:nw][n][:convdc][i]["Qacmax"]^2) / sqrt(3) # assuming rated voltage = 1pu
-#     )
-# end
 
 "variable: `iconv_ac[j]` for `j` in `convdc`"
-function variable_acside_current(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_ac",
+function variable_acside_current(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+    PowerModels.var(pm, nw, cnd)[:iconv_ac] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_iconv_ac",
     lowerbound = 0,
-    upperbound = pm.ref[:nw][n][:convdc][i]["Imax"]
+    upperbound = PowerModels.ref(pm, nw, :convdc, i, "Imax", cnd)
     )
 end
 
 "variable: `iconv_ac[j]` and `iconv_ac_sq[j]` for `j` in `convdc`"
-function variable_acside_current(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true) where {T <: PowerModels.AbstractWForms}
-    pm.var[:nw][n][:iconv_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_dc",
+function variable_acside_current(pm::GenericPowerModel{T}; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true) where {T <: PowerModels.AbstractWForms}
+    PowerModels.var(pm, nw, cnd)[:iconv_ac] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_iconv_ac",
     lowerbound = 0,
-    upperbound = pm.ref[:nw][n][:convdc][i]["Imax"]
+    upperbound = PowerModels.ref(pm, nw, :convdc, i, "Imax", cnd)
     )
-    pm.var[:nw][n][:iconv_ac_sq] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_iconv_dc_sq",
+    PowerModels.var(pm, nw, cnd)[:iconv_ac_sq] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_iconv_ac_sq",
     lowerbound = 0,
-    upperbound = pm.ref[:nw][n][:convdc][i]["Imax"]^2
+    upperbound = PowerModels.ref(pm, nw, :convdc, i, "Imax", cnd)^2
     )
 end
 
 "variable: `itf_sq[j]` for `j` in `convdc`"
-function variable_conv_transformer_current_sqr(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true) where {T <: PowerModels.AbstractWForms}
-    bigM = 2 #TODO derive exact bound
-    pm.var[:nw][n][:itf_sq] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_itf_sq",
+function variable_conv_transformer_current_sqr(pm::GenericPowerModel{T}; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true) where {T <: PowerModels.AbstractWForms}
+    bigM = 2; #TODO derive exact bound
+    PowerModels.var(pm, nw, cnd)[:itf_sq] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_itf_sq",
     lowerbound = 0,
-    upperbound = (bigM*pm.ref[:nw][n][:convdc][i]["Imax"])^2
+    upperbound = PowerModels.ref(pm, nw, :convdc, i, "Imax", cnd)^2
     )
 end
 
 
 "variable: `irc_sq[j]` for `j` in `convdc`"
-function variable_conv_reactor_current_sqr(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true) where {T <: PowerModels.AbstractWForms}
-    bigM = 2 #TODO derive exact bound
-    pm.var[:nw][n][:irc_sq] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_irc_sq",
+function variable_conv_reactor_current_sqr(pm::GenericPowerModel{T}; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true) where {T <: PowerModels.AbstractWForms}
+    bigM = 2; #TODO derive exact bound
+    PowerModels.var(pm, nw, cnd)[:irc_sq] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_irc_sq",
     lowerbound = 0,
-    upperbound = (bigM*pm.ref[:nw][n][:convdc][i]["Imax"])^2
+    upperbound = PowerModels.ref(pm, nw, :convdc, i, "Imax", cnd)^2
     )
 end
 
 
-function variable_converter_filter_voltage(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
-    variable_converter_filter_voltage_magnitude(pm, n; kwargs...)
-    variable_converter_filter_voltage_angle(pm, n; kwargs...)
+function variable_converter_filter_voltage(pm::GenericPowerModel; kwargs...)
+    variable_converter_filter_voltage_magnitude(pm; kwargs...)
+    variable_converter_filter_voltage_angle(pm; kwargs...)
 end
 
 
 "variable: `vmf[j]` for `j` in `convdc`"
-function variable_converter_filter_voltage_magnitude(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_filter_voltage_magnitude(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 1.2; # only internal converter voltage is strictly regulated
-    pm.var[:nw][n][:vmf] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vmf",
-    lowerbound = pm.ref[:nw][n][:convdc][i]["Vmmin"]/bigM,
-    upperbound = pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM
+    PowerModels.var(pm, nw, cnd)[:vmf] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_vmf",
+    lowerbound = PowerModels.ref(pm, nw, :convdc, i, "Vmmin", cnd) / bigM,
+    upperbound = PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd) * bigM
     )
 end
 
 
 "variable: `vaf[j]` for `j` in `convdc`"
-function variable_converter_filter_voltage_angle(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_filter_voltage_angle(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 2*pi; #
-    pm.var[:nw][n][:vaf] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vaf",
+    PowerModels.var(pm, nw, cnd)[:vaf] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_vaf",
     lowerbound = -bigM,
-    upperbound = bigM
+    upperbound =  bigM
     )
 end
 
 
-function variable_converter_internal_voltage(pm::GenericPowerModel, n::Int=pm.cnw; kwargs...)
-    variable_converter_internal_voltage_magnitude(pm, n; kwargs...)
-    variable_converter_internal_voltage_angle(pm, n; kwargs...)
+function variable_converter_internal_voltage(pm::GenericPowerModel; kwargs...)
+    variable_converter_internal_voltage_magnitude(pm; kwargs...)
+    variable_converter_internal_voltage_angle(pm; kwargs...)
 end
 
 
 "variable: `vmc[j]` for `j` in `convdc`"
-function variable_converter_internal_voltage_magnitude(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    pm.var[:nw][n][:vmc] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vmc",
-    lowerbound = pm.ref[:nw][n][:convdc][i]["Vmmin"],
-    upperbound = pm.ref[:nw][n][:convdc][i]["Vmmax"]
+function variable_converter_internal_voltage_magnitude(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+    PowerModels.var(pm, nw, cnd)[:vmc] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_vmc",
+    lowerbound = PowerModels.ref(pm, nw, :convdc, i, "Vmmin", cnd),
+    upperbound = PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd)
     )
 end
 
 "variable: `vac[j]` for `j` in `convdc`"
-function variable_converter_internal_voltage_angle(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_internal_voltage_angle(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 2*pi; #
-    pm.var[:nw][n][:vac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_vac",
+    PowerModels.var(pm, nw, cnd)[:vac] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_vac",
     lowerbound = -bigM,
-    upperbound = bigM
+    upperbound =  bigM
     )
 end
 
 
 
 "variable: `wrf_ac[j]` and `wif_ac`  for `j` in `convdc`"
-function variable_converter_filter_voltage_cross_products(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_filter_voltage_cross_products(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 1.2; # only internal converter voltage is strictly regulated
-    pm.var[:nw][n][:wrf_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wrf_ac",
+    PowerModels.var(pm, nw, cnd)[:wrf_ac] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_wrf_ac",
     lowerbound = 0,
-    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2
+    upperbound = (PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd) * bigM)^2
     )
-    pm.var[:nw][n][:wif_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wif_ac",
-    lowerbound = -(pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2,
-    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2
+    PowerModels.var(pm, nw, cnd)[:wif_ac] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_wif_ac",
+    lowerbound = -(PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd) * bigM)^2,
+    upperbound =  (PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd) * bigM)^2
     )
 end
 
 "variable: `wf_ac` for `j` in `convdc`"
-function variable_converter_filter_voltage_magnitude_sqr(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_filter_voltage_magnitude_sqr(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 1.2; # only internal converter voltage is strictly regulated
-    pm.var[:nw][n][:wf_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wf_ac",
-    lowerbound = (pm.ref[:nw][n][:convdc][i]["Vmmin"]/bigM)^2,
-    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2
+    PowerModels.var(pm, nw, cnd)[:wf_ac] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_wf_ac",
+    lowerbound =  (PowerModels.ref(pm, nw, :convdc, i, "Vmmin", cnd) / bigM)^2,
+    upperbound =  (PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd) * bigM)^2
     )
 end
 
 
 "variable: `wrc_ac[j]` and `wic_ac[j]`  for `j` in `convdc`"
-function variable_converter_internal_voltage_cross_products(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
+function variable_converter_internal_voltage_cross_products(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 1.2; # only internal converter voltage is strictly regulated
-    pm.var[:nw][n][:wrc_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wrc_ac",
-    lowerbound = 0,
-    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2
+    PowerModels.var(pm, nw, cnd)[:wrc_ac] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_wrc_ac",
+    lowerbound =  0,
+    upperbound =  (PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd) * bigM)^2
     )
-    pm.var[:nw][n][:wic_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wic_ac",
-    lowerbound = -(pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2,
-    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"]*bigM)^2
+    PowerModels.var(pm, nw, cnd)[:wic_ac] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_wic_ac",
+    lowerbound =  -(PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd) * bigM)^2,
+    upperbound =   (PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd) * bigM)^2
     )
 end
 
 "variable: `wc_ac[j]` for `j` in `convdc`"
-function variable_converter_internal_voltage_magnitude_sqr(pm::GenericPowerModel, n::Int=pm.cnw; bounded = true)
-    pm.var[:nw][n][:wc_ac] = @variable(pm.model,
-    [i in keys(pm.ref[:nw][n][:convdc])], basename="$(n)_wc_ac",
-    lowerbound = (pm.ref[:nw][n][:convdc][i]["Vmmin"])^2,
-    upperbound = (pm.ref[:nw][n][:convdc][i]["Vmmax"])^2
+function variable_converter_internal_voltage_magnitude_sqr(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+    PowerModels.var(pm, nw, cnd)[:wc_ac] = @variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_wc_ac",
+    lowerbound =  PowerModels.ref(pm, nw, :convdc, i, "Vmmin", cnd)^2,
+    upperbound =  PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd)^2
     )
 end
