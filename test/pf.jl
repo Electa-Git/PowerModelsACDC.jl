@@ -98,26 +98,23 @@ end
         @test isapprox(result["objective"], 0; atol = 1e-2)
 
         @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.283139; atol = 1e-3)
-
-        @test isapprox(result["solution"]["bus"]["5"]["va"], -0.01553; atol = 1e-3)
-        @test isapprox(result["solution"]["bus"]["3"]["va"], -0.058307; atol = 1e-3)
-
-        @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -2.176058; atol = 1e-3)
-        @test isapprox(result["solution"]["convdc"]["3"]["pdc"], 1.21468; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["5"]["va"], -0.1642; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["3"]["va"], -0.1284; atol = 1e-3)
+        @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -0.2831; atol = 1e-3)
+        @test isapprox(result["solution"]["convdc"]["3"]["pdc"], -0.3385; atol = 1e-3)
     end
     @testset "24-bus rts ac dc case with three zones" begin
         result = run_acdcpf("../test/data/case24_3zones_acdc.m", DCPPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
         @test isapprox(result["objective"], 0; atol = 1e-2)
+        @test isapprox(result["solution"]["gen"]["65"]["pg"], 1.881; atol = 1e-3)
 
-        @test isapprox(result["solution"]["gen"]["65"]["pg"], 1.21477; atol = 1e-3)
-
-        @test isapprox(result["solution"]["bus"]["119"]["va"], 0.1155568; atol = 1e-3)
-        @test isapprox(result["solution"]["bus"]["224"]["va"], -0.0486571; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["119"]["va"], 0.1237; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["224"]["va"], -0.04742; atol = 1e-3)
 
         @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -0.753; atol = 1e-3)
-        @test isapprox(result["solution"]["convdc"]["3"]["pdc"], -1.188206; atol = 1e-3)
+        @test isapprox(result["solution"]["convdc"]["3"]["pdc"], -1.85212; atol = 1e-3)
     end
 end
 

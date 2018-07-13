@@ -193,7 +193,7 @@ function variable_converter_firing_angle(pm::GenericPowerModel; nw::Int=pm.cnw, 
     else
         PowerModels.var(pm, nw, cnd)[:phiconv] = @variable(pm.model,
         [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_phiconv",
-        start = acos(PowerModels.getval(ref(pm, nw, :convdc, i), "Pdcset", cnd, 1.0) / sqrt((PowerModels.getval(ref(pm, nw, :convdc, i), "Pacrated", cnd, 1.0))^2 + (PowerModels.getval(ref(pm, nw, :convdc, i), "Pacrated", cnd, 1.0))^2))
+        start = acos(PowerModels.getval(ref(pm, nw, :convdc, i), "Pdcset", cnd, 1.0) / sqrt((PowerModels.getval(ref(pm, nw, :convdc, i), "Pacrated", cnd, 1.0))^2 + (PowerModels.getval(ref(pm, nw, :convdc, i), "Qacrated", cnd, 1.0))^2))
         )
     end
 end
@@ -227,7 +227,7 @@ function variable_conv_transformer_current_sqr(pm::GenericPowerModel{T}; nw::Int
     PowerModels.var(pm, nw, cnd)[:itf_sq] = @variable(pm.model,
     [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_itf_sq",
     lowerbound = 0,
-    upperbound = PowerModels.ref(pm, nw, :convdc, i, "Imax", cnd)^2
+    upperbound = (bigM * PowerModels.ref(pm, nw, :convdc, i, "Imax", cnd))^2
     )
 end
 
@@ -238,7 +238,7 @@ function variable_conv_reactor_current_sqr(pm::GenericPowerModel{T}; nw::Int=pm.
     PowerModels.var(pm, nw, cnd)[:irc_sq] = @variable(pm.model,
     [i in PowerModels.ids(pm, nw, :convdc)], basename="$(nw)_$(cnd)_irc_sq",
     lowerbound = 0,
-    upperbound = PowerModels.ref(pm, nw, :convdc, i, "Imax", cnd)^2
+    upperbound = (bigM * PowerModels.ref(pm, nw, :convdc, i, "Imax", cnd))^2
     )
 end
 

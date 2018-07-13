@@ -119,7 +119,7 @@ Converter reactive power setpoint constraint (PF only, not applicable)
 ```
 ```
 """
-function constraint_reactive_conv_setpoint(pm::GenericPowerModel{T}, n::Int, i, qconv) where {T <: PowerModels.AbstractDCPForm}
+function constraint_reactive_conv_setpoint(pm::GenericPowerModel{T}, n::Int, cnd::Int, i, qconv) where {T <: PowerModels.AbstractDCPForm}
 end
 
 """

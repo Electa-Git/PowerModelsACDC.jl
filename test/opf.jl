@@ -99,31 +99,31 @@ end
 
 @testset "test soc distflow opf_bf" begin
     @testset "3-bus case" begin
-        result = run_acdcopf("../test/data/case3.m", SOCDFPowerModel, ipopt_solver)
+        result = run_acdcopf("../test/data/case3.m", SOCBFPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
         @test isapprox(result["objective"], 5746.7; atol = 1e0)
     end
     @testset "5-bus asymmetric case" begin
-        result = run_acdcopf("../test/data/case5_asym.m", SOCDFPowerModel, ipopt_solver)
+        result = run_acdcopf("../test/data/case5_asym.m", SOCBFPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
         @test isapprox(result["objective"], 14999; atol = 1e0)
     end
     @testset "5-bus ac dc case" begin
-        result = run_acdcopf("../test/data/case5_acdc.m", SOCDFPowerModel, ipopt_solver)
+        result = run_acdcopf("../test/data/case5_acdc.m", SOCBFPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
         @test isapprox(result["objective"], 183.91; atol = 1e0)
     end
     @testset "5-bus ac dc case with 2 seperate ac grids" begin
-        result = run_acdcopf("../test/data/case5_2grids.m", SOCDFPowerModel, ipopt_solver)
+        result = run_acdcopf("../test/data/case5_2grids.m", SOCBFPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
         @test isapprox(result["objective"], 363.50; atol = 1e0)
     end
     @testset "24-bus rts ac dc case with three zones" begin
-        result = run_acdcopf("../test/data/case24_3zones_acdc.m", SOCDFPowerModel, ipopt_solver)
+        result = run_acdcopf("../test/data/case24_3zones_acdc.m", SOCBFPowerModel, ipopt_solver)
 
         @test result["status"] == :LocalOptimal
         @test isapprox(result["objective"], 150156.26; atol = 1e0)
@@ -193,7 +193,7 @@ end
         @test isapprox(result["objective"], 5851.3; atol = 2e0)
     end
     @testset "5-bus ac dc case" begin
-        result = run_acdcopf("../test/data/case5_acdc.m", SDPWRMPowerModel, scs_solver)
+        result = run_acdcopf("../test/data/case5_acdc.m", SDPWRMPowerModel, mosek)
 
         @test result["status"] == :Optimal
         @test isapprox(result["objective"], 194.12; atol = 1e0)
