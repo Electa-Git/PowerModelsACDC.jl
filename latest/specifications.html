@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Problem Specifications · PowerModelsACDC</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>PowerModelsACDC</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search.html"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="index.html">Home</a></li><li><span class="toctext">Manual</span><ul><li><a class="toctext" href="quickguide.html">Getting Started</a></li><li><a class="toctext" href="result-data.html">Results</a></li></ul></li><li><span class="toctext">Library</span><ul><li><a class="toctext" href="formulations.html">Network Formulations</a></li><li class="current"><a class="toctext" href="specifications.html">Problem Specifications</a><ul class="internal"><li><a class="toctext" href="#ACDCOPF-1">ACDCOPF</a></li></ul></li><li><span class="toctext">Modeling Components</span><ul><li><a class="toctext" href="objective.html">Objective</a></li><li><a class="toctext" href="variables.html">Variables</a></li><li><a class="toctext" href="constraints.html">Constraints</a></li></ul></li><li><a class="toctext" href="parser.html">File IO</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Library</li><li><a href="specifications.html">Problem Specifications</a></li></ul><a class="edit-page" href="https://github.com/hakanergun/PowerModelsACDC.jl/blob/master/docs/src/specifications.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Problem Specifications</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Problem-Specifications-1" href="#Problem-Specifications-1">Problem Specifications</a></h1><h2><a class="nav-anchor" id="ACDCOPF-1" href="#ACDCOPF-1">ACDCOPF</a></h2><p>OPF with support for AC and DC grids at the same time, including AC/DC converters.</p><h4><a class="nav-anchor" id="Variables-1" href="#Variables-1">Variables</a></h4><pre><code class="language-julia">variable_voltage(pm)
+variable_generation(pm)
+variable_branch_flow(pm)</code></pre><h4><a class="nav-anchor" id="Objective-1" href="#Objective-1">Objective</a></h4><pre><code class="language-julia">objective_min_fuel_cost(pm)</code></pre><h4><a class="nav-anchor" id="Constraints-1" href="#Constraints-1">Constraints</a></h4><pre><code class="language-julia">
+variable_active_dcbranch_flow(pm)
+variable_dcbranch_current(pm)
+variable_dc_converter(pm)
+variable_dcgrid_voltage_magnitude(pm)
+
+constraint_voltage(pm)
+constraint_voltage_dc(pm)
+
+for i in ids(pm, :ref_buses)
+    constraint_theta_ref(pm, i)
+end
+
+for i in ids(pm, :bus)
+    constraint_kcl_shunt(pm, i)
+end
+
+for i in ids(pm, :branch)
+    # dirty, should be improved in the future TODO
+    if typeof(pm) &lt;: PowerModels.SOCDFPowerModel
+        constraint_flow_losses(pm, i)
+        constraint_voltage_magnitude_difference(pm, i)
+        constraint_branch_current(pm, i)
+    else
+        constraint_ohms_yt_from(pm, i)
+        constraint_ohms_yt_to(pm, i)
+    end
+
+    constraint_voltage_angle_difference(pm, i)
+
+    constraint_thermal_limit_from(pm, i)
+    constraint_thermal_limit_to(pm, i)
+end
+for i in ids(pm, :busdc)
+    constraint_kcl_shunt_dcgrid(pm, i)
+end
+for i in ids(pm, :branchdc)
+    constraint_ohms_dc_branch(pm, i)
+end
+for i in ids(pm, :convdc)
+    constraint_converter_losses(pm, i)
+    constraint_converter_current(pm, i)
+    constraint_conv_transformer(pm, i)
+    constraint_conv_reactor(pm, i)
+    constraint_conv_filter(pm, i)
+end</code></pre><footer><hr/><a class="previous" href="formulations.html"><span class="direction">Previous</span><span class="title">Network Formulations</span></a><a class="next" href="objective.html"><span class="direction">Next</span><span class="title">Objective</span></a></footer></article></body></html>
