@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Overview",
     "category": "section",
-    "text": "PowerModelsACDC.jl is a Julia/JuMP package extending PowerModels.jl, which focuses on Steady-State Power Network Optimization. PowerModels.jl provides utilities for parsing and modifying network data and is designed to enable computational evaluation of emerging power network formulations and algorithms in a common platform.PowerModelsACDC.jl adds new problem types:Power flow with both ac and dc lines, from point-to-point connections to meshed grids, with converters connecting ac and dc grid lines\nThe equivalent optimal power flow problem typePowerModelsACDC.jl extends the formulation hierarchy developed for AC grids, with equivalent DC grid and converter station formulations:ACPPowerModel\nDCPPowerModel\nSOCWRPowerModel\nSDPWRMPowerModel\nQCWRPowerModel\nQCWRTriPowerModel"
+    "text": "PowerModelsACDC.jl is a Julia/JuMP package extending PowerModels.jl, which focuses on Steady-State Power Network Optimization. PowerModels.jl provides utilities for parsing and modifying network data and is designed to enable computational evaluation of emerging power network formulations and algorithms in a common platform.PowerModelsACDC.jl adds new problem types:Power flow with both ac and dc lines, from point-to-point connections to meshed grids, with converters connecting ac and dc grid lines\nThe equivalent optimal power flow problem typePowerModelsACDC.jl extends the formulation hierarchy developed for AC grids, with equivalent DC grid and converter station formulations:ACPPowerModel\nDCPPowerModel\nSOCWRPowerModel\nSDPWRMPowerModel\nQCWRPowerModel\nQCWRTriPowerModelDeveloped by:Hakan Ergun, Jay Dave KU Leuven / EnergyVille\nFrederik Geth, CSIRO"
 },
 
 {
@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Installation of PowerModelACDC",
     "category": "section",
-    "text": "The latest stable release of PowerModelACDC can be installed using the Julia package manager withPkg.clone(\"https://github.com/hakanergun/PowerModelsACDC.jl.git\")also make sure to have cloned the latest version of PowerModels.jl as well as InfrastructureModels.jl.note: Note\nThis is a research-grade optimization package. Eventually, we hope to make this a stable julia package."
+    "text": "The latest stable release of PowerModelACDC can be installed using the Julia package manager withPkg.clone(\"https://github.com/hakanergun/PowerModelsACDC.jl.git\")also make sure to use v0.8.0 of PowerModels.jl as well as v0.0.8 InfrastructureModels.jl.note: Note\nThis is a research-grade optimization package. Eventually, we hope to make this a stable julia package."
 },
 
 {
@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Network Formulations",
     "title": "ACDC converters",
     "category": "section",
-    "text": "Power balance: P^conv ac_ij + P^conv dc_ji = a + b cdot I^conv ac + c cdot (I^conv ac)^2.\nCurrent variable model: (P^convac_ij)^2 + (Q^convac_ij)^2 = U_i^2 cdot  (I^conv ac)^2."
+    "text": "Power balance: P^conv ac_ij + P^conv dc_ji = a + b cdot I^conv ac + c cdot (I^conv ac)^2.\nCurrent variable model: (P^convac_ij)^2 + (Q^convac_ij)^2 = U_i^2 cdot  (I^conv ac)^2.\nLCC converters, active /reactive power:P^conv ac = cosvarphi_c cdot S^convacratedQ^conv ac = sinvarphi_c cdot S^convacrated"
 },
 
 {
@@ -173,7 +173,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Network Formulations",
     "title": "ACDC converters",
     "category": "section",
-    "text": "Under the same assumptions as MATPOWER (U_i approx 1), P^conv ac_ij approx I^conv ac allowing the converter model to be formulated as:Network flow model: P^conv ac_ij + P^conv dc_ji = a + b P^conv ac_ij"
+    "text": "Under the same assumptions as MATPOWER (U_i approx 1), P^conv ac_ij approx I^conv ac allowing the converter model to be formulated as:Network flow model: P^conv ac_ij + P^conv dc_ji = a + b P^conv ac_ij\nLCC converters, n.a."
 },
 
 {
@@ -197,7 +197,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Network Formulations",
     "title": "ACDC converters",
     "category": "section",
-    "text": "Two separate current variables, I^conv ac and i^conv ac sq are defined, the nonconvex relation i^conv ac sq = (I^conv ac)^2 is convexified, using U_i leq U_i^max:Power balance: P^conv ac_ij + P^conv dc_ji = a + bcdot I^conv ac + ccdot i^conv ac sq.\nSquared current: (P^conv ac_ij)^2 + (Q^conv ac_ij)^2 leq  u_ii cdot  i^conv ac sq\nLinear current: (P^conv ac_ij)^2 + (Q^conv ac_ij)^2 leq  (U_i^max)^2 cdot  (I^conv ac)^2\nLinking both current variables: (I^conv ac)^2 leq i^conv ac sq"
+    "text": "Two separate current variables, I^conv ac and i^conv ac sq are defined, the nonconvex relation i^conv ac sq = (I^conv ac)^2 is convexified, using U_i leq U_i^max:Power balance: P^conv ac_ij + P^conv dc_ji = a + bcdot I^conv ac + ccdot i^conv ac sq.\nSquared current: (P^conv ac_ij)^2 + (Q^conv ac_ij)^2 leq  u_ii cdot  i^conv ac sq\nLinear current: (P^conv ac_ij)^2 + (Q^conv ac_ij)^2 leq  (U_i^max)^2 cdot  (I^conv ac)^2\nLinking both current variables: (I^conv ac)^2 leq i^conv ac sq\nLCC converters:Q^convac geq Q^1_c + (P^convac - P^1_c)frac(Q^2_c  - Q^1_c)(P^2_c  - P^1_c)P^1_c =  cos  varphi_c^textmin cdot S^convacratedP^2_c =   cos varphi_c^textmax cdot S^convacratedQ^1_c =   sin  varphi_c^textmin cdot S^convacratedQ^2_c =   sin varphi_c^textmax cdot S^convacrated"
 },
 
 {
@@ -269,7 +269,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Problem Specifications",
     "title": "Constraints",
     "category": "section",
-    "text": "\nvariable_active_dcbranch_flow(pm)\nvariable_dcbranch_current(pm)\nvariable_dc_converter(pm)\nvariable_dcgrid_voltage_magnitude(pm)\n\nconstraint_voltage(pm)\nconstraint_voltage_dc(pm)\n\nfor i in ids(pm, :ref_buses)\n    constraint_theta_ref(pm, i)\nend\n\nfor i in ids(pm, :bus)\n    constraint_kcl_shunt(pm, i)\nend\n\nfor i in ids(pm, :branch)\n    # dirty, should be improved in the future TODO\n    if typeof(pm) <: PowerModels.SOCDFPowerModel\n        constraint_flow_losses(pm, i)\n        constraint_voltage_magnitude_difference(pm, i)\n        constraint_branch_current(pm, i)\n    else\n        constraint_ohms_yt_from(pm, i)\n        constraint_ohms_yt_to(pm, i)\n    end\n\n    constraint_voltage_angle_difference(pm, i)\n\n    constraint_thermal_limit_from(pm, i)\n    constraint_thermal_limit_to(pm, i)\nend\nfor i in ids(pm, :busdc)\n    constraint_kcl_shunt_dcgrid(pm, i)\nend\nfor i in ids(pm, :branchdc)\n    constraint_ohms_dc_branch(pm, i)\nend\nfor i in ids(pm, :convdc)\n    constraint_converter_losses(pm, i)\n    constraint_converter_current(pm, i)\n    constraint_conv_transformer(pm, i)\n    constraint_conv_reactor(pm, i)\n    constraint_conv_filter(pm, i)\nend"
+    "text": "\nvariable_active_dcbranch_flow(pm)\nvariable_dcbranch_current(pm)\nvariable_dc_converter(pm)\nvariable_dcgrid_voltage_magnitude(pm)\n\nconstraint_voltage(pm)\nconstraint_voltage_dc(pm)\n\nfor i in ids(pm, :ref_buses)\n    constraint_theta_ref(pm, i)\nend\n\nfor i in ids(pm, :bus)\n    constraint_kcl_shunt(pm, i)\nend\n\nfor i in ids(pm, :branch)\n    # dirty, should be improved in the future TODO\n    if typeof(pm) <: PowerModels.SOCDFPowerModel\n        constraint_flow_losses(pm, i)\n        constraint_voltage_magnitude_difference(pm, i)\n        constraint_branch_current(pm, i)\n    else\n        constraint_ohms_yt_from(pm, i)\n        constraint_ohms_yt_to(pm, i)\n    end\n\n    constraint_voltage_angle_difference(pm, i)\n\n    constraint_thermal_limit_from(pm, i)\n    constraint_thermal_limit_to(pm, i)\nend\nfor i in ids(pm, :busdc)\n    constraint_kcl_shunt_dcgrid(pm, i)\nend\nfor i in ids(pm, :branchdc)\n    constraint_ohms_dc_branch(pm, i)\nend\nfor i in ids(pm, :convdc)\n    constraint_converter_losses(pm, i)\n    constraint_converter_current(pm, i)\n    constraint_conv_transformer(pm, i)\n    constraint_conv_reactor(pm, i)\n    constraint_conv_filter(pm, i)\n    if pm.ref[:nw][pm.cnw][:convdc][i][\"islcc\"] == 1\n        constraint_conv_firing_angle(pm, i)\n    end\nend"
 },
 
 {
@@ -581,7 +581,7 @@ var documenterSearchIndex = {"docs": [
     "page": "File IO",
     "title": "AC DC converter",
     "category": "section",
-    "text": "busdc_i   - converter bus number (DC bus numbering)\nbusac_i   - converter bus number (AC bus numbering)  \ntype_dc   - DC bus type (1 = constant power, 2 = DC slack, 3 = DC droop) (only power flow)  \ntype_ac   - AC bus type (1 = PQ, 2 = PV), should be consistent with AC bus  (only power flow)  \nP_g       - active power injected in the AC grid (MW)\nQ_g       - reactive power injected in the AC grid (MVAr)    \nVtar      - target voltage of converter connected AC bus (p.u.)    \nrtf       - transformer resistance (p.u.) (not yet implemented)\nxtf       - transformer reactance (p.u.) (not yet implemented)    \nbf        - filter susceptance (p.u.) (not yet implemented)\nrc        - phase reactor resistance (p.u.) (not yet implemented)   \nxc        - phase reactor reactance (p.u.) (not yet implemented)\nbasekVac  - converter AC base voltage (kV)    \nVmmax     - maximum converter voltage magnitude (p.u.)   \nVmmin     - minimumconverter voltagemagnitude (p.u.)   \nImax      - maximum converter current (p.u.)   \nstatus    - converter status (1 = on, 0 = off) (not yet implemented)\nLossA     - constant loss coefficient (MW)\nLossB     - linear loss coefficient (kV)\nLossCrec  - rectifier quadratic loss coefficient (Ω­)\nLossCinv  - inverter quadratic loss coefficient (Ω­) (not yet implemented)\ndroop     - DC voltage droop (MW/p.u) (not yet implemented)      \nPdcset    - voltage droop power set-point (MW)  (not yet implemented)\nVdcset    - voltage droop voltage set-point (p.u.) (not yet implemented)\ndVdcset   - voltage droop deadband (p.u.) (optional) (not yet implemented) \nPacmax    - Maximum AC active power (MW)\nPacmin    - Minimum AC active power (MW)\nQacmax    - Maximum AC reactive power (Mvar)\nQacmin    - Minimum AC reactive power (Mvar)"
+    "text": "busdc_i     - converter bus number (DC bus numbering)\nbusac_i     - converter bus number (AC bus numbering)  \ntype_dc     - DC bus type (1 = constant power, 2 = DC slack, 3 = DC droop) (only power flow)  \ntype_ac     - AC bus type (1 = PQ, 2 = PV), should be consistent with AC bus  (only power flow)  \nP_g         - active power injected in the AC grid (MW)\nQ_g         - reactive power injected in the AC grid (MVAr)    \nVtar        - target voltage of converter connected AC bus (p.u.)\nislcc       - binary indicating LCC converter (islcc = 1 -> LCC)\nrtf         - transformer resistance (p.u.) (not yet implemented)\nxtf         - transformer reactance (p.u.) (not yet implemented)\ntransformer - binary indicating converter transformer    \nbf          - filter susceptance (p.u.) (not yet implemented)\nfilter      - binary indicating converter filter\nrc          - phase reactor resistance (p.u.) (not yet implemented)   \nxc          - phase reactor reactance (p.u.) (not yet implemented)\nreactor     - binary indicating converter reactor\nbasekVac    - converter AC base voltage (kV)    \nVmmax       - maximum converter voltage magnitude (p.u.)   \nVmmin       - minimumconverter voltagemagnitude (p.u.)   \nImax        - maximum converter current (p.u.)   \nstatus      - converter status (1 = on, 0 = off) (not yet implemented)\nLossA       - constant loss coefficient (MW)\nLossB       - linear loss coefficient (kV)\nLossCrec    - rectifier quadratic loss coefficient (Ω­)\nLossCinv    - inverter quadratic loss coefficient (Ω­) (not yet implemented)\ndroop       - DC voltage droop (MW/p.u) (not yet implemented)      \nPdcset      - voltage droop power set-point (MW)  (not yet implemented)\nVdcset      - voltage droop voltage set-point (p.u.) (not yet implemented)\ndVdcset     - voltage droop deadband (p.u.) (optional) (not yet implemented)\nPacmax      - Maximum AC active power (MW)\nPacmin      - Minimum AC active power (MW)\nQacmax      - Maximum AC reactive power (Mvar)\nQacmin      - Minimum AC reactive power (Mvar)"
 },
 
 ]}

@@ -46,4 +46,7 @@ for i in ids(pm, :convdc)
     constraint_conv_transformer(pm, i)
     constraint_conv_reactor(pm, i)
     constraint_conv_filter(pm, i)
+    if pm.ref[:nw][pm.cnw][:convdc][i][&quot;islcc&quot;] == 1
+        constraint_conv_firing_angle(pm, i)
+    end
 end</code></pre><footer><hr/><a class="previous" href="formulations.html"><span class="direction">Previous</span><span class="title">Network Formulations</span></a><a class="next" href="objective.html"><span class="direction">Next</span><span class="title">Objective</span></a></footer></article></body></html>
