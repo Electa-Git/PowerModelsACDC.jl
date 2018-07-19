@@ -20,6 +20,9 @@ PowerModelsACDC.jl extends the formulation hierarchy developed for AC grids, wit
 - QCWRPowerModel
 - QCWRTriPowerModel
 
+Developed by:
+- Hakan Ergun, Jay Dave KU Leuven / EnergyVille
+- Frederik Geth, CSIRO
 
 
 ## Installation of PowerModelACDC
@@ -29,7 +32,7 @@ The latest stable release of PowerModelACDC can be installed using the Julia pac
 ```julia
 Pkg.clone("https://github.com/hakanergun/PowerModelsACDC.jl.git")
 ```
-also make sure to have cloned the latest version of PowerModels.jl as well as InfrastructureModels.jl.
+also make sure to use v0.8.0 of PowerModels.jl as well as v0.0.8 InfrastructureModels.jl.
 
 !!! note
     This is a research-grade optimization package. Eventually, we hope to make this a

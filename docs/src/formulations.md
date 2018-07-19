@@ -45,6 +45,10 @@ Note that generally, $a \geq 0, b \geq 0, c \geq 0$ as physical losses are posit
 ### ACDC converters
 - Power balance: $P^{conv, ac}_{ij} + P^{conv, dc}_{ji}$ = $a + b \cdot I^{conv, ac} + c \cdot (I^{conv, ac})^2$.
 - Current variable model: $(P^{conv,ac}_{ij})^2$ + $(Q^{conv,ac}_{ij})^2$ = $U_i^2 \cdot  (I^{conv, ac})^2$.
+- LCC converters, active /reactive power:
+
+$P^{conv, ac} = \cos\varphi_{c} \cdot S^{conv,ac,rated}$
+$Q^{conv, ac} = \sin\varphi_{c} \cdot S^{conv,ac,rated}$
 
 ## DCPPowerModel (NF)
 Due to the absence of voltage angles in DC grids, the DC power flow model reduces to network flow (NF) under the 'DC' assumptions
@@ -55,7 +59,7 @@ Due to the absence of voltage angles in DC grids, the DC power flow model reduce
 ### ACDC converters
 Under the same assumptions as MATPOWER ($U_i \approx 1$), $P^{conv, ac}_{ij} \approx I^{conv, ac}$ allowing the converter model to be formulated as:
 - Network flow model: $P^{conv, ac}_{ij}$ + $P^{conv, dc}_{ji}$ = $a + b P^{conv, ac}_{ij}$
-
+- LCC converters, n.a.
 
 ## AC WR(M) variable space.  (BFM)
 For the SDP formulation, the norm syntax is used to represent the SOC expressions below.
@@ -73,6 +77,12 @@ Two separate current variables, $I^{conv, ac}$ and $i^{conv, ac, sq}$ are define
 - Squared current: $(P^{conv, ac}_{ij})^2 + (Q^{conv, ac}_{ij})^2 \leq  u_{ii} \cdot  i^{conv, ac, sq}$
 - Linear current: $(P^{conv, ac}_{ij})^2 + (Q^{conv, ac}_{ij})^2 \leq  (U_i^{max})^2 \cdot  (I^{conv, ac})^2$
 - Linking both current variables: $(I^{conv, ac})^2$ $\leq$ $i^{conv, ac, sq}$
+- LCC converters:
+$Q^{conv,ac} \geq Q^{1}_{c} + (P^{conv,ac} - P^{1}_{c})\frac{(Q^{2}_{c}  - Q^{1}_{c})}{(P^{2}_{c}  - P^{1}_{c})}$
+$P^{1}_{c} =  \cos  \varphi_{c}^{\text{min}} \cdot S^{conv,ac,rated}$
+$P^{2}_{c} =   \cos \varphi_{c}^{\text{max}} \cdot S^{conv,ac,rated}$
+$Q^{1}_{c} =   \sin  \varphi_{c}^{\text{min}} \cdot S^{conv,ac,rated}$
+$Q^{2}_{c} =   \sin \varphi_{c}^{\text{max}} \cdot S^{conv,ac,rated}$
 
 
 

@@ -67,5 +67,8 @@ for i in ids(pm, :convdc)
     constraint_conv_transformer(pm, i)
     constraint_conv_reactor(pm, i)
     constraint_conv_filter(pm, i)
+    if pm.ref[:nw][pm.cnw][:convdc][i]["islcc"] == 1
+        constraint_conv_firing_angle(pm, i)
+    end
 end
 ```
