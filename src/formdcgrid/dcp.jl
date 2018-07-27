@@ -33,6 +33,6 @@ function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel{T}, n::I
     # not used
 end
 
-function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel{T}, n::Int=pm.cnw; bounded = true) where {T <: PowerModels.AbstractDCPForm}
-    # not used
+function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel{T}; kwrags...) where {T <: PowerModels.AbstractDCPForm}
+    # not used nw::Int=pm.cnw
 end
