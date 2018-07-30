@@ -28,7 +28,7 @@ scs = SCSSolver(max_iters=100000);
 ipopt = IpoptSolver(tol=1e-6)
 mosek = MosekSolver()
 #mosek = MosekSolver()
-s = Dict("output" => Dict("branch_flows" => true))
+s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
 resultAC = run_acdcopf(file, ACPPowerModel, ipopt; setting = s)
 

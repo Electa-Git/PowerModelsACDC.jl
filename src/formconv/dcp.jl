@@ -10,7 +10,12 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int,
     pconv_dc = PowerModels.var(pm, n, cnd, :pconv_dc, i)
     v = 1 #pu, assumption to approximate current
     cm_conv_ac = pconv_ac/v # can actually be negative, not a very nice model...
-    PowerModels.con(pm, n, cnd, :conv_loss)[i] = @constraint(pm.model, pconv_ac + pconv_dc == a + b*cm_conv_ac )
+    if pm.setting["conv_losses_mp"] == true
+        PowerModels.con(pm, n, cnd, :conv_loss)[i] = @constraint(pm.model, pconv_ac + pconv_dc == a + b*cm_conv_ac )
+    else
+        PowerModels.con(pm, n, cnd, :conv_loss)[i] = @constraint(pm.model, pconv_ac + pconv_dc >= a + b*cm_conv_ac )
+        PowerModels.con(pm, n, cnd, :conv_loss_aux)[i] = @constraint(pm.model, pconv_ac + pconv_dc >= a - b*cm_conv_ac )
+    end
     #pm.con[:nw][n][:conv_loss][i] = @constraint(pm.model, pconv_ac + pconv_dc == a  )
 end
 

@@ -24,7 +24,7 @@ files =
 scs = SCSSolver(max_iters=100000);
 ipopt = IpoptSolver(tol=1e-6, print_level=0)
 #mosek = MosekSolver()
-s = Dict("output" => Dict("branch_flows" => true))
+s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
 objective = Dict{String, Any}()
 
