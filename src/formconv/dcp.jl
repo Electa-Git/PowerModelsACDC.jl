@@ -5,7 +5,7 @@ Creates lossy converter model between AC and DC grid, assuming U_i is approximat
 pconv_ac[i] + pconv_dc[i] == a + b*pconv_ac
 ```
 """
-function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, a, b, c) where {T <: PowerModels.AbstractDCPForm}
+function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, a, b, c, plmax) where {T <: PowerModels.AbstractDCPForm}
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     pconv_dc = PowerModels.var(pm, n, cnd, :pconv_dc, i)
     v = 1 #pu, assumption to approximate current
@@ -15,6 +15,7 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int,
     else
         PowerModels.con(pm, n, cnd, :conv_loss)[i] = @constraint(pm.model, pconv_ac + pconv_dc >= a + b*cm_conv_ac )
         PowerModels.con(pm, n, cnd, :conv_loss_aux)[i] = @constraint(pm.model, pconv_ac + pconv_dc >= a - b*cm_conv_ac )
+        PowerModels.con(pm, n, cnd, :conv_loss_plmax)[i] = @constraint(pm.model, pconv_ac + pconv_dc <= plmax)
     end
     #pm.con[:nw][n][:conv_loss][i] = @constraint(pm.model, pconv_ac + pconv_dc == a  )
 end

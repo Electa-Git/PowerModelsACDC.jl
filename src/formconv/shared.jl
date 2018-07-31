@@ -15,7 +15,7 @@ Creates lossy converter model between AC and DC side
 pconv_ac[i] + pconv_dc[i] == a + b*I + c*Isq
 ```
 """
-function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, a, b, c) where {T <: PowerModels.AbstractWForms}
+function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, a, b, c, plmax) where {T <: PowerModels.AbstractWForms}
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     pconv_dc = PowerModels.var(pm, n, cnd, :pconv_dc, i)
     iconv = PowerModels.var(pm, n, cnd, :iconv_ac, i)

@@ -5,7 +5,7 @@ Creates lossy converter model between AC and DC grid
 pconv_ac[i] + pconv_dc[i] == a + bI + cI^2
 ```
 """
-function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, a, b, c) where {T <: PowerModels.AbstractACPForm}
+function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, a, b, c, plmax) where {T <: PowerModels.AbstractACPForm}
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     pconv_dc = PowerModels.var(pm, n, cnd, :pconv_dc, i)
     iconv = PowerModels.var(pm, n, cnd, :iconv_ac, i)
