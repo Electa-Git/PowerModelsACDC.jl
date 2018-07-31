@@ -109,13 +109,13 @@ end
 
         @test result["status"] == :LocalOptimal
         @test isapprox(result["objective"], 0; atol = 1e-2)
-        @test isapprox(result["solution"]["gen"]["65"]["pg"], 1.881; atol = 1e-3)
+        @test isapprox(result["solution"]["gen"]["65"]["pg"], -1.419; atol = 1e-3)
 
-        @test isapprox(result["solution"]["bus"]["119"]["va"], 0.1237; atol = 1e-3)
-        @test isapprox(result["solution"]["bus"]["224"]["va"], -0.04742; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["119"]["va"], 0.19063; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["224"]["va"], 0.11968; atol = 1e-3)
 
         @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -0.753; atol = 1e-3)
-        @test isapprox(result["solution"]["convdc"]["3"]["pdc"], -1.85212; atol = 1e-3)
+        @test isapprox(result["solution"]["convdc"]["3"]["pdc"], 1.43579; atol = 1e-3)
     end
 end
 

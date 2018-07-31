@@ -8,9 +8,10 @@ function constraint_kcl_shunt(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int
     p = PowerModels.var(pm, n, cnd, :p)
     pg = PowerModels.var(pm, n, cnd, :pg)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac)
+    pconv_grid_ac = PowerModels.var(pm, n, cnd, :pconv_tf_fr)
     v = 1
 
-    PowerModels.con(pm, n, cnd, :kcl_p)[i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*v^2)
+    PowerModels.con(pm, n, cnd, :kcl_p)[i] = @constraint(pm.model, sum(p[a] for a in bus_arcs)  == sum(pg[g] for g in bus_gens) + sum(pconv_grid_ac[c] for c in bus_convs_ac) - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*v^2)
 end
 
 """

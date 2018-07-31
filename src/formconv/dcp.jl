@@ -68,6 +68,7 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::
         PowerModels.con(pm, n, cnd, :conv_pr_p_to)[i] = @constraint(pm.model, pconv_ac == -bc*(v^2)*(vac-vaf))
     else
         PowerModels.con(pm, n, cnd, :conv_pr_p)[i] =  @constraint(pm.model, vac == vaf)
+        PowerModels.con(pm, n, cnd, :conv_pr_p_to)[i] = @constraint(pm.model, ppr_fr + pconv_ac  == 0)
     end
 end
 
