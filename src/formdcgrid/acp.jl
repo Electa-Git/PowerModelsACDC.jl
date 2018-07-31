@@ -13,8 +13,8 @@ function constraint_kcl_shunt(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int
     pconv_grid_ac = PowerModels.var(pm, n, cnd, :pconv_tf_fr)
     qconv_grid_ac = PowerModels.var(pm, n, cnd, :qconv_tf_fr)
 
-    PowerModels.con(pm, n, cnd, :kcl_p)[i] = @NLconstraint(pm.model, sum(p[a] for a in bus_arcs)  == sum(pg[g] for g in bus_gens) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*vm^2)
-    PowerModels.con(pm, n, cnd, :kcl_q)[i] = @NLconstraint(pm.model, sum(q[a] for a in bus_arcs)  == sum(qg[g] for g in bus_gens) + sum(qconv_grid_ac[c] for c in bus_convs_ac) - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*vm^2)
+    PowerModels.con(pm, n, cnd, :kcl_p)[i] = @NLconstraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)   - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*vm^2)
+    PowerModels.con(pm, n, cnd, :kcl_q)[i] = @NLconstraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*vm^2)
 end
 
 """

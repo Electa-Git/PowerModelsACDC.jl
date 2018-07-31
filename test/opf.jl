@@ -36,7 +36,7 @@ end
         result = run_acdcopf("../test/data/case3.m", DCPPowerModel, ipopt_solver; setting = s)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"], 5782; atol = 1e0)
+        @test isapprox(result["objective"], 5638.97; atol = 1e0)
     end
     @testset "5-bus asymmetric case" begin
         result = run_acdcopf("../test/data/case5_asym.m", DCPPowerModel, ipopt_solver; setting = s)
@@ -48,20 +48,20 @@ end
         result = run_acdcopf("../test/data/case5_acdc.m", DCPPowerModel, ipopt_solver; setting = s)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"], 178.31; atol = 1e0)
+        @test isapprox(result["objective"], 171.69; atol = 1e0)
     end
     @testset "5-bus ac dc case with 2 seperate ac grids" begin
         result = run_acdcopf("../test/data/case5_2grids.m", DCPPowerModel, ipopt_solver; setting = s)
 
         @test result["status"] == :LocalOptimal
-        @test isapprox(result["objective"], 379.84; atol = 1e0)
+        @test isapprox(result["objective"], 371.01; atol = 1e0)
     end
 
     @testset "24-bus rts ac dc case with three zones" begin
        result = run_acdcopf("../test/data/case24_3zones_acdc.m", DCPPowerModel, ipopt_solver; setting = s)
 
        @test result["status"] == :LocalOptimal
-       @test isapprox(result["objective"], 144791.39; atol = 1e0)
+       @test isapprox(result["objective"], 143714.75; atol = 1e0)
     end
 end
 

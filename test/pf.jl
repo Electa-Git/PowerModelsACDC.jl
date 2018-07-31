@@ -98,9 +98,9 @@ end
         @test result["status"] == :LocalOptimal
         @test isapprox(result["objective"], 0; atol = 1e-2)
 
-        @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.283139; atol = 1e-3)
-        @test isapprox(result["solution"]["bus"]["5"]["va"], -0.1642; atol = 1e-3)
-        @test isapprox(result["solution"]["bus"]["3"]["va"], -0.1284; atol = 1e-3)
+        @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.2169; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["5"]["va"], -0.09289; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["3"]["va"], -0.0826; atol = 1e-3)
         @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -0.2831; atol = 1e-3)
         @test isapprox(result["solution"]["convdc"]["3"]["pdc"], -0.3385; atol = 1e-3)
     end
@@ -109,10 +109,10 @@ end
 
         @test result["status"] == :LocalOptimal
         @test isapprox(result["objective"], 0; atol = 1e-2)
-        @test isapprox(result["solution"]["gen"]["65"]["pg"], -1.419; atol = 1e-3)
+        @test isapprox(result["solution"]["gen"]["65"]["pg"], 1.419; atol = 1e-3)
 
-        @test isapprox(result["solution"]["bus"]["119"]["va"], 0.19063; atol = 1e-3)
-        @test isapprox(result["solution"]["bus"]["224"]["va"], 0.11968; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["119"]["va"], 0.17208; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["224"]["va"], 0.07803; atol = 1e-3)
 
         @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -0.753; atol = 1e-3)
         @test isapprox(result["solution"]["convdc"]["3"]["pdc"], 1.43579; atol = 1e-3)
