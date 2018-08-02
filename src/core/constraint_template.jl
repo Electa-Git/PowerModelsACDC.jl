@@ -58,7 +58,7 @@ function constraint_converter_losses(pm::GenericPowerModel, i::Int; nw::Int=pm.c
     if !haskey(PowerModels.con(pm, nw, cnd), :conv_loss)
         PowerModels.con(pm, nw, cnd)[:conv_loss] = Dict{Int,ConstraintRef}()
         PowerModels.con(pm, nw, cnd)[:conv_loss_aux] = Dict{Int,ConstraintRef}()
-        PowerModels.con(pm, nw, cnd)[:conv_loss_ne_plmax] = Dict{Int,ConstraintRef}()
+        PowerModels.con(pm, nw, cnd)[:conv_loss_plmax] = Dict{Int,ConstraintRef}()
     end
     conv = ref(pm, nw, :convdc, i)
     a = conv["LossA"]
