@@ -233,6 +233,14 @@ function fix_data_single_network!(data, MVAbase)
             check_branchdc_parameters(branchdc)
         end
     end
+    if haskey(data, "busdc")
+        new_busdc = Dict{String, Any}()
+        for (i, busdc) in data["busdc"]
+                new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
+                new_busdc[string(new_bus)] = busdc # assigning new bus numbers: continous numbers from dc bus numbers
+        end
+        data["busdc"] = new_busdc # assigning new bus numbers: continous numbers from dc bus numbers
+    end
     if !haskey(data, "dcpol")
         data["dcpol"] = 2
     end
@@ -249,6 +257,14 @@ function fix_data_multinetwork!(data, MVAbase)
             for (i, branchdc) in data["nw"][n]["branchdc"]
                 check_branchdc_parameters(branchdc)
             end
+        end
+        if haskey(data["nw"][n], "busdc")
+            new_busdc = Dict{String, Any}()
+            for (i, busdc) in data["nw"][n]["busdc"]
+                    new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
+                    new_busdc[string(new_bus)] = busdc # assigning new bus numbers: continous numbers from dc bus numbers
+            end
+            data["nw"][n]["busdc"] = new_busdc # assigning new bus numbers: continous numbers from dc bus numbers
         end
         if !haskey(data["nw"][n], "dcpol")
             data["nw"][n]["dcpol"] = 2

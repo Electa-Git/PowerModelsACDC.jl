@@ -1,6 +1,6 @@
 function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
     if haskey(pm.ref[:nw][n], :convdc)
-        # Filter converters & DC branches with status 0 as well as wrong bus numbers
+        #Filter converters & DC branches with status 0 as well as wrong bus numbers
         pm.ref[:nw][n][:convdc] = filter((i, conv) -> conv["status"] == 1 && conv["busdc_i"] in keys(pm.ref[:nw][n][:busdc]) && conv["busac_i"] in keys(pm.ref[:nw][n][:bus]), pm.ref[:nw][n][:convdc])
         pm.ref[:nw][n][:branchdc] = filter((i, branchdc) -> branchdc["status"] == 1 && branchdc["fbusdc"] in keys(pm.ref[:nw][n][:busdc]) && branchdc["tbusdc"] in keys(pm.ref[:nw][n][:busdc]), pm.ref[:nw][n][:branchdc])
         # DC grid arcs for DC grid branches
@@ -9,7 +9,7 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
         pm.ref[:nw][n][:arcs_dcgrid] = [pm.ref[:nw][n][:arcs_dcgrid_from]; pm.ref[:nw][n][:arcs_dcgrid_to]]
         pm.ref[:nw][n][:arcs_conv_acdc] = [(i,conv["busac_i"],conv["busdc_i"]) for (i,conv) in pm.ref[:nw][n][:convdc]]
         #bus arcs of the DC grid
-        bus_arcs_dcgrid = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
+        bus_arcs_dcgrid = Dict([(bus["busdc_i"], []) for (i,bus) in pm.ref[:nw][n][:busdc]])
         for (l,i,j) in pm.ref[:nw][n][:arcs_dcgrid]
             push!(bus_arcs_dcgrid[i], (l,i,j))
         end
@@ -22,14 +22,12 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
         end
         pm.ref[:nw][n][:bus_convs_ac] = bus_convs_ac
 
-
         # bus_convs for AC side power injection of DC converters
-        bus_convs_dc = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:busdc]])
+        bus_convs_dc = Dict([(bus["busdc_i"], []) for (i,bus) in pm.ref[:nw][n][:busdc]])
         for (i,conv) in pm.ref[:nw][n][:convdc]
             push!(bus_convs_dc[conv["busdc_i"]], i)
         end
         pm.ref[:nw][n][:bus_convs_dc] = bus_convs_dc
-
         # Add DC reference buses
         ref_buses_dc = Dict{String, Any}()
         for (k,v) in pm.ref[:nw][n][:convdc]

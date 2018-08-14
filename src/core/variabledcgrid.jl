@@ -42,7 +42,7 @@ function variable_dcgrid_voltage_magnitude_sqr(pm::GenericPowerModel; nw::Int=pm
         lowerbound = 0
         )
         PowerModels.var(pm, nw, cnd)[:wdcr] = @variable(pm.model,
-        [i in PowerModels.ids(pm, nw, :buspairsdc)], basename="$(nw)_$(cnd)_wdcr",
+        [(i,j) in PowerModels.ids(pm, nw, :buspairsdc)], basename="$(nw)_$(cnd)_wdcr",
         start = PowerModels.getval(ref(pm, nw, :busdc, i), "Vdc", cnd, 1.0)^2,
         lowerbound = 0
         )
