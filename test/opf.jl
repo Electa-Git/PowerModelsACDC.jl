@@ -186,24 +186,24 @@ end
 end
 
 
-@testset "test sdp opf" begin
-    @testset "3-bus case" begin
-        result = run_acdcopf("../test/data/case3.m", SDPWRMPowerModel, scs_solver; setting = s)
-
-        @test result["status"] == :Optimal
-        @test isapprox(result["objective"], 5851.3; atol = 2e0)
-    end
-    # @testset "5-bus ac dc case" begin
-    #     result = run_acdcopf("../test/data/case5_acdc.m", SDPWRMPowerModel, mosek)
-    #
-    #     @test result["status"] == :Optimal
-    #     @test isapprox(result["objective"], 194.12; atol = 1e0)
-    # end
-    # TODO replace this with smaller case, way too slow for unit testing
-    # @testset "24-bus rts ac dc case with three zones" begin
-    #    result = run_acdcopf("../test/data/case24_3zones_acdc.m", SDPWRMPowerModel, scs_solver)
-    #
-    #    @test result["status"] == :Optimal
-    #    @test isapprox(result["objective"], 150179.96; atol = 1e0)
-    # end
-end
+# @testset "test sdp opf" begin
+#     @testset "3-bus case" begin
+#         result = run_acdcopf("../test/data/case3.m", SDPWRMPowerModel, scs_solver; setting = s)
+#
+#         @test result["status"] == :Optimal
+#         @test isapprox(result["objective"], 5851.3; atol = 2e0)
+#     end
+#     # @testset "5-bus ac dc case" begin
+#     #     result = run_acdcopf("../test/data/case5_acdc.m", SDPWRMPowerModel, mosek)
+#     #
+#     #     @test result["status"] == :Optimal
+#     #     @test isapprox(result["objective"], 194.12; atol = 1e0)
+#     # end
+#     # TODO replace this with smaller case, way too slow for unit testing
+#     # @testset "24-bus rts ac dc case with three zones" begin
+#     #    result = run_acdcopf("../test/data/case24_3zones_acdc.m", SDPWRMPowerModel, scs_solver)
+#     #
+#     #    @test result["status"] == :Optimal
+#     #    @test isapprox(result["objective"], 150179.96; atol = 1e0)
+#     # end
+# end
