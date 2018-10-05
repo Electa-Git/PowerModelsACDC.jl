@@ -17,6 +17,7 @@ files =
 "./test/data/case24_3zones_acdc.m";
 "./test/data/case39_acdc.m";
 "./test/data/case3120sp_acdc.m";
+"./test/data/pglib_opf_case588_sdet_acdc.m"
 ]
 
 
@@ -29,7 +30,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 objective = Dict{String, Any}()
 
 function exctract_info(dict)
-    return Dict("obj" => dict["objective"], "solve_time" => dict["solve_time"], "result" => dict )
+    return Dict("obj" => dict["objective"], "solve_time" => dict["solve_time"], "result" => dict, "u_error" => 0, "pf_error" => 0, "pfdc_error" => 0, "u_error_rel" => 0, "pf_error_rel" => 0, "pfdc_error_rel" => 0  )
 end
 
 function calc_gap(dict)
@@ -38,6 +39,47 @@ function calc_gap(dict)
             print(formulation)
             ac = formulations["AC NLP"]["obj"]
             results["gap"] = (ac - results["obj"])/ac
+        end
+    end
+end
+
+function calc_errors(dict)
+    for (filename, formulations) in dict
+        for (formulation, results) in formulations
+            print(formulation)
+            for (bus_id, bus) in formulations["AC NLP"]["result"]["solution"]["bus"]
+                results["u_error"] = results["u_error"] + (bus["vm"] - results["result"]["solution"]["bus"][bus_id]["vm"])^2
+            end
+            results["u_error"] = results["u_error"] / length(formulations["AC NLP"]["result"]["solution"]["bus"])
+            for (branch_id, branch) in formulations["AC NLP"]["result"]["solution"]["branch"]
+                results["pf_error"] = results["pf_error"] + (branch["pf"] - results["result"]["solution"]["branch"][branch_id]["pf"])^2
+            end
+            results["pf_error"] = results["pf_error"] / length(formulations["AC NLP"]["result"]["solution"]["branch"])
+            for (branch_id, branch) in formulations["AC NLP"]["result"]["solution"]["branchdc"]
+                results["pfdc_error"] = results["pfdc_error"] + (branch["pf"] - results["result"]["solution"]["branchdc"][branch_id]["pf"])^2
+            end
+            results["pfdc_error"] = results["pfdc_error"] / length(formulations["AC NLP"]["result"]["solution"]["branchdc"])
+        end
+    end
+end
+
+
+function calc_errors_rel(dict)
+    for (filename, formulations) in dict
+        for (formulation, results) in formulations
+            print(formulation)
+            for (bus_id, bus) in formulations["AC NLP"]["result"]["solution"]["bus"]
+                results["u_error_rel"] = results["u_error_rel"] + abs(bus["vm"] - results["result"]["solution"]["bus"][bus_id]["vm"])/abs(bus["vm"])
+            end
+            results["u_error_rel"] = results["u_error_rel"] / length(formulations["AC NLP"]["result"]["solution"]["bus"])
+            for (branch_id, branch) in formulations["AC NLP"]["result"]["solution"]["branch"]
+                results["pf_error_rel"] = results["pf_error_rel"] + abs(branch["pf"] - results["result"]["solution"]["branch"][branch_id]["pf"])/abs(branch["pf"])
+            end
+            results["pf_error_rel"] = results["pf_error_rel"] / length(formulations["AC NLP"]["result"]["solution"]["branch"])
+            for (branch_id, branch) in formulations["AC NLP"]["result"]["solution"]["branchdc"]
+                results["pfdc_error_rel"] = results["pfdc_error_rel"] + abs(branch["pf"] - results["result"]["solution"]["branchdc"][branch_id]["pf"])/abs(branch["pf"])
+            end
+            results["pfdc_error_rel"] = results["pfdc_error_rel"] / length(formulations["AC NLP"]["result"]["solution"]["branchdc"])
         end
     end
 end
@@ -66,6 +108,7 @@ for file in files
     #fix_things!(data)
 
     case = Dict{String, Any}()
+    er_dict = Dict{String, Any}()
 
     resultAC = run_acdcopf(data, ACPPowerModel, ipopt; setting = s)
     case["AC NLP"] = exctract_info(resultAC)
@@ -93,6 +136,8 @@ for file in files
 end
 
 calc_gap(objective)
+calc_errors(objective)
+calc_errors_rel(objective)
 
 
 function print_table_opt_gap(dict)
@@ -124,4 +169,66 @@ function print_table_opt_gap(dict)
 end
 clearconsole()
 stt = print_table_opt_gap(objective)
+print(stt)
+function print_table_errors(dict)
+    s = ""
+    c = " & "
+    s = s*"case"*c*"BIM SDP"*c*c*c* "QC SOC"*c*c*c* "BIM SOC"*c*c*c* "BFM SOC"*c*c*c*raw"\ "[1]*raw"\ "* " \n"
+    for (filename, ff) in dict
+        s = s*filename
+        l = 6
+        l2 = 8
+        p = 100
+        s = s *c*string(Base.signif(ff["BIM SDP"]["u_error"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SDP"]["pf_error"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SDP"]["pfdc_error"], l))
+        s = s *c*string(Base.signif(ff["QC SOC"]["u_error"], l))
+        s = s *c*string(Base.signif(p*ff["QC SOC"]["pf_error"], l))
+        s = s *c*string(Base.signif(p*ff["QC SOC"]["pfdc_error"], l))
+        s = s *c*string(Base.signif(ff["BIM SOC"]["u_error"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SOC"]["pf_error"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SOC"]["pfdc_error"], l))
+        s = s *c*string(Base.signif(ff["BFM SOC"]["u_error"], l))
+        s = s *c*string(Base.signif(p*ff["BFM SOC"]["pf_error"], l))
+        s = s *c*string(Base.signif(p*ff["BFM SOC"]["pfdc_error"], l))
+
+        s = s*raw"\ "[1]*raw"\ "*" \n"
+    end
+    return s
+end
+stt = print_table_errors(objective)
+print(stt)
+
+function print_table_errors_rel(dict)
+    s = ""
+    c = " & "
+    s = s*"case"*c*"BIM SDP"*c*c*c* "QC SOC"*c*c*c* "BIM SOC"*c*c*c* "BFM SOC"*c*c*c*raw"\ "[1]*raw"\ "* " \n"
+    for (filename, ff) in dict
+        s = s*filename
+        l = 6
+        l2 = 8
+        p = 100
+        s = s *c*string(Base.signif(ff["AC NLP"]["solve_time"], l))
+        s = s *c*string(Base.signif(ff["BIM SDP"]["solve_time"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SDP"]["u_error_rel"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SDP"]["pf_error_rel"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SDP"]["pfdc_error_rel"], l))
+        s = s *c*string(Base.signif(ff["QC SOC"]["solve_time"], l))
+        s = s *c*string(Base.signif(p*ff["QC SOC"]["u_error_rel"], l))
+        s = s *c*string(Base.signif(p*ff["QC SOC"]["pf_error_rel"], l))
+        s = s *c*string(Base.signif(p*ff["QC SOC"]["pfdc_error_rel"], l))
+        s = s *c*string(Base.signif(ff["BIM SOC"]["solve_time"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SOC"]["u_error_rel"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SOC"]["pf_error_rel"], l))
+        s = s *c*string(Base.signif(p*ff["BIM SOC"]["pfdc_error_rel"], l))
+        s = s *c*string(Base.signif(ff["BFM SOC"]["solve_time"], l))
+        s = s *c*string(Base.signif(p*ff["BFM SOC"]["u_error_rel"], l))
+        s = s *c*string(Base.signif(p*ff["BFM SOC"]["pf_error_rel"], l))
+        s = s *c*string(Base.signif(p*ff["BFM SOC"]["pfdc_error_rel"], l))
+
+        s = s*raw"\ "[1]*raw"\ "*" \n"
+    end
+    return s
+end
+stt = print_table_errors_rel(objective)
 print(stt)
