@@ -15,7 +15,8 @@ file_case3120 = "./test/data/case3120sp_acdc.m"
 file_case5dcgrid = "./test/data/case5_dcgrid.m"
 file_case5_b2bdc = "./test/data/case5_b2bdc.m"
 file_lcc = "./test/data/lcc_test.m"
-file = file_case5acdc
+file_588sdet_acdc = "./test/data/pglib_opf_case588_sdet_acdc.m"
+file = file_588sdet_acdc
 
 data = PowerModels.parse_file(file)
 

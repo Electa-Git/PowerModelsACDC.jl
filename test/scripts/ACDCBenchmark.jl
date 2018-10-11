@@ -3,7 +3,7 @@ using PowerModels
 using Ipopt
 #using CPLEX
 using SCS
-#using Mosek
+using Mosek
 
 files =
 [
@@ -24,6 +24,7 @@ files =
 
 scs = SCSSolver(max_iters=100000);
 ipopt = IpoptSolver(tol=1e-6, print_level=0)
+mosek = MosekSolver(MSK_DPAR_OPTIMIZER_MAX_TIME = 360)
 #mosek = MosekSolver()
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
@@ -69,15 +70,15 @@ function calc_errors_rel(dict)
         for (formulation, results) in formulations
             print(formulation)
             for (bus_id, bus) in formulations["AC NLP"]["result"]["solution"]["bus"]
-                results["u_error_rel"] = results["u_error_rel"] + abs(bus["vm"] - results["result"]["solution"]["bus"][bus_id]["vm"])/abs(bus["vm"])
+                results["u_error_rel"] = results["u_error_rel"] + abs(bus["vm"] - results["result"]["solution"]["bus"][bus_id]["vm"])/abs(bus["vm"]+1e-5)
             end
             results["u_error_rel"] = results["u_error_rel"] / length(formulations["AC NLP"]["result"]["solution"]["bus"])
             for (branch_id, branch) in formulations["AC NLP"]["result"]["solution"]["branch"]
-                results["pf_error_rel"] = results["pf_error_rel"] + abs(branch["pf"] - results["result"]["solution"]["branch"][branch_id]["pf"])/abs(branch["pf"])
+                results["pf_error_rel"] = results["pf_error_rel"] + abs(branch["pf"] - results["result"]["solution"]["branch"][branch_id]["pf"])/abs(branch["pf"]+1e-5)
             end
             results["pf_error_rel"] = results["pf_error_rel"] / length(formulations["AC NLP"]["result"]["solution"]["branch"])
             for (branch_id, branch) in formulations["AC NLP"]["result"]["solution"]["branchdc"]
-                results["pfdc_error_rel"] = results["pfdc_error_rel"] + abs(branch["pf"] - results["result"]["solution"]["branchdc"][branch_id]["pf"])/abs(branch["pf"])
+                results["pfdc_error_rel"] = results["pfdc_error_rel"] + abs(branch["pf"] - results["result"]["solution"]["branchdc"][branch_id]["pf"])/abs(branch["pf"]+1e-5)
             end
             results["pfdc_error_rel"] = results["pfdc_error_rel"] / length(formulations["AC NLP"]["result"]["solution"]["branchdc"])
         end
@@ -116,8 +117,8 @@ for file in files
     resultQC = run_acdcopf(data, QCWRPowerModel, ipopt; setting = s)
     case["QC SOC"] = exctract_info(resultQC)
     # #
-    resultQCTri = run_acdcopf(data, QCWRTriPowerModel, ipopt; setting = s)
-    case["QCTri SOC"] = exctract_info(resultQCTri)
+    # resultQCTri = run_acdcopf(data, QCWRTriPowerModel, ipopt; setting = s)
+    # case["QCTri SOC"] = exctract_info(resultQCTri)
     # #
     resultSOCBIM = run_acdcopf(data, SOCWRPowerModel, ipopt; setting = s)
     case["BIM SOC"] = exctract_info(resultSOCBIM)
@@ -125,9 +126,8 @@ for file in files
     resultSOCBFM = run_acdcopf(data, SOCBFPowerModel, ipopt; setting = s)
     case["BFM SOC"] = exctract_info(resultSOCBFM)
     # #
-    #resultSDP = run_acdcopf(data, SDPWRMPowerModel, scs; setting = s)
-    #case["BIM SDP"] = exctract_info(resultSDP)
-    case["BIM SDP"] = exctract_info(resultSOCBFM)
+    resultSDP = run_acdcopf(data, SDPWRMPowerModel, mosek; setting = s)
+    case["BIM SDP"] = exctract_info(resultSDP)
     # # #
     resultDC = run_acdcopf(data, DCPPowerModel, ipopt; setting = s)
     case["DC LP"] = exctract_info(resultDC)
@@ -143,7 +143,7 @@ calc_errors_rel(objective)
 function print_table_opt_gap(dict)
     s = ""
     c = " & "
-    s = s*"case"*c*"AC NLP"*c* "QC SOC" *c*c* "QCTri SOC" *c*c* "BIM SOC" *c*c* "BFM SOC" *c*c* "BIM SDP" *c*c* "DC LP"*c*raw"\ "[1]*raw"\ "* " \n"
+    s = s*"case"*c*"AC NLP"*c* "BIM SDP" *c*c*  "QC SOC" *c*c* "BIM SOC" *c*c* "BFM SOC" *c*c*"DC LP"*c*raw"\ "[1]*raw"\ "* " \n"
     for (filename, ff) in dict
         s = s*filename
         l = 6
@@ -168,8 +168,8 @@ function print_table_opt_gap(dict)
     return s
 end
 clearconsole()
-stt = print_table_opt_gap(objective)
-print(stt)
+# stt = print_table_opt_gap(objective)
+# print(stt)
 function print_table_errors(dict)
     s = ""
     c = " & "
@@ -208,27 +208,47 @@ function print_table_errors_rel(dict)
         l = 6
         l2 = 8
         p = 100
-        s = s *c*string(Base.signif(ff["AC NLP"]["solve_time"], l))
-        s = s *c*string(Base.signif(ff["BIM SDP"]["solve_time"], l))
         s = s *c*string(Base.signif(p*ff["BIM SDP"]["u_error_rel"], l))
         s = s *c*string(Base.signif(p*ff["BIM SDP"]["pf_error_rel"], l))
         s = s *c*string(Base.signif(p*ff["BIM SDP"]["pfdc_error_rel"], l))
-        s = s *c*string(Base.signif(ff["QC SOC"]["solve_time"], l))
         s = s *c*string(Base.signif(p*ff["QC SOC"]["u_error_rel"], l))
         s = s *c*string(Base.signif(p*ff["QC SOC"]["pf_error_rel"], l))
         s = s *c*string(Base.signif(p*ff["QC SOC"]["pfdc_error_rel"], l))
-        s = s *c*string(Base.signif(ff["BIM SOC"]["solve_time"], l))
         s = s *c*string(Base.signif(p*ff["BIM SOC"]["u_error_rel"], l))
         s = s *c*string(Base.signif(p*ff["BIM SOC"]["pf_error_rel"], l))
         s = s *c*string(Base.signif(p*ff["BIM SOC"]["pfdc_error_rel"], l))
-        s = s *c*string(Base.signif(ff["BFM SOC"]["solve_time"], l))
         s = s *c*string(Base.signif(p*ff["BFM SOC"]["u_error_rel"], l))
         s = s *c*string(Base.signif(p*ff["BFM SOC"]["pf_error_rel"], l))
         s = s *c*string(Base.signif(p*ff["BFM SOC"]["pfdc_error_rel"], l))
+        # s = s *c*string(Base.signif(p*ff["DC LP"]["u_error_rel"], l))
+        # s = s *c*string(Base.signif(p*ff["DC LP"]["pf_error_rel"], l))
+        # s = s *c*string(Base.signif(p*ff["DC LP"]["pfdc_error_rel"], l))
 
         s = s*raw"\ "[1]*raw"\ "*" \n"
     end
     return s
 end
 stt = print_table_errors_rel(objective)
+print(stt)
+function print_table_comp_time(dict)
+    s = ""
+    c = " & "
+    s = s*"case"*c*"BIM NLP"*c*"BIM SDP"*c* "QC SOC"*c*c*c* "BIM SOC"*c*c*c* "BFM SOC"*c*c*c*raw"\ "[1]*raw"\ "* " \n"
+    for (filename, ff) in dict
+        s = s*filename
+        l = 6
+        l2 = 8
+        p = 100
+        s = s *c*string(Base.signif(ff["AC NLP"]["solve_time"], l))
+        s = s *c*string(Base.signif(ff["BIM SDP"]["solve_time"], l))
+        s = s *c*string(Base.signif(ff["QC SOC"]["solve_time"], l))
+        s = s *c*string(Base.signif(ff["BIM SOC"]["solve_time"], l))
+        s = s *c*string(Base.signif(ff["BFM SOC"]["solve_time"], l))
+        s = s *c*string(Base.signif(ff["DC LP"]["solve_time"], l))
+
+        s = s*raw"\ "[1]*raw"\ "*" \n"
+    end
+    return s
+end
+stt = print_table_comp_time(objective)
 print(stt)
