@@ -58,3 +58,9 @@ mpc.dcline = [
 mpc.dclinecost = [
 	2	 0.0	 0.0	 3	   0.000000	  40.000000	   0.000000;
 ];
+
+% adds current ratings to branch matrix
+%column_names%	c_rating_a
+mpc.branch_currents = [
+400;426;426;426;426;240;
+];

@@ -2,7 +2,6 @@
 function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel{T}; kwargs...) where {T <: PowerModels.AbstractWForms}
     variable_dcgrid_voltage_magnitude_sqr(pm; kwargs...)
 end
-
 """
 ```
 sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac) == sum(pg[g] for g in bus_gens)  - pd - gs*w
@@ -21,7 +20,6 @@ function constraint_kcl_shunt(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int
     PowerModels.con(pm, n, cnd, :kcl_p)[i] = @constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)  - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*w)
     PowerModels.con(pm, n, cnd, :kcl_q)[i] = @constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*w)
 end
-
 """
 Creates Ohms constraints for DC branches
 
@@ -44,7 +42,6 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, cnd::Int, f
         @constraint(pm.model, p_dc_to == p * g *  (wdc_to - wdc_frto))
     end
 end
-
 "`wdc[i] == vdcm^2`"
 function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel{T}, n::Int, cnd::Int, i, vdcm) where {T <: PowerModels.AbstractWForms}
     wdc = PowerModels.var(pm, n, cnd, :wdc, i)
@@ -54,4 +51,18 @@ end
 
 function add_dc_bus_voltage_setpoint(sol, pm::GenericPowerModel{T}) where {T <: PowerModels.AbstractWForms}
     PowerModels.add_setpoint(sol, pm, "busdc", "vm", :wdc; scale = (x,item) -> sqrt(x))
+end
+
+"""
+Limits dc branch current
+
+```
+p[f_idx] <= wdc[f_bus] * Imax
+```
+"""
+function constraint_dc_branch_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p) where {T <: PowerModels.AbstractWForms}
+    p_dc_fr = PowerModels.var(pm, n, cnd, :p_dcgrid, f_idx)
+    wdc_fr = PowerModels.var(pm, n, cnd, :wdc, f_bus)
+
+    @constraint(pm.model, p_dc_fr <= wdc_fr * ccm_max * p^2)
 end

@@ -7,10 +7,16 @@ using JuMP
 using PowerModels
 using InfrastructureModels
 
+import Compat: @__MODULE__
+
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 PMs = PowerModels
 
 include("prob/acdcopf.jl")
 include("prob/acdcpf.jl")
+include("prob/acdcopf_bf.jl")
 include("core/solution.jl")
 include("core/data.jl")
 include("core/variabledcgrid.jl")

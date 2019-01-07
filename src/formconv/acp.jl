@@ -1,6 +1,5 @@
 """
 Creates lossy converter model between AC and DC grid
-
 ```
 pconv_ac[i] + pconv_dc[i] == a + bI + cI^2
 ```
@@ -12,11 +11,8 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int,
 
     PowerModels.con(pm, n, cnd, :conv_loss)[i] = @NLconstraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv^2)
 end
-
-
 """
 Links converter power & current
-
 ```
 pconv_ac[i]^2 + pconv_dc[i]^2 == vmc[i]^2 * iconv_ac[i]^2
 ```
@@ -29,10 +25,8 @@ function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int
 
     PowerModels.con(pm, n, cnd, :conv_i)[i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == vmc^2 * iconv^2)
 end
-
 """
 Converter transformer constraints
-
 ```
 p_tf_fr ==  g/(tm^2)*vm_fr^2 + -g/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -b/(tm)*vm_fr*vm_to*sin(va_fr-va_to)
 q_tf_fr == -b/(tm^2)*vm_fr^2 +  b/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -g/(tm)*vm_fr*vm_to*sin(va_fr-va_to)
@@ -40,7 +34,6 @@ p_tf_to ==  g*vm_to^2 + -g/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -b/(t
 q_tf_to == -b*vm_to^2 +  b/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g/(tm)*vm_to*vm_fr    *sin(va_to - va_fr)
 ```
 """
-
 function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractACPForm}
     ptf_fr = PowerModels.var(pm, n, cnd, :pconv_tf_fr, i)
     qtf_fr = PowerModels.var(pm, n, cnd, :qconv_tf_fr, i)
@@ -72,7 +65,6 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int,
         @constraint(pm.model, vm/(tm) == vmf)
     end
 end
-
 "constraints for a voltage magnitude transformer + series impedance"
 function ac_power_flow_constraints(model, g, b, gsh_fr, vm_fr, vm_to, va_fr, va_to, p_fr, p_to, q_fr, q_to, tm)
     c1 = @NLconstraint(model, p_fr ==  g/(tm^2)*vm_fr^2 + -g/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -b/(tm)*vm_fr*vm_to*sin(va_fr-va_to))
@@ -81,11 +73,8 @@ function ac_power_flow_constraints(model, g, b, gsh_fr, vm_fr, vm_to, va_fr, va_
     c4 = @NLconstraint(model, q_to == -b*vm_to^2 +  b/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g/(tm)*vm_to*vm_fr    *sin(va_to - va_fr))
     return c1, c2, c3, c4
 end
-
-
 """
 Converter reactor constraints
-
 ```
 -pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf)
 -qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf)
@@ -93,7 +82,6 @@ p_pr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac
 q_pr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac)
 ```
 """
-
 function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractACPForm}
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qconv_ac = PowerModels.var(pm, n, cnd, :qconv_ac, i)
@@ -124,16 +112,13 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::
 
     end
 end
-
 """
 Converter filter constraints
-
 ```
 ppr_fr + ptf_to == 0
 qpr_fr + qtf_to +  (-bv) * filter *vmf^2 == 0
 ```
 """
-
 function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, bv, filter) where {T <: PowerModels.AbstractACPForm}
     ppr_fr = PowerModels.var(pm, n, cnd, :pconv_pr_fr, i)
     qpr_fr = PowerModels.var(pm, n, cnd, :qconv_pr_fr, i)
@@ -145,16 +130,13 @@ function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::I
     PowerModels.con(pm, n, cnd, :conv_kcl_p)[i] = @constraint(pm.model,   ppr_fr + ptf_to == 0 )
     PowerModels.con(pm, n, cnd, :conv_kcl_q)[i] = @NLconstraint(pm.model, qpr_fr + qtf_to +  (-bv) * filter *vmf^2 == 0)
 end
-
 """
 LCC firing angle constraints
-
 ```
 pconv_ac == cos(phi) * Srated
 qconv_ac == sin(phi) * Srated
 ```
 """
-
 function constraint_conv_firing_angle(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, S, P1, Q1, P2, Q2) where {T <: PowerModels.AbstractACPForm}
     p = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     q = PowerModels.var(pm, n, cnd, :qconv_ac, i)

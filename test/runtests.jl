@@ -1,6 +1,7 @@
 using PowerModelsACDC
 using PowerModels
 using Memento
+using InfrastructureModels
 
 # Suppress warnings during testing.
 setlevel!(getlogger(InfrastructureModels), "error")

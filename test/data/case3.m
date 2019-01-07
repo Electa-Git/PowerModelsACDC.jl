@@ -85,3 +85,11 @@ mpc.branch_names = {
 	'Branch 2'	456;
 	'Branch 3'	789;
 };
+
+% adds current ratings to branch matrix
+%column_names%	c_rating_a
+mpc.branch_currents = [
+9000;
+50;
+9000;
+];

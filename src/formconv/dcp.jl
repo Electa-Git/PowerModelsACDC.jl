@@ -17,9 +17,7 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int,
         PowerModels.con(pm, n, cnd, :conv_loss_aux)[i] = @constraint(pm.model, pconv_ac + pconv_dc >= a - b*cm_conv_ac )
         PowerModels.con(pm, n, cnd, :conv_loss_plmax)[i] = @constraint(pm.model, pconv_ac + pconv_dc <= plmax)
     end
-    #pm.con[:nw][n][:conv_loss][i] = @constraint(pm.model, pconv_ac + pconv_dc == a  )
 end
-
 """
 Converter transformer constraints
 
@@ -28,7 +26,6 @@ p_tf_fr == -btf*(v^2)/tm*(va-vaf)
 p_tf_to == -btf*(v^2)/tm*(vaf-va)
 ```
 """
-
 function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractDCPForm}
     ptf_fr = PowerModels.var(pm, n, cnd, :pconv_tf_fr, i)
     ptf_to = PowerModels.var(pm, n, cnd, :pconv_tf_to, i)
@@ -46,7 +43,6 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int,
         PowerModels.con(pm, n, cnd, :conv_tf_p_to)[i] = @constraint(pm.model, ptf_fr + ptf_to  == 0)
     end
 end
-
 """
 Converter reactor constraints
 
@@ -55,7 +51,6 @@ p_pr_fr == -bc*(v^2)*(vaf-vac)
 pconv_ac == -bc*(v^2)*(vac-vaf)
 ```
 """
-
 function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractDCPForm}
     ppr_fr = PowerModels.var(pm, n, cnd, :pconv_pr_fr, i)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
@@ -72,34 +67,26 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::
         PowerModels.con(pm, n, cnd, :conv_pr_p_to)[i] = @constraint(pm.model, ppr_fr + pconv_ac  == 0)
     end
 end
-
 """
 Converter filter constraints (no active power losses)
-
 ```
 p_pr_fr + p_tf_to == 0
 ```
 """
-
 function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, bv, filter)where {T <: PowerModels.AbstractDCPForm}
     ppr_fr = PowerModels.var(pm, n, cnd, :pconv_pr_fr, i)
     ptf_to = PowerModels.var(pm, n, cnd, :pconv_tf_to, i)
 
     PowerModels.con(pm, n, cnd, :conv_kcl_p)[i] = @constraint(pm.model,   ppr_fr + ptf_to == 0 )
 end
-
-
 """
 Converter current constraint (not applicable)
-
 ```
 ```
 """
 function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, Umax, Imax) where {T <: PowerModels.AbstractDCPForm}
     # not used
 end
-
-
 function variable_dc_converter(pm::GenericPowerModel{T}; kwargs...) where {T <: PowerModels.AbstractDCPForm}
     variable_converter_active_power(pm; kwargs...)
     variable_dcside_power(pm; kwargs...)
@@ -119,19 +106,15 @@ end
 function variable_converter_internal_voltage(pm::GenericPowerModel{T}; kwargs...) where {T <: PowerModels.AbstractDCPForm}
     variable_converter_internal_voltage_angle(pm; kwargs...)
 end
-
 """
 Converter reactive power setpoint constraint (PF only, not applicable)
-
 ```
 ```
 """
 function constraint_reactive_conv_setpoint(pm::GenericPowerModel{T}, n::Int, cnd::Int, i, qconv) where {T <: PowerModels.AbstractDCPForm}
 end
-
 """
 Converter firing angle constraint (not applicable)
-
 ```
 ```
 """

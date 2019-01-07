@@ -13,3 +13,17 @@ function constraint_voltage_dc(pm::GenericPowerModel{T}, n::Int, cnd::Int) where
         InfrastructureModels.relaxation_complex_product(pm.model, wdc[i], wdc[j], wdcr[(i,j)], 0)
     end
 end
+
+"""
+Limits dc branch current
+
+```
+p[f_idx] <= wdc[f_bus] * Imax
+```
+"""
+function constraint_dc_branch_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p) where {T <: PowerModels.AbstractWRForm}
+    p_dc_fr = PowerModels.var(pm, n, cnd, :p_dcgrid, f_idx)
+    wdc_fr = PowerModels.var(pm, n, cnd, :wdc, f_bus)
+
+    @constraint(pm.model, p_dc_fr <= wdc_fr * ccm_max * p^2)
+end

@@ -16,7 +16,7 @@ file_case5dcgrid = "./test/data/case5_dcgrid.m"
 file_case5_b2bdc = "./test/data/case5_b2bdc.m"
 file_lcc = "./test/data/lcc_test.m"
 file_588sdet_acdc = "./test/data/pglib_opf_case588_sdet_acdc.m"
-file = file_588sdet_acdc
+file = file_case5acdc
 
 data = PowerModels.parse_file(file)
 
@@ -34,20 +34,23 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 resultAC = run_acdcopf(file, ACPPowerModel, ipopt; setting = s)
 
 resultQC = run_acdcopf(file, QCWRPowerModel, ipopt; setting = s)
-# #
-resultQCTri = run_acdcopf(file, QCWRTriPowerModel, ipopt; setting = s)
 # # #
-resultSOCBIM = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
+resultQCTri = run_acdcopf(file, QCWRTriPowerModel, ipopt; setting = s)
+resultACQCTri = PowerModels.run_opf(file, QCWRPowerModel, ipopt; setting = s)
 # #
-resultSOCBFM = run_acdcopf(file, SOCBFPowerModel, ipopt; setting = s)
+resultSOCBIM = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
+resultACSOCBIM = PowerModels.run_opf(file, SOCWRPowerModel, ipopt; setting = s)
+# #
+resultSOCBFM = run_acdcopf_bf(file, SOCBFPowerModel, ipopt; setting = s)
+resultACSOCBFM = PowerModels.run_opf_bf(file, SOCBFPowerModel, ipopt; setting = s)
 # #
 resultSDP = run_acdcopf(file, SDPWRMPowerModel, mosek; setting = s)
 # #
 resultDC = run_acdcopf(file, DCPPowerModel, ipopt; setting = s)
 #
-# # other tests
-resultACPF24 = run_acdcpf(file_case24, ACPPowerModel, ipopt; setting = s)
-resultACPF5 = run_acdcpf(file_case5acdc, ACPPowerModel, ipopt; setting = s)
+# # # other tests
+# resultACPF24 = run_acdcpf(file_case24, ACPPowerModel, ipopt; setting = s)
+# resultACPF5 = run_acdcpf(file_case5acdc, ACPPowerModel, ipopt; setting = s)
 # resultAC5b2b = run_acdcopf(file_case5_b2bdc, ACPPowerModel, ipopt; setting = s)
 # resultAC39 = run_acdcopf(file_case39, ACPPowerModel, ipopt; setting = s)
 # resultAC3120 = run_acdcopf(file_case3120, ACPPowerModel, ipopt; setting = s)

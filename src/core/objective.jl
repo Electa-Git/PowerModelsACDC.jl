@@ -14,30 +14,49 @@ end
 ""
 function objective_min_polynomial_fuel_cost(pm::GenericPowerModel)
     PowerModels.check_polynomial_cost_models(pm)
-    return @objective(pm.model, Min,
-        sum(
-            sum(   gen["cost"][1]*sum(PowerModels.var(pm, n, cnd, :pg, i) for cnd in PowerModels.conductor_ids(pm, n))^2 +
-                   gen["cost"][2]*sum(PowerModels.var(pm, n, cnd, :pg, i) for cnd in PowerModels.conductor_ids(pm, n))+
-                   gen["cost"][3] for (i,gen) in nw_ref[:gen])
-        for (n, nw_ref) in PowerModels.nws(pm))
-    )
+    order = PowerModels.calc_max_cost_index(pm.data)-1
 
-
-    # PowerModels.check_polynomial_cost_models(pm)
-    #
-    # return @objective(pm.model, Min,
-    #     sum(
-    #         sum(gen["cost"][1]*sum(PowerModels.var(pm, n, cnd, :pg, i)^2 + gen["cost"][2]*PowerModels.var(pm, n, cnd, :pg, i) + gen["cost"][3] for (i,gen) in pm.ref[:nw][n][:gen])
-    #         for cnd in PowerModels.conductor_ids(pm, n))
-    #             for n in nws)
-    # )
+    if order == 1
+        return _objective_min_polynomial_fuel_cost_linear(pm)
+    elseif order == 2
+        return _objective_min_polynomial_fuel_cost_quadratic(pm)
+    else
+        error("cost model order of $(order) is not supported")
+    end
 end
 
+function _objective_min_polynomial_fuel_cost_linear(pm::GenericPowerModel)
+    from_idx = Dict()
+    for (n, nw_ref) in nws(pm)
+        from_idx[n] = Dict(arc[1] => arc for arc in nw_ref[:arcs_from_dc])
+    end
+
+    return @objective(pm.model, Min,
+        sum(
+            sum(   gen["cost"][1]*sum( var(pm, n, c, :pg, i) for c in conductor_ids(pm, n))+
+                   gen["cost"][2] for (i,gen) in nw_ref[:gen])
+        for (n, nw_ref) in nws(pm))
+    )
+end
+""
+function _objective_min_polynomial_fuel_cost_quadratic(pm::GenericPowerModel)
+    from_idx = Dict()
+    for (n, nw_ref) in nws(pm)
+        from_idx[n] = Dict(arc[1] => arc for arc in nw_ref[:arcs_from_dc])
+    end
+
+    return @objective(pm.model, Min,
+        sum(
+            sum(   gen["cost"][1]*sum( var(pm, n, c, :pg, i) for c in conductor_ids(pm, n))^2 +
+                   gen["cost"][2]*sum( var(pm, n, c, :pg, i) for c in conductor_ids(pm, n))+
+                   gen["cost"][3] for (i,gen) in nw_ref[:gen])
+        for (n, nw_ref) in nws(pm))
+    )
+end
 ""
 function objective_min_polynomial_fuel_cost(pm::GenericPowerModel{T}) where {T <: PowerModels.AbstractConicPowerFormulation}
     PowerModels.check_polynomial_cost_models(pm)
     pg_sqr = Dict()
-    # dc_p_sqr = Dict()
     for (n, nw_ref) in PowerModels.nws(pm)
         for cnd in PowerModels.conductor_ids(pm, n)
             pg_sqr = PowerModels.var(pm, n, cnd)[:pg_sqr] = @variable(pm.model,
@@ -49,15 +68,6 @@ function objective_min_polynomial_fuel_cost(pm::GenericPowerModel{T}) where {T <
                 @constraint(pm.model, norm([2*var(pm, n, cnd, :pg, i), pg_sqr[i]-1]) <= pg_sqr[i]+1)
             end
 
-            # dc_p_sqr = var(pm, n, cnd)[:p_dc_sqr] = @variable(pm.model,
-            #     [i in ids(pm, n, :dcline)], basename="$(n)_$(h)_dc_p_sqr",
-            #     lowerbound = ref(pm, n, :dcline, i, "pminf", cnd)^2,
-            #     upperbound = ref(pm, n, :dcline, i, "pmaxf", cnd)^2
-            # )
-            #
-            # for (i, dcline) in nw_ref[:dcline]
-            #     @constraint(pm.model, norm([2*var(pm, n, cnd, :p_dc)[from_idx[n][i]], dc_p_sqr[i]-1]) <= dc_p_sqr[i]+1)
-            # end
         end
     end
 
@@ -69,7 +79,6 @@ function objective_min_polynomial_fuel_cost(pm::GenericPowerModel{T}) where {T <
         for (n, nw_ref) in PowerModels.nws(pm))
     )
 end
-
 ""
 function objective_min_pwl_fuel_cost(pm::GenericPowerModel)
 

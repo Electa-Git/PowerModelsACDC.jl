@@ -11,7 +11,7 @@ files =
 "./test/data/case5_acdc.m";
 "./test/data/case5_lcc.m";
 "./test/data/case5_b2bdc.m";
-#"./test/data/case5_dc.m"; #Don't use normally
+# "./test/data/case5_dc.m"; #Don't use normally
 "./test/data/case5_dcgrid.m";
 "./test/data/case5_dcgrid_b0.m";
 "./test/data/case24_3zones_acdc.m";
@@ -123,11 +123,12 @@ for file in files
     resultSOCBIM = run_acdcopf(data, SOCWRPowerModel, ipopt; setting = s)
     case["BIM SOC"] = exctract_info(resultSOCBIM)
     # #
-    resultSOCBFM = run_acdcopf(data, SOCBFPowerModel, ipopt; setting = s)
+    resultSOCBFM = run_acdcopf_bf(data, SOCBFPowerModel, ipopt; setting = s)
     case["BFM SOC"] = exctract_info(resultSOCBFM)
     # #
-    resultSDP = run_acdcopf(data, SDPWRMPowerModel, mosek; setting = s)
-    case["BIM SDP"] = exctract_info(resultSDP)
+    case["BIM SDP"] = exctract_info(resultAC)
+    # resultSDP = run_acdcopf(data, SDPWRMPowerModel, mosek; setting = s)
+    # case["BIM SDP"] = exctract_info(resultSDP)
     # # #
     resultDC = run_acdcopf(data, DCPPowerModel, ipopt; setting = s)
     case["DC LP"] = exctract_info(resultDC)
@@ -168,8 +169,8 @@ function print_table_opt_gap(dict)
     return s
 end
 clearconsole()
-# stt = print_table_opt_gap(objective)
-# print(stt)
+stt = print_table_opt_gap(objective)
+print(stt)
 function print_table_errors(dict)
     s = ""
     c = " & "

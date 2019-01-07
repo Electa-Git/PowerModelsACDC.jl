@@ -14,17 +14,12 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, cnd::Int, f
     wdc_fr = PowerModels.var(pm, n, cnd, :wdc, f_bus)
     wdc_to = PowerModels.var(pm, n, cnd, :wdc, t_bus)
 
-    # @constraint(pm.model, p_dc_fr + p_dc_to ==  r/p * ccm_dcgrid)
-    # @NLconstraint(pm.model, p_dc_fr^2 <= wdc_fr*ccm_dcgrid)
-    # @constraint(pm.model, wdc_to == wdc_fr - 2*(r/p)*p_dc_fr + (r/p)^2*ccm_dcgrid)
     @constraint(pm.model, p_dc_fr + p_dc_to ==  r * p * ccm_dcgrid)
     @NLconstraint(pm.model, p_dc_fr^2 <= p^2 * wdc_fr * ccm_dcgrid)
     @constraint(pm.model, wdc_to == wdc_fr - 2 * r * (p_dc_fr/p) + (r)^2 * ccm_dcgrid)
 end
-
 """
 Model to approximate cross products of node voltages
-
 ```
 wdcr[(i,j)] <= wdc[i]*wdc[j]
 ```
@@ -35,4 +30,7 @@ end
 
 function variable_dcbranch_current(pm::GenericPowerModel{T}; kwargs...) where {T <: PowerModels.AbstractBFForm}
     variable_dcbranch_current_sqr(pm; kwargs...)
+end
+function constraint_dc_branch_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p) where {T <: PowerModels.AbstractBFForm}
+# do nothing
 end

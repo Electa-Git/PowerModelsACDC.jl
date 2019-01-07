@@ -1,24 +1,24 @@
-export run_acdcopf
+export run_acdcopf_bf
 
 ""
-function run_acdcopf(file::String, model_constructor, solver; kwargs...)
+function run_acdcopf_bf(file::String, model_constructor::Type{GenericPowerModel{T}}, solver; kwargs...) where T <: PowerModels.AbstractBFForm
     data = PowerModels.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcopf(data, model_constructor, solver; kwargs...)
+    return run_acdcopf_bf(data, model_constructor, solver; kwargs...)
 end
 
 ""
-function run_acdcopf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
-    pm = PowerModels.build_generic_model(data, model_constructor, post_acdcopf; kwargs...)
+function run_acdcopf_bf(data::Dict{String,Any}, model_constructor::Type{GenericPowerModel{T}}, solver; kwargs...) where T <: PowerModels.AbstractBFForm
+    pm = PowerModels.build_generic_model(data, model_constructor, post_acdcopf_bf; kwargs...)
     return PowerModels.solve_generic_model(pm, solver; solution_builder = get_solution_acdc)
 end
 
-""
-function post_acdcopf(pm::GenericPowerModel)
+function post_acdcopf_bf(pm::GenericPowerModel)
     add_ref_dcgrid!(pm)
     PowerModels.variable_voltage(pm)
     PowerModels.variable_generation(pm)
     PowerModels.variable_branch_flow(pm)
+    PowerModels.variable_branch_current(pm)
 
     variable_active_dcbranch_flow(pm)
     variable_dcbranch_current(pm)
@@ -39,8 +39,11 @@ function post_acdcopf(pm::GenericPowerModel)
     end
 
     for i in PowerModels.ids(pm, :branch)
-        PowerModels.constraint_ohms_yt_from(pm, i)
-        PowerModels.constraint_ohms_yt_to(pm, i)
+
+        PowerModels.constraint_flow_losses(pm, i)
+        PowerModels.constraint_voltage_magnitude_difference(pm, i)
+        PowerModels.constraint_branch_current(pm, i)
+
         PowerModels.constraint_voltage_angle_difference(pm, i)
         PowerModels.constraint_thermal_limit_from(pm, i)
         PowerModels.constraint_thermal_limit_to(pm, i)
@@ -50,6 +53,7 @@ function post_acdcopf(pm::GenericPowerModel)
     end
     for i in PowerModels.ids(pm, :branchdc)
         constraint_ohms_dc_branch(pm, i)
+        constraint_dc_branch_current(pm, i)
     end
     for i in PowerModels.ids(pm, :convdc)
         constraint_converter_losses(pm, i)

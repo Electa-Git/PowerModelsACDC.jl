@@ -7,10 +7,8 @@ function variable_converter_internal_voltage(pm::GenericPowerModel{T}; kwargs...
     variable_converter_internal_voltage_magnitude_sqr(pm; kwargs...)
     variable_converter_internal_voltage_cross_products(pm; kwargs...)
 end
-
 """
 Creates lossy converter model between AC and DC side
-
 ```
 pconv_ac[i] + pconv_dc[i] == a + b*I + c*Isq
 ```
@@ -23,10 +21,8 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int,
 
     PowerModels.con(pm, n, cnd, :conv_loss)[i] = @constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv_sq)
 end
-
 """
 Converter transformer constraints
-
 ```
 p_tf_fr ==  g/(tm^2)*w_fr + -g/(tm)*wr + -b/(tm)*wi)
 q_tf_fr == -b/(tm^2)*w_fr +  b/(tm)*wr + -g/(tm)*wi)
@@ -34,7 +30,6 @@ p_tf_to ==  g*w_to + -g/(tm)*wr     + -b/(tm)*(-wi))
 q_tf_to == -b*w_to +  b/(tm)*wr     + -g/(tm)*(-wi))
 ```
 """
-
 function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractWRForms}
     ptf_fr = PowerModels.var(pm, n, cnd, :pconv_tf_fr, i)
     qtf_fr = PowerModels.var(pm, n, cnd, :qconv_tf_fr, i)
@@ -63,7 +58,6 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int,
         pcon, qcon = constraint_lossless_section(pm, w/tm^2, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to)
     end
 end
-
 "constraints for a voltage magnitude transformer + series impedance"
 function ac_power_flow_constraints_w(pm::GenericPowerModel{T}, g, b, w_fr, w_to, wr, wi, p_fr, p_to, q_fr, q_to, tm)  where {T <: PowerModels.AbstractWRForms}
     c1 = @constraint(pm.model, p_fr ==  g/(tm^2)*w_fr + -g/(tm)*wr + -b/(tm)*wi)
@@ -72,10 +66,8 @@ function ac_power_flow_constraints_w(pm::GenericPowerModel{T}, g, b, w_fr, w_to,
     c4 = @constraint(pm.model, q_to == -b*w_to +  b/(tm)*wr     + -g/(tm)*(-wi))
     return c1, c2, c3, c4
 end
-
 """
 Converter reactor constraints
-
 ```
 p_pr_fr ==  g/(tm^2)*w_fr + -g/(tm)*wr + -b/(tm)*wi)
 q_pr_fr == -b/(tm^2)*w_fr +  b/(tm)*wr + -g/(tm)*wi)
@@ -83,7 +75,6 @@ p_pr_to ==  g*w_to + -g/(tm)*wr     + -b/(tm)*(-wi))
 q_pr_to == -b*w_to +  b/(tm)*wr     + -g/(tm)*(-wi))
 ```
 """
-
 function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractWRForms}
     ppr_fr = PowerModels.var(pm, n, cnd, :pconv_pr_fr, i)
     qpr_fr = PowerModels.var(pm, n, cnd, :qconv_pr_fr, i)
@@ -101,7 +92,6 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)
-#        PowerModels.relaxation_complex_product(pm.model, wf, wc, wrc, wic)
         constraint_voltage_product_converter(pm, wrc, wic, wf, wc)
         c1, c2, c3, c4 = ac_power_flow_constraints_w(pm, gc, bc, wf, wc, wrc, wic, ppr_fr, ppr_to, qpr_fr, qpr_to, 1)
         PowerModels.con(pm, n, cnd, :conv_pr_p)[i] = c1
@@ -112,7 +102,6 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::
         PowerModels.con(pm, n, cnd, :conv_pr_q)[i] = qcon
     end
 end
-
 """
 Converter filter constraints
 
@@ -121,7 +110,6 @@ p_pr_fr + p_tf_to == 0
 q_pr_fr + q_tf_to + -bv*filter*wf == 0
 ```
 """
-
 function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, bv, filter) where {T <: PowerModels.AbstractWForms}
     ppr_fr = PowerModels.var(pm, n, cnd, :pconv_pr_fr, i)
     qpr_fr = PowerModels.var(pm, n, cnd, :qconv_pr_fr, i)
@@ -150,10 +138,8 @@ function add_converter_voltage_setpoint(sol, pm::GenericPowerModel{T}) where {T 
     PowerModels.add_setpoint(sol, pm, "convdc", "vmconv", :wc_ac; scale = (x,item) -> sqrt(x))
     PowerModels.add_setpoint(sol, pm, "convdc", "vmfilt", :wf_ac; scale = (x,item) -> sqrt(x))
 end
-
 """
 LCC firing angle constraints
-
 ```
 qconv_ac >= Q1 + (pconv_ac-P1) * (Q2-Q1)/(P2-P1)
 
@@ -163,7 +149,6 @@ P2 = cos(pi) * Srated
 Q2 = sin(pi) * Srated
 ```
 """
-
 function constraint_conv_firing_angle(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, S, P1, Q1, P2, Q2) where {T <: PowerModels.AbstractWForms}
     pc = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qc = PowerModels.var(pm, n, cnd, :qconv_ac, i)

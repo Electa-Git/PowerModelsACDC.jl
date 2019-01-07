@@ -16,7 +16,6 @@ function constraint_kcl_shunt(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int
     PowerModels.con(pm, n, cnd, :kcl_p)[i] = @NLconstraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)   - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*vm^2)
     PowerModels.con(pm, n, cnd, :kcl_q)[i] = @NLconstraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*vm^2)
 end
-
 """
 Creates Ohms constraints for DC branches
 
@@ -38,9 +37,12 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, cnd::Int, f
         @NLconstraint(pm.model, p_dc_to == p * g * vmdc_to * (vmdc_to - vmdc_fr))
     end
 end
-
 "`vdc[i] == vdcm`"
 function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel{T}, n::Int, cnd::Int, i, vdcm) where {T <: PowerModels.AbstractACPForm}
     v = PowerModels.var(pm, n, cnd, :vdcm, i)
     PowerModels.con(pm, n, cnd, :v_dc)[i] = @constraint(pm.model, v == vdcm)
+end
+
+function constraint_dc_branch_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p) where {T <: PowerModels.AbstractACPForm}
+# do nothing
 end

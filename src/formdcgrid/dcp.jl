@@ -27,8 +27,6 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, cnd::Int, f
 
     @constraint(pm.model, p_dc_fr + p_dc_to == 0)
 end
-
-
 "`vdc[i] == vdcm`"
 function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel{T}, n::Int, cnd::Int, i, vdcm) where {T <: PowerModels.AbstractDCPForm}
     # not used
@@ -36,4 +34,8 @@ end
 
 function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel{T}; kwrags...) where {T <: PowerModels.AbstractDCPForm}
     # not used nw::Int=pm.cnw
+end
+
+function constraint_dc_branch_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p) where {T <: PowerModels.AbstractDCPForm}
+# do nothing
 end

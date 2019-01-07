@@ -1,8 +1,9 @@
 function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
     if haskey(pm.ref[:nw][n], :convdc)
         #Filter converters & DC branches with status 0 as well as wrong bus numbers
-        pm.ref[:nw][n][:convdc] = filter((i, conv) -> conv["status"] == 1 && conv["busdc_i"] in keys(pm.ref[:nw][n][:busdc]) && conv["busac_i"] in keys(pm.ref[:nw][n][:bus]), pm.ref[:nw][n][:convdc])
-        pm.ref[:nw][n][:branchdc] = filter((i, branchdc) -> branchdc["status"] == 1 && branchdc["fbusdc"] in keys(pm.ref[:nw][n][:busdc]) && branchdc["tbusdc"] in keys(pm.ref[:nw][n][:busdc]), pm.ref[:nw][n][:branchdc])
+        pm.ref[:nw][n][:convdc] = Dict([x for x in pm.ref[:nw][n][:convdc] if (x.second["status"] == 1 && x.second["busdc_i"] in keys(pm.ref[:nw][n][:busdc]) && x.second["busac_i"] in keys(pm.ref[:nw][n][:bus]))])
+        pm.ref[:nw][n][:branchdc] = Dict([x for x in pm.ref[:nw][n][:branchdc] if (x.second["status"] == 1 && x.second["fbusdc"] in keys(pm.ref[:nw][n][:busdc]) && x.second["tbusdc"] in keys(pm.ref[:nw][n][:busdc]))])
+
         # DC grid arcs for DC grid branches
         pm.ref[:nw][n][:arcs_dcgrid_from] = [(i,branch["fbusdc"],branch["tbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]
         pm.ref[:nw][n][:arcs_dcgrid_to]   = [(i,branch["tbusdc"],branch["fbusdc"]) for (i,branch) in pm.ref[:nw][n][:branchdc]]
@@ -145,7 +146,8 @@ function find_all_ac_grids(branches_ac, buses_ac)
         connections = []
         buses = []
         for (i, bus) in buses_ac
-            buses = cat(1,buses,bus["index"])
+            # buses = cat(1,buses,bus["index"])
+            buses = cat(buses, bus["index"], dims = 1)
         end
         grid_id = 1
         iter_id = 1

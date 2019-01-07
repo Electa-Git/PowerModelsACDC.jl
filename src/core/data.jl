@@ -211,7 +211,7 @@ end
 
 function fix_data!(data)
     MVAbase = data["baseMVA"]
-    assert(MVAbase>0)
+    @assert(MVAbase>0)
 
     rescale_energy_cost = x -> (MWhbase/dollarbase)*x
 
@@ -273,9 +273,9 @@ function fix_data_multinetwork!(data, MVAbase)
 end
 
 function check_branchdc_parameters(branchdc)
-    assert(branchdc["rateA"]>=0)
-    assert(branchdc["rateB"]>=0)
-    assert(branchdc["rateC"]>=0)
+    @assert(branchdc["rateA"]>=0)
+    @assert(branchdc["rateB"]>=0)
+    @assert(branchdc["rateC"]>=0)
 end
 
 function set_branchdc_pu(branchdc, MVAbase)
@@ -316,10 +316,10 @@ function set_conv_pu_ohm(conv, Zbase)
 end
 
 function check_conv_parameters(conv)
-    assert(conv["LossA"]>=0)
-    assert(conv["LossB"]>=0)
-    assert(conv["LossCrec"]>=0)
-    assert(conv["LossCinv"]>=0)
+    @assert(conv["LossA"]>=0)
+    @assert(conv["LossB"]>=0)
+    @assert(conv["LossCrec"]>=0)
+    @assert(conv["LossCinv"]>=0)
     conv_id = conv["index"]
     conv["Pacrated"] = max(abs(conv["Pacmax"]),abs(conv["Pacmin"]))
     conv["Qacrated"] = max(abs(conv["Qacmax"]),abs(conv["Qacmin"]))
@@ -343,10 +343,10 @@ function check_conv_parameters(conv)
         conv["Qacrated"] = conv["Pacrated"]
         conv["Qacmin"] =  0
     end
-    assert(conv["Pacmax"]>=conv["Pacmin"])
-    assert(conv["Qacmax"]>=conv["Qacmin"])
-    assert(conv["Pacrated"]>=0)
-    assert(conv["Qacrated"]>=0)
+    @assert(conv["Pacmax"]>=conv["Pacmin"])
+    @assert(conv["Qacmax"]>=conv["Qacmin"])
+    @assert(conv["Pacrated"]>=0)
+    @assert(conv["Qacrated"]>=0)
 end
 
 

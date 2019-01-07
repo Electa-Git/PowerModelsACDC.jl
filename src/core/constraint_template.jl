@@ -1,8 +1,5 @@
-
 constraint_voltage_dc(pm::GenericPowerModel) = constraint_voltage_dc(pm, pm.cnw, pm.ccnd) # TODO check this
 # no data, so no further templating is needed, constraint goes directly to the formulations
-
-
 function constraint_kcl_shunt(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :kcl_p)
         PowerModels.con(pm, nw, cnd)[:kcl_p] = Dict{Int,ConstraintRef}()
@@ -94,8 +91,6 @@ function constraint_reactive_conv_setpoint(pm::GenericPowerModel, i::Int; nw::In
     conv = ref(pm, nw, :convdc, i)
     constraint_reactive_conv_setpoint(pm, nw, cnd, conv["index"], conv["Q_g"])
 end
-
-
 ""
 function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :v_dc)
@@ -154,4 +149,17 @@ function constraint_conv_firing_angle(pm::GenericPowerModel, i::Int; nw::Int=pm.
     P2 = cos(pi) * S
     Q2 = sin(pi) * S
     constraint_conv_firing_angle(pm, nw, cnd, i, S, P1, Q1, P2, Q2)
+end
+
+function constraint_dc_branch_current(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+    vpu = 1;
+    branch = ref(pm, nw, :branchdc, i)
+    f_bus = branch["fbusdc"]
+    t_bus = branch["tbusdc"]
+    f_idx = (i, f_bus, t_bus)
+
+    ccm_max = (PowerModels.getval(ref(pm, nw, :branchdc, i), "rateA", cnd, 0.0) / vpu)^2
+
+    p = ref(pm, nw, :dcpol)
+    constraint_dc_branch_current(pm, nw, cnd, f_bus, f_idx, ccm_max, p)
 end

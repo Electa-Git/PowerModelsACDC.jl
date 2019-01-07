@@ -7,10 +7,8 @@ function variable_converter_internal_voltage(pm::GenericPowerModel{T}; kwargs...
     variable_converter_internal_voltage_magnitude_sqr(pm; kwargs...)
     variable_conv_reactor_current_sqr(pm; kwargs...)
 end
-
 """
 Converter transformer constraints
-
 ```
 p_tf_fr + ptf_to ==  rtf*itf
 q_tf_fr + qtf_to ==  xtf*itf
@@ -18,7 +16,6 @@ p_tf_fr^2 + qtf_fr^2 <= w/tm^2 * itf
 wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf
 ```
 """
-
 function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractBFForm}
     w = PowerModels.var(pm, n, cnd, :w, acbus)
     itf = PowerModels.var(pm, n, cnd, :itf_sq, i)
@@ -42,10 +39,8 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int,
         @constraint(pm.model, wf == w/tm^2 )
     end
 end
-
 """
 Converter reactor constraints
-
 ```
 p_pr_fr + ppr_to == rc*ipr
 q_pr_fr + qpr_to == xc*ipr
@@ -53,7 +48,6 @@ p_pr_fr^2 + qpr_fr^2 <= wf * ipr
 wc == wf -2*(rc*ppr_fr + xc*qpr_fr) + (rc^2 + xc^2)*ipr
 ```
 """
-
 function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractBFForm}
     wf = PowerModels.var(pm, n, cnd, :wf_ac, i)
     ipr = PowerModels.var(pm, n, cnd, :irc_sq, i)
@@ -75,10 +69,8 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::
         @constraint(pm.model, wc == wf)
     end
 end
-
 """
 Links converter power & current
-
 ```
 pconv_ac[i]^2 + pconv_dc[i]^2 <= wc[i] * iconv_ac_sq[i]
 pconv_ac[i]^2 + pconv_dc[i]^2 <= (Umax)^2 * (iconv_ac[i])^2
@@ -94,4 +86,5 @@ function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int
     PowerModels.con(pm, n, cnd, :conv_i)[i] = @NLconstraint(pm.model,      pconv_ac^2 + qconv_ac^2 <=  wc * iconv_sq)
     PowerModels.con(pm, n, cnd, :conv_i_sqrt)[i] = @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= (Umax)^2 * iconv^2)
     @NLconstraint(pm.model, iconv^2 <= iconv_sq)
+    @constraint(pm.model, iconv_sq <= iconv*Imax)
 end
