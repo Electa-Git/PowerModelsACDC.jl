@@ -281,14 +281,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "objective.html#PowerModels.objective_min_fuel_cost",
-    "page": "Objective",
-    "title": "PowerModels.objective_min_fuel_cost",
-    "category": "function",
-    "text": "\n\n"
-},
-
-{
     "location": "objective.html#Objective-1",
     "page": "Objective",
     "title": "Objective",
