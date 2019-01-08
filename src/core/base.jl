@@ -147,9 +147,9 @@ function find_all_ac_grids(branches_ac, buses_ac)
         buses = []
         for (i, bus) in buses_ac
             if VERSION < v"0.7.0-"
-                buses = cat(buses, bus["index"], dims = 1)
-            else
                 buses = cat(1,buses,bus["index"])
+            else
+                buses = cat(buses, bus["index"], dims = 1)
             end
         end
         grid_id = 1
