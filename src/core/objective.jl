@@ -13,7 +13,6 @@ end
 
 ""
 function objective_min_polynomial_fuel_cost(pm::GenericPowerModel)
-    PowerModels.check_polynomial_cost_models(pm)
     order = PowerModels.calc_max_cost_index(pm.data)-1
 
     if order == 1

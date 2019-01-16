@@ -7,17 +7,17 @@ using Mosek
 
 files =
 [
-"./test/data/case5_2grids.m";
-"./test/data/case5_acdc.m";
-"./test/data/case5_lcc.m";
-"./test/data/case5_b2bdc.m";
+# "./test/data/case5_2grids.m";
+# "./test/data/case5_acdc.m";
+# "./test/data/case5_lcc.m";
+# "./test/data/case5_b2bdc.m";
 # "./test/data/case5_dc.m"; #Don't use normally
-"./test/data/case5_dcgrid.m";
-"./test/data/case5_dcgrid_b0.m";
-"./test/data/case24_3zones_acdc.m";
-"./test/data/case39_acdc.m";
+# "./test/data/case5_dcgrid.m";
+# "./test/data/case5_dcgrid_b0.m";
+# "./test/data/case24_3zones_acdc.m";
+# "./test/data/case39_acdc.m";
 "./test/data/case3120sp_acdc.m";
-"./test/data/pglib_opf_case588_sdet_acdc.m"
+# "./test/data/pglib_opf_case588_sdet_acdc.m"
 ]
 
 
