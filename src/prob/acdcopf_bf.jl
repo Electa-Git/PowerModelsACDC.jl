@@ -25,7 +25,7 @@ function post_acdcopf_bf(pm::GenericPowerModel)
     variable_dc_converter(pm)
     variable_dcgrid_voltage_magnitude(pm)
 
-    objective_min_fuel_cost(pm)
+    PowerModels.objective_min_fuel_cost(pm)
 
     PowerModels.constraint_voltage(pm)
     constraint_voltage_dc(pm)

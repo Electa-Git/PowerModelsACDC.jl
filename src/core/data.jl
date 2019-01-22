@@ -156,6 +156,7 @@ function convert_matpowerdcline_to_branchdc_single_network!(data, MVAbase)
             data["convdc"]["$conv_i"] = converter2
         end
     end
+    data["dcline"] = []
 end
 
 function convert_matpowerdcline_to_branchdc_multinetwork!(data, MVAbase)
@@ -205,6 +206,7 @@ function convert_matpowerdcline_to_branchdc_multinetwork!(data, MVAbase)
                 data["nw"][n]["convdc"]["$conv_i"] = converter2
             end
         end
+        data["nw"][n]["dcline"] = []
     end
 end
 
