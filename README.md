@@ -39,7 +39,26 @@ For further information, consult the PowerModels [documentation](https://lanl-an
 
 ## Acknowledgments
 
-The developers thank Carleton Coffrin for his support
+The developers thank Carleton Coffrin (LANL) for his support.
+
+## Citing PowerModelsACDC
+
+If you find PowerModelsACDC useful in your work, we kindly request that you cite the following [publication](https://ieeexplore.ieee.org/document/8636236):
+
+```
+@ARTICLE{8636236,
+author={H. Ergun and J. Dave and D. Van Hertem and F. Geth},
+journal={IEEE Transactions on Power Systems},
+title={Optimal Power Flow for AC/DC Grids: Formulation, Convex Relaxation, Linear Approximation and Implementation},
+year={2019},
+volume={},
+number={},
+pages={1-1},
+keywords={Mathematical model;HVDC transmission;AC-DC power converters;Numerical models;Inductors;Impedance;Linear approximation;HVDC transmission;flexible ac transmission systems;power system analysis computing},
+doi={10.1109/TPWRS.2019.2897835},
+ISSN={0885-8950},
+month={},}
+```
 
 ## License
 
