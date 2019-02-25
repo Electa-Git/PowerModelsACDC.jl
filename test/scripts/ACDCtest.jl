@@ -5,6 +5,8 @@ using Ipopt
 using SCS
 using Mosek
 
+file_pf_droop = "./test/data/case5_acdc_droop.m"
+
 file_case5acdc = "./test/data/case5_acdc.m"
 file_case5dc ="./test/data/case5_dc.m"
 file_case5dcgrid ="./test/data/case5_dcgrid.m"
@@ -42,7 +44,7 @@ resultSOCBIM = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
 resultACSOCBIM = PowerModels.run_opf(file, SOCWRPowerModel, ipopt; setting = s)
 # #
 resultSOCBFM = run_acdcopf_bf(file, SOCBFPowerModel, ipopt; setting = s)
-resultACSOCBFM = PowerModels.run_opf_bf(file, SOCBFPowerModel, ipopt; setting = s)
+resultSOCBFMConic = PowerModels.run_opf_bf(file, SOCBFConicPowerModel, mosek; setting = s)
 # #
 resultSDP = run_acdcopf(file, SDPWRMPowerModel, mosek; setting = s)
 # #
@@ -50,7 +52,8 @@ resultDC = run_acdcopf(file, DCPPowerModel, ipopt; setting = s)
 #
 # # # other tests
 # resultACPF24 = run_acdcpf(file_case24, ACPPowerModel, ipopt; setting = s)
-# resultACPF5 = run_acdcpf(file_case5acdc, ACPPowerModel, ipopt; setting = s)
+resultACPF5 = run_acdcpf(file_case5acdc, ACPPowerModel, ipopt; setting = s)
+# resultACPF5_droop = run_acdcpf(file_pf_droop, ACPPowerModel, ipopt; setting = s)
 # resultAC5b2b = run_acdcopf(file_case5_b2bdc, ACPPowerModel, ipopt; setting = s)
 # resultAC39 = run_acdcopf(file_case39, ACPPowerModel, ipopt; setting = s)
 # resultAC3120 = run_acdcopf(file_case3120, ACPPowerModel, ipopt; setting = s)

@@ -163,3 +163,13 @@ function constraint_dc_branch_current(pm::GenericPowerModel, i::Int; nw::Int=pm.
     p = ref(pm, nw, :dcpol)
     constraint_dc_branch_current(pm, nw, cnd, f_bus, f_idx, ccm_max, p)
 end
+
+function constraint_dc_droop_control(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+    if !haskey(PowerModels.con(pm, nw, cnd), :conv_dc_droop)
+        PowerModels.con(pm, nw, cnd)[:conv_dc_droop] = Dict{Int,ConstraintRef}()
+    end
+    conv = ref(pm, nw, :convdc, i)
+    bus = ref(pm, nw, :busdc, conv["busdc_i"])
+
+    constraint_dc_droop_control(pm, nw, cnd, i, conv["busdc_i"], conv["Vdcset"], conv["Pdcset"], conv["droop"])
+end

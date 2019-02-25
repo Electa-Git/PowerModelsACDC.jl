@@ -120,3 +120,10 @@ Converter firing angle constraint (not applicable)
 """
 function constraint_conv_firing_angle(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, S, P1, Q1, P2, Q2) where {T <: PowerModels.AbstractDCPForm}
 end
+"""
+Converter droop constraint (not applicable)
+```
+```
+"""
+function constraint_dc_droop_control(pm::GenericPowerModel{T}, i::Int; n::Int, cnd::Int, busdc_i, vref_dc, pref_dc, k_droop) where {T <: PowerModels.AbstractDCPForm}
+end

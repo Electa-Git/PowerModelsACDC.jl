@@ -143,5 +143,12 @@ function constraint_conv_firing_angle(pm::GenericPowerModel{T}, n::Int, cnd::Int
     phi = PowerModels.var(pm, n, cnd, :phiconv, i)
 
     PowerModels.con(pm, n, cnd, :conv_cosphi)[i] = @NLconstraint(pm.model,   p == cos(phi) * S)
-    PowerModels.con(pm, n, cnd, :conv_sinphi)[i] =@NLconstraint(pm.model,   q == sin(phi) * S)
+    PowerModels.con(pm, n, cnd, :conv_sinphi)[i] = @NLconstraint(pm.model,   q == sin(phi) * S)
+end
+
+function constraint_dc_droop_control(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, busdc_i, vref_dc, pref_dc, k_droop) where {T <: PowerModels.AbstractACPForm}
+    pconv_dc = PowerModels.var(pm, n, cnd, :pconv_dc, i)
+    vdc = PowerModels.var(pm, n, cnd, :vdcm, busdc_i)
+
+    PowerModels.con(pm, n, cnd, :conv_dc_droop)[i] = @constraint(pm.model, pconv_dc == pref_dc - sign(pref_dc) * 1 / k_droop * (vdc - vref_dc))
 end
