@@ -125,5 +125,5 @@ Converter droop constraint (not applicable)
 ```
 ```
 """
-function constraint_dc_droop_control(pm::GenericPowerModel{T}, i::Int; n::Int, cnd::Int, busdc_i, vref_dc, pref_dc, k_droop) where {T <: PowerModels.AbstractDCPForm}
+function constraint_dc_droop_control(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, busdc_i, vref_dc, pref_dc, k_droop) where {T <: PowerModels.AbstractDCPForm}
 end
