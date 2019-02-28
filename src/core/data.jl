@@ -25,12 +25,14 @@ function get_pu_bases(MVAbase, kVbase)
 end
 
 function process_additional_data!(data)
+    #set data in correct base
+    to_pu!(data)
     # make sure everything is set up correctly
     fix_data!(data)
     MVAbase = data["baseMVA"]
-
-    #set data in correct base
-    to_pu!(data)
+    # 
+    # #set data in correct base
+    # to_pu!(data)
 
     #convert dcline to 2 converters, 2 dc buses, 1 branchdc
     convert_matpowerdcline_to_branchdc!(data, MVAbase)
