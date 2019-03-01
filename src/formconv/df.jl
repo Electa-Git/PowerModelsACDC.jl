@@ -149,6 +149,6 @@ function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int
     PowerModels.con(pm, n, cnd, :conv_i)[i] = @constraint(pm.model, norm([2*pconv_ac; 2*qconv_ac;  wc - iconv_sq]) <=  wc + iconv_sq)
     PowerModels.con(pm, n, cnd, :conv_i_sqrt)[i] = @constraint(pm.model, norm([pconv_ac; qconv_ac]) <= (Umax)*iconv)
     # PowerModels.con(pm, n, cnd, :conv_i_sqrt)[i] = @constraint(pm.model, norm([2*pconv_ac; 2*qconv_ac; Umax^2 - iconv_sq]) <= (Umax)^2 + iconv_sq)
-    @constraint(pm.model, norm([sqrt(2)*iconv; 1 - iconv_sq]) <= 1 + iconv_sq)
+    @constraint(pm.model, norm([2*iconv; 1 - iconv_sq]) <= 1 + iconv_sq)
     @constraint(pm.model, iconv_sq <= iconv*Imax)
 end
