@@ -22,11 +22,8 @@ file = file_case5acdc
 
 data = PowerModels.parse_file(file)
 
-#TODO CHECK DF, WRM, WRM!!!!!!
-
 PowerModelsACDC.process_additional_data!(data)
 #display(data)
-#scs = SCSSolver(max_iters=100000, verbose=0);
 scs = SCSSolver(max_iters=100000);
 ipopt = IpoptSolver(tol=1e-6)
 mosek = MosekSolver()
@@ -44,7 +41,7 @@ resultSOCBIM = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
 resultACSOCBIM = PowerModels.run_opf(file, SOCWRPowerModel, ipopt; setting = s)
 # #
 resultSOCBFM = run_acdcopf_bf(file, SOCBFPowerModel, ipopt; setting = s)
-resultSOCBFMConic = PowerModels.run_opf_bf(file, SOCBFConicPowerModel, mosek; setting = s)
+resultSOCBFMConic = run_acdcopf_bf(file, SOCBFConicPowerModel, mosek; setting = s)
 # #
 resultSDP = run_acdcopf(file, SDPWRMPowerModel, mosek; setting = s)
 # #
