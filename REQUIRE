@@ -1,5 +1,6 @@
-julia 1.1
-
-JuMP 0.19 - 0.20
-PowerModels
+julia 0.7
+JuMP 0.17 0.19-
+PowerModels 0.8
 InfrastructureModels
+Compat 0.26.0
+
