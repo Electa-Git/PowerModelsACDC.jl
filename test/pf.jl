@@ -64,17 +64,17 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test isapprox(result["objective"], 0; atol = 1e-2)
 
         @test isapprox(result["solution"]["gen"]["65"]["pg"], 1.419; atol = 1e-3)
-        @test isapprox(result["solution"]["gen"]["65"]["qg"], -1.2965; atol = 1e-3)
+        @test isapprox(result["solution"]["gen"]["65"]["qg"], -1.29648; atol = 1e-3)
 
 
         @test isapprox(result["solution"]["bus"]["101"]["vm"], 1.035; atol = 1e-3)
         @test isapprox(result["solution"]["bus"]["101"]["va"], -0.1389; atol = 1e-3)
-        @test isapprox(result["solution"]["bus"]["205"]["vm"], 1.032; atol = 1e-3)
-        @test isapprox(result["solution"]["bus"]["301"]["vm"], 1.026; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["205"]["vm"], 1.0318; atol = 1e-3)
+        @test isapprox(result["solution"]["bus"]["301"]["vm"], 1.026266; atol = 1e-3)
 
-        @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -0.7536; atol = 1e-3)
-        @test isapprox(result["solution"]["convdc"]["3"]["pdc"], -1.37298; atol = 1e-3)
-        @test isapprox(result["solution"]["busdc"]["5"]["vm"], 1.017; atol = 1e-3)
+        @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -0.753; atol = 1e-3)
+        @test isapprox(result["solution"]["convdc"]["3"]["pdc"], -1.37301; atol = 1e-3)
+        @test isapprox(result["solution"]["busdc"]["5"]["vm"], 1.01731; atol = 1e-3)
     end
 end
 
