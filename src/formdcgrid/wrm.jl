@@ -10,7 +10,7 @@ function constraint_voltage_dc(pm::GenericPowerModel{T}, n::Int, cnd::Int) where
     wdcr = PowerModels.var(pm, n, cnd, :wdcr)
 
     for (i,j) in PowerModels.ids(pm, n, :buspairsdc)
-        @constraint(pm.model, norm([ 2*wdcr[(i,j)]; wdc[i]-wdc[j] ]) <= wdc[i]+wdc[j] )
+        @constraint(pm.model, [ wdc[i]/sqrt(2), wdc[j]/sqrt(2), wdcr[(i,j)]/sqrt(2), wdcr[(i,j)]/sqrt(2)] in JuMP.RotatedSecondOrderCone() )
     end
 end
 

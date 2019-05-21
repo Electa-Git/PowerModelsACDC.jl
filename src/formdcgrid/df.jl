@@ -28,7 +28,7 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, cnd::Int, f
     wdc_to = PowerModels.var(pm, n, cnd, :wdc, t_bus)
 
     @constraint(pm.model, p_dc_fr + p_dc_to ==  r * p * ccm_dcgrid)
-    @constraint(pm.model, norm([2*p_dc_fr/p; wdc_fr - ccm_dcgrid])<= wdc_fr + ccm_dcgrid)
+    @constraint(pm.model, [p*wdc_fr/sqrt(2), p*ccm_dcgrid/sqrt(2), p_dc_fr/sqrt(2), p_dc_fr/sqrt(2)] in JuMP.RotatedSecondOrderCone())
     @constraint(pm.model, wdc_to == wdc_fr - 2 * r * (p_dc_fr/p) + (r)^2 * ccm_dcgrid)
 end
 """

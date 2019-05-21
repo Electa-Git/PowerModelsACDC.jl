@@ -30,7 +30,7 @@ function process_additional_data!(data)
     # make sure everything is set up correctly
     fix_data!(data)
     MVAbase = data["baseMVA"]
-    # 
+    #
     # #set data in correct base
     # to_pu!(data)
 
@@ -328,14 +328,14 @@ function check_conv_parameters(conv)
     conv["Pacrated"] = max(abs(conv["Pacmax"]),abs(conv["Pacmin"]))
     conv["Qacrated"] = max(abs(conv["Qacmax"]),abs(conv["Qacmin"]))
     if conv["Imax"] < sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
-        warn(PowerModels.LOGGER, "Inconsistent current limit for converter $conv_id, it will be updated.")
+        Memento.warn(PowerModels.LOGGER, "Inconsistent current limit for converter $conv_id, it will be updated.")
         conv["Imax"] = sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
     end
     if conv["LossCrec"] != conv["LossCinv"]
-        warn(PowerModels.LOGGER, "The losses of converter $conv_id are different in inverter and rectifier mode, inverter losses are used.")
+        Memento.warn(PowerModels.LOGGER, "The losses of converter $conv_id are different in inverter and rectifier mode, inverter losses are used.")
     end
     if conv["islcc"] == 1
-        warn(PowerModels.LOGGER, "Converter $conv_id is an LCC, reactive power limits might be updated.")
+        Memento.warn(PowerModels.LOGGER, "Converter $conv_id is an LCC, reactive power limits might be updated.")
         if abs(conv["Pacmax"]) >= abs(conv["Pacmin"])
             conv["phimin"] = 0
             conv["phimax"] = acos(conv["Pacmin"] / conv["Pacmax"])

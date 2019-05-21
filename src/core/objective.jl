@@ -59,17 +59,18 @@ function objective_min_polynomial_fuel_cost(pm::GenericPowerModel{T}) where {T <
     for (n, nw_ref) in PowerModels.nws(pm)
         for cnd in PowerModels.conductor_ids(pm, n)
             pg_sqr = PowerModels.var(pm, n, cnd)[:pg_sqr] = @variable(pm.model,
-                [i in PowerModels.ids(pm, n, :gen)], basename="$(n)_$(cnd)_pg_sqr",
-                lowerbound = PowerModels.ref(pm, n, :gen, i, "pmin", cnd)^2,
-                upperbound = PowerModels.ref(pm, n, :gen, i, "pmax", cnd)^2
+                [i in PowerModels.ids(pm, n, :gen)], base_name="$(n)_$(cnd)_pg_sqr",
+                lower_bound = PowerModels.ref(pm, n, :gen, i, "pmin", cnd)^2,
+                upper_bound = PowerModels.ref(pm, n, :gen, i, "pmax", cnd)^2
             )
             for (i, gen) in nw_ref[:gen]
-                @constraint(pm.model, norm([2*var(pm, n, cnd, :pg, i), pg_sqr[i]-1]) <= pg_sqr[i]+1)
+                # @constraint(pm.model, norm([2*var(pm, n, cnd, :pg, i), pg_sqr[i]-1]) <= pg_sqr[i]+1)
+                @constraint(pm.model, [pg_sqr[i], var(pm, n, cnd, :pg, i)/sqrt(2), var(pm, n, cnd, :pg, i)/sqrt(2)] in JuMP.SecondOrderCone())
             end
 
         end
     end
-
+    print("pipi")
     return @objective(pm.model, Min,
         sum(
             sum( gen["cost"][1]*sum(PowerModels.var(pm, n, cnd, :pg_sqr, i) for cnd in PowerModels.conductor_ids(pm, n)) +
@@ -83,7 +84,7 @@ function objective_min_pwl_fuel_cost(pm::GenericPowerModel)
 
     for (n, nw_ref) in PowerModels.nws(pm)
         pg_cost = PowerModels.var(pm, n)[:pg_cost] = @variable(pm.model,
-            [i in PowerModels.ids(pm, n, :gen)], basename="$(n)_pg_cost"
+            [i in PowerModels.ids(pm, n, :gen)], base_name="$(n)_pg_cost"
         )
 
         # pwl cost

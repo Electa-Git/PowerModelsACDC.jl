@@ -1,9 +1,12 @@
 using PowerModelsACDC
 using PowerModels
 using Ipopt
+using Memento
 #using CPLEX
 using SCS
 using Mosek
+using MosekTools
+using JuMP
 
 file_pf_droop = "./test/data/case5_acdc_droop.m"
 
@@ -24,10 +27,13 @@ data = PowerModels.parse_file(file)
 
 PowerModelsACDC.process_additional_data!(data)
 #display(data)
-scs = SCSSolver(max_iters=100000);
-ipopt = IpoptSolver(tol=1e-6)
-mosek = MosekSolver()
-#mosek = MosekSolver()
+# scs = SCSSolver(max_iters=100000);
+ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
+# ipopt = IpoptSolver(tol=1e-6)
+# mosek = MosekSolver()
+mosek = JuMP.with_optimizer(Mosek.Optimizer)
+scs = JuMP.with_optimizer(SCS.Optimizer)
+
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
 resultAC = run_acdcopf(file, ACPPowerModel, ipopt; setting = s)
@@ -42,6 +48,7 @@ resultACSOCBIM = PowerModels.run_opf(file, SOCWRPowerModel, ipopt; setting = s)
 # #
 resultSOCBFM = run_acdcopf_bf(file, SOCBFPowerModel, ipopt; setting = s)
 resultSOCBFMConic = run_acdcopf_bf(file, SOCBFConicPowerModel, mosek; setting = s)
+resultSOCBFMConicSCS = run_acdcopf_bf(file, SOCBFConicPowerModel, scs; setting = s)
 # #
 resultSDP = run_acdcopf(file, SDPWRMPowerModel, mosek; setting = s)
 # #

@@ -2,17 +2,22 @@ isdefined(Base, :__precompile__) && __precompile__()
 
 module PowerModelsACDC
 
-using Compat
+# using Compat
 using JuMP
 using PowerModels
 using InfrastructureModels
+using Memento
 
-import Compat: @__MODULE__
+# import Compat: @__MODULE__
 
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+# using Compat.LinearAlgebra
+# using Compat.SparseArrays
+#
+# PMs = PowerModels
 
-PMs = PowerModels
+import JuMP: with_optimizer
+export with_optimizer
+
 
 include("prob/acdcopf.jl")
 include("prob/acdcpf.jl")
