@@ -7,6 +7,7 @@ using SCS
 using Mosek
 using MosekTools
 using JuMP
+using Gurobi  # needs startvalues for all variables!
 
 file_pf_droop = "./test/data/case5_acdc_droop.m"
 
@@ -33,6 +34,7 @@ ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
 # mosek = MosekSolver()
 mosek = JuMP.with_optimizer(Mosek.Optimizer)
 scs = JuMP.with_optimizer(SCS.Optimizer)
+gurobi = JuMP.with_optimizer(Gurobi.Optimizer, Presolve=0)
 
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
@@ -52,7 +54,7 @@ resultSOCBFMConicSCS = run_acdcopf_bf(file, SOCBFConicPowerModel, scs; setting =
 # #
 resultSDP = run_acdcopf(file, SDPWRMPowerModel, mosek; setting = s)
 # #
-resultDC = run_acdcopf(file, DCPPowerModel, ipopt; setting = s)
+resultDC = run_acdcopf(file, DCPPowerModel, gurobi; setting = s)
 #
 # # # other tests
 # resultACPF24 = run_acdcpf(file_case24, ACPPowerModel, ipopt; setting = s)

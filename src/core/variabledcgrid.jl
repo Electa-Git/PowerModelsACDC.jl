@@ -9,7 +9,8 @@ function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel; nw::Int=pm.cnw
         PowerModels.var(pm, nw, cnd)[:vdcm] = @variable(pm.model,
         [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_$(cnd)_vdcm",
         lower_bound = PowerModels.ref(pm, nw, :busdc, i, "Vdcmin", cnd),
-        upper_bound = PowerModels.ref(pm, nw, :busdc, i, "Vdcmax", cnd)
+        upper_bound = PowerModels.ref(pm, nw, :busdc, i, "Vdcmax", cnd),
+        start = PowerModels.getval(ref(pm, nw, :busdc, i), "Vdc", cnd, 1.0)
         )
     else
         PowerModels.var(pm, nw, cnd)[:vdcm] = @variable(pm.model,
@@ -55,7 +56,8 @@ function variable_active_dcbranch_flow(pm::GenericPowerModel; nw::Int=pm.cnw, cn
         PowerModels.var(pm, nw, cnd)[:p_dcgrid] = @variable(pm.model,
         [(l,i,j) in PowerModels.ref(pm, nw, :arcs_dcgrid)], base_name="$(nw)_$(cnd)_pdcgrid",
         lower_bound = -PowerModels.ref(pm, nw, :branchdc, l, "rateA", cnd),
-        upper_bound =  PowerModels.ref(pm, nw, :branchdc, l, "rateA", cnd)
+        upper_bound =  PowerModels.ref(pm, nw, :branchdc, l, "rateA", cnd),
+        start = PowerModels.getval(ref(pm, nw, :branchdc, l), "p_start", cnd, 1.0)
         )
     else
         PowerModels.var(pm, nw, cnd)[:p_dcgrid] = @variable(pm.model,
@@ -72,7 +74,8 @@ function variable_dcbranch_current_sqr(pm::GenericPowerModel; nw::Int=pm.cnw, cn
         PowerModels.var(pm, nw, cnd)[:ccm_dcgrid] = @variable(pm.model,
         [l in PowerModels.ids(pm, nw, :branchdc)], base_name="$(nw)_$(cnd)_ccm_dcgrid",
         lower_bound = 0,
-        upper_bound = (PowerModels.ref(pm, nw, :branchdc, l, "rateA", cnd) / vpu)^2
+        upper_bound = (PowerModels.ref(pm, nw, :branchdc, l, "rateA", cnd) / vpu)^2,
+        start = (PowerModels.getval(ref(pm, nw, :branchdc, l), "p_start", cnd, 0.0) / vpu)^2
         )
     else
         PowerModels.var(pm, nw, cnd)[:ccm_dcgrid] = @variable(pm.model,
