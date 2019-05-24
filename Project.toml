@@ -10,7 +10,7 @@ PowerModels = "c36e90e8-916a-50a6-bd94-075b64ef4655"
 [compat]
 Cbc = "≥ 0.4.0"
 Ipopt = "≥ 0.4.0"
-PowerModels = " 0.10.0"
+PowerModels = "0.10.0"
 SCS = "≥ 0.4.0"
 julia = "≥ 0.7.0"
 
