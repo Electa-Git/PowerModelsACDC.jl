@@ -3,7 +3,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
     # @testset "3-bus case" begin
     #     result = run_acdcpf("../test/data/case3.m", ACPPowerModel, ipopt_solver, setting = Dict("output" => Dict("branch_flows" => true)))
     #
-    #     @test result["status"] == :LocalOptimal
+    #     @test result["termination_status"] == LOCALLY_SOLVED
     #     @test isapprox(result["objective"], 0; atol = 1e-2)
     #
     #     @test isapprox(result["solution"]["gen"]["2"]["pg"], 1.600063; atol = 1e-3)
@@ -22,7 +22,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
     @testset "5-bus ac dc case" begin
         result = run_acdcpf("../test/data/case5_acdc.m", ACPPowerModel, ipopt_solver; setting = s)
 
-        @test result["status"] == :LocalOptimal
+        @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
 
         @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.3494; atol = 1e-3)
@@ -41,7 +41,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
     @testset "5-bus ac dc case with 2 seperate ac grids" begin
         result = run_acdcpf("../test/data/case5_2grids.m", ACPPowerModel, ipopt_solver; setting = s)
 
-        @test result["status"] == :LocalOptimal
+        @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
 
         @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.9326; atol = 1e-3)
@@ -61,7 +61,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
     # @testset "24-bus rts ac dc case with three zones" begin
     #     result = run_acdcpf("../test/data/case24_3zones_acdc.m", ACPPowerModel, ipopt_solver; setting = s)
     #
-    #     @test result["status"] == :LocalOptimal
+    #     @test result["termination_status"] == LOCALLY_SOLVED
     #     @test isapprox(result["objective"], 0; atol = 1e-2)
     #
     #     @test isapprox(result["solution"]["gen"]["65"]["pg"], 1.419; atol = 1e-3)
@@ -84,7 +84,7 @@ end
     # @testset "3-bus case" begin
     #     result = run_acdcpf("../test/data/case3.m", DCPPowerModel, ipopt_solver)
     #
-    #     @test result["status"] == :LocalOptimal
+    #     @test result["termination_status"] == LOCALLY_SOLVED
     #     @test isapprox(result["objective"], 0; atol = 1e-2)
     #
     #     @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.54994; atol = 1e-3)
@@ -96,7 +96,7 @@ end
     @testset "5-bus ac dc case" begin
         result = run_acdcpf("../test/data/case5_acdc.m", DCPPowerModel, ipopt_solver; setting = s)
 
-        @test result["status"] == :LocalOptimal
+        @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
 
         @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.2169; atol = 1e-3)
@@ -108,7 +108,7 @@ end
     @testset "24-bus rts ac dc case with three zones" begin
         result = run_acdcpf("../test/data/case24_3zones_acdc.m", DCPPowerModel, ipopt_solver; setting = s)
 
-        @test result["status"] == :LocalOptimal
+        @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
         @test isapprox(result["solution"]["gen"]["65"]["pg"], 1.419; atol = 1e-3)
 
@@ -125,7 +125,7 @@ end
 #     @testset "5-bus ac dc case" begin
 #         result = run_acdcpf("../test/data/case5_acdc.m", SOCWRPowerModel, ipopt_solver)
 #
-#         @test result["status"] == :LocalOptimal
+#         @test result["termination_status"] == LOCALLY_SOLVED
 #         @test isapprox(result["objective"], 0; atol = 1e-2)
 #
 #         @test isapprox(result["solution"]["gen"]["1"]["pg"], 12.258; atol = 1e-3)
@@ -144,7 +144,7 @@ end
 #     @testset "24-bus rts ac dc case with three zones" begin
 #         result = run_acdcpf("../test/data/case24_3zones_acdc.m", SOCWRPowerModel, ipopt_solver)
 #
-#         @test result["status"] == :LocalOptimal
+#         @test result["termination_status"] == LOCALLY_SOLVED
 #         @test isapprox(result["objective"], 0; atol = 1e-2)
 #
 #         @test isapprox(result["solution"]["gen"]["65"]["pg"], 1.419; atol = 1e-3)
@@ -167,7 +167,7 @@ end
 #     @testset "5-bus ac dc case" begin
 #         result = run_acdcpf("../test/data/case5_acdc.m", SOCDFPowerModel, ipopt_solver)
 #
-#         @test result["status"] == :LocalOptimal
+#         @test result["termination_status"] == LOCALLY_SOLVED
 #         @test isapprox(result["objective"], 0; atol = 1e-2)
 #
 #         @test result["solution"]["gen"]["1"]["pg"] >= 1.480
@@ -185,7 +185,7 @@ end
 #     @testset "24-bus rts ac dc case with three zones" begin
 #         result = run_acdcpf("../test/data/case24_3zones_acdc.m", SOCDFPowerModel, ipopt_solver)
 #
-#         @test result["status"] == :LocalOptimal
+#         @test result["termination_status"] == LOCALLY_SOLVED
 #         @test isapprox(result["objective"], 0; atol = 1e-2)
 #     end
 # end
@@ -197,7 +197,7 @@ end
 #     @testset "5-bus ac dc case" begin
 #         result = run_pf("../test/data/case5_acdc.m", SDPWRMPowerModel, scs_solver)
 #
-#         @test result["status"] == :Optimal
+#         @test result["termination_status"] == :Optimal
 #         @test isapprox(result["objective"], 0; atol = 1e-2)
 #
 #         @test result["solution"]["gen"]["1"]["pg"] >= 1.480
@@ -216,7 +216,7 @@ end
 #     @testset "24-bus rts ac dc case with three zones" begin
 #         result = run_acdcpf("../test/data/case24_3zones_acdc.m", SDPWRMPowerModel, scs_solver)
 #
-#         @test result["status"] == :Optimal
+#         @test result["termination_status"] == :Optimal
 #         @test isapprox(result["objective"], 0; atol = 1e-2)
 #     end
 # end
