@@ -29,5 +29,5 @@ deploydocs(
     make = nothing,
     target = "build",
     repo = "github.com/hakanergun/PowerModelsACDC.jl.git",
-    julia = "0.6"
+    julia = "1.1"
 )

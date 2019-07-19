@@ -10,7 +10,7 @@ function constraint_voltage_dc(pm::GenericPowerModel{T}, n::Int, cnd::Int) where
     wdcr = PowerModels.var(pm, n, cnd, :wdcr)
 
     for (i,j) in PowerModels.ids(pm, n, :buspairsdc)
-        JuMP.@constraint(pm.model, wdcr[(i,j)]^2 <= wdc[i]*wdc[j])
+        JuMP.@NLconstraint(pm.model, wdcr[(i,j)]^2 <= wdc[i]*wdc[j])
         # InfrastructureModels.relaxation_product(pm.model, wdc[i], wdc[j], wdcr_, wdcr_)
     end
 end
