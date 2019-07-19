@@ -20,8 +20,8 @@ addons:
 
 before_install:
     # don't keep an old version of the code in the cache
- # - julia -e 'using Pkg; if "PowerModels" in keys(Pkg.installed()) Pkg.rm("PowerModels"); Pkg.rm("PowerModels"); Pkg.add("https://github.com/lanl-ansi/PowerModels.jl.git") end'
- # - julia -e 'using Pkg; if "PowerModelsACDC" in keys(Pkg.installed()) Pkg.rm("PowerModelsACDC"); Pkg.rm("PowerModelsACDC") end'
+ - julia -e 'using Pkg; if "PowerModels" in keys(Pkg.installed()) Pkg.rm("PowerModels"); Pkg.rm("PowerModels"); Pkg.add("https://github.com/lanl-ansi/PowerModels.jl.git") end'
+  - julia -e 'using Pkg; if "PowerModelsACDC" in keys(Pkg.installed()) Pkg.rm("PowerModelsACDC"); Pkg.rm("PowerModelsACDC") end'
  # - julia -e 'using Pkg; Pkg.update()' #make sure we get the latest version of METADATA
   - julia -e 'using Pkg; if !("Documenter" in keys(Pkg.installed())) Pkg.add("Documenter") end'
 
