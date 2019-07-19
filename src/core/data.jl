@@ -284,39 +284,39 @@ end
 
 function set_branchdc_pu(branchdc, MVAbase)
     rescale_power = x -> x/MVAbase
-    PowerModels.apply_func(branchdc, "rateA", rescale_power)
-    PowerModels.apply_func(branchdc, "rateB", rescale_power)
-    PowerModels.apply_func(branchdc, "rateC", rescale_power)
+    PowerModels._apply_func!(branchdc, "rateA", rescale_power)
+    PowerModels._apply_func!(branchdc, "rateB", rescale_power)
+    PowerModels._apply_func!(branchdc, "rateC", rescale_power)
 end
 
 function set_busdc_pu(busdc, MVAbase)
     rescale_power = x -> x/MVAbase
-    PowerModels.apply_func(busdc, "Pdc", rescale_power)
+    PowerModels._apply_func!(busdc, "Pdc", rescale_power)
 end
 
 function set_conv_pu_power(conv, MVAbase)
     rescale_power = x -> x/MVAbase
-    PowerModels.apply_func(conv, "P_g", rescale_power)
-    PowerModels.apply_func(conv, "Q_g", rescale_power)
-    PowerModels.apply_func(conv, "Pdcset", rescale_power)
-    PowerModels.apply_func(conv, "LossA", rescale_power)
-    PowerModels.apply_func(conv, "Pacmax", rescale_power)
-    PowerModels.apply_func(conv, "Pacmin", rescale_power)
-    PowerModels.apply_func(conv, "Qacmax", rescale_power)
-    PowerModels.apply_func(conv, "Qacmin", rescale_power)
-    PowerModels.apply_func(conv, "Pacrated", rescale_power)
-    PowerModels.apply_func(conv, "Qacrated", rescale_power)
+    PowerModels._apply_func!(conv, "P_g", rescale_power)
+    PowerModels._apply_func!(conv, "Q_g", rescale_power)
+    PowerModels._apply_func!(conv, "Pdcset", rescale_power)
+    PowerModels._apply_func!(conv, "LossA", rescale_power)
+    PowerModels._apply_func!(conv, "Pacmax", rescale_power)
+    PowerModels._apply_func!(conv, "Pacmin", rescale_power)
+    PowerModels._apply_func!(conv, "Qacmax", rescale_power)
+    PowerModels._apply_func!(conv, "Qacmin", rescale_power)
+    PowerModels._apply_func!(conv, "Pacrated", rescale_power)
+    PowerModels._apply_func!(conv, "Qacrated", rescale_power)
 end
 
 function set_conv_pu_volt(conv, kVbase)
     rescale_volt = x -> x  / (kVbase)
-    PowerModels.apply_func(conv, "LossB", rescale_volt)
+    PowerModels._apply_func!(conv, "LossB", rescale_volt)
 end
 
 function set_conv_pu_ohm(conv, Zbase)
     rescale_ohm = x -> x / Zbase
-    PowerModels.apply_func(conv, "LossCrec", rescale_ohm)
-    PowerModels.apply_func(conv, "LossCinv", rescale_ohm)
+    PowerModels._apply_func!(conv, "LossCrec", rescale_ohm)
+    PowerModels._apply_func!(conv, "LossCinv", rescale_ohm)
 end
 
 function check_conv_parameters(conv)
