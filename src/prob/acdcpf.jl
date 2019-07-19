@@ -9,9 +9,9 @@ end
 
 ""
 function run_acdcpf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
-    pm = PowerModels.build_generic_model(data, model_constructor, post_acdcpf; kwargs...)
+    pm = PowerModels.build_model(data, model_constructor, post_acdcpf; kwargs...)
     #display(pm)
-    return PowerModels.solve_generic_model(pm, solver; solution_builder = get_solution_acdc)
+    return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end
 
 ""
@@ -31,7 +31,7 @@ function post_acdcpf(pm::GenericPowerModel)
     variable_dc_converter(pm, bounded = false)
     variable_dcgrid_voltage_magnitude(pm, bounded = false)
 
-    PowerModels.constraint_voltage(pm)
+    PowerModels.constraint_model_voltage(pm)
     constraint_voltage_dc(pm)
 
 

@@ -5,9 +5,9 @@ using InfrastructureModels
 using JuMP
 
 # Suppress warnings during testing.
-setlevel!(getlogger(InfrastructureModels), "error")
-setlevel!(getlogger(PowerModelsACDC), "error")
-setlevel!(getlogger(PowerModels), "error")
+setlevel!(Memento.getlogger(InfrastructureModels), "error")
+setlevel!(Memento.getlogger(PowerModelsACDC), "error")
+setlevel!(Memento.getlogger(PowerModels), "error")
 
 using Ipopt
 #using Pajarito

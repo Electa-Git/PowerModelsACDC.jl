@@ -43,22 +43,22 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
                     ref_buses_dc["$k"] = v
                 end
             end
-            Memento.warn(PowerModels.LOGGER, "no reference DC bus found, setting reference bus based on AC bus type")
+            Memento.warn(PowerModels._LOGGER, "no reference DC bus found, setting reference bus based on AC bus type")
         end
 
         for (k,conv) in pm.ref[:nw][n][:convdc]
             conv_id = conv["index"]
             if conv["type_ac"] == 2 && conv["type_dc"] == 1
-                Memento.warn(PowerModels.LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+                Memento.warn(PowerModels._LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
             elseif conv["type_ac"] == 1 && conv["type_dc"] == 1
-                Memento.warn(PowerModels.LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+                Memento.warn(PowerModels._LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
             end
             convbus_ac = conv["busac_i"]
             if conv["Vmmax"] < pm.ref[:nw][n][:bus][convbus_ac]["vmin"]
-                Memento.warn(PowerModels.LOGGER, "The maximum AC side voltage of converter $conv_id is smaller than the minimum AC bus voltage")
+                Memento.warn(PowerModels._LOGGER, "The maximum AC side voltage of converter $conv_id is smaller than the minimum AC bus voltage")
             end
             if conv["Vmmin"] > pm.ref[:nw][n][:bus][convbus_ac]["vmax"]
-                Memento.warn(PowerModels.LOGGER, "The miximum AC side voltage of converter $conv_id is larger than the maximum AC bus voltage")
+                Memento.warn(PowerModels._LOGGER, "The miximum AC side voltage of converter $conv_id is larger than the maximum AC bus voltage")
             end
         end
 
@@ -67,7 +67,7 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
             for (rb) in keys(ref_buses_dc)
                 ref_buses_warn = ref_buses_warn*rb*", "
             end
-            Memento.warn(PowerModels.LOGGER, "multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
+            Memento.warn(PowerModels._LOGGER, "multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
         end
         ACgrids = find_all_ac_grids(pm.ref[:nw][n][:branch], pm.ref[:nw][n][:bus])
 
@@ -80,7 +80,7 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
                 end
             end
             if a == 0
-                Memento.warn(PowerModels.LOGGER, "Grid $i does not have any voltage reference bus, this might cause infeasibility")
+                Memento.warn(PowerModels._LOGGER, "Grid $i does not have any voltage reference bus, this might cause infeasibility")
             end
         end
         pm.ref[:nw][n][:ref_buses_dc] = ref_buses_dc

@@ -50,7 +50,7 @@ function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel{T}, n::I
 end
 
 function add_dc_bus_voltage_setpoint(sol, pm::GenericPowerModel{T}) where {T <: PowerModels.AbstractWForms}
-    PowerModels.add_setpoint(sol, pm, "busdc", "vm", :wdc; scale = (x,item) -> sqrt(x))
+    PowerModels.add_setpoint!(sol, pm, "busdc", "vm", :wdc, status_name="Vdc", inactive_status_value = 4; scale = (x,item,cnd) -> sqrt(x))
 end
 
 """

@@ -158,7 +158,7 @@ function constraint_dc_branch_current(pm::GenericPowerModel, i::Int; nw::Int=pm.
     t_bus = branch["tbusdc"]
     f_idx = (i, f_bus, t_bus)
 
-    ccm_max = (PowerModels.getval(ref(pm, nw, :branchdc, i), "rateA", cnd, 0.0) / vpu)^2
+    ccm_max = (PowerModels.comp_start_value(ref(pm, nw, :branchdc, i), "rateA", cnd, 0.0) / vpu)^2
 
     p = ref(pm, nw, :dcpol)
     constraint_dc_branch_current(pm, nw, cnd, f_bus, f_idx, ccm_max, p)

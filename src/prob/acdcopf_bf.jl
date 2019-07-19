@@ -9,8 +9,8 @@ end
 
 ""
 function run_acdcopf_bf(data::Dict{String,Any}, model_constructor::Type{GenericPowerModel{T}}, solver; kwargs...) where T <: PowerModels.AbstractBFForm
-    pm = PowerModels.build_generic_model(data, model_constructor, post_acdcopf_bf; kwargs...)
-    return PowerModels.solve_generic_model(pm, solver; solution_builder = get_solution_acdc)
+    pm = PowerModels.build_model(data, model_constructor, post_acdcopf_bf; kwargs...)
+    return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end
 
 function post_acdcopf_bf(pm::GenericPowerModel)
@@ -27,7 +27,7 @@ function post_acdcopf_bf(pm::GenericPowerModel)
 
     PowerModels.objective_min_fuel_cost(pm)
 
-    PowerModels.constraint_voltage(pm)
+    PowerModels.constraint_model_current(pm)
     constraint_voltage_dc(pm)
 
     for i in PowerModels.ids(pm, :ref_buses)
@@ -42,7 +42,7 @@ function post_acdcopf_bf(pm::GenericPowerModel)
 
         PowerModels.constraint_flow_losses(pm, i)
         PowerModels.constraint_voltage_magnitude_difference(pm, i)
-        PowerModels.constraint_branch_current(pm, i)
+
 
         PowerModels.constraint_voltage_angle_difference(pm, i)
         PowerModels.constraint_thermal_limit_from(pm, i)

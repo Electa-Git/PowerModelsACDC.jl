@@ -135,8 +135,8 @@ end
 
 
 function add_converter_voltage_setpoint(sol, pm::GenericPowerModel{T}) where {T <: PowerModels.AbstractWForms}
-    PowerModels.add_setpoint(sol, pm, "convdc", "vmconv", :wc_ac; scale = (x,item) -> sqrt(x))
-    PowerModels.add_setpoint(sol, pm, "convdc", "vmfilt", :wf_ac; scale = (x,item) -> sqrt(x))
+    PowerModels.add_setpoint!(sol, pm, "convdc", "vmconv", :wc_ac; scale = (x,item) -> sqrt(x))
+    PowerModels.add_setpoint!(sol, pm, "convdc", "vmfilt", :wf_ac; scale = (x,item) -> sqrt(x))
 end
 """
 LCC firing angle constraints

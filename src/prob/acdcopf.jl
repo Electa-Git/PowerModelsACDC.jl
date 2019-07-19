@@ -9,8 +9,8 @@ end
 
 ""
 function run_acdcopf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
-    pm = PowerModels.build_generic_model(data, model_constructor, post_acdcopf; kwargs...)
-    return PowerModels.solve_generic_model(pm, solver; solution_builder = get_solution_acdc)
+    pm = PowerModels.build_model(data, model_constructor, post_acdcopf; kwargs...)
+    return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end
 
 ""
@@ -27,7 +27,7 @@ function post_acdcopf(pm::GenericPowerModel)
 
     PowerModels.objective_min_fuel_cost(pm)
 
-    PowerModels.constraint_voltage(pm)
+    PowerModels.constraint_model_voltage(pm)
     constraint_voltage_dc(pm)
 
     for i in PowerModels.ids(pm, :ref_buses)

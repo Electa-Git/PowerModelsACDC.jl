@@ -4,8 +4,8 @@ using Ipopt
 using Memento
 using CPLEX
 using SCS
-using Mosek
-using MosekTools
+# using Mosek
+# using MosekTools
 using JuMP
 using Gurobi  # needs startvalues for all variables!
 
@@ -32,7 +32,7 @@ PowerModelsACDC.process_additional_data!(data)
 ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
 # ipopt = IpoptSolver(tol=1e-6)
 # mosek = MosekSolver()
-mosek = JuMP.with_optimizer(Mosek.Optimizer)
+# mosek = JuMP.with_optimizer(Mosek.Optimizer)
 scs = JuMP.with_optimizer(SCS.Optimizer)
 gurobi = JuMP.with_optimizer(Gurobi.Optimizer, Presolve=0)
 cplex = JuMP.with_optimizer(CPLEX.Optimizer)
@@ -50,7 +50,7 @@ resultSOCBIM = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
 resultACSOCBIM = PowerModels.run_opf(file, SOCWRPowerModel, ipopt; setting = s)
 # #
 resultSOCBFM = run_acdcopf_bf(file, SOCBFPowerModel, ipopt; setting = s)
-resultSOCBFMConic = run_acdcopf_bf(file, SOCBFConicPowerModel, mosek; setting = s)
+# resultSOCBFMConic = run_acdcopf_bf(file, SOCBFConicPowerModel, mosek; setting = s)
 resultSOCBFMConicSCS = run_acdcopf_bf(file, SOCBFConicPowerModel, scs; setting = s)
 # #
 resultSDP = run_acdcopf(file, SDPWRMPowerModel, mosek; setting = s)
