@@ -1,5 +1,5 @@
-﻿name = "PowerModelsACDC"
-uuid = "0de58836-c097-508c-ba55-6efa22db5d20"
+name = "PowerModelsACDC"
+uuid = "ff45984e-d068-5f4c-9e32-c4133509d236"
 
 [deps]
 InfrastructureModels = "2030c09a-7f63-5d83-885d-db604e0e9cc0"
@@ -10,3 +10,13 @@ PowerModels = "c36e90e8-916a-50a6-bd94-075b64ef4655"
 [compat]
 PowerModels = "≥ 0.11.1"
 julia = "≥ 1.1.0"
+
+[extras]
+InfrastructureModels = "2030c09a-7f63-5d83-885d-db604e0e9cc0"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+Memento = "f28f55f0-a522-5efc-85c2-fe41dfb9b2d9"
+PowerModels = "c36e90e8-916a-50a6-bd94-075b64ef4655"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["InfrastructureModels", "Test", "PowerModels", "Memento", "JuMP"]
