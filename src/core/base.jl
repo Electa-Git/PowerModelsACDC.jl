@@ -69,18 +69,20 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
             end
             Memento.warn(PowerModels._LOGGER, "multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
         end
-        ACgrids = find_all_ac_grids(pm.ref[:nw][n][:branch], pm.ref[:nw][n][:bus])
 
 
-        for (i, grid) in ACgrids
-            a = 0
-            for (j, bus) in pm.ref[:nw][n][:ref_buses]
-                if (bus["bus_i"] in grid["Buses"])
-                    a = 1
+        if haskey(pm.setting, "find_all_ac_grids") && pm.tetting["find_all_ac_grids"] == true
+            ACgrids = find_all_ac_grids(pm.ref[:nw][n][:branch], pm.ref[:nw][n][:bus])
+            for (i, grid) in ACgrids
+                a = 0
+                for (j, bus) in pm.ref[:nw][n][:ref_buses]
+                    if (bus["bus_i"] in grid["Buses"])
+                        a = 1
+                    end
                 end
-            end
-            if a == 0
-                Memento.warn(PowerModels._LOGGER, "Grid $i does not have any voltage reference bus, this might cause infeasibility")
+                if a == 0
+                    Memento.warn(PowerModels._LOGGER, "Grid $i does not have any voltage reference bus, this might cause infeasibility")
+                end
             end
         end
         pm.ref[:nw][n][:ref_buses_dc] = ref_buses_dc
