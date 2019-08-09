@@ -53,7 +53,7 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int,
         PowerModels.con(pm, n, cnd, :conv_tf_q_to)[i] = c4
 
         #@constraint(pm.model, (wrf)^2 + (wif)^2 <= wf*w)
-        constraint_voltage_product_converter(pm::GenericPowerModel{T}, wrf, wif, wf, w)
+        constraint_voltage_product_converter(pm, wrf, wif, wf, w)
     else
         pcon, qcon = constraint_lossless_section(pm, w/tm^2, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to)
     end
