@@ -61,12 +61,12 @@ function add_dc_bus_voltage_setpoint(sol, pm::GenericPowerModel)
 end
 
 function add_dcconverter_voltage_setpoint(sol, pm::GenericPowerModel)
-    PowerModels.add_setpoint!(sol, pm, "convdc", "vmconv", :vmc, status_name="islcc", inactive_status_value = 4)
-    PowerModels.add_setpoint!(sol, pm, "convdc", "vaconv", :vac, status_name="islcc", inactive_status_value = 4)
-    PowerModels.add_setpoint!(sol, pm, "convdc", "vmfilt", :vmf, status_name="islcc", inactive_status_value = 4)
-    PowerModels.add_setpoint!(sol, pm, "convdc", "vafilt", :vaf, status_name="islcc", inactive_status_value = 4)
+    PowerModels.add_setpoint!(sol, pm, "convdc", "vmconv", :vmc, status_name="islcc", inactive_status_value = 0)
+    PowerModels.add_setpoint!(sol, pm, "convdc", "vaconv", :vac, status_name="islcc", inactive_status_value = 0)
+    PowerModels.add_setpoint!(sol, pm, "convdc", "vmfilt", :vmf, status_name="islcc", inactive_status_value = 0)
+    PowerModels.add_setpoint!(sol, pm, "convdc", "vafilt", :vaf, status_name="islcc", inactive_status_value = 0)
 end
 
 function add_dcconverter_firing_angle(sol, pm::GenericPowerModel)
-    PowerModels.add_setpoint!(sol, pm, "convdc", "phi", :phiconv, status_name="islcc", inactive_status_value = 4)
+    PowerModels.add_setpoint!(sol, pm, "convdc", "phi", :phiconv, status_name="islcc", inactive_status_value = 0)
 end
