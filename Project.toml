@@ -1,7 +1,6 @@
 ﻿name = "PowerModelsACDC"
 uuid = "ff45984e-d068-5f4c-9e32-c4133509d236"
 repo = "https://github.com/hakanergun/PowerModelsACDC.jl"
-version = "0.1.0"
 
 [deps]
 InfrastructureModels = "2030c09a-7f63-5d83-885d-db604e0e9cc0"
