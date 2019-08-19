@@ -47,17 +47,17 @@ If you find PowerModelsACDC useful in your work, we kindly request that you cite
 
 ```
 @ARTICLE{8636236,
-author={H. Ergun and J. Dave and D. Van Hertem and F. Geth},
+author={H. {Ergun} and J. {Dave} and D. {Van Hertem} and F. {Geth}},
 journal={IEEE Transactions on Power Systems},
-title={Optimal Power Flow for AC/DC Grids: Formulation, Convex Relaxation, Linear Approximation and Implementation},
+title={Optimal Power Flow for AC–DC Grids: Formulation, Convex Relaxation, Linear Approximation, and Implementation},
 year={2019},
-volume={},
-number={},
-pages={1-1},
-keywords={Mathematical model;HVDC transmission;AC-DC power converters;Numerical models;Inductors;Impedance;Linear approximation;HVDC transmission;flexible ac transmission systems;power system analysis computing},
+volume={34},
+number={4},
+pages={2980-2990},
+keywords={AC-DC power convertors;approximation theory;HVDC power convertors;HVDC power transmission;power grids;power transmission control;reactive power control;AC-DC grids;linear approximation;active power control capabilities;reactive power control capabilities;HVDC converter stations;power systems;ancillary services;optimal power flow model;convex relaxation formulation;parameterized ac-dc converter model;common ac optimal power flow formulations;dc nodes;converter station technologies;ac nodes;ancillary security;open-source tool;Mathematical model;HVDC transmission;AC-DC power converters;Numerical models;Inductors;Impedance;Linear approximation;HVDC transmission;flexible ac transmission systems;power system analysis computing},
 doi={10.1109/TPWRS.2019.2897835},
 ISSN={0885-8950},
-month={},}
+month={July},}
 ```
 
 ## License
