@@ -32,7 +32,7 @@ The latest stable release of PowerModelACDC can be installed using the Julia pac
 ```julia
 Pkg.clone("https://github.com/hakanergun/PowerModelsACDC.jl.git")
 ```
-The package is compatible with PowerModels v0.9.2, InfrastrucureModels v0.0.13 and julia v0.7.
+The package is compatible with PowerModels v0.12.2, InfrastrucureModels v0.0.13 and julia v1.1.1
 
 !!! note
     This is a research-grade optimization package. Eventually, we hope to make this a
