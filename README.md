@@ -49,7 +49,7 @@ If you find PowerModelsACDC useful in your work, we kindly request that you cite
 @ARTICLE{8636236,
 author={H. {Ergun} and J. {Dave} and D. {Van Hertem} and F. {Geth}},
 journal={IEEE Transactions on Power Systems},
-title={Optimal Power Flow for AC–DC Grids: Formulation, Convex Relaxation, Linear Approximation, and Implementation},
+title={Optimal Power Flow for ACï¿½DC Grids: Formulation, Convex Relaxation, Linear Approximation, and Implementation},
 year={2019},
 volume={34},
 number={4},
