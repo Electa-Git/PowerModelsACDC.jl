@@ -15,7 +15,7 @@ Cbc = "≥ 0.4.0"
 Ipopt = "≥ 0.4.0"
 PowerModels = "~0.12.2"
 SCS = "≥ 0.4.0"
-julia = "^1"
+julia = "≥ 1.1.1"
 
 [extras]
 Cbc = "9961bab8-2fa3-5c5a-9d89-47fab24efd76"
