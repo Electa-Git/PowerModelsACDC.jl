@@ -372,3 +372,7 @@ function variable_converter_internal_voltage_magnitude_sqr(pm::GenericPowerModel
     start = PowerModels.ref(pm, nw, :convdc, i, "Vtar", cnd)^2
     )
 end
+
+function variable_cos_voltage(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+    #only for lpac
+end
