@@ -25,7 +25,7 @@ before_install:
  # - julia -e 'using Pkg; Pkg.update()' #make sure we get the latest version of METADATA
 - julia -e 'using Pkg; Pkg.add("Ipopt")'
 - julia -e 'using Pkg; Pkg.add("SCS")'
-- julia -e 'using Pkg; if !("Documenter" in keys(Pkg.installed())) Pkg.add("Documenter") end'
+- julia -e 'using Pkg; Pkg.add("Documenter")'
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
