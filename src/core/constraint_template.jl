@@ -1,6 +1,6 @@
-constraint_voltage_dc(pm::GenericPowerModel) = constraint_voltage_dc(pm, pm.cnw, pm.ccnd) # TODO check this
+constraint_voltage_dc(pm::AbstractPowerModel) = constraint_voltage_dc(pm, pm.cnw, pm.ccnd) # TODO check this
 # no data, so no further templating is needed, constraint goes directly to the formulations
-function constraint_kcl_shunt(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_kcl_shunt(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :kcl_p)
         PowerModels.con(pm, nw, cnd)[:kcl_p] = Dict{Int,ConstraintRef}()
     end
@@ -25,7 +25,7 @@ function constraint_kcl_shunt(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd
     constraint_kcl_shunt(pm, nw, cnd, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
 end
 
-function constraint_kcl_shunt_dcgrid(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_kcl_shunt_dcgrid(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :kcl_dcgrid)
         PowerModels.con(pm, nw, cnd)[:kcl_dcgrid] = Dict{Int,ConstraintRef}()
     end
@@ -36,7 +36,7 @@ function constraint_kcl_shunt_dcgrid(pm::GenericPowerModel, i::Int; nw::Int=pm.c
     constraint_kcl_shunt_dcgrid(pm, nw, cnd, i, bus_arcs_dcgrid, bus_convs_dc, pd)
 end
 #
-function constraint_ohms_dc_branch(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_ohms_dc_branch(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :dc_branch)
         PowerModels.con(pm, nw, cnd)[:dc_branch] = Dict{Int,ConstraintRef}()
     end
@@ -51,7 +51,7 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw
     constraint_ohms_dc_branch(pm, nw, cnd, f_bus, t_bus, f_idx, t_idx, branch["r"], p)
 end
 #
-function constraint_converter_losses(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_converter_losses(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :conv_loss)
         PowerModels.con(pm, nw, cnd)[:conv_loss] = Dict{Int,ConstraintRef}()
         PowerModels.con(pm, nw, cnd)[:conv_loss_aux] = Dict{Int,ConstraintRef}()
@@ -65,7 +65,7 @@ function constraint_converter_losses(pm::GenericPowerModel, i::Int; nw::Int=pm.c
     constraint_converter_losses(pm, nw, cnd, i, a, b, c, plmax)
 end
 
-function constraint_converter_current(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_converter_current(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :conv_i)
         PowerModels.con(pm, nw, cnd)[:conv_i] = Dict{Int,ConstraintRef}()
         PowerModels.con(pm, nw, cnd)[:conv_i_sqrt] = Dict{Int,ConstraintRef}()
@@ -76,7 +76,7 @@ function constraint_converter_current(pm::GenericPowerModel, i::Int; nw::Int=pm.
     constraint_converter_current(pm, nw, cnd, i, Vmax, Imax)
 end
 
-function constraint_active_conv_setpoint(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_active_conv_setpoint(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :conv_pac)
         PowerModels.con(pm, nw, cnd)[:conv_pac] = Dict{Int,ConstraintRef}()
     end
@@ -84,7 +84,7 @@ function constraint_active_conv_setpoint(pm::GenericPowerModel, i::Int; nw::Int=
     constraint_active_conv_setpoint(pm, nw, cnd, conv["index"], conv["P_g"])
 end
 
-function constraint_reactive_conv_setpoint(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_reactive_conv_setpoint(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :conv_qac)
         PowerModels.con(pm, nw, cnd)[:conv_qac] = Dict{Int,ConstraintRef}()
     end
@@ -92,7 +92,7 @@ function constraint_reactive_conv_setpoint(pm::GenericPowerModel, i::Int; nw::In
     constraint_reactive_conv_setpoint(pm, nw, cnd, conv["index"], conv["Q_g"])
 end
 ""
-function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_dc_voltage_magnitude_setpoint(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :v_dc)
         PowerModels.con(pm, nw, cnd)[:v_dc] = Dict{Int,ConstraintRef}()
     end
@@ -101,7 +101,7 @@ function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel, i::Int;
 end
 
 #
-function constraint_conv_reactor(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_conv_reactor(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :conv_pr_p_fr)
         PowerModels.con(pm, nw, cnd)[:conv_pr_p] = Dict{Int,ConstraintRef}()
         PowerModels.con(pm, nw, cnd)[:conv_pr_p_to] = Dict{Int,ConstraintRef}()
@@ -112,7 +112,7 @@ function constraint_conv_reactor(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, 
 end
 
 #
-function constraint_conv_filter(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_conv_filter(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :conv_kcl_p)
         PowerModels.con(pm, nw, cnd)[:conv_kcl_p] = Dict{Int,ConstraintRef}()
         PowerModels.con(pm, nw, cnd)[:conv_kcl_q] = Dict{Int,ConstraintRef}()
@@ -122,7 +122,7 @@ function constraint_conv_filter(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, c
 end
 
 #
-function constraint_conv_transformer(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_conv_transformer(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :conv_tf_p_fr)
         PowerModels.con(pm, nw, cnd)[:conv_tf_p_fr] = Dict{Int,ConstraintRef}()
         PowerModels.con(pm, nw, cnd)[:conv_tf_q_fr] = Dict{Int,ConstraintRef}()
@@ -134,7 +134,7 @@ function constraint_conv_transformer(pm::GenericPowerModel, i::Int; nw::Int=pm.c
 end
 
 #
-function constraint_conv_firing_angle(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_conv_firing_angle(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :conv_cosphi)
         PowerModels.con(pm, nw, cnd)[:conv_cosphi] = Dict{Int,ConstraintRef}()
         PowerModels.con(pm, nw, cnd)[:conv_sinphi] = Dict{Int,ConstraintRef}()
@@ -151,7 +151,7 @@ function constraint_conv_firing_angle(pm::GenericPowerModel, i::Int; nw::Int=pm.
     constraint_conv_firing_angle(pm, nw, cnd, i, S, P1, Q1, P2, Q2)
 end
 
-function constraint_dc_branch_current(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_dc_branch_current(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     vpu = 1;
     branch = ref(pm, nw, :branchdc, i)
     f_bus = branch["fbusdc"]
@@ -164,7 +164,7 @@ function constraint_dc_branch_current(pm::GenericPowerModel, i::Int; nw::Int=pm.
     constraint_dc_branch_current(pm, nw, cnd, f_bus, f_idx, ccm_max, p)
 end
 
-function constraint_dc_droop_control(pm::GenericPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
+function constraint_dc_droop_control(pm::AbstractPowerModel, i::Int; nw::Int=pm.cnw, cnd::Int=pm.ccnd)
     if !haskey(PowerModels.con(pm, nw, cnd), :conv_dc_droop)
         PowerModels.con(pm, nw, cnd)[:conv_dc_droop] = Dict{Int,ConstraintRef}()
     end

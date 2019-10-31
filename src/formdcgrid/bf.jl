@@ -6,7 +6,7 @@ Creates Ohms constraints for DC branches
 p[f_idx] + p[t_idx] == p * g[l] * (wdc[f_bus] - wdcr[f_bus,t_bus])
 ```
 """
-function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, t_bus, f_idx, t_idx, r, p) where {T <: PowerModels.AbstractBFQPForm}
+function constraint_ohms_dc_branch(pm::AbstractBFQPModel, n::Int, cnd::Int, f_bus, t_bus, f_idx, t_idx, r, p)
     l = f_idx[1];
     p_dc_fr = PowerModels.var(pm, n, cnd, :p_dcgrid, f_idx)
     p_dc_to = PowerModels.var(pm, n, cnd, :p_dcgrid, t_idx)
@@ -19,7 +19,7 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, cnd::Int, f
     @constraint(pm.model, wdc_to == wdc_fr - 2 * r * (p_dc_fr/p) + (r)^2 * ccm_dcgrid)
 end
 
-function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, t_bus, f_idx, t_idx, r, p) where {T <: PowerModels.AbstractBFConicForm}
+function constraint_ohms_dc_branch(pm::AbstractBFConicModel, n::Int, cnd::Int, f_bus, t_bus, f_idx, t_idx, r, p)
     l = f_idx[1];
     p_dc_fr = PowerModels.var(pm, n, cnd, :p_dcgrid, f_idx)
     p_dc_to = PowerModels.var(pm, n, cnd, :p_dcgrid, t_idx)
@@ -37,13 +37,13 @@ Model to approximate cross products of node voltages
 wdcr[(i,j)] <= wdc[i]*wdc[j]
 ```
 """
-function constraint_voltage_dc(pm::GenericPowerModel{T}, n::Int = pm.cnw, cnd::Int = pm.ccnd) where {T <: PowerModels.AbstractBFForm}
+function constraint_voltage_dc(pm::AbstractBFModel, n::Int = pm.cnw, cnd::Int = pm.ccnd)
 # do nothing
 end
 
-function variable_dcbranch_current(pm::GenericPowerModel{T}; kwargs...) where {T <: PowerModels.AbstractBFForm}
+function variable_dcbranch_current(pm::AbstractBFModel; kwargs...)
     variable_dcbranch_current_sqr(pm; kwargs...)
 end
-function constraint_dc_branch_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p) where {T <: PowerModels.AbstractBFForm}
+function constraint_dc_branch_current(pm::AbstractBFModel, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p)
 # do nothing
 end

@@ -1,4 +1,4 @@
-function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
+function add_ref_dcgrid!(pm::AbstractPowerModel, n::Int)
     if haskey(pm.ref[:nw][n], :convdc)
         #Filter converters & DC branches with status 0 as well as wrong bus numbers
         pm.ref[:nw][n][:convdc] = Dict([x for x in pm.ref[:nw][n][:convdc] if (x.second["status"] == 1 && x.second["busdc_i"] in keys(pm.ref[:nw][n][:busdc]) && x.second["busac_i"] in keys(pm.ref[:nw][n][:bus]))])
@@ -105,7 +105,7 @@ function add_ref_dcgrid!(pm::GenericPowerModel, n::Int)
         pm.ref[:nw][n][:buspairsdc] = Dict{String, Any}()
     end
 end
-add_ref_dcgrid!(pm::GenericPowerModel) = add_ref_dcgrid!(pm::GenericPowerModel, pm.cnw)
+add_ref_dcgrid!(pm::AbstractPowerModel) = add_ref_dcgrid!(pm::AbstractPowerModel, pm.cnw)
 
 
 "compute bus pair level structures"

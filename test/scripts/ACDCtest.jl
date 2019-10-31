@@ -2,7 +2,7 @@ using PowerModelsACDC
 using PowerModels
 using Ipopt
 using Memento
-using CPLEX
+# using CPLEX
 using SCS
 using Mosek
 using MosekTools
@@ -31,16 +31,16 @@ ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
 mosek = JuMP.with_optimizer(Mosek.Optimizer)
 scs = JuMP.with_optimizer(SCS.Optimizer)
 gurobi = JuMP.with_optimizer(Gurobi.Optimizer, Presolve=0)
-cplex = JuMP.with_optimizer(CPLEX.Optimizer)
+# cplex = JuMP.with_optimizer(CPLEX.Optimizer)
 
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
 resultAC = run_acdcopf(file, ACPPowerModel, ipopt; setting = s)
 
-resultQC = run_acdcopf(file, QCWRPowerModel, ipopt; setting = s)
+resultQC = run_acdcopf(file, QCRMPowerModel, ipopt; setting = s)
 # # #
-resultQCTri = run_acdcopf(file, QCWRTriPowerModel, ipopt; setting = s)
-resultACQCTri = PowerModels.run_opf(file, QCWRPowerModel, ipopt; setting = s)
+# resultQCTri = run_acdcopf(file, QCWRTriPowerModel, ipopt; setting = s)
+# resultACQCTri = PowerModels.run_opf(file, QCWRPowerModel, ipopt; setting = s)
 # #
 resultSOCBIM = run_acdcopf(file, SOCWRPowerModel, ipopt; setting = s)
 resultACSOCBIM = PowerModels.run_opf(file, SOCWRPowerModel, ipopt; setting = s)
@@ -52,7 +52,7 @@ resultSOCBFMConicSCS = run_acdcopf_bf(file, SOCBFConicPowerModel, scs; setting =
 resultSDP = run_acdcopf(file, SDPWRMPowerModel, mosek; setting = s)
 # #
 resultDC = run_acdcopf(file, DCPPowerModel, gurobi; setting = s)
-resultDCcplex = run_acdcopf(file, DCPPowerModel, cplex; setting = s)
+# resultDCcplex = run_acdcopf(file, DCPPowerModel, cplex; setting = s)
 #
 # # # other tests
 # resultACPF24 = run_acdcpf(file_case24, ACPPowerModel, ipopt; setting = s)

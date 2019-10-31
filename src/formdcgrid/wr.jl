@@ -5,7 +5,7 @@ Model to approximate cross products of node voltages
 wdcr[(i,j)] <= wdc[i]*wdc[j]
 ```
 """
-function constraint_voltage_dc(pm::GenericPowerModel{T}, n::Int, cnd::Int) where {T <: PowerModels.AbstractWRForm}
+function constraint_voltage_dc(pm::AbstractWRModel, n::Int, cnd::Int)
     wdc = PowerModels.var(pm, n, cnd, :wdc)
     wdcr = PowerModels.var(pm, n, cnd, :wdcr)
 
@@ -15,7 +15,7 @@ function constraint_voltage_dc(pm::GenericPowerModel{T}, n::Int, cnd::Int) where
     end
 end
 
-function constraint_voltage_dc(pm::GenericPowerModel{T}, n::Int, cnd::Int) where {T <: PowerModels.AbstractWRConicForm}
+function constraint_voltage_dc(pm::AbstractWRConicModel, n::Int, cnd::Int)
     wdc = PowerModels.var(pm, n, cnd, :wdc)
     wdcr = PowerModels.var(pm, n, cnd, :wdcr)
 
@@ -31,7 +31,7 @@ Limits dc branch current
 p[f_idx] <= wdc[f_bus] * Imax
 ```
 """
-function constraint_dc_branch_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p) where {T <: PowerModels.AbstractWRForm}
+function constraint_dc_branch_current(pm::AbstractWRModel, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p)
     p_dc_fr = PowerModels.var(pm, n, cnd, :p_dcgrid, f_idx)
     wdc_fr = PowerModels.var(pm, n, cnd, :wdc, f_bus)
 

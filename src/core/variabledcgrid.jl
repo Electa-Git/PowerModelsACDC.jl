@@ -1,10 +1,10 @@
 
-function variable_dcbranch_current(pm::GenericPowerModel; kwargs...)
+function variable_dcbranch_current(pm::AbstractPowerModel; kwargs...)
 end
 
 
 "variable: `vdcm[i]` for `i` in `dcbus`es"
-function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_dcgrid_voltage_magnitude(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     if bounded
         PowerModels.var(pm, nw, cnd)[:vdcm] = @variable(pm.model,
         [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_$(cnd)_vdcm",
@@ -22,7 +22,7 @@ end
 
 
 "variable: `vdcm[i]` for `i` in `dcbus`es"
-function variable_dcgrid_voltage_magnitude_sqr(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_dcgrid_voltage_magnitude_sqr(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     if bounded
         PowerModels.var(pm, nw, cnd)[:wdc] = @variable(pm.model,
         [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_$(cnd)_wdc",
@@ -51,7 +51,7 @@ function variable_dcgrid_voltage_magnitude_sqr(pm::GenericPowerModel; nw::Int=pm
 end
 
 "variable: `p_dcgrid[l,i,j]` for `(l,i,j)` in `arcs_dcgrid`"
-function variable_active_dcbranch_flow(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_active_dcbranch_flow(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     if bounded
         PowerModels.var(pm, nw, cnd)[:p_dcgrid] = @variable(pm.model,
         [(l,i,j) in PowerModels.ref(pm, nw, :arcs_dcgrid)], base_name="$(nw)_$(cnd)_pdcgrid",
@@ -68,7 +68,7 @@ function variable_active_dcbranch_flow(pm::GenericPowerModel; nw::Int=pm.cnw, cn
 end
 
 "variable: `ccm_dcgrid[l]` for `(l)` in `branchdc`"
-function variable_dcbranch_current_sqr(pm::GenericPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_dcbranch_current_sqr(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     vpu = 0.8;
     if bounded
         PowerModels.var(pm, nw, cnd)[:ccm_dcgrid] = @variable(pm.model,
