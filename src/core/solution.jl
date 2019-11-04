@@ -17,7 +17,6 @@ end
 
 
 function add_dcconverter_setpoint(sol, pm::AbstractPowerModel)
-    mva_base = pm.data["baseMVA"]
     PowerModels.add_setpoint!(sol, pm, "convdc", "pgrid", :pconv_tf_fr)
     PowerModels.add_setpoint!(sol, pm, "convdc", "qgrid", :qconv_tf_fr)
     PowerModels.add_setpoint!(sol, pm, "convdc", "pconv", :pconv_ac)
