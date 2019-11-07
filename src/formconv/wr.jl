@@ -1,9 +1,9 @@
-function constraint_voltage_product_converter(pm::GenericPowerModel{T}, wr, wi, w_fr, w_to) where {T <: PowerModels.AbstractWRForm}
+function constraint_voltage_product_converter(pm::AbstractWRModel, wr, wi, w_fr, w_to)
     InfrastructureModels.relaxation_complex_product(pm.model, w_fr, w_to, wr, wi)
 #    @constraint(pm.model, (wrf)^2 + (wif)^2 <= w_fr*w_to)
 end
 
-function constraint_voltage_product_converter(pm::GenericPowerModel{T}, wr, wi, w_fr, w_to) where {T <: PowerModels.AbstractWRConicForm}
+function constraint_voltage_product_converter(pm::AbstractWRConicModel, wr, wi, w_fr, w_to)
     InfrastructureModels.relaxation_complex_product_conic(pm.model, w_fr, w_to, wr, wi)
 #    @constraint(pm.model, (wrf)^2 + (wif)^2 <= w_fr*w_to)
 end
@@ -15,7 +15,7 @@ pconv_ac[i]^2 + pconv_dc[i]^2 <= wc[i] * iconv_ac_sq[i]
 pconv_ac[i]^2 + pconv_dc[i]^2 <= (Umax)^2 * (iconv_ac[i])^2
 ```
 """
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, Umax, Imax) where {T <: PowerModels.AbstractWRForm}
+function constraint_converter_current(pm::AbstractWRModel, n::Int, cnd::Int, i::Int, Umax, Imax)
     wc = PowerModels.var(pm, n, cnd, :wc_ac, i)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qconv_ac = PowerModels.var(pm, n, cnd, :qconv_ac, i)
@@ -28,7 +28,7 @@ function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int
     @constraint(pm.model, iconv_sq <= iconv*Imax)
 end
 
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, Umax, Imax) where {T <: PowerModels.AbstractWRConicForm}
+function constraint_converter_current(pm::AbstractWRConicModel, n::Int, cnd::Int, i::Int, Umax, Imax)
     wc = PowerModels.var(pm, n, cnd, :wc_ac, i)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qconv_ac = PowerModels.var(pm, n, cnd, :qconv_ac, i)

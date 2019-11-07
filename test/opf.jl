@@ -133,25 +133,25 @@ end
 
 @testset "test qc opf" begin
     @testset "3-bus case" begin
-        result = run_acdcopf("../test/data/case3.m", QCWRPowerModel, ipopt_solver; setting = s)
+        result = run_acdcopf("../test/data/case3.m", QCRMPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 5780; atol = 1e0)
     end
     @testset "5-bus asymmetric case" begin
-        result = run_acdcopf("../test/data/case5_asym.m", QCWRPowerModel, ipopt_solver; setting = s)
+        result = run_acdcopf("../test/data/case5_asym.m", QCRMPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 15921; atol = 1e0)
     end
     @testset "5-bus ac dc case" begin
-        result = run_acdcopf("../test/data/case5_acdc.m", QCWRPowerModel, ipopt_solver; setting = s)
+        result = run_acdcopf("../test/data/case5_acdc.m", QCRMPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 183.76; atol = 1e0)
     end
     @testset "24-bus rts ac dc case with three zones" begin
-        result = run_acdcopf("../test/data/case24_3zones_acdc.m", QCWRPowerModel, ipopt_solver; setting = s)
+        result = run_acdcopf("../test/data/case24_3zones_acdc.m", QCRMPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 150156.25; atol = 1e0)
@@ -160,25 +160,25 @@ end
 
 @testset "test qc opf with trilinear convexhull relaxation" begin
     @testset "3-bus case" begin
-        result = run_acdcopf("../test/data/case3.m", QCWRTriPowerModel, ipopt_solver; setting = s)
+        result = run_acdcopf("../test/data/case3.m", QCRMPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
-        @test isapprox(result["objective"], 5817.58; atol = 1e0)
+        @test isapprox(result["objective"], 5780; atol = 1e0)
     end
     # @testset "5-bus asymmetric case" begin
-    #     result = run_acdcopf("../test/data/case5_asym.m", QCWRTriPowerModel, ipopt_solver)
+    #     result = run_acdcopf("../test/data/case5_asym.m", QCRMTriPowerModel, ipopt_solver)
     #
     #     @test result["termination_status"] == LOCALLY_SOLVED
     #     @test isapprox(result["objective"], 15816.9; atol = 1e0)
     # end
     @testset "5-bus ac dc case" begin
-        result = run_acdcopf("../test/data/case5_acdc.m", QCWRTriPowerModel, ipopt_solver; setting = s)
+        result = run_acdcopf("../test/data/case5_acdc.m", QCRMPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 183.76; atol = 1e0)
     end
     @testset "24-bus rts ac dc case with three zones" begin
-        result = run_acdcopf("../test/data/case24_3zones_acdc.m", QCWRTriPowerModel, ipopt_solver; setting = s)
+        result = run_acdcopf("../test/data/case24_3zones_acdc.m", QCRMPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"],  150156.25; atol = 1e0)

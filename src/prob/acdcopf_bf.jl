@@ -1,19 +1,19 @@
 export run_acdcopf_bf
 
 ""
-function run_acdcopf_bf(file::String, model_constructor::Type{GenericPowerModel{T}}, solver; kwargs...) where T <: PowerModels.AbstractBFForm
+function run_acdcopf_bf(file::String, model_type::Type{T}, solver; kwargs...) where T <: AbstractBFModel
     data = PowerModels.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcopf_bf(data, model_constructor, solver; kwargs...)
+    return run_acdcopf_bf(data, model_type, solver; kwargs...)
 end
 
 ""
-function run_acdcopf_bf(data::Dict{String,Any}, model_constructor::Type{GenericPowerModel{T}}, solver; kwargs...) where T <: PowerModels.AbstractBFForm
-    pm = PowerModels.build_model(data, model_constructor, post_acdcopf_bf; kwargs...)
+function run_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: AbstractBFModel
+    pm = PowerModels.build_model(data, model_type, post_acdcopf_bf; kwargs...)
     return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end
 
-function post_acdcopf_bf(pm::GenericPowerModel)
+function post_acdcopf_bf(pm::AbstractPowerModel)
     add_ref_dcgrid!(pm)
     PowerModels.variable_voltage(pm)
     PowerModels.variable_generation(pm)

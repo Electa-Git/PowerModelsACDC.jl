@@ -4,7 +4,7 @@ sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[
 sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*v^2
 ```
 """
-function constraint_kcl_shunt(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs) where {T <: PowerModels.AbstractACPForm}
+function constraint_kcl_shunt(pm::AbstractACPModel, n::Int, cnd::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
     vm = PowerModels.var(pm, n, cnd, :vm, i)
     p = PowerModels.var(pm, n, cnd, :p)
     q = PowerModels.var(pm, n, cnd, :q)
@@ -23,7 +23,7 @@ Creates Ohms constraints for DC branches
 p[f_idx] == p * g[l] * vmdc[f_bus] * (vmdc[f_bus] - vmdc[t_bus])
 ```
 """
-function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, t_bus, f_idx, t_idx, r, p) where {T <: PowerModels.AbstractACPForm}
+function constraint_ohms_dc_branch(pm::AbstractACPModel, n::Int, cnd::Int, f_bus, t_bus, f_idx, t_idx, r, p)
     p_dc_fr = PowerModels.var(pm, n, cnd, :p_dcgrid, f_idx)
     p_dc_to = PowerModels.var(pm, n, cnd, :p_dcgrid, t_idx)
     vmdc_fr = PowerModels.var(pm, n, cnd, :vdcm, f_bus)
@@ -38,11 +38,11 @@ function constraint_ohms_dc_branch(pm::GenericPowerModel{T}, n::Int, cnd::Int, f
     end
 end
 "`vdc[i] == vdcm`"
-function constraint_dc_voltage_magnitude_setpoint(pm::GenericPowerModel{T}, n::Int, cnd::Int, i, vdcm) where {T <: PowerModels.AbstractACPForm}
+function constraint_dc_voltage_magnitude_setpoint(pm::AbstractACPModel, n::Int, cnd::Int, i, vdcm)
     v = PowerModels.var(pm, n, cnd, :vdcm, i)
     PowerModels.con(pm, n, cnd, :v_dc)[i] = @constraint(pm.model, v == vdcm)
 end
 
-function constraint_dc_branch_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p) where {T <: PowerModels.AbstractACPForm}
+function constraint_dc_branch_current(pm::AbstractACPModel, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p)
 # do nothing
 end

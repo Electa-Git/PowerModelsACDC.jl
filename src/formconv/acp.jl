@@ -4,7 +4,7 @@ Creates lossy converter model between AC and DC grid
 pconv_ac[i] + pconv_dc[i] == a + bI + cI^2
 ```
 """
-function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, a, b, c, plmax) where {T <: PowerModels.AbstractACPForm}
+function constraint_converter_losses(pm::AbstractACPModel, n::Int, cnd::Int, i::Int, a, b, c, plmax)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     pconv_dc = PowerModels.var(pm, n, cnd, :pconv_dc, i)
     iconv = PowerModels.var(pm, n, cnd, :iconv_ac, i)
@@ -17,7 +17,7 @@ Links converter power & current
 pconv_ac[i]^2 + pconv_dc[i]^2 == vmc[i]^2 * iconv_ac[i]^2
 ```
 """
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, Umax, Imax) where {T <: PowerModels.AbstractACPForm}
+function constraint_converter_current(pm::AbstractACPModel, n::Int, cnd::Int, i::Int, Umax, Imax)
     vmc = PowerModels.var(pm, n, cnd, :vmc, i)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qconv_ac = PowerModels.var(pm, n, cnd, :qconv_ac, i)
@@ -34,7 +34,7 @@ p_tf_to ==  g*vm_to^2 + -g/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -b/(t
 q_tf_to == -b*vm_to^2 +  b/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g/(tm)*vm_to*vm_fr    *sin(va_to - va_fr)
 ```
 """
-function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractACPForm}
+function constraint_conv_transformer(pm::AbstractACPModel, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer)
     ptf_fr = PowerModels.var(pm, n, cnd, :pconv_tf_fr, i)
     qtf_fr = PowerModels.var(pm, n, cnd, :qconv_tf_fr, i)
     ptf_to = PowerModels.var(pm, n, cnd, :pconv_tf_to, i)
@@ -82,7 +82,7 @@ p_pr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac
 q_pr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac)
 ```
 """
-function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractACPForm}
+function constraint_conv_reactor(pm::AbstractACPModel, n::Int, cnd::Int, i::Int, rc, xc, reactor)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qconv_ac = PowerModels.var(pm, n, cnd, :qconv_ac, i)
     ppr_fr = PowerModels.var(pm, n, cnd, :pconv_pr_fr, i)
@@ -119,7 +119,7 @@ ppr_fr + ptf_to == 0
 qpr_fr + qtf_to +  (-bv) * filter *vmf^2 == 0
 ```
 """
-function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, bv, filter) where {T <: PowerModels.AbstractACPForm}
+function constraint_conv_filter(pm::AbstractACPModel, n::Int, cnd::Int, i::Int, bv, filter)
     ppr_fr = PowerModels.var(pm, n, cnd, :pconv_pr_fr, i)
     qpr_fr = PowerModels.var(pm, n, cnd, :qconv_pr_fr, i)
     ptf_to = PowerModels.var(pm, n, cnd, :pconv_tf_to, i)
@@ -137,7 +137,7 @@ pconv_ac == cos(phi) * Srated
 qconv_ac == sin(phi) * Srated
 ```
 """
-function constraint_conv_firing_angle(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, S, P1, Q1, P2, Q2) where {T <: PowerModels.AbstractACPForm}
+function constraint_conv_firing_angle(pm::AbstractACPModel, n::Int, cnd::Int, i::Int, S, P1, Q1, P2, Q2)
     p = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     q = PowerModels.var(pm, n, cnd, :qconv_ac, i)
     phi = PowerModels.var(pm, n, cnd, :phiconv, i)
@@ -146,7 +146,7 @@ function constraint_conv_firing_angle(pm::GenericPowerModel{T}, n::Int, cnd::Int
     PowerModels.con(pm, n, cnd, :conv_sinphi)[i] = @NLconstraint(pm.model,   q == sin(phi) * S)
 end
 
-function constraint_dc_droop_control(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, busdc_i, vref_dc, pref_dc, k_droop) where {T <: PowerModels.AbstractACPForm}
+function constraint_dc_droop_control(pm::AbstractACPModel, n::Int, cnd::Int, i::Int, busdc_i, vref_dc, pref_dc, k_droop)
     pconv_dc = PowerModels.var(pm, n, cnd, :pconv_dc, i)
     vdc = PowerModels.var(pm, n, cnd, :vdcm, busdc_i)
 

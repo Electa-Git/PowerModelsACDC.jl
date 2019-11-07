@@ -1,5 +1,5 @@
 ""
-function objective_min_fuel_cost(pm::GenericPowerModel)
+function objective_min_fuel_cost(pm::AbstractPowerModel)
     model = PowerModels.check_cost_models(pm)
     if model == 1
         return objective_min_pwl_fuel_cost(pm)
@@ -12,7 +12,7 @@ function objective_min_fuel_cost(pm::GenericPowerModel)
 end
 
 ""
-function objective_min_polynomial_fuel_cost(pm::GenericPowerModel)
+function objective_min_polynomial_fuel_cost(pm::AbstractPowerModel)
     order = PowerModels.calc_max_cost_index(pm.data)-1
 
     if order == 1
@@ -24,7 +24,7 @@ function objective_min_polynomial_fuel_cost(pm::GenericPowerModel)
     end
 end
 
-function _objective_min_polynomial_fuel_cost_linear(pm::GenericPowerModel)
+function _objective_min_polynomial_fuel_cost_linear(pm::AbstractPowerModel)
     from_idx = Dict()
     for (n, nw_ref) in nws(pm)
         from_idx[n] = Dict(arc[1] => arc for arc in nw_ref[:arcs_from_dc])
@@ -38,7 +38,7 @@ function _objective_min_polynomial_fuel_cost_linear(pm::GenericPowerModel)
     )
 end
 ""
-function _objective_min_polynomial_fuel_cost_quadratic(pm::GenericPowerModel)
+function _objective_min_polynomial_fuel_cost_quadratic(pm::AbstractPowerModel)
     from_idx = Dict()
     for (n, nw_ref) in nws(pm)
         from_idx[n] = Dict(arc[1] => arc for arc in nw_ref[:arcs_from_dc])
@@ -53,7 +53,7 @@ function _objective_min_polynomial_fuel_cost_quadratic(pm::GenericPowerModel)
     )
 end
 ""
-function objective_min_polynomial_fuel_cost(pm::GenericPowerModel{T}) where {T <: PowerModels.AbstractConicPowerFormulation}
+function objective_min_polynomial_fuel_cost(pm::AbstractConicModel)
     PowerModels.check_polynomial_cost_models(pm)
     pg_sqr = Dict()
     for (n, nw_ref) in PowerModels.nws(pm)
@@ -80,7 +80,7 @@ function objective_min_polynomial_fuel_cost(pm::GenericPowerModel{T}) where {T <
     )
 end
 ""
-function objective_min_pwl_fuel_cost(pm::GenericPowerModel)
+function objective_min_pwl_fuel_cost(pm::AbstractPowerModel)
 
     for (n, nw_ref) in PowerModels.nws(pm)
         pg_cost = PowerModels.var(pm, n)[:pg_cost] = @variable(pm.model,
