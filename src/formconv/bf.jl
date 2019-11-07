@@ -36,7 +36,7 @@ function constraint_conv_transformer(pm::AbstractBFQPModel, n::Int, cnd::Int, i:
     else
         PowerModels.con(pm, n, cnd, :conv_tf_p_fr)[i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
         PowerModels.con(pm, n, cnd, :conv_tf_q_fr)[i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
-        @constraint(pm.model, wf == w/tm^2 )
+        @constraint(pm.model, wf == w )
     end
 end
 
@@ -155,6 +155,6 @@ function constraint_converter_current(pm::AbstractBFConicModel, n::Int, cnd::Int
     PowerModels.con(pm, n, cnd, :conv_i_sqrt)[i] = @constraint(pm.model, [Umax * iconv/sqrt(2), Umax * iconv/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
     # PowerModels.con(pm, n, cnd, :conv_i_sqrt)[i] = @constraint(pm.model, norm([2*pconv_ac; 2*qconv_ac; Umax^2 - iconv_sq]) <= (Umax)^2 + iconv_sq)
     # @constraint(pm.model, [2*iconv, 1 - iconv_sq, 1 + iconv_sq] in JuMP.RotatedSecondOrderCone())
-    # @constraint(pm.model, [iconv_sq, iconv/sqrt(2), iconv/sqrt(2)] in JuMP.SecondOrderCone())
+    @constraint(pm.model, [iconv_sq, iconv/sqrt(2), iconv/sqrt(2)] in JuMP.RotatedSecondOrderCone())
     @constraint(pm.model, iconv_sq <= iconv*Imax)
 end

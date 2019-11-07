@@ -62,7 +62,7 @@ function constraint_conv_transformer(pm::AbstractACPModel, n::Int, cnd::Int, i::
         PowerModels.con(pm, n, cnd, :conv_tf_p_fr)[i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
         PowerModels.con(pm, n, cnd, :conv_tf_q_fr)[i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
         @constraint(pm.model, va == vaf)
-        @constraint(pm.model, vm/(tm) == vmf)
+        @constraint(pm.model, vm == vmf)
     end
 end
 "constraints for a voltage magnitude transformer + series impedance"

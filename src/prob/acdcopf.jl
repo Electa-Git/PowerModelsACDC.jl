@@ -41,7 +41,7 @@ function post_acdcopf(pm::AbstractPowerModel)
     for i in PowerModels.ids(pm, :branch)
         PowerModels.constraint_ohms_yt_from(pm, i)
         PowerModels.constraint_ohms_yt_to(pm, i)
-        PowerModels.constraint_voltage_angle_difference(pm, i)
+        PowerModels.constraint_voltage_angle_difference(pm, i) #angle difference across transformer and reactor - useful for LPAC if available?
         PowerModels.constraint_thermal_limit_from(pm, i)
         PowerModels.constraint_thermal_limit_to(pm, i)
     end

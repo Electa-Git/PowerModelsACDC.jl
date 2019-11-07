@@ -55,7 +55,7 @@ function constraint_conv_transformer(pm::AbstractWRModels, n::Int, cnd::Int, i::
         #@constraint(pm.model, (wrf)^2 + (wif)^2 <= wf*w)
         constraint_voltage_product_converter(pm, wrf, wif, wf, w)
     else
-        pcon, qcon = constraint_lossless_section(pm, w/tm^2, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to)
+        pcon, qcon = constraint_lossless_section(pm, w, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to)
     end
 end
 "constraints for a voltage magnitude transformer + series impedance"
