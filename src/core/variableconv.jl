@@ -373,6 +373,6 @@ function variable_converter_internal_voltage_magnitude_sqr(pm::AbstractPowerMode
     )
 end
 
-function variable_cos_voltage(pm::AbstractLPACModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_cos_voltage(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     #only for lpac
 end
