@@ -20,7 +20,7 @@ function variable_dcgrid_voltage_magnitude(pm::AbstractPowerModel; nw::Int=pm.cn
     end
 end
 
-function variable_dcgrid_voltage_magnitude(pm::GenericPowerModel{T}; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true) where {T <: PowerModels.AbstractLPACForm}
+function variable_dcgrid_voltage_magnitude(pm::AbstractLPACModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true)
         PowerModels.var(pm, nw, cnd)[:phi_vdcm] = @variable(pm.model,
         [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_$(cnd)_phi_vdcm",
         lower_bound = PowerModels.ref(pm, nw, :busdc, i, "Vdcmin", cnd) - 1, #+/- 10% tolerance to voltages
