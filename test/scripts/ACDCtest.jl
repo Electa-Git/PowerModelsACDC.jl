@@ -40,7 +40,7 @@ resultAC = run_acdcopf(file, ACPPowerModel, ipopt; setting = s)
 
 resultLPAC = run_acdcopf(file, LPACCPowerModel, ipopt; setting = s)
 
-resultQC = run_acdcopf(file, QCRMPowerModel, ipopt; setting = s)
+resultQC = run_acdcopf(file, QCWRPowerModel, ipopt; setting = s)
 # # #
 # resultQCTri = run_acdcopf(file, QCWRTriPowerModel, ipopt; setting = s)
 # resultACQCTri = PowerModels.run_opf(file, QCWRPowerModel, ipopt; setting = s)
