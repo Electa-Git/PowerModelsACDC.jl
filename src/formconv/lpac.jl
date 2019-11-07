@@ -1,4 +1,4 @@
-function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, a, b, c, plmax) where {T <: PowerModels.AbstractLPACForm}
+function constraint_converter_losses(pm::AbstractLPACModel, n::Int, cnd::Int, i::Int, a, b, c, plmax)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     pconv_dc = PowerModels.var(pm, n, cnd, :pconv_dc, i)
     iconv = PowerModels.var(pm, n, cnd, :iconv_ac, i)
@@ -6,7 +6,7 @@ function constraint_converter_losses(pm::GenericPowerModel{T}, n::Int, cnd::Int,
     PowerModels.con(pm, n, cnd, :conv_loss)[i] = @constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv)
 end
 
-function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractLPACForm}
+function constraint_conv_transformer(pm::AbstractLPACModel, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer)
     ptf_fr = PowerModels.var(pm, n, cnd, :pconv_tf_fr, i)
     qtf_fr = PowerModels.var(pm, n, cnd, :qconv_tf_fr, i)
     ptf_to = PowerModels.var(pm, n, cnd, :pconv_tf_to, i)
@@ -49,7 +49,7 @@ function lpac_power_flow_constraints(model, g, b, phi_fr, phi_to, va_fr, va_to, 
 end
 
 
-function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractLPACForm}
+function constraint_conv_reactor(pm::AbstractLPACModel, n::Int, cnd::Int, i::Int, rc, xc, reactor)
     ppr_fr = PowerModels.var(pm, n, cnd, :pconv_pr_fr, i)
     qpr_fr = PowerModels.var(pm, n, cnd, :qconv_pr_fr, i)
     ppr_to = -PowerModels.var(pm, n, cnd, :pconv_ac, i)
@@ -83,7 +83,7 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::
     end
 end
 
-function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, bv, filter) where {T <: PowerModels.AbstractLPACForm}
+function constraint_conv_filter(pm::AbstractLPACModel, n::Int, cnd::Int, i::Int, bv, filter)
     ppr_fr = PowerModels.var(pm, n, cnd, :pconv_pr_fr, i)
     qpr_fr = PowerModels.var(pm, n, cnd, :qconv_pr_fr, i)
     ptf_to = PowerModels.var(pm, n, cnd, :pconv_tf_to, i)
@@ -95,7 +95,7 @@ function constraint_conv_filter(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::I
 end
 
 
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, Umax, Imax) where {T <: PowerModels.AbstractLPACForm}
+function constraint_converter_current(pm::AbstractLPACModel, n::Int, cnd::Int, i::Int, Umax, Imax)
     phi_vmc = PowerModels.var(pm, n, cnd, :phi_vmc, i)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qconv_ac = PowerModels.var(pm, n, cnd, :qconv_ac, i)
@@ -106,19 +106,19 @@ function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int
 end
 
 
-function variable_converter_filter_voltage(pm::GenericPowerModel{T}; kwargs...) where {T <: PowerModels.AbstractLPACForm}
+function variable_converter_filter_voltage(pm::AbstractLPACModel; kwargs...)
     variable_converter_filter_voltage_magnitude(pm; kwargs...)
     variable_converter_filter_voltage_angle_cs(pm; kwargs...)
     variable_converter_filter_voltage_angle(pm; kwargs...)
 end
 
-function variable_converter_internal_voltage(pm::GenericPowerModel{T}; kwargs...) where {T <: PowerModels.AbstractLPACForm}
+function variable_converter_internal_voltage(pm::AbstractLPACModel; kwargs...)
     variable_converter_internal_voltage_magnitude(pm; kwargs...)
     variable_converter_internal_voltage_angle_cs(pm; kwargs...)
     variable_converter_internal_voltage_angle(pm; kwargs...)
 end
 
-function variable_converter_filter_voltage_angle_cs(pm::GenericPowerModel{T}; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true) where {T <: PowerModels.AbstractLPACForm}
+function variable_converter_filter_voltage_angle_cs(pm::AbstractLPACModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true)
     PowerModels.var(pm, nw, cnd)[:cs_vaf] = @variable(pm.model,
     [i in PowerModels.ids(pm, nw, :convdc)], base_name="$(nw)_$(cnd)_cs_vaf",
     lower_bound =  0, # using the maximum bound allowed in cosine linearization. can be changed to bus angle +/- 10 degree?
@@ -127,7 +127,7 @@ function variable_converter_filter_voltage_angle_cs(pm::GenericPowerModel{T}; nw
     )
 end
 
-function variable_converter_internal_voltage_angle_cs(pm::GenericPowerModel{T}; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true) where {T <: PowerModels.AbstractLPACForm}
+function variable_converter_internal_voltage_angle_cs(pm::AbstractLPACModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true)
     PowerModels.var(pm, nw, cnd)[:cs_vac] = @variable(pm.model,
     [i in PowerModels.ids(pm, nw, :convdc)], base_name="$(nw)_$(cnd)_cs_vac",
     lower_bound =  0, # using the maximum bound allowed in cosine linearization. can be changed to bus angle +/- 10 degree?
@@ -136,7 +136,7 @@ function variable_converter_internal_voltage_angle_cs(pm::GenericPowerModel{T}; 
     )
 end
 
-function variable_converter_filter_voltage_magnitude(pm::GenericPowerModel{T}; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true) where {T <: PowerModels.AbstractLPACForm}
+function variable_converter_filter_voltage_magnitude(pm::AbstractLPACModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true)
     PowerModels.var(pm, nw, cnd)[:phi_vmf] = JuMP.@variable(pm.model,
             [i in PowerModels.ids(pm, nw, :convdc)], base_name="$(nw)_$(cnd)_phi_vmf",
             lower_bound = PowerModels.ref(pm, nw, :convdc, i, "Vmmin", cnd) - 1.0,
@@ -145,7 +145,7 @@ function variable_converter_filter_voltage_magnitude(pm::GenericPowerModel{T}; n
         )
 end
 
-function variable_converter_internal_voltage_magnitude(pm::GenericPowerModel{T}; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true) where {T <: PowerModels.AbstractLPACForm}
+function variable_converter_internal_voltage_magnitude(pm::AbstractLPACModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true)
     PowerModels.var(pm, nw, cnd)[:phi_vmc] = JuMP.@variable(pm.model,
         [i in PowerModels.ids(pm, nw, :convdc)], base_name="$(nw)_$(cnd)_phi_vmc",
         lower_bound = PowerModels.ref(pm, nw, :convdc, i, "Vmmin", cnd) - 1.0,
@@ -154,7 +154,7 @@ function variable_converter_internal_voltage_magnitude(pm::GenericPowerModel{T};
         )
 end
 
-function constraint_conv_capacity_PWL(pm::GenericPowerModel{T}, n::Int, cnd::Int, ppr_to, qpr_to, Umax, Imax, Smax) where {T <: PowerModels.AbstractLPACForm}
+function constraint_conv_capacity_PWL(pm::AbstractLPACModel, n::Int, cnd::Int, ppr_to, qpr_to, Umax, Imax, Smax)
     np = 20 #no. of segments, can be passed as an argument later
     l = 0
     for i = 1:np
@@ -166,7 +166,7 @@ function constraint_conv_capacity_PWL(pm::GenericPowerModel{T}, n::Int, cnd::Int
     end
 end
 
-function constraint_cos_angle_diff_PWL(pm::GenericPowerModel{T}, n::Int, cnd::Int, cs, va_fr, va_to) where {T <: PowerModels.AbstractLPACForm}
+function constraint_cos_angle_diff_PWL(pm::AbstractLPACModel, n::Int, cnd::Int, cs, va_fr, va_to)
     nb = 20 #no. of segments, can be passed as an argument later
     l = -pi/6
     h = pi/6
@@ -181,7 +181,7 @@ end
 
 
 # ## quadratic constraint for cos - used for debugging of PWL of cos
-# function constraint_cos_voltage(pm::GenericPowerModel{T}, n::Int, cnd::Int, cs, va_fr, va_to) where {T <: PowerModels.AbstractLPACForm}
+# function constraint_cos_voltage(pm::AbstractLPACModel, n::Int, cnd::Int, cs, va_fr, va_to)
 #     vad_max = max(-pi/6,pi/6) # this shoudl be maximum of ac bus angle and converter station (filter, converter) bus angle. since cos is
 #     #cosine is taken between maximum and minimum (pi,-pi) at the moment. to be changed in the future
 #     c5 = @constraint(pm.model, cs <= 1 - (1-cos(vad_max))/vad_max^2*(va_fr - va_to)^2)
@@ -189,7 +189,7 @@ end
 # end
 
 
-function add_dcconverter_voltage_setpoint(sol, pm::GenericPowerModel{T}) where T <: PowerModels.AbstractLPACForm
+function add_dcconverter_voltage_setpoint(sol, pm::AbstractLPACModel)
     PowerModels.add_setpoint!(sol, pm, "convdc", "vmconv", :phi_vmc, status_name="islcc", inactive_status_value = 4, scale = (x,item,cnd) -> 1.0+x)
     PowerModels.add_setpoint!(sol, pm, "convdc", "vmfilt", :phi_vmf, status_name="islcc", inactive_status_value = 4, scale = (x,item,cnd) -> 1.0+x)
     PowerModels.add_setpoint!(sol, pm, "convdc", "vaconv", :vac, status_name="islcc", inactive_status_value = 4)
