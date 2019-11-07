@@ -27,13 +27,6 @@ file = file_case5acdc
 data = PowerModels.parse_file(file)
 
 PowerModelsACDC.process_additional_data!(data)
-#
-# for i = 1: length(keys(data["branch"]))
-#     data["branch"]["$i"]["rate_a"] = 12* data["branch"]["$i"]["rate_a"]
-# end
-# for i = 1: length(keys(data["load"]))
-#     data["load"]["$i"]["pd"] =2* data["load"]["$i"]["pd"]
-# end
 
 ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
 mosek = JuMP.with_optimizer(Mosek.Optimizer)
