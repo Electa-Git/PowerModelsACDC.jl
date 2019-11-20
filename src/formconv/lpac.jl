@@ -161,7 +161,6 @@ function constraint_conv_capacity_PWL(pm::AbstractLPACModel, n::Int, cnd::Int, p
         a= Smax*sin(l)
         b = Smax*cos(l)
         c6 = @constraint(pm.model, a*ppr_to + b*qpr_to <= Smax^2) #current and voltage bounds to be proper to use Umax*Imax because Umax*Imax == Smax
-        # c6 = @constraint(pm.model, a*ppr_to + b*qpr_to <= (Umax*Imax)^2) #current and voltage bounds to be proper to use Umax*Imax because Umax*Imax == Smax
         l = l + 2*pi/np
     end
 end
@@ -178,16 +177,6 @@ function constraint_cos_angle_diff_PWL(pm::AbstractLPACModel, n::Int, cnd::Int, 
         a = a + inc
     end
 end
-
-
-# ## quadratic constraint for cos - used for debugging of PWL of cos
-# function constraint_cos_voltage(pm::AbstractLPACModel, n::Int, cnd::Int, cs, va_fr, va_to)
-#     vad_max = max(-pi/6,pi/6) # this shoudl be maximum of ac bus angle and converter station (filter, converter) bus angle. since cos is
-#     #cosine is taken between maximum and minimum (pi,-pi) at the moment. to be changed in the future
-#     c5 = @constraint(pm.model, cs <= 1 - (1-cos(vad_max))/vad_max^2*(va_fr - va_to)^2)
-#     return c5
-# end
-
 
 function add_dcconverter_voltage_setpoint(sol, pm::AbstractLPACModel)
     PowerModels.add_setpoint!(sol, pm, "convdc", "vmconv", :phi_vmc, status_name="islcc", inactive_status_value = 4, scale = (x,item,cnd) -> 1.0+x)
