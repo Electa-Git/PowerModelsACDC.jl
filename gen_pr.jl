@@ -118,7 +118,7 @@ for arg in ARGS
         "uuid" => uuid(name),
         "autors" => ["Hakan Ergun", "Frederik Geth"],
         "repo" => "https://github.com/hakanergun/PowerModelsACDC.jl",
-        "version" => "0.1.0",
+        "version" => "0.2.0",
         "deps" => Dict{String,String}(),
         "compat" => Dict{String,String}(),
         "extras" => Dict{String,String}(),
