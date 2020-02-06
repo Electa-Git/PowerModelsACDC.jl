@@ -12,13 +12,13 @@ PowerModels = "c36e90e8-916a-50a6-bd94-075b64ef4655"
 
 [compat]
 Cbc = "≥ 0.4.0"
+InfrastructureModels = "~ 0.3.2"
 Ipopt = "≥ 0.4.0"
-PowerModels = "~ 0.13.0"
+JuMP = "0.20.1"
+Memento = "0.12.1"
+PowerModels = "~ 0.13.0, 0.15"
 SCS = "≥ 0.4.0"
 julia = "1.1"
-Memento = "0.12.1"
-InfrastructureModels = "~ 0.3.2"
-JuMP = "0.20.1"
 
 [extras]
 Cbc = "9961bab8-2fa3-5c5a-9d89-47fab24efd76"
