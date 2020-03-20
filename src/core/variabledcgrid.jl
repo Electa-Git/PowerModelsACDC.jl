@@ -4,92 +4,95 @@ end
 
 
 "variable: `vdcm[i]` for `i` in `dcbus`es"
-function variable_dcgrid_voltage_magnitude(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_dcgrid_voltage_magnitude(pm::AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true)
+    vdcm = PowerModels.var(pm, nw)[:vdcm] = JuMP.JuMP.@variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_vdcm",
+    start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc", 1.0)
+    )
+
     if bounded
-        PowerModels.var(pm, nw, cnd)[:vdcm] = @variable(pm.model,
-        [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_$(cnd)_vdcm",
-        lower_bound = PowerModels.ref(pm, nw, :busdc, i, "Vdcmin", cnd),
-        upper_bound = PowerModels.ref(pm, nw, :busdc, i, "Vdcmax", cnd),
-        start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc", cnd, 1.0)
-        )
-    else
-        PowerModels.var(pm, nw, cnd)[:vdcm] = @variable(pm.model,
-        [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_$(cnd)_vdcm",
-        start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc", cnd, 1.0)
-        )
+        for (i, busdc) in ref(pm, nw, :busdc)
+            JuMP.set_lower_bound(vdcm[i],  busdc["Vdcmin"])
+            JuMP.set_upper_bound(vdcm[i],  busdc["Vdcmax"])
+        end
     end
+
+    report && PowerModels.sol_component_value(pm, nw, :busdc, :vm, ids(pm, nw, :busdc), vdcm)
 end
 
-function variable_dcgrid_voltage_magnitude(pm::AbstractLPACModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded = true)
-        PowerModels.var(pm, nw, cnd)[:phi_vdcm] = @variable(pm.model,
-        [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_$(cnd)_phi_vdcm",
-        lower_bound = PowerModels.ref(pm, nw, :busdc, i, "Vdcmin", cnd) - 1, #+/- 10% tolerance to voltages
-        upper_bound = PowerModels.ref(pm, nw, :busdc, i, "Vdcmax", cnd) - 1,
-        start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc", cnd)
-        )
-end
+function variable_dcgrid_voltage_magnitude(pm::AbstractLPACModel; nw::Int=pm.cnw, bounded = true, report::Bool=true)
+    phivdcm = PowerModels.var(pm, nw)[:phi_vdcm] = JuMP.JuMP.@variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_phi_vdcm",
+    start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc")
+    )
 
+    if bounded
+        for (i, busdc) in ref(pm, nw, :busdc)
+            JuMP.set_lower_bound(phivdcm[i],  busdc["Vdcmin"] - 1)
+            JuMP.set_upper_bound(phivdcm[i],  busdc["Vdcmax"] - 1)
+        end
+    end
+
+    report && PowerModels.sol_component_value(pm, nw, :busdc, :phivdcm, ids(pm, nw, :busdc), phivdcm)
+
+end
 "variable: `vdcm[i]` for `i` in `dcbus`es"
-function variable_dcgrid_voltage_magnitude_sqr(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_dcgrid_voltage_magnitude_sqr(pm::AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true)
+    wdc = PowerModels.var(pm, nw)[:wdc] = JuMP.@variable(pm.model,
+    [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_wdc",
+    start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc", 1.0)^2
+    )
+    wdcr = PowerModels.var(pm, nw)[:wdcr] = JuMP.@variable(pm.model,
+    [(i,j) in PowerModels.ids(pm, nw, :buspairsdc)], base_name="$(nw)_wdcr",
+    start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc", 1.0)^2
+    )
+
     if bounded
-        PowerModels.var(pm, nw, cnd)[:wdc] = @variable(pm.model,
-        [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_$(cnd)_wdc",
-        lower_bound = PowerModels.ref(pm, nw, :busdc, i, "Vdcmin", cnd)^2,
-        upper_bound = PowerModels.ref(pm, nw, :busdc, i, "Vdcmax", cnd)^2,
-        start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc", cnd, 1.0)^2
-        )
-        PowerModels.var(pm, nw, cnd)[:wdcr] = @variable(pm.model,
-        [(i,j) in PowerModels.ids(pm, nw, :buspairsdc)], base_name="$(nw)_$(cnd)_wdcr",
-        lower_bound = 0,
-        upper_bound = PowerModels.ref(pm, nw, :buspairsdc, (i,j), "vm_fr_max", cnd) * PowerModels.ref(pm, nw, :buspairsdc, (i,j), "vm_to_max", cnd),
-        start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc", cnd, 1.0)^2
-        )
-    else
-        PowerModels.var(pm, nw, cnd)[:wdc] = @variable(pm.model,
-        [i in PowerModels.ids(pm, nw, :busdc)], base_name="$(nw)_$(cnd)_wdc",
-        start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc", cnd, 1.0)^2,
-        lower_bound = 0
-        )
-        PowerModels.var(pm, nw, cnd)[:wdcr] = @variable(pm.model,
-        [(i,j) in PowerModels.ids(pm, nw, :buspairsdc)], base_name="$(nw)_$(cnd)_wdcr",
-        start = PowerModels.comp_start_value(ref(pm, nw, :busdc, i), "Vdc", cnd, 1.0)^2,
-        lower_bound = 0
-        )
+        for (i, busdc) in ref(pm, nw, :busdc)
+            JuMP.set_lower_bound(wdc[i],  busdc["Vdcmin"]^2)
+            JuMP.set_upper_bound(wdc[i],  busdc["Vdcmax"]^2)
+        end
+        for (bp, buspairdc) in ref(pm, nw, :buspairsdc)
+            JuMP.set_lower_bound(wdcr[bp],  0)
+            JuMP.set_upper_bound(wdcr[bp],  buspairdc["vm_fr_max"] * buspairdc["vm_to_max"])
+        end
     end
+
+    report && PowerModels.sol_component_value(pm, nw, :busdc, :wdc, ids(pm, nw, :busdc), wdc)
 end
 
 "variable: `p_dcgrid[l,i,j]` for `(l,i,j)` in `arcs_dcgrid`"
-function variable_active_dcbranch_flow(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_active_dcbranch_flow(pm::AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true)
+    p = PowerModels.var(pm, nw)[:p_dcgrid] = JuMP.@variable(pm.model,
+    [(l,i,j) in PowerModels.ref(pm, nw, :arcs_dcgrid)], base_name="$(nw)_pdcgrid",
+    start = PowerModels.comp_start_value(ref(pm, nw, :branchdc, l), "p_start", 1.0)
+    )
+
     if bounded
-        PowerModels.var(pm, nw, cnd)[:p_dcgrid] = @variable(pm.model,
-        [(l,i,j) in PowerModels.ref(pm, nw, :arcs_dcgrid)], base_name="$(nw)_$(cnd)_pdcgrid",
-        lower_bound = -PowerModels.ref(pm, nw, :branchdc, l, "rateA", cnd),
-        upper_bound =  PowerModels.ref(pm, nw, :branchdc, l, "rateA", cnd),
-        start = PowerModels.comp_start_value(ref(pm, nw, :branchdc, l), "p_start", cnd, 1.0)
-        )
-    else
-        PowerModels.var(pm, nw, cnd)[:p_dcgrid] = @variable(pm.model,
-        [(l,i,j) in PowerModels.ref(pm, nw, :arcs_dcgrid)], base_name="$(nw)_$(cnd)_pdcgrid",
-        start = PowerModels.comp_start_value(ref(pm, nw, :branchdc, l), "p_start", cnd, 1.0)
-        )
+        for arc in ref(pm, nw, :arcs_dcgrid)
+            l,i,j = arc
+            JuMP.set_lower_bound(p[arc], -ref(pm, nw, :branchdc, l)["rateA"])
+            JuMP.set_upper_bound(p[arc],  ref(pm, nw, :branchdc, l)["rateA"])
+        end
     end
+
+    report && PowerModels.sol_component_value_edge(pm, nw, :branchdc, :pf, :pt, ref(pm, nw, :arcs_dcgrid_from), ref(pm, nw, :arcs_dcgrid_from), p)
 end
 
+
 "variable: `ccm_dcgrid[l]` for `(l)` in `branchdc`"
-function variable_dcbranch_current_sqr(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_dcbranch_current_sqr(pm::AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true)
     vpu = 0.8;
+    cc = PowerModels.var(pm, nw)[:ccm_dcgrid] = JuMP.@variable(pm.model,
+    [l in PowerModels.ids(pm, nw, :branchdc)], base_name="$(nw)_$(cnd)_ccm_dcgrid",
+    start = (PowerModels.comp_start_value(ref(pm, nw, :branchdc, l), "p_start", 0.0) / vpu)^2
+    )
     if bounded
-        PowerModels.var(pm, nw, cnd)[:ccm_dcgrid] = @variable(pm.model,
-        [l in PowerModels.ids(pm, nw, :branchdc)], base_name="$(nw)_$(cnd)_ccm_dcgrid",
-        lower_bound = 0,
-        upper_bound = (PowerModels.ref(pm, nw, :branchdc, l, "rateA", cnd) / vpu)^2,
-        start = (PowerModels.comp_start_value(ref(pm, nw, :branchdc, l), "p_start", cnd, 0.0) / vpu)^2
-        )
-    else
-        PowerModels.var(pm, nw, cnd)[:ccm_dcgrid] = @variable(pm.model,
-        [l in PowerModels.ids(pm, nw, :branchdc)], base_name="$(nw)_$(cnd)_ccm_dcgrid",
-        start = (PowerModels.comp_start_value(ref(pm, nw, :branchdc, l), "p_start", cnd, 0.0) / vpu)^2,
-        lower_bound = 0
-        )
+        for (l, branch) in ref(pm, nw, :branchdc)
+            JuMP.set_lower_bound(cc[l], 0)
+            JuMP.set_upper_bound(cc[l], (PowerModels.ref(pm, nw, :branchdc, l, "rateA") / vpu)^2)
+        end
     end
+
+    report && PowerModels.sol_component_value_edge(pm, nw, :branch, :ccm, ref(pm, nw, :branchdc), cc)
 end
