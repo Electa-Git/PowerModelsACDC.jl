@@ -2,5 +2,5 @@ julia 1.1
 
 JuMP
 PowerModels 0.15.3
-InfrastructureModels 0.4
+InfrastructureModels 0.4.2
 Memento
