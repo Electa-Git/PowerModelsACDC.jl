@@ -8,6 +8,7 @@ For details on `GenericPowerModel`, see PowerModels.jl [documentation](https://l
 Extending PowerModels,  formulations for balanced  OPF in DC grids have been implemented and mapped to the following AC grid formulations:
 - ACPPowerModel
 - DCPPowerModel
+- LPACPowerModel
 - SOCWRPowerModel
 - SDPWRMPowerModel
 - QCWRPowerModel

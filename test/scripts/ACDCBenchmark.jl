@@ -4,27 +4,28 @@ using Ipopt
 #using CPLEX
 using SCS
 using Mosek
-
+using MosekTools
+using JuMP
 files =
 [
-# "./test/data/case5_2grids.m";
-# "./test/data/case5_acdc.m";
-# "./test/data/case5_lcc.m";
-# "./test/data/case5_b2bdc.m";
-# "./test/data/case5_dc.m"; #Don't use normally
-# "./test/data/case5_dcgrid.m";
-# "./test/data/case5_dcgrid_b0.m";
-# "./test/data/case24_3zones_acdc.m";
-# "./test/data/case39_acdc.m";
+"./test/data/case5_2grids.m";
 "./test/data/case3120sp_acdc.m";
-# "./test/data/pglib_opf_case588_sdet_acdc.m"
+# "./test/data/case5_lcc.m";
+"./test/data/case5_b2bdc.m";
+# "./test/data/case5_dc.m"; #Don't use normally
+"./test/data/case5_dcgrid.m";
+"./test/data/case5_dcgrid_b0.m";
+"./test/data/case24_3zones_acdc.m";
+"./test/data/case39_acdc.m";
+"./test/data/case3120sp_acdc.m";
+"./test/data/pglib_opf_case588_sdet_acdc.m"
 ]
 
 
 
-scs = SCSSolver(max_iters=100000);
-ipopt = IpoptSolver(tol=1e-6, print_level=0)
-mosek = MosekSolver(MSK_DPAR_OPTIMIZER_MAX_TIME = 360)
+ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
+mosek = JuMP.with_optimizer(Mosek.Optimizer)
+scs = JuMP.with_optimizer(SCS.Optimizer)
 #mosek = MosekSolver()
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
@@ -133,6 +134,10 @@ for file in files
     resultDC = run_acdcopf(data, DCPPowerModel, ipopt; setting = s)
     case["DC LP"] = exctract_info(resultDC)
     #
+    resultLPAC = run_acdcopf(data, LPACCPowerModel, ipopt; setting = s)
+    case["LPAC"] = exctract_info(resultLPAC)
+
+
     objective[file] = case
 end
 
@@ -144,26 +149,28 @@ calc_errors_rel(objective)
 function print_table_opt_gap(dict)
     s = ""
     c = " & "
-    s = s*"case"*c*"AC NLP"*c* "BIM SDP" *c*c*  "QC SOC" *c*c* "BIM SOC" *c*c* "BFM SOC" *c*c*"DC LP"*c*raw"\ "[1]*raw"\ "* " \n"
+    s = s*"case"*c*"AC NLP"*c* "BIM SDP" *c*c*  "QC SOC" *c*c* "BIM SOC" *c*c* "BFM SOC" *c*c*"DC LP" *c*c*"LPAC"*c*raw"\ "[1]*raw"\ "* " \n"
     for (filename, ff) in dict
         s = s*filename
-        l = 6
+        l = 2
         l2 = 8
         p = 100
-        s = s *c*string(Base.signif(ff["AC NLP"]["obj"], l))
-        s = s *c*string(Base.signif(ff["BIM SDP"]["obj"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SDP"]["gap"], l))
-        s = s *c*string(Base.signif(ff["QC SOC"]["obj"], l))
-        s = s *c*string(Base.signif(p*ff["QC SOC"]["gap"], l))
-        # s = s *c*string(ff["QCTri SOC"]["obj"])[1:l2]
-        # s = s *c*string(p*ff["QCTri SOC"]["gap"])[1:l]
-        s = s *c*string(Base.signif(ff["BIM SOC"]["obj"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SOC"]["gap"], l))
-        s = s *c*string(Base.signif(ff["BFM SOC"]["obj"], l))
-        s = s *c*string(Base.signif(p*ff["BFM SOC"]["gap"], l))
-        s = s *c*string(Base.signif(ff["DC LP"]["obj"], l))
-        s = s *c*string(Base.signif(p*ff["DC LP"]["gap"], l))
 
+        s = s *c*string(round(ff["AC NLP"]["obj"], digits = l))
+        s = s *c*string(round(ff["BIM SDP"]["obj"], digits = l))
+        s = s *c*string(round(p*ff["BIM SDP"]["gap"], digits = l))
+        s = s *c*string(round(ff["QC SOC"]["obj"], digits = l))
+        s = s *c*string(round(p*ff["QC SOC"]["gap"], digits = l))
+        # s = s *c*string(roundff["QCTri SOC"]["obj"])[1:l2]
+        # s = s *c*string(roundp*ff["QCTri SOC"]["gap"])[1:l]
+        s = s *c*string(round(ff["BIM SOC"]["obj"], digits = l))
+        s = s *c*string(round(p*ff["BIM SOC"]["gap"], digits = l))
+        s = s *c*string(round(ff["BFM SOC"]["obj"], digits = l))
+        s = s *c*string(round(p*ff["BFM SOC"]["gap"], digits = l))
+        s = s *c*string(round(ff["DC LP"]["obj"], digits = l))
+        s = s *c*string(round(p*ff["DC LP"]["gap"], digits = l))
+        s = s *c*string(round(ff["LPAC"]["obj"], digits = l))
+        s = s *c*string(round(p*ff["LPAC"]["gap"], digits = l))
         s = s*raw"\ "[1]*raw"\ "*" \n"
     end
     return s
@@ -180,18 +187,18 @@ function print_table_errors(dict)
         l = 6
         l2 = 8
         p = 100
-        s = s *c*string(Base.signif(ff["BIM SDP"]["u_error"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SDP"]["pf_error"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SDP"]["pfdc_error"], l))
-        s = s *c*string(Base.signif(ff["QC SOC"]["u_error"], l))
-        s = s *c*string(Base.signif(p*ff["QC SOC"]["pf_error"], l))
-        s = s *c*string(Base.signif(p*ff["QC SOC"]["pfdc_error"], l))
-        s = s *c*string(Base.signif(ff["BIM SOC"]["u_error"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SOC"]["pf_error"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SOC"]["pfdc_error"], l))
-        s = s *c*string(Base.signif(ff["BFM SOC"]["u_error"], l))
-        s = s *c*string(Base.signif(p*ff["BFM SOC"]["pf_error"], l))
-        s = s *c*string(Base.signif(p*ff["BFM SOC"]["pfdc_error"], l))
+        s = s *c*string(round(ff["BIM SDP"]["u_error"], digits = l))
+        s = s *c*string(round(p*ff["BIM SDP"]["pf_error"], digits = l))
+        s = s *c*string(round(p*ff["BIM SDP"]["pfdc_error"], digits = l))
+        s = s *c*string(round(ff["QC SOC"]["u_error"], digits = l))
+        s = s *c*string(round(p*ff["QC SOC"]["pf_error"], digits = l))
+        s = s *c*string(round(p*ff["QC SOC"]["pfdc_error"], digits = l))
+        s = s *c*string(round(ff["BIM SOC"]["u_error"], digits = l))
+        s = s *c*string(round(p*ff["BIM SOC"]["pf_error"], digits = l))
+        s = s *c*string(round(p*ff["BIM SOC"]["pfdc_error"], digits = l))
+        s = s *c*string(round(ff["BFM SOC"]["u_error"], digits = l))
+        s = s *c*string(round(p*ff["BFM SOC"]["pf_error"], digits = l))
+        s = s *c*string(round(p*ff["BFM SOC"]["pfdc_error"], digits = l))
 
         s = s*raw"\ "[1]*raw"\ "*" \n"
     end
@@ -209,21 +216,21 @@ function print_table_errors_rel(dict)
         l = 6
         l2 = 8
         p = 100
-        s = s *c*string(Base.signif(p*ff["BIM SDP"]["u_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SDP"]["pf_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SDP"]["pfdc_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["QC SOC"]["u_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["QC SOC"]["pf_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["QC SOC"]["pfdc_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SOC"]["u_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SOC"]["pf_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["BIM SOC"]["pfdc_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["BFM SOC"]["u_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["BFM SOC"]["pf_error_rel"], l))
-        s = s *c*string(Base.signif(p*ff["BFM SOC"]["pfdc_error_rel"], l))
-        # s = s *c*string(Base.signif(p*ff["DC LP"]["u_error_rel"], l))
-        # s = s *c*string(Base.signif(p*ff["DC LP"]["pf_error_rel"], l))
-        # s = s *c*string(Base.signif(p*ff["DC LP"]["pfdc_error_rel"], l))
+        s = s *c*string(round(p*ff["BIM SDP"]["u_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["BIM SDP"]["pf_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["BIM SDP"]["pfdc_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["QC SOC"]["u_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["QC SOC"]["pf_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["QC SOC"]["pfdc_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["BIM SOC"]["u_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["BIM SOC"]["pf_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["BIM SOC"]["pfdc_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["BFM SOC"]["u_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["BFM SOC"]["pf_error_rel"], digits = l))
+        s = s *c*string(round(p*ff["BFM SOC"]["pfdc_error_rel"], digits = l))
+        # s = s *c*string(round(p*ff["DC LP"]["u_error_rel"], digits = l))
+        # s = s *c*string(round(p*ff["DC LP"]["pf_error_rel"], digits = l))
+        # s = s *c*string(round(p*ff["DC LP"]["pfdc_error_rel"], digits = l))
 
         s = s*raw"\ "[1]*raw"\ "*" \n"
     end
@@ -240,12 +247,12 @@ function print_table_comp_time(dict)
         l = 6
         l2 = 8
         p = 100
-        s = s *c*string(Base.signif(ff["AC NLP"]["solve_time"], l))
-        s = s *c*string(Base.signif(ff["BIM SDP"]["solve_time"], l))
-        s = s *c*string(Base.signif(ff["QC SOC"]["solve_time"], l))
-        s = s *c*string(Base.signif(ff["BIM SOC"]["solve_time"], l))
-        s = s *c*string(Base.signif(ff["BFM SOC"]["solve_time"], l))
-        s = s *c*string(Base.signif(ff["DC LP"]["solve_time"], l))
+        s = s *c*string(round(ff["AC NLP"]["solve_time"], digits = l))
+        s = s *c*string(round(ff["BIM SDP"]["solve_time"], digits = l))
+        s = s *c*string(round(ff["QC SOC"]["solve_time"], digits = l))
+        s = s *c*string(round(ff["BIM SOC"]["solve_time"], digits = l))
+        s = s *c*string(round(ff["BFM SOC"]["solve_time"], digits = l))
+        s = s *c*string(round(ff["DC LP"]["solve_time"], digits = l))
 
         s = s*raw"\ "[1]*raw"\ "*" \n"
     end

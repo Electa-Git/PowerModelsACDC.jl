@@ -1,21 +1,21 @@
 export run_acdcpf
 
 ""
-function run_acdcpf(file::String, model_constructor, solver; kwargs...)
+function run_acdcpf(file::String, model_type::Type, solver; kwargs...)
     data = PowerModels.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcpf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
+    return run_acdcpf(data::Dict{String,Any}, model_type, solver; kwargs...)
 end
 
 ""
-function run_acdcpf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
-    pm = PowerModels.build_model(data, model_constructor, post_acdcpf; kwargs...)
+function run_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
+    pm = PowerModels.build_model(data, model_type, post_acdcpf; kwargs...)
     #display(pm)
     return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end
 
 ""
-function post_acdcpf(pm::GenericPowerModel)
+function post_acdcpf(pm::AbstractPowerModel)
     add_ref_dcgrid!(pm)
     PowerModels.variable_voltage(pm, bounded = false)
     PowerModels.variable_generation(pm, bounded = false)

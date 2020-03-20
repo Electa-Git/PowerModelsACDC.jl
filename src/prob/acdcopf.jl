@@ -1,20 +1,20 @@
 export run_acdcopf
 
 ""
-function run_acdcopf(file::String, model_constructor, solver; kwargs...)
+function run_acdcopf(file::String, model_type::Type, solver; kwargs...)
     data = PowerModels.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcopf(data, model_constructor, solver; kwargs...)
+    return run_acdcopf(data, model_type, solver; kwargs...)
 end
 
 ""
-function run_acdcopf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
-    pm = PowerModels.build_model(data, model_constructor, post_acdcopf; kwargs...)
+function run_acdcopf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
+    pm = PowerModels.build_model(data, model_type, post_acdcopf; kwargs...)
     return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end
 
 ""
-function post_acdcopf(pm::GenericPowerModel)
+function post_acdcopf(pm::AbstractPowerModel)
     add_ref_dcgrid!(pm)
     PowerModels.variable_voltage(pm)
     PowerModels.variable_generation(pm)
@@ -41,7 +41,7 @@ function post_acdcopf(pm::GenericPowerModel)
     for i in PowerModels.ids(pm, :branch)
         PowerModels.constraint_ohms_yt_from(pm, i)
         PowerModels.constraint_ohms_yt_to(pm, i)
-        PowerModels.constraint_voltage_angle_difference(pm, i)
+        PowerModels.constraint_voltage_angle_difference(pm, i) #angle difference across transformer and reactor - useful for LPAC if available?
         PowerModels.constraint_thermal_limit_from(pm, i)
         PowerModels.constraint_thermal_limit_to(pm, i)
     end

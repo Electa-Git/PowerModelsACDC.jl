@@ -1,4 +1,4 @@
-function constraint_voltage_product_converter(pm::GenericPowerModel{T}, wr, wi, w_fr, w_to) where {T <: PowerModels.AbstractWRMForm}
+function constraint_voltage_product_converter(pm::AbstractWRMModel, wr, wi, w_fr, w_to)
     # # @constraint(pm.model, norm([ 2*wr;  2*wi; w_fr-w_to ]) <= w_fr+w_to )
     # @constraint(pm.model, [ 2*wr,  2*wi, w_fr-w_to, w_fr+w_to] in JuMP.RotatedSecondOrderCone())
     @constraint(pm.model, [w_fr/sqrt(2), w_to/sqrt(2), wr, wi] in JuMP.RotatedSecondOrderCone())
@@ -12,7 +12,7 @@ pconv_ac[i]^2 + pconv_dc[i]^2 <= wc[i] * iconv_ac_sq[i]
 pconv_ac[i]^2 + pconv_dc[i]^2 <= (Umax)^2 * (iconv_ac[i])^2
 ```
 """
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, Umax, Imax) where {T <: PowerModels.AbstractWRMForm}
+function constraint_converter_current(pm::AbstractWRMModel, n::Int, cnd::Int, i::Int, Umax, Imax)
     wc = PowerModels.var(pm, n, cnd, :wc_ac, i)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qconv_ac = PowerModels.var(pm, n, cnd, :qconv_ac, i)

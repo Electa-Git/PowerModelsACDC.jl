@@ -1,9 +1,9 @@
-function variable_converter_filter_voltage(pm::GenericPowerModel{T}; kwargs...) where {T <: PowerModels.AbstractBFForm}
+function variable_converter_filter_voltage(pm::AbstractBFModel; kwargs...)
     variable_converter_filter_voltage_magnitude_sqr(pm; kwargs...)
     variable_conv_transformer_current_sqr(pm; kwargs...)
 end
 
-function variable_converter_internal_voltage(pm::GenericPowerModel{T}; kwargs...) where {T <: PowerModels.AbstractBFForm}
+function variable_converter_internal_voltage(pm::AbstractBFModel; kwargs...)
     variable_converter_internal_voltage_magnitude_sqr(pm; kwargs...)
     variable_conv_reactor_current_sqr(pm; kwargs...)
 end
@@ -16,7 +16,7 @@ p_tf_fr^2 + qtf_fr^2 <= w/tm^2 * itf
 wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf
 ```
 """
-function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractBFQPForm}
+function constraint_conv_transformer(pm::AbstractBFQPModel, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer)
     w = PowerModels.var(pm, n, cnd, :w, acbus)
     itf = PowerModels.var(pm, n, cnd, :itf_sq, i)
     wf = PowerModels.var(pm, n, cnd, :wf_ac, i)
@@ -36,11 +36,11 @@ function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int,
     else
         PowerModels.con(pm, n, cnd, :conv_tf_p_fr)[i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
         PowerModels.con(pm, n, cnd, :conv_tf_q_fr)[i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
-        @constraint(pm.model, wf == w/tm^2 )
+        @constraint(pm.model, wf == w )
     end
 end
 
-function constraint_conv_transformer(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer) where {T <: PowerModels.AbstractBFConicForm}
+function constraint_conv_transformer(pm::AbstractBFConicModel, n::Int, cnd::Int, i::Int, rtf, xtf, acbus, tm, transformer)
     w = PowerModels.var(pm, n, cnd, :w, acbus)
     itf = PowerModels.var(pm, n, cnd, :itf_sq, i)
     wf = PowerModels.var(pm, n, cnd, :wf_ac, i)
@@ -76,7 +76,7 @@ p_pr_fr^2 + qpr_fr^2 <= wf * ipr
 wc == wf -2*(rc*ppr_fr + xc*qpr_fr) + (rc^2 + xc^2)*ipr
 ```
 """
-function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractBFQPForm}
+function constraint_conv_reactor(pm::AbstractBFQPModel, n::Int, cnd::Int, i::Int, rc, xc, reactor)
     wf = PowerModels.var(pm, n, cnd, :wf_ac, i)
     ipr = PowerModels.var(pm, n, cnd, :irc_sq, i)
     wc = PowerModels.var(pm, n, cnd, :wc_ac, i)
@@ -98,7 +98,7 @@ function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::
     end
 end
 
-function constraint_conv_reactor(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, rc, xc, reactor) where {T <: PowerModels.AbstractBFConicForm}
+function constraint_conv_reactor(pm::AbstractBFConicModel, n::Int, cnd::Int, i::Int, rc, xc, reactor)
     wf = PowerModels.var(pm, n, cnd, :wf_ac, i)
     ipr = PowerModels.var(pm, n, cnd, :irc_sq, i)
     wc = PowerModels.var(pm, n, cnd, :wc_ac, i)
@@ -129,7 +129,7 @@ pconv_ac[i]^2 + pconv_dc[i]^2 <= wc[i] * iconv_ac_sq[i]
 pconv_ac[i]^2 + pconv_dc[i]^2 <= (Umax)^2 * (iconv_ac[i])^2
 ```
 """
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, Umax, Imax) where {T <: PowerModels.AbstractBFQPForm}
+function constraint_converter_current(pm::AbstractBFQPModel, n::Int, cnd::Int, i::Int, Umax, Imax)
     wc = PowerModels.var(pm, n, cnd, :wc_ac, i)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qconv_ac = PowerModels.var(pm, n, cnd, :qconv_ac, i)
@@ -142,7 +142,7 @@ function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int
     @constraint(pm.model, iconv_sq <= iconv*Imax)
 end
 
-function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int, i::Int, Umax, Imax) where {T <: PowerModels.AbstractBFConicForm}
+function constraint_converter_current(pm::AbstractBFConicModel, n::Int, cnd::Int, i::Int, Umax, Imax)
     wc = PowerModels.var(pm, n, cnd, :wc_ac, i)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qconv_ac = PowerModels.var(pm, n, cnd, :qconv_ac, i)
@@ -155,6 +155,6 @@ function constraint_converter_current(pm::GenericPowerModel{T}, n::Int, cnd::Int
     PowerModels.con(pm, n, cnd, :conv_i_sqrt)[i] = @constraint(pm.model, [Umax * iconv/sqrt(2), Umax * iconv/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
     # PowerModels.con(pm, n, cnd, :conv_i_sqrt)[i] = @constraint(pm.model, norm([2*pconv_ac; 2*qconv_ac; Umax^2 - iconv_sq]) <= (Umax)^2 + iconv_sq)
     # @constraint(pm.model, [2*iconv, 1 - iconv_sq, 1 + iconv_sq] in JuMP.RotatedSecondOrderCone())
-    # @constraint(pm.model, [iconv_sq, iconv/sqrt(2), iconv/sqrt(2)] in JuMP.SecondOrderCone())
+    @constraint(pm.model, [iconv_sq, iconv/sqrt(2), iconv/sqrt(2)] in JuMP.RotatedSecondOrderCone())
     @constraint(pm.model, iconv_sq <= iconv*Imax)
 end
