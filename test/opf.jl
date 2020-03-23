@@ -6,12 +6,12 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 5907; atol = 1e0)
     end
-    @testset "5-bus asymmetric case" begin
-        result = run_acdcopf("../test/data/case5_asym.m", ACPPowerModel, ipopt_solver; setting = s)
-
-        @test result["termination_status"] == LOCALLY_SOLVED
-        @test isapprox(result["objective"], 17551; atol = 1e0)
-    end
+    # @testset "5-bus asymmetric case" begin
+    #     result = run_acdcopf("../test/data/case5_asym.m", ACPPowerModel, ipopt_solver; setting = s)
+    #
+    #     @test result["termination_status"] == LOCALLY_SOLVED
+    #     @test isapprox(result["objective"], 17551; atol = 1e0)
+    # end
     @testset "5-bus ac dc case" begin
         result = run_acdcopf("../test/data/case5_acdc.m", ACPPowerModel, ipopt_solver; setting = s)
 
@@ -38,12 +38,12 @@ end
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 5638.97; atol = 1e0)
     end
-    @testset "5-bus asymmetric case" begin
-        result = run_acdcopf("../test/data/case5_asym.m", DCPPowerModel, ipopt_solver; setting = s)
-
-        @test result["termination_status"] == LOCALLY_SOLVED
-        @test isapprox(result["objective"], 17479; atol = 1e0)
-    end
+    # @testset "5-bus asymmetric case" begin
+    #     result = run_acdcopf("../test/data/case5_asym.m", DCPPowerModel, ipopt_solver; setting = s)
+    #
+    #     @test result["termination_status"] == LOCALLY_SOLVED
+    #     @test isapprox(result["objective"], 17479; atol = 1e0)
+    # end
     @testset "5-bus ac dc case" begin
         result = run_acdcopf("../test/data/case5_acdc.m", DCPPowerModel, ipopt_solver; setting = s)
 
@@ -72,12 +72,12 @@ end
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 5746.7; atol = 1e0)
     end
-    @testset "5-bus asymmetric case" begin
-        result = run_acdcopf("../test/data/case5_asym.m", SOCWRPowerModel, ipopt_solver; setting = s)
-
-        @test result["termination_status"] == LOCALLY_SOLVED
-        @test isapprox(result["objective"], 14999; atol = 1e0)
-    end
+    # @testset "5-bus asymmetric case" begin
+    #     result = run_acdcopf("../test/data/case5_asym.m", SOCWRPowerModel, ipopt_solver; setting = s)
+    #
+    #     @test result["termination_status"] == LOCALLY_SOLVED
+    #     @test isapprox(result["objective"], 14999; atol = 1e0)
+    # end
     @testset "5-bus ac dc case" begin
         result = run_acdcopf("../test/data/case5_acdc.m", SOCWRPowerModel, ipopt_solver; setting = s)
 
@@ -105,12 +105,12 @@ end
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 5746.7; atol = 1e0)
     end
-    @testset "5-bus asymmetric case" begin
-        result = run_acdcopf_bf("../test/data/case5_asym.m", SOCBFPowerModel, ipopt_solver; setting = s)
-
-        @test result["termination_status"] == LOCALLY_SOLVED
-        @test isapprox(result["objective"], 14999; atol = 1e0)
-    end
+    # @testset "5-bus asymmetric case" begin
+    #     result = run_acdcopf_bf("../test/data/case5_asym.m", SOCBFPowerModel, ipopt_solver; setting = s)
+    #
+    #     @test result["termination_status"] == LOCALLY_SOLVED
+    #     @test isapprox(result["objective"], 14999; atol = 1e0)
+    # end
     @testset "5-bus ac dc case" begin
         result = run_acdcopf_bf("../test/data/case5_acdc.m", SOCBFPowerModel, ipopt_solver; setting = s)
 
@@ -138,12 +138,12 @@ end
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 5780; atol = 1e0)
     end
-    @testset "5-bus asymmetric case" begin
-        result = run_acdcopf("../test/data/case5_asym.m", QCRMPowerModel, ipopt_solver; setting = s)
-
-        @test result["termination_status"] == LOCALLY_SOLVED
-        @test isapprox(result["objective"], 15921; atol = 1e0)
-    end
+    # @testset "5-bus asymmetric case" begin
+    #     result = run_acdcopf("../test/data/case5_asym.m", QCRMPowerModel, ipopt_solver; setting = s)
+    #
+    #     @test result["termination_status"] == LOCALLY_SOLVED
+    #     @test isapprox(result["objective"], 15921; atol = 1e0)
+    # end
     @testset "5-bus ac dc case" begin
         result = run_acdcopf("../test/data/case5_acdc.m", QCRMPowerModel, ipopt_solver; setting = s)
 

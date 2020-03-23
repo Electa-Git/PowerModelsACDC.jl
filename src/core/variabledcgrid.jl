@@ -76,7 +76,7 @@ function variable_active_dcbranch_flow(pm::AbstractPowerModel; nw::Int=pm.cnw, b
         end
     end
 
-    report && PowerModels.sol_component_value_edge(pm, nw, :branchdc, :pf, :pt, ref(pm, nw, :arcs_dcgrid_from), ref(pm, nw, :arcs_dcgrid_from), p)
+    report && PowerModels.sol_component_value_edge(pm, nw, :branchdc, :pf, :pt, ref(pm, nw, :arcs_dcgrid_from), ref(pm, nw, :arcs_dcgrid_to), p)
 end
 
 
