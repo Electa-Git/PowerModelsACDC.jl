@@ -1,35 +1,28 @@
-# """
-# Creates Ohms constraints for DC branches
-#
-# ```
-# p[f_idx] + p[t_idx] == p * g[l] * (wdc[f_bus] - wdcr[f_bus,t_bus])
-# ```
-# """
-# function constraint_ohms_dc_branch(pm::AbstractWRModels, n::Int,  f_bus, t_bus, f_idx, t_idx, r, p)
-#     p_dc_fr = PowerModels.var(pm, n, :p_dcgrid, f_idx)
-#     p_dc_to = PowerModels.var(pm, n, :p_dcgrid, t_idx)
-#     wdc_fr = PowerModels.var(pm, n, :wdc, f_bus)
-#     wdc_to = PowerModels.var(pm, n, :wdc, t_bus)
-#     wdc_frto = PowerModels.var(pm, n, :wdcr, (f_bus, t_bus))
-#
-#     if r == 0
-#         @constraint(pm.model, p_dc_fr + p_dc_to == 0)
-#     else
-#         g = 1 / r
-#         @constraint(pm.model, p_dc_fr == p * g *  (wdc_fr - wdc_frto))
-#         @constraint(pm.model, p_dc_to == p * g *  (wdc_to - wdc_frto))
-#     end
-# end
-# "`wdc[i] == vdcm^2`"
-# function constraint_dc_voltage_magnitude_setpoint(pm::AbstractWModels, n::Int,  i, vdcm)
-#     wdc = PowerModels.var(pm, n, :wdc, i)
-#
-#     PowerModels.con(pm, n, :v_dc)[i] = @constraint(pm.model, wdc == vdcm^2)
-# end
-#
-# function add_dc_bus_voltage_setpoint(sol, pm::AbstractWModels)
-#     PowerModels.add_setpoint!(sol, pm, "busdc", "vm", :wdc, status_name="Vdc", inactive_status_value = 4; scale = (x,item,cnd) -> sqrt(x))
-# end
+"""
+Model to approximate cross products of node voltages
+
+```
+wdcr[(i,j)] <= wdc[i]*wdc[j]
+```
+"""
+function constraint_voltage_dc(pm::AbstractWRModel, n::Int)
+    wdc = PowerModels.var(pm, n, :wdc)
+    wdcr = PowerModels.var(pm, n, :wdcr)
+
+    for (i,j) in PowerModels.ids(pm, n, :buspairsdc)
+        JuMP.@constraint(pm.model, wdcr[(i,j)]^2 <= wdc[i]*wdc[j])
+        # InfrastructureModels.relaxation_product(pm.model, wdc[i], wdc[j], wdcr_, wdcr_)
+    end
+end
+
+function constraint_voltage_dc(pm::AbstractWRConicModel, n::Int)
+    wdc = PowerModels.var(pm, n, :wdc)
+    wdcr = PowerModels.var(pm, n, :wdcr)
+
+    for (i,j) in PowerModels.ids(pm, n, :buspairsdc)
+        relaxation_complex_product_conic(pm.model, wdc[i], wdc[j], wdcr[(i,j)])
+    end
+end
 
 """
 Limits dc branch current
@@ -38,7 +31,7 @@ Limits dc branch current
 p[f_idx] <= wdc[f_bus] * Imax
 ```
 """
-function constraint_dc_branch_current(pm::AbstractWModels, n::Int,  f_bus, f_idx, ccm_max, p)
+function constraint_dc_branch_current(pm::AbstractWRModel, n::Int, f_bus, f_idx, ccm_max, p)
     p_dc_fr = PowerModels.var(pm, n, :p_dcgrid, f_idx)
     wdc_fr = PowerModels.var(pm, n, :wdc, f_bus)
 
