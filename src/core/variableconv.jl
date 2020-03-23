@@ -303,8 +303,8 @@ function variable_converter_filter_voltage_angle(pm::AbstractPowerModel; nw::Int
     )
     if bounded
         for (c, convdc) in ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(vaf[c], - bigM)
-            JuMP.set_upper_bound(vaf[c],   bigM)
+            JuMP.set_lower_bound(vaf[c], -bigM)
+            JuMP.set_upper_bound(vaf[c],  bigM)
         end
     end
     report && PowerModels.sol_component_value(pm, nw, :convdc, :vafilt, ids(pm, nw, :convdc), vaf)
