@@ -5,9 +5,9 @@ Model to approximate cross products of node voltages
 wdcr[(i,j)] <= wdc[i]*wdc[j]
 ```
 """
-function constraint_voltage_dc(pm::AbstractWRMModel, n::Int, cnd::Int)
-    wdc = PowerModels.var(pm, n, cnd, :wdc)
-    wdcr = PowerModels.var(pm, n, cnd, :wdcr)
+function constraint_voltage_dc(pm::AbstractWRMModel, n::Int)
+    wdc = PowerModels.var(pm, n, :wdc)
+    wdcr = PowerModels.var(pm, n, :wdcr)
 
     for (i,j) in PowerModels.ids(pm, n, :buspairsdc)
         @constraint(pm.model, [ wdc[i]/sqrt(2), wdc[j]/sqrt(2), wdcr[(i,j)]/sqrt(2), wdcr[(i,j)]/sqrt(2)] in JuMP.RotatedSecondOrderCone() )
@@ -21,9 +21,9 @@ Limits dc branch current
 p[f_idx] <= wdc[f_bus] * Imax
 ```
 """
-function constraint_dc_branch_current(pm::AbstractWRMModel, n::Int, cnd::Int, f_bus, f_idx, ccm_max, p)
-    p_dc_fr = PowerModels.var(pm, n, cnd, :p_dcgrid, f_idx)
-    wdc_fr = PowerModels.var(pm, n, cnd, :wdc, f_bus)
+function constraint_dc_branch_current(pm::AbstractWRMModel, n::Int, f_bus, f_idx, ccm_max, p)
+    p_dc_fr = PowerModels.var(pm, n, :p_dcgrid, f_idx)
+    wdc_fr = PowerModels.var(pm, n, :wdc, f_bus)
 
     @constraint(pm.model, p_dc_fr <= wdc_fr * ccm_max * p^2)
 end
