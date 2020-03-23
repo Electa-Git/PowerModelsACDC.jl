@@ -144,7 +144,7 @@ function variable_converter_to_grid_active_power(pm::AbstractPowerModel; nw::Int
         end
     end
 
-    report && PowerModels.sol_component_value(pm, nw, :convdc, :ptf_fr, ids(pm, nw, :convdc), ptffr)
+    report && PowerModels.sol_component_value(pm, nw, :convdc, :pgrid, ids(pm, nw, :convdc), ptffr)
 end
 
 "variable: `qconv_grid_ac[j]` for `j` in `convdc`"
@@ -161,7 +161,7 @@ function variable_converter_to_grid_reactive_power(pm::AbstractPowerModel; nw::I
         end
     end
 
-    report && PowerModels.sol_component_value(pm, nw, :convdc, :qtf_fr, ids(pm, nw, :convdc), qtffr)
+    report && PowerModels.sol_component_value(pm, nw, :convdc, :qgrid, ids(pm, nw, :convdc), qtffr)
 end
 
 
@@ -195,7 +195,7 @@ function variable_converter_firing_angle(pm::AbstractPowerModel; nw::Int=pm.cnw,
         end
     end
 
-    report && PowerModels.sol_component_value(pm, nw, :convdc, :phiconv, ids(pm, nw, :convdc), phic)
+    report && PowerModels.sol_component_value(pm, nw, :convdc, :phi, ids(pm, nw, :convdc), phic)
 end
 
 "variable: `iconv_ac[j]` for `j` in `convdc`"
@@ -211,7 +211,7 @@ function variable_acside_current(pm::AbstractPowerModel; nw::Int=pm.cnw, bounded
         end
     end
 
-    report && PowerModels.sol_component_value(pm, nw, :convdc, :iconv_ac, ids(pm, nw, :convdc), ic)
+    report && PowerModels.sol_component_value(pm, nw, :convdc, :iconv, ids(pm, nw, :convdc), ic)
 end
 
 "variable: `iconv_ac[j]` and `iconv_ac_sq[j]` for `j` in `convdc`"
