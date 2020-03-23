@@ -9,8 +9,8 @@ end
 
 ""
 function run_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: AbstractBFModel
-    pm = PowerModels.build_model(data, model_type, post_acdcopf_bf; kwargs...)
-    return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
+    return PowerModels.run_model(data, model_type, solver, post_acdcopf_bf; kwargs...)
+    # return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end
 
 function post_acdcopf_bf(pm::AbstractPowerModel)

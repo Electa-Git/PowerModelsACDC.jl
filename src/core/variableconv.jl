@@ -423,8 +423,8 @@ function variable_converter_internal_voltage_magnitude_sqr(pm::AbstractPowerMode
     )
     if bounded
         for (c, convdc) in ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(wcac[c], (convdc["Vmmin"] / bigM)^2)
-            JuMP.set_upper_bound(wcac[c], (convdc["Vmmax"] * bigM)^2)
+            JuMP.set_lower_bound(wcac[c], (convdc["Vmmin"])^2)
+            JuMP.set_upper_bound(wcac[c], (convdc["Vmmax"])^2)
         end
     end
     report && PowerModels.sol_component_value(pm, nw, :convdc, :wconv, ids(pm, nw, :convdc), wcac)

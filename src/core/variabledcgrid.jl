@@ -84,15 +84,15 @@ end
 function variable_dcbranch_current_sqr(pm::AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true)
     vpu = 0.8;
     cc = PowerModels.var(pm, nw)[:ccm_dcgrid] = JuMP.@variable(pm.model,
-    [l in PowerModels.ids(pm, nw, :branchdc)], base_name="$(nw)_$(cnd)_ccm_dcgrid",
+    [l in PowerModels.ids(pm, nw, :branchdc)], base_name="$(nw)_ccm_dcgrid",
     start = (PowerModels.comp_start_value(ref(pm, nw, :branchdc, l), "p_start", 0.0) / vpu)^2
     )
     if bounded
-        for (l, branch) in ref(pm, nw, :branchdc)
+        for (l, branchdc) in ref(pm, nw, :branchdc)
             JuMP.set_lower_bound(cc[l], 0)
-            JuMP.set_upper_bound(cc[l], (PowerModels.ref(pm, nw, :branchdc, l, "rateA") / vpu)^2)
+            JuMP.set_upper_bound(cc[l], (branchdc["rateA"] / vpu)^2)
         end
     end
 
-    report && PowerModels.sol_component_value_edge(pm, nw, :branch, :ccm, ref(pm, nw, :branchdc), cc)
+    report && PowerModels.sol_component_value(pm, nw, :branchdc, :ccm, ids(pm, nw, :branchdc), cc)
 end

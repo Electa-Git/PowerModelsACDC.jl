@@ -9,9 +9,9 @@ end
 
 ""
 function run_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    pm = PowerModels.build_model(data, model_type, post_acdcpf; kwargs...)
+    return PowerModels.run_model(data, model_type, solver, post_acdcpf; kwargs...)
     #display(pm)
-    return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
+    # return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end
 
 ""

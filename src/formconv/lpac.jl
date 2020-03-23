@@ -61,8 +61,8 @@ function constraint_conv_reactor(pm::AbstractLPACModel, n::Int, i::Int, rc, xc, 
     cs = PowerModels.var(pm, n, :cs_vac,i)
 
     phi_vmc_ub = JuMP.upper_bound(phi_vmc)
-    ppr_to_ub = JuMP.upper_bound(PowerModels.var(pm, n, cnd)[:pconv_ac][i])
-    qpr_to_ub = JuMP.upper_bound(PowerModels.var(pm, n, cnd)[:qconv_ac][i])
+    ppr_to_ub = JuMP.upper_bound(PowerModels.var(pm, n)[:pconv_ac][i])
+    qpr_to_ub = JuMP.upper_bound(PowerModels.var(pm, n)[:qconv_ac][i])
     Smax = sqrt(ppr_to_ub^2 + qpr_to_ub^2)
     zc = rc + im*xc
     if reactor
