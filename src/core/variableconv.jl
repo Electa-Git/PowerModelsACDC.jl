@@ -433,7 +433,3 @@ end
 function variable_cos_voltage(pm::AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true)
     #only for lpac
 end
-
-function variable_cos_voltage(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
-    #only for lpac
-end
