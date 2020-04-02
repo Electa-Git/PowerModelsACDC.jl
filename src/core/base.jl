@@ -93,6 +93,8 @@ function add_ref_dcgrid!(pm::AbstractPowerModel, n::Int)
         pm.ref[:nw][n][:branchdc] = Dict{String, Any}()
         # DC grid arcs for DC grid branches
         pm.ref[:nw][n][:arcs_dcgrid] = Dict{String, Any}()
+        pm.ref[:nw][n][:arcs_dcgrid_from] = Dict{String, Any}()
+        pm.ref[:nw][n][:arcs_dcgrid_to] = Dict{String, Any}()
         pm.ref[:nw][n][:arcs_conv_acdc] = Dict{String, Any}()
         pm.ref[:nw][n][:bus_arcs_dcgrid] = Dict{String, Any}()
         bus_convs_ac = Dict([(i, []) for (i,bus) in pm.ref[:nw][n][:bus]])
