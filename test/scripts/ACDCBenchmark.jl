@@ -105,7 +105,7 @@ function fix_things!(data)
 end
 
 for file in files
-    data = PowerModels.parse_file(file)
+    data = _PM.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
     #fix_things!(data)
 

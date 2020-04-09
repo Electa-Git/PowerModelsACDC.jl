@@ -2,28 +2,25 @@ export run_acdcpf
 
 ""
 function run_acdcpf(file::String, model_type::Type, solver; kwargs...)
-    data = PowerModels.parse_file(file)
+    data = _PM.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcpf(data::Dict{String,Any}, model_type, solver; kwargs...)
+    return run_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
 ""
 function run_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return PowerModels.run_model(data, model_type, solver, post_acdcpf; kwargs...)
-    #display(pm)
-    # return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
+    return _PM.run_model(data, model_type, solver, post_acdcpf; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
 ""
-function post_acdcpf(pm::AbstractPowerModel)
-    add_ref_dcgrid!(pm)
-    PowerModels.variable_voltage(pm, bounded = false)
-    PowerModels.variable_generation(pm, bounded = false)
-    PowerModels.variable_branch_flow(pm, bounded = false)
+function post_acdcpf(pm::_PM.AbstractPowerModel)
+    _PM.variable_voltage(pm, bounded = false)
+    _PM.variable_generation(pm, bounded = false)
+    _PM.variable_branch_flow(pm, bounded = false)
 
     # dirty, should be improved in the future TODO
-    if typeof(pm) <: PowerModels.SOCBFPowerModel
-        PowerModels.variable_branch_current(pm, bounded = false)
+    if typeof(pm) <: _PM.SOCBFPowerModel
+        _PM.variable_branch_current(pm, bounded = false)
     end
 
     variable_active_dcbranch_flow(pm, bounded = false)
@@ -31,47 +28,47 @@ function post_acdcpf(pm::AbstractPowerModel)
     variable_dc_converter(pm, bounded = false)
     variable_dcgrid_voltage_magnitude(pm, bounded = false)
 
-    PowerModels.constraint_model_voltage(pm)
+    _PM.constraint_model_voltage(pm)
     constraint_voltage_dc(pm)
 
 
-    for (i,bus) in ref(pm, :ref_buses)
+    for (i,bus) in _PM.ref(pm, :ref_buses)
         @assert bus["bus_type"] == 3
-        PowerModels.constraint_theta_ref(pm, i)
-        PowerModels.constraint_voltage_magnitude_setpoint(pm, i)
+        _PM.constraint_theta_ref(pm, i)
+        _PM.constraint_voltage_magnitude_setpoint(pm, i)
     end
 
-    for (i, bus) in ref(pm, :bus)# PowerModels.ids(pm, :bus)
+    for (i, bus) in _PM.ref(pm, :bus)# _PM.ids(pm, :bus)
         constraint_kcl_shunt(pm, i)
         # PV Bus Constraints
-        if length(ref(pm, :bus_gens, i)) > 0 && !(i in ids(pm,:ref_buses))
+        if length(_PM.ref(pm, :bus_gens, i)) > 0 && !(i in _PM.ids(pm,:ref_buses))
             # this assumes inactive generators are filtered out of bus_gens
             @assert bus["bus_type"] == 2
-            PowerModels.constraint_voltage_magnitude_setpoint(pm, i)
-            for j in ref(pm, :bus_gens, i)
-                PowerModels.constraint_active_gen_setpoint(pm, j)
+            _PM.constraint_voltage_magnitude_setpoint(pm, i)
+            for j in _PM.ref(pm, :bus_gens, i)
+                _PM.constraint_active_gen_setpoint(pm, j)
             end
         end
     end
 
-    for i in PowerModels.ids(pm, :branch)
+    for i in _PM.ids(pm, :branch)
         # dirty, should be improved in the future TODO
-        if typeof(pm) <: PowerModels.SOCBFPowerModel
-            PowerModels.constraint_flow_losses(pm, i)
-            PowerModels.constraint_voltage_magnitude_difference(pm, i)
-            PowerModels.constraint_branch_current(pm, i)
+        if typeof(pm) <: _PM.SOCBFPowerModel
+            _PM.constraint_flow_losses(pm, i)
+            _PM.constraint_voltage_magnitude_difference(pm, i)
+            _PM.constraint_branch_current(pm, i)
         else
-            PowerModels.constraint_ohms_yt_from(pm, i)
-            PowerModels.constraint_ohms_yt_to(pm, i)
+            _PM.constraint_ohms_yt_from(pm, i)
+            _PM.constraint_ohms_yt_to(pm, i)
         end
     end
-    for i in PowerModels.ids(pm, :busdc)
+    for i in _PM.ids(pm, :busdc)
         constraint_kcl_shunt_dcgrid(pm, i)
     end
-    for i in PowerModels.ids(pm, :branchdc)
+    for i in _PM.ids(pm, :branchdc)
         constraint_ohms_dc_branch(pm, i)
     end
-    for (c, conv) in PowerModels.ref(pm, :convdc)
+    for (c, conv) in _PM.ref(pm, :convdc)
         #constraint_converter_filter_transformer_reactor(pm, c)
         constraint_conv_transformer(pm, c)
         constraint_conv_reactor(pm, c)

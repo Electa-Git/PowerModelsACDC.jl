@@ -2,26 +2,36 @@ isdefined(Base, :__precompile__) && __precompile__()
 
 module PowerModelsACDC
 
-# using Compat
-using JuMP
-using PowerModels
-using InfrastructureModels
-using Memento
-
-# import Compat: @__MODULE__
-
-# using Compat.LinearAlgebra
-# using Compat.SparseArrays
-#
-# PMs = PowerModels
+# import Compat
+import JuMP
+import Memento
+import PowerModels
+const _PM = PowerModels
+import InfrastructureModels
+# import InfrastructureModels: ids, ref, var, con, sol, nw_ids, nws, optimize_model!, @im_fields
+const _IM = InfrastructureModels
 
 import JuMP: with_optimizer
 export with_optimizer
+
+# Create our module level logger (this will get precompiled)
+const _LOGGER = Memento.getlogger(@__MODULE__)
+
+# Register the module level logger at runtime so that folks can access the logger via `getlogger(PowerModels)`
+# NOTE: If this line is not included then the precompiled `_PM._LOGGER` won't be registered at runtime.
+__init__() = Memento.register(_LOGGER)
 
 
 include("prob/acdcopf.jl")
 include("prob/acdcpf.jl")
 include("prob/acdcopf_bf.jl")
+include("prob/tnepopf.jl")
+include("prob/tnepopf_bf.jl")
+include("prob/mp_tnepopf.jl")
+include("prob/mp_tnepopf_bf.jl")
+
+
+
 include("core/solution.jl")
 include("core/data.jl")
 include("core/variabledcgrid.jl")
@@ -48,4 +58,6 @@ include("formconv/lpac.jl")
 include("formconv/shared.jl")
 
 include("core/constraint_template.jl")
+include("io/multinetwork.jl")
+include("io/results.jl")
 end

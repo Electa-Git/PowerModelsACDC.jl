@@ -2,56 +2,54 @@ export run_acdcopf
 
 ""
 function run_acdcopf(file::String, model_type::Type, solver; kwargs...)
-    data = PowerModels.parse_file(file)
+    data = _PM.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcopf(data, model_type, solver; kwargs...)
+    return run_acdcopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
 ""
 function run_acdcopf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return PowerModels.run_model(data, model_type, solver, post_acdcopf; kwargs...)
-    # return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
+    return _PM.run_model(data, model_type, solver, post_acdcopf; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
 ""
-function post_acdcopf(pm::AbstractPowerModel)
-    add_ref_dcgrid!(pm)
-    PowerModels.variable_voltage(pm)
-    PowerModels.variable_generation(pm)
-    PowerModels.variable_branch_flow(pm)
+function post_acdcopf(pm::_PM.AbstractPowerModel)
+    _PM.variable_voltage(pm)
+    _PM.variable_generation(pm)
+    _PM.variable_branch_flow(pm)
 
     variable_active_dcbranch_flow(pm)
     variable_dcbranch_current(pm)
     variable_dc_converter(pm)
     variable_dcgrid_voltage_magnitude(pm)
 
-    PowerModels.objective_min_fuel_cost(pm)
+    _PM.objective_min_fuel_cost(pm)
 
-    PowerModels.constraint_model_voltage(pm)
+    _PM.constraint_model_voltage(pm)
     constraint_voltage_dc(pm)
 
-    for i in PowerModels.ids(pm, :ref_buses)
-        PowerModels.constraint_theta_ref(pm, i)
+    for i in _PM.ids(pm, :ref_buses)
+        _PM.constraint_theta_ref(pm, i)
     end
 
-    for i in PowerModels.ids(pm, :bus)
+    for i in _PM.ids(pm, :bus)
         constraint_kcl_shunt(pm, i)
     end
 
-    for i in PowerModels.ids(pm, :branch)
-        PowerModels.constraint_ohms_yt_from(pm, i)
-        PowerModels.constraint_ohms_yt_to(pm, i)
-        PowerModels.constraint_voltage_angle_difference(pm, i) #angle difference across transformer and reactor - useful for LPAC if available?
-        PowerModels.constraint_thermal_limit_from(pm, i)
-        PowerModels.constraint_thermal_limit_to(pm, i)
+    for i in _PM.ids(pm, :branch)
+        _PM.constraint_ohms_yt_from(pm, i)
+        _PM.constraint_ohms_yt_to(pm, i)
+        _PM.constraint_voltage_angle_difference(pm, i) #angle difference across transformer and reactor - useful for LPAC if available?
+        _PM.constraint_thermal_limit_from(pm, i)
+        _PM.constraint_thermal_limit_to(pm, i)
     end
-    for i in PowerModels.ids(pm, :busdc)
+    for i in _PM.ids(pm, :busdc)
         constraint_kcl_shunt_dcgrid(pm, i)
     end
-    for i in PowerModels.ids(pm, :branchdc)
+    for i in _PM.ids(pm, :branchdc)
         constraint_ohms_dc_branch(pm, i)
     end
-    for i in PowerModels.ids(pm, :convdc)
+    for i in _PM.ids(pm, :convdc)
         constraint_converter_losses(pm, i)
         constraint_converter_current(pm, i)
         constraint_conv_transformer(pm, i)

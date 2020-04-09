@@ -1,19 +1,22 @@
 using PowerModelsACDC
 using PowerModels
-using Memento
-using InfrastructureModels
-using JuMP
+import Memento
+import InfrastructureModels
+import JuMP
 
 # Suppress warnings during testing.
-setlevel!(Memento.getlogger(InfrastructureModels), "error")
-setlevel!(Memento.getlogger(PowerModelsACDC), "error")
-setlevel!(Memento.getlogger(PowerModels), "error")
+Memento.setlevel!(Memento.getlogger(InfrastructureModels), "error")
+Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
+Memento.setlevel!(Memento.getlogger(PowerModels), "error")
 
-using Ipopt
-#using Pajarito
-#using GLPKMathProgInterface
-using SCS
-#using Mosek
+import Ipopt
+import Gurobi
+#import GLPKMathProgInterface
+import SCS
+import Cbc
+import Mosek
+import MosekTools
+import Juniper
 
 using Test
 
@@ -25,11 +28,17 @@ using Test
 
 ipopt_solver = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
 scs_solver = JuMP.with_optimizer(SCS.Optimizer)
+gurobi = JuMP.with_optimizer(Gurobi.Optimizer)
+mosek = JuMP.with_optimizer(Mosek.Optimizer)
+cbc = JuMP.with_optimizer(Cbc.Optimizer, tol=1e-4, print_level=0)
+juniper = JuMP.with_optimizer(Juniper.Optimizer, nl_solver = ipopt_solver, mip_solver= cbc, time_limit= 7200)
 
 @testset "PowerModelsACDC" begin
 
 include("pf.jl")
 
 include("opf.jl")
+
+include("tnep.jl")
 
 end

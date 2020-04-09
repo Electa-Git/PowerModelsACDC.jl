@@ -1,61 +1,59 @@
 export run_acdcopf_bf
 
 ""
-function run_acdcopf_bf(file::String, model_type::Type{T}, solver; kwargs...) where T <: AbstractBFModel
-    data = PowerModels.parse_file(file)
+function run_acdcopf_bf(file::String, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
+    data = _PM.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcopf_bf(data, model_type, solver; kwargs...)
+    return run_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
 ""
-function run_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: AbstractBFModel
-    return PowerModels.run_model(data, model_type, solver, post_acdcopf_bf; kwargs...)
-    # return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
+function run_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
+    return _PM.run_model(data, model_type, solver, post_acdcopf_bf; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
-function post_acdcopf_bf(pm::AbstractPowerModel)
-    add_ref_dcgrid!(pm)
-    PowerModels.variable_voltage(pm)
-    PowerModels.variable_generation(pm)
-    PowerModels.variable_branch_flow(pm)
-    PowerModels.variable_branch_current(pm)
+function post_acdcopf_bf(pm::_PM.AbstractPowerModel)
+    _PM.variable_voltage(pm)
+    _PM.variable_generation(pm)
+    _PM.variable_branch_flow(pm)
+    _PM.variable_branch_current(pm)
 
     variable_active_dcbranch_flow(pm)
     variable_dcbranch_current(pm)
     variable_dc_converter(pm)
     variable_dcgrid_voltage_magnitude(pm)
 
-    PowerModels.objective_min_fuel_cost(pm)
+    _PM.objective_min_fuel_cost(pm)
 
-    PowerModels.constraint_model_current(pm)
+    _PM.constraint_model_current(pm)
     constraint_voltage_dc(pm)
 
-    for i in PowerModels.ids(pm, :ref_buses)
-        PowerModels.constraint_theta_ref(pm, i)
+    for i in _PM.ids(pm, :ref_buses)
+        _PM.constraint_theta_ref(pm, i)
     end
 
-    for i in PowerModels.ids(pm, :bus)
+    for i in _PM.ids(pm, :bus)
         constraint_kcl_shunt(pm, i)
     end
 
-    for i in PowerModels.ids(pm, :branch)
+    for i in _PM.ids(pm, :branch)
 
-        PowerModels.constraint_flow_losses(pm, i)
-        PowerModels.constraint_voltage_magnitude_difference(pm, i)
+        _PM.constraint_flow_losses(pm, i)
+        _PM.constraint_voltage_magnitude_difference(pm, i)
 
 
-        PowerModels.constraint_voltage_angle_difference(pm, i)
-        PowerModels.constraint_thermal_limit_from(pm, i)
-        PowerModels.constraint_thermal_limit_to(pm, i)
+        _PM.constraint_voltage_angle_difference(pm, i)
+        _PM.constraint_thermal_limit_from(pm, i)
+        _PM.constraint_thermal_limit_to(pm, i)
     end
-    for i in PowerModels.ids(pm, :busdc)
+    for i in _PM.ids(pm, :busdc)
         constraint_kcl_shunt_dcgrid(pm, i)
     end
-    for i in PowerModels.ids(pm, :branchdc)
+    for i in _PM.ids(pm, :branchdc)
         constraint_ohms_dc_branch(pm, i)
         constraint_dc_branch_current(pm, i)
     end
-    for i in PowerModels.ids(pm, :convdc)
+    for i in _PM.ids(pm, :convdc)
         constraint_converter_losses(pm, i)
         constraint_converter_current(pm, i)
         constraint_conv_transformer(pm, i)

@@ -1,4 +1,4 @@
-function mpc = case5_2grids()
+function mpc = case5_2gr_PM.ids()
 %case 5 nodes    Power flow data for 5 bus, 2 generator case.
 %   Please see 'help caseformat' for details on the case file format.
 %

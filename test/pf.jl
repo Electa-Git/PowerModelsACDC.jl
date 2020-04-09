@@ -1,7 +1,7 @@
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 @testset "test ac polar pf" begin
     # @testset "3-bus case" begin
-    #     result = run_acdcpf("../test/data/case3.m", ACPPowerModel, ipopt_solver, setting = Dict("output" => Dict("branch_flows" => true)))
+    #     result = run_ac_pf("../test/data/case3.m", ACPPowerModel, ipopt_solver, setting = Dict("output" => Dict("branch_flows" => true)))
     #
     #     @test result["termination_status"] == LOCALLY_SOLVED
     #     @test isapprox(result["objective"], 0; atol = 1e-2)

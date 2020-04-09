@@ -34,7 +34,7 @@ AC/DC converter stations, connecting ac nodes and dc nodes, are composed of a tr
 
 Note that the matpower-style `dcline` is transformed internally to two converters + a dcline connecting them. Such a transformation is exact for the 'dc'-style linearized models, but not for the AC models.
 
-For further information, consult the PowerModels [documentation](https://lanl-ansi.github.io/PowerModels.jl/stable/).
+For further information, consult the PowerModels [documentation](https://lanl-ansi.github.io/_PM.jl/stable/).
 
 
 ## Acknowledgments
