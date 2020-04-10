@@ -1,19 +1,19 @@
 export run_mp_tnepopf
 
 ""
-function run_mp_tnepopf(file::String, model_type::Type, solver; setting = s, kwargs...)
+function run_mp_tnepopf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
     return run_mp_tnepopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], kwargs...)
 end
 
 ""
-function run_mp_tnepopf(data::Dict{String,Any}, model_type::Type, solver; setting = s, kwargs...)
+function run_mp_tnepopf(data::Dict{String,Any}, model_type::Type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
     if setting["process_data_internally"] == true
         # PowerModelsACDC.process_additional_data!(data)
         process_additional_data!(data)
     end
     s = setting
-    return _PM.run_model(data, model_type, solver, post_mp_tnepopf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], kwargs...)
+    return _PM.run_model(data, model_type, solver, post_mp_tnepopf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
     # pm = _PM.build_model(data, model_type, post_mp_tnepopf; setting = s, kwargs...)
     # return _PM.optimize_model!(pm, solver; solution_builder = get_solution_acdc_ne)
 end

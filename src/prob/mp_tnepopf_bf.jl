@@ -13,7 +13,7 @@ function run_mp_tnepopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; 
         process_additional_data!(data)
     end
     s = setting
-    return _PM.run_model(data, model_type, solver, post_mp_tnepopf_bf; kwargs...)
+    return _PM.run_model(data, model_type, solver, post_mp_tnepopf_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
 end
 
 ""
