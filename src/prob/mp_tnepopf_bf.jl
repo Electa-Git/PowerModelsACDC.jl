@@ -45,8 +45,8 @@ function post_mp_tnepopf_bf(pm::_PM.AbstractPowerModel)
     objective_min_cost(pm)
     for (n, networks) in pm.ref[:nw]
         _PM.constraint_model_voltage(pm; nw = n)
+        constraint_voltage_dc(pm)
         constraint_voltage_dc_ne(pm)
-        constraint_voltage_dc_ne_bus(pm)
         for i in _PM.ids(pm, n, :ref_buses)
             _PM.constraint_theta_ref(pm, i, nw = n)
         end

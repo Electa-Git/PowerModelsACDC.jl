@@ -42,7 +42,7 @@ function constraint_voltage_dc_ne(pm::_PM.AbstractWRMModel, n::Int)
     wdc_du_frto = _PM.var(pm, n, :wdcr_du) #J:12/07 ||
     wdc_du_to = _PM.var(pm, n, :wdc_du_to) #J:12/07 note: Wdc_ne defined over buses and Wdc_du_to over dc lines..
     wdc_du_fr = _PM.var(pm, n, :wdc_du_fr) #J:12/07  ||
-    z  = var(pm, n, :branch_ne)
+    z  = _PM.var(pm, n, :branch_ne)
 
         for (l,i,j) in pm.ref[:nw][n][:arcs_dcgrid_from_ne]
         wdc_to = []

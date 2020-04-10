@@ -1,5 +1,5 @@
 # Example code to print list of built HVDC branches and converters
-function display_results(result)
+function display_results_tnep(result)
     built_cv = []
     built_br = []
     for (c, conv) in result["solution"]["convdc_ne"]

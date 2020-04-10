@@ -118,14 +118,12 @@ function constraint_dc_droop_control(pm::_PM.AbstractPowerModel, i::Int; nw::Int
 end
 
 ############## TNEP Constraints #####################
-
-
 function constraint_voltage_dc_ne(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw)
     constraint_voltage_dc_ne(pm, nw)
 end
-function constraint_voltage_dc_ne_bus(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw)
-    constraint_voltage_dc_ne_bus(pm, nw)
-end
+# function constraint_voltage_dc_ne_bus(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw)
+#     constraint_voltage_dc_ne_bus(pm, nw)
+# end
 # no data, so no further templating is needed, constraint goes directly to the formulations
 function constraint_kcl_shunt_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     #

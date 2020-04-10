@@ -35,8 +35,8 @@ function post_tnepopf(pm::_PM.AbstractPowerModel)
     objective_min_cost(pm)
 
     _PM.constraint_model_voltage(pm)
+    constraint_voltage_dc(pm)
     constraint_voltage_dc_ne(pm)
-    constraint_voltage_dc_ne_bus(pm)
     for i in _PM.ids(pm, :ref_buses)
         _PM.constraint_theta_ref(pm, i)
     end
@@ -69,7 +69,7 @@ function post_tnepopf(pm::_PM.AbstractPowerModel)
         constraint_converter_losses(pm, i)
         constraint_converter_current(pm, i)
         constraint_conv_transformer(pm, i)
-        Pconstraint_conv_reactor(pm, i)
+        constraint_conv_reactor(pm, i)
         constraint_conv_filter(pm, i)
         if pm.ref[:nw][pm.cnw][:convdc][i]["islcc"] == 1
             constraint_conv_firing_angle(pm, i)

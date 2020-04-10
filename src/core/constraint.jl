@@ -33,8 +33,8 @@ end
 ###################### TNEP Constraints ############################
 function constraint_voltage_dc_ne(pm::_PM.AbstractPowerModel,  n::Int)
 end
-function constraint_voltage_dc_ne_bus(pm::_PM.AbstractPowerModel,  n::Int)
-end
+# function constraint_voltage_dc_ne_bus(pm::_PM.AbstractPowerModel,  n::Int)
+# end
 
 function constraint_converter_limit_on_off(pm::_PM.AbstractDCPModel, n::Int, i, pmax, pmin, qmax, qmin, pmaxdc, pmindc, imax)
     #display(pm)

@@ -45,7 +45,7 @@ Model to approximate cross products of node voltages
 wdcr[(i,j)] <= wdc[i]*wdc[j]
 ```
 """
-function constraint_voltage_dc_ne_bus(pm::_PM.AbstractWRModel, n::Int)
+function constraint_voltage_dc_ne(pm::_PM.AbstractWRModel, n::Int)
     wdc = _PM.var(pm, n, :wdc_ne)
     wdc_frto = _PM.var(pm, n, :wdcr_ne)#J:12/07 ----<<
     wdc_du_frto = _PM.var(pm, n, :wdcr_du) #J:12/07 ||
@@ -63,15 +63,15 @@ function constraint_voltage_dc_ne_bus(pm::_PM.AbstractWRModel, n::Int)
     end
 end
 
-function constraint_voltage_dc_ne(pm::_PM.AbstractWRModel, n::Int)
-    wdc = _PM.var(pm, n, :wdc_ne)
-    wdcr = _PM.var(pm, n, :wdcr_ne)
-    for (i,j) in _PM.ids(pm, n, :buspairsdc_ne)
-        _IM.relaxation_complex_product(pm.model, wdc[i], wdc[j], wdcr[(i,j)], 0)
-    end
-end
+# function constraint_voltage_dc_ne(pm::_PM.AbstractWRModel, n::Int)
+#     wdc = _PM.var(pm, n, :wdc_ne)
+#     wdcr = _PM.var(pm, n, :wdcr_ne)
+#     for (i,j) in _PM.ids(pm, n, :buspairsdc_ne)
+#         _IM.relaxation_complex_product(pm.model, wdc[i], wdc[j], wdcr[(i,j)], 0)
+#     end
+# end
 
-function constraint_voltage_dc_ne_bus(pm::_PM.AbstractWRConicModel, n::Int)
+function constraint_voltage_dc_ne(pm::_PM.AbstractWRConicModel, n::Int)
     wdc = _PM.var(pm, n, :wdc_ne)
     wdc_frto = _PM.var(pm, n, :wdcr_ne)#J:12/07 ----<<
     wdc_du_frto = _PM.var(pm, n, :wdcr_du) #J:12/07 ||
