@@ -1,6 +1,6 @@
-% Case to test two connected components in the network data
-% the case is two replicates of the case3 network
-
+% Garver system - Transmission Network Estimation Using Linear Programming, IEEE trans. on power appratus and sys
+% Power system transmission network expansion planning using AC model by Rider, MJ and Garcia, AV and Romero, R
+%modification: gen cost is changed. A low value is set to penalize power losses but not dominate the objective.
 function mpc = case6
 mpc.version = '2';
 mpc.baseMVA = 100.0;
@@ -57,31 +57,15 @@ mpc.busdc_ne = [
 %% candidate branches
 %column_names%   fbusdc  tbusdc  r      l        c   rateA   rateB   rateC status cost
 mpc.branchdc_ne = [
-	1	 6	 0.01	 0.00	 0.00  100.0	 0.0	 0.0	 1.0	 1.1;
-	1	 6	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.1;
-	1	 6	 0.01	 0.00	 0.00  400.0	 0.0	 0.0	 1.0	 3.1;
-	2	 3	 0.01	 0.00	 0.00  100.0	 0.0	 0.0	 1.0	 1.2;
-	2	 3	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.2;
-	2	 3	 0.01	 0.00	 0.00  400.0	 0.0	 0.0	 1.0	 3.2;
-	2	 5	 0.01	 0.00	 0.00  100.0	 0.0	 0.0	 1.0	 1.3;
 	2	 5	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.3;
-	2	 5	 0.01	 0.00	 0.00  400.0	 0.0	 0.0	 1.0	 3.3;
-	2	 6	 0.01	 0.00	 0.00  100.0	 0.0	 0.0	 1.0	 1.4;
 	2	 6	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.4;
 	2	 6	 0.01	 0.00	 0.00  400.0	 0.0	 0.0	 1.0	 3.4;
-	3	 4	 0.01	 0.00	 0.00  100.0	 0.0	 0.0	 1.0	 1.5;
-	3	 4	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.5;
-	3	 4	 0.01	 0.00	 0.00  400.0	 0.0	 0.0	 1.0	 3.5;
-	3	 6	 0.01	 0.00	 0.00  100.0	 0.0	 0.0	 1.0	 1.6;
 	3	 6	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.6;
 	3	 6	 0.01	 0.00	 0.00  400.0	 0.0	 0.0	 1.0	 3.6;
-	4	 5	 0.01	 0.00	 0.00  100.0	 0.0	 0.0	 1.0	 1.7;
 	4	 5	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.7;
 	4	 5	 0.01	 0.00	 0.00  400.0	 0.0	 0.0	 1.0	 3.7;
-	4	 6	 0.01	 0.00	 0.00  100.0	 0.0	 0.0	 1.0	 1.8;
 	4	 6	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.8;
 	4	 6	 0.01	 0.00	 0.00  400.0	 0.0	 0.0	 1.0	 3.8;
-	5	 6	 0.01	 0.00	 0.00  100.0	 0.0	 0.0	 1.0	 1.9;
 	5	 6	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.9;
 	5	 6	 0.01	 0.00	 0.00  400.0	 0.0	 0.0	 1.0	 3.9;
  ];
