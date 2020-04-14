@@ -1,18 +1,18 @@
 using PowerModelsACDC
 using PowerModels
-import Memento
-import InfrastructureModels
-import JuMP
+using Memento
+using InfrastructureModels
+using JuMP
 
 # Suppress warnings during testing.
 Memento.setlevel!(Memento.getlogger(InfrastructureModels), "error")
 Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
 Memento.setlevel!(Memento.getlogger(PowerModels), "error")
 
-import Ipopt
-import SCS
-import Cbc
-import Juniper
+using Ipopt
+using SCS
+using Cbc
+using Juniper
 
 using Test
 
