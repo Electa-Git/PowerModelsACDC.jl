@@ -26,6 +26,8 @@ before_install:
 - julia -e 'using Pkg; Pkg.add("Ipopt")'
 - julia -e 'using Pkg; Pkg.add("SCS")'
 - julia -e 'using Pkg; Pkg.add("Documenter")'
+- julia -e 'using Pkg; Pkg.add("Juniper")'
+- julia -e 'using Pkg; Pkg.add("Cbc")'
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
