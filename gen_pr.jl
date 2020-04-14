@@ -1,3 +1,5 @@
+#!/usr/bin/env julia
+
 import Pkg
 import Pkg.Types: VersionSpec, VersionRange, VersionBound, semver_spec
 import Base: thismajor, thisminor, thispatch, nextmajor, nextminor, nextpatch
@@ -116,7 +118,7 @@ for arg in ARGS
     project = Dict(
         "name" => name,
         "uuid" => uuid(name),
-        "autors" => ["Hakan Ergun", "Frederik Geth"],
+        "autors" => ["Hakan Ergun", "Frederik Geth", "Jay Dave"],
         "repo" => "https://github.com/hakanergun/PowerModelsACDC.jl",
         "version" => "0.3.0",
         "deps" => Dict{String,String}(),
