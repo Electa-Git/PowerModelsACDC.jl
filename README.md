@@ -43,8 +43,8 @@ The developers thank Carleton Coffrin (LANL) for his support.
 
 ## Citing PowerModelsACDC
 
-If you find PowerModelsACDC useful in your work, we kindly request that you cite the following [publication](https://ieeexplore.ieee.org/document/8636236):
-
+If you find PowerModelsACDC useful in your work, we kindly request that you cite the following publications:
+[AC/DC OPF Core](https://ieeexplore.ieee.org/document/8636236):
 ```
 @ARTICLE{8636236,
 author={H. {Ergun} and J. {Dave} and D. {Van Hertem} and F. {Geth}},
@@ -59,7 +59,29 @@ doi={10.1109/TPWRS.2019.2897835},
 ISSN={0885-8950},
 month={July},}
 ```
-
+[TNEP Extension 1](https://digital-library.theiet.org/content/journals/10.1049/iet-gtd.2019.0383):
+```
+@ARTICLE{
+   iet:/content/journals/10.1049/iet-gtd.2019.0383,
+   author = {Jay Dave},
+   author = {Hakan Ergun},
+   author = {Ting An},
+   author = {Jingjing Lu},
+   author = {Dirk Van Hertem},
+   keywords = {power systems;meshed HVDC grids;increased utilisation;presented formulations;convex formulations;second-order cone convex relaxation;multiple HVDC links;linear approximation;dc grids;transmission network expansion planning problem;high-voltage direct current;traditional ac grid;TNEP problem;nonlinear formulation;},
+   ISSN = {1751-8687},
+   title = {TNEP of meshed HVDC grids: ‘AC’, ‘DC’ and convex formulations},
+   journal = {IET Generation, Transmission & Distribution},
+   issue = {24},   
+   volume = {13},
+   year = {2019},
+   month = {December},
+   pages = {5523-5532(9)},
+   publisher ={Institution of Engineering and Technology},
+   copyright = {© The Institution of Engineering and Technology},
+   url = {https://digital-library.theiet.org/content/journals/10.1049/iet-gtd.2019.0383}
+}
+```
 ## License
 
 This code is provided under a BSD license.

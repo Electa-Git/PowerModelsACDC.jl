@@ -189,6 +189,8 @@ function variable_dcgrid_voltage_magnitude_sqr_ne(pm::_PM.AbstractPowerModel; nw
                 JuMP.set_upper_bound(wdcr_ne[br],  bus_vdcmax[bi_bp[br][1]] * bus_vdcmax[bi_bp[br][2]])
             end
         end
+        report && _PM.sol_component_value(pm, nw, :busdc_ne, :wdc_ne, _PM.ids(pm, nw, :busdc_ne), wdc_ne)
+        report && _PM.sol_component_value(pm, nw, :busdc_ne, :wdcr_ne, _PM.ids(pm, nw, :busdc_ne), wdcr_ne)
 end
 
 function variable_dcgrid_voltage_magnitude_sqr_du(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true) # this has to to every branch, different than its counterpart(Wdc_fr) since two candidate branches can be connected to same node and two duplicate variables will be needed
@@ -217,43 +219,45 @@ function variable_dcgrid_voltage_magnitude_sqr_du(pm::_PM.AbstractPowerModel; nw
             JuMP.set_upper_bound(wdcr_frto_ne[i],  1.21)
         end
     end
-
+    report && _PM.sol_component_value(pm, nw, :busdc_ne, :wdc_du_fr, _PM.ids(pm, nw, :busdc_ne), wdc_fr_ne)
+    report && _PM.sol_component_value(pm, nw, :busdc_ne, :wdc_du_to, _PM.ids(pm, nw, :busdc_ne), wdc_to_ne)
+    report && _PM.sol_component_value(pm, nw, :busdc_ne, :wdcr_du, _PM.ids(pm, nw, :busdc_ne), wdcr_frto_ne)
 end
 
 "variable: `p_dcgrid[l,i,j]` for `(l,i,j)` in `arcs_dcgrid`"
 function variable_active_dcbranch_flow_ne(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true)
+        p = _PM.var(pm, nw)[:p_dcgrid_ne]= JuMP.@variable(pm.model,
+        [(l,i,j) in _PM.ref(pm, nw, :arcs_dcgrid_ne)], base_name="$(nw)_pdcgrid_ne",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :branchdc_ne, l), "p_start",  1.0)
+        )
+
     if bounded
-        _PM.var(pm, nw)[:p_dcgrid_ne]= JuMP.@variable(pm.model,
-        [(l,i,j) in _PM.ref(pm, nw, :arcs_dcgrid_ne)], base_name="$(nw)_pdcgrid_ne",
-        lower_bound = -_PM.ref(pm, nw, :branchdc_ne, l, "rateA"),
-        upper_bound =  _PM.ref(pm, nw, :branchdc_ne, l, "rateA"),
-        start = _PM.comp_start_value(_PM.ref(pm, nw, :branchdc_ne, l), "p_start",  1.0)
-        )
-    else
-        _PM.var(pm, nw)[:p_dcgrid_ne] = JuMP.@variable(pm.model,
-        [(l,i,j) in _PM.ref(pm, nw, :arcs_dcgrid_ne)], base_name="$(nw)_pdcgrid_ne",
-        start = _PM.comp_start_value(_PM.ref(pm, nw, :branchdc_ne, l), "p_start",  1.0)
-        )
+        for arc in _PM.ref(pm, nw, :arcs_dcgrid_ne)
+            l,i,j = arc
+            JuMP.set_lower_bound(p[arc], -_PM.ref(pm, nw, :branchdc_ne, l)["rateA"])
+            JuMP.set_upper_bound(p[arc],  _PM.ref(pm, nw, :branchdc_ne, l)["rateA"])
+        end
     end
+
+    report && _PM.sol_component_value_edge(pm, nw, :branchdc_ne, :pf, :pt, _PM.ref(pm, nw, :arcs_dcgrid_from_ne), _PM.ref(pm, nw, :arcs_dcgrid_to_ne), p)
 end
 
 "variable: `ccm_dcgrid[l]` for `(l)` in `branchdc`"
 function variable_dcbranch_current_sqr_ne(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true)
     vpu = 0.8
+    cc= _PM.var(pm, nw)[:ccm_dcgrid_ne] = JuMP.@variable(pm.model,
+    [l in _PM.ids(pm, nw, :branchdc_ne)], base_name="$(nw)_ccm_dcgrid_ne",
+    start = (_PM.comp_start_value(_PM.ref(pm, nw, :branchdc_ne, l), "p_start",  0.0) / vpu)^2
+    )
+
     if bounded
-        _PM.var(pm, nw)[:ccm_dcgrid_ne] = JuMP.@variable(pm.model,
-        [l in _PM.ids(pm, nw, :branchdc_ne)], base_name="$(nw)_ccm_dcgrid_ne",
-        lower_bound = 0,
-        upper_bound = (_PM.ref(pm, nw, :branchdc_ne, l, "rateA")/vpu)^2,
-        start = (_PM.comp_start_value(_PM.ref(pm, nw, :branchdc_ne, l), "p_start",  0.0) / vpu)^2
-        )
-    else
-        _PM.var(pm, nw)[:ccm_dcgrid_ne] = JuMP.@variable(pm.model,
-        [l in _PM.ids(pm, nw, :branchdc_ne)], base_name="$(nw)_ccm_dcgrid_ne",
-        start = (_PM.comp_start_value(_PM.ref(pm, nw, :branchdc_ne, l), "p_start",  0.0)/vpu)^2,
-        lower_bound = 0,
-        )
+        for (l, branchdc) in _PM.ref(pm, nw, :branchdc_ne)
+            JuMP.set_lower_bound(cc[l], 0)
+            JuMP.set_upper_bound(cc[l], (branchdc["rateA"] / vpu)^2)
+        end
     end
+
+    report && _PM.sol_component_value(pm, nw, :branchdc_ne, :ccm, _PM.ids(pm, nw, :branchdc), cc)
 end
 
 "variable: `0 <= convdc_ne[c] <= 1` for `c` in `candidate converters"

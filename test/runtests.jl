@@ -10,22 +10,29 @@ Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
 Memento.setlevel!(Memento.getlogger(PowerModels), "error")
 
 import Ipopt
-import Gurobi
-#import GLPKMathProgInterface
 import SCS
 import Cbc
-import Mosek
-import MosekTools
 import Juniper
 
 using Test
 
+local_test = false
+
 ipopt_solver = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
 scs_solver = JuMP.with_optimizer(SCS.Optimizer)
-gurobi = JuMP.with_optimizer(Gurobi.Optimizer)
-mosek = JuMP.with_optimizer(Mosek.Optimizer)
 cbc = JuMP.with_optimizer(Cbc.Optimizer, tol=1e-4, print_level=0)
 juniper = JuMP.with_optimizer(Juniper.Optimizer, nl_solver = ipopt_solver, mip_solver= cbc, time_limit= 7200)
+
+
+if local_test == true
+    ### ONLY for local testing, not supported intravis due to licensces ##############
+    import Gurobi
+    import Mosek
+    import MosekTools
+    gurobi = JuMP.with_optimizer(Gurobi.Optimizer)
+    mosek = JuMP.with_optimizer(Mosek.Optimizer)
+    ##############################
+end
 
 @testset "PowerModelsACDC" begin
 
