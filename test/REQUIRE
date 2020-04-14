@@ -1,6 +1,4 @@
 julia 1.1
 
 
-Ipopt 0.4
-SCS 0.4
-Cbc 0.4
+PowerModels 0.15.3

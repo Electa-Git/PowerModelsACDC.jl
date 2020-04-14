@@ -1,5 +1,5 @@
 # Constraints
-All the OPF constraints for the AC grids have been re-used from PowerModels.jl, and are therefore not repeated here.
+All the OPF constraints for the AC grids have been re-used from _PM.jl, and are therefore not repeated here.
 
 ```@meta
 CurrentModule = PowerModelsACDC

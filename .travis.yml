@@ -20,12 +20,14 @@ addons:
 
 before_install:
     # don't keep an old version of the code in the cache
- # - julia -e 'using Pkg; if "PowerModels" in keys(Pkg.installed()) Pkg.rm("PowerModels"); Pkg.rm("PowerModels"); Pkg.add("https://github.com/lanl-ansi/PowerModels.jl.git") end'
+ # - julia -e 'using Pkg; if "PowerModels" in keys(Pkg.installed()) Pkg.rm("PowerModels"); Pkg.rm("PowerModels"); Pkg.add("https://github.com/lanl-ansi/_PM.jl.git") end'
  # - julia -e 'using Pkg; if "PowerModelsACDC" in keys(Pkg.installed()) Pkg.rm("PowerModelsACDC"); Pkg.rm("PowerModelsACDC") end'
  # - julia -e 'using Pkg; Pkg.update()' #make sure we get the latest version of METADATA
 - julia -e 'using Pkg; Pkg.add("Ipopt")'
 - julia -e 'using Pkg; Pkg.add("SCS")'
 - julia -e 'using Pkg; Pkg.add("Documenter")'
+- julia -e 'using Pkg; Pkg.add("Juniper")'
+- julia -e 'using Pkg; Pkg.add("Cbc")'
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi

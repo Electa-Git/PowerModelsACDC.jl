@@ -25,15 +25,8 @@ function get_pu_bases(MVAbase, kVbase)
 end
 
 function process_additional_data!(data)
-    #set data in correct base
     to_pu!(data)
-    # make sure everything is set up correctly
     fix_data!(data)
-    #
-    # #set data in correct base
-    # to_pu!(data)
-
-    #convert dcline to 2 converters, 2 dc buses, 1 branchdc
     convert_matpowerdcline_to_branchdc!(data)
 end
 
@@ -73,6 +66,36 @@ function to_pu_single_network!(data)
             set_busdc_pu(busdc, MVAbase)
         end
     end
+    if haskey(data, "convdc_ne")
+        for (i, conv) in data["convdc_ne"]
+            dcbus = conv["busdc_i"]
+            kVbase = conv["basekVac"]
+            Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
+            Ibase = get_pu_bases(MVAbase, kVbase)["I"]
+
+            set_conv_pu_power(conv, MVAbase)
+            set_conv_pu_volt(conv, kVbase*sqrt(3))
+            set_conv_pu_ohm(conv, Zbase)
+        end
+    end
+    if haskey(data, "branchdc_ne")
+        for (i, branchdc) in data["branchdc_ne"]
+            set_branchdc_pu(branchdc, MVAbase)
+        end
+    end
+    if haskey(data, "busdc_ne")
+        new_busdc_ne = Dict{String, Any}()
+        for (i, busdc) in data["busdc_ne"]
+            set_busdc_pu(busdc, MVAbase)
+            new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
+            if new_bus == i
+                display("candidate dc buses and existing dc buses should have different bus numbers")
+            end
+            new_busdc_ne[string(new_bus)] = busdc # assigning new bus numbers: continous numbers from dc bus numbers
+            busdc["index"] = new_bus
+        end
+        data["busdc_ne"] = new_busdc_ne # assigning new bus numbers: continous numbers from dc bus numbers
+    end
 end
 
 function to_pu_multinetwork!(data)
@@ -99,6 +122,38 @@ function to_pu_multinetwork!(data)
             for (i, busdc) in data["nw"][n]["busdc"]
                 set_busdc_pu(busdc, MVAbase)
             end
+        end
+        if haskey(data["nw"][n], "convdc_ne")
+            for (i, conv) in data["nw"][n]["convdc_ne"]
+                dcbus = conv["busdc_i"]
+                kVbase = conv["basekVac"]
+                Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
+                Ibase = get_pu_bases(MVAbase, kVbase)["I"]
+
+                set_conv_pu_power(conv, MVAbase)
+                set_conv_pu_volt(conv, kVbase*sqrt(3))
+                set_conv_pu_ohm(conv, Zbase)
+                conv["cost"] = conv["cost"]/length(data["nw"])
+            end
+        end
+        if haskey(data["nw"][n], "branchdc_ne")
+            for (i, branchdc) in data["nw"][n]["branchdc_ne"]
+                set_branchdc_pu(branchdc, MVAbase)
+                branchdc["cost"] = branchdc["cost"]/length(data["nw"])
+            end
+        end
+        if haskey(data["nw"][n], "busdc_ne")
+            new_busdc_ne = Dict{String, Any}()
+            for (i, busdc) in data["nw"][n]["busdc_ne"]
+                set_busdc_pu(busdc, MVAbase)
+                new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from exisiting dc bus numbers
+                if new_bus == i
+                    display("candidate dc buses and existing dc buses should have different bus numbers")
+                end
+                new_busdc_ne[string(new_bus)] = busdc # assigning new bus numbers: continous numbers from dc bus numbers
+                busdc["index"] = new_bus
+            end
+            data["nw"][string(n)]["busdc_ne"] = new_busdc_ne # assigning new bus numbers: continous numbers from exisiting dc bus numbers
         end
     end
 end
@@ -163,7 +218,7 @@ end
 
 function convert_matpowerdcline_to_branchdc_multinetwork!(data)
     for (n, network) in data["nw"]
-            MVAbase = network["baseMVA"]
+        MVAbase = network["baseMVA"]
         if haskey(data["nw"][n], "dcline") && haskey(data["nw"][n]["dcline"], "1")
             if !haskey(data["nw"][n], "convdc")
                 data["nw"][n]["convdc"] = Dict{String, Any}()
@@ -242,13 +297,23 @@ function fix_data_single_network!(data)
     if haskey(data, "busdc")
         new_busdc = Dict{String, Any}()
         for (i, busdc) in data["busdc"]
-                new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
-                new_busdc[string(new_bus)] = busdc # assigning new bus numbers: continous numbers from dc bus numbers
+            new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
+            new_busdc[string(new_bus)] = busdc # assigning new bus numbers: continous numbers from dc bus numbers
         end
         data["busdc"] = new_busdc # assigning new bus numbers: continous numbers from dc bus numbers
     end
     if !haskey(data, "dcpol")
         data["dcpol"] = 2
+    end
+    if haskey(data, "convdc_ne")
+        for (i, conv) in data["convdc_ne"]
+            check_conv_parameters(conv)
+        end
+    end
+    if haskey(data, "branchdc_ne")
+        for (i, branchdc) in data["branchdc_ne"]
+            check_branchdc_parameters(branchdc)
+        end
     end
 end
 
@@ -269,13 +334,23 @@ function fix_data_multinetwork!(data)
         if haskey(data["nw"][n], "busdc")
             new_busdc = Dict{String, Any}()
             for (i, busdc) in data["nw"][n]["busdc"]
-                    new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
-                    new_busdc[string(new_bus)] = busdc # assigning new bus numbers: continous numbers from dc bus numbers
+                new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
+                new_busdc[string(new_bus)] = busdc # assigning new bus numbers: continous numbers from dc bus numbers
             end
             data["nw"][n]["busdc"] = new_busdc # assigning new bus numbers: continous numbers from dc bus numbers
         end
         if !haskey(data["nw"][n], "dcpol")
             data["nw"][n]["dcpol"] = 2
+        end
+        if haskey(data["nw"][n], "convdc_ne")
+            for (i, conv) in data["nw"][n]["convdc_ne"]
+                check_conv_parameters(conv)
+            end
+        end
+        if haskey(data["nw"][n], "branchdc_ne")
+            for (i, branchdc) in data["nw"][n]["branchdc_ne"]
+                check_branchdc_parameters(branchdc)
+            end
         end
     end
 end
@@ -288,39 +363,39 @@ end
 
 function set_branchdc_pu(branchdc, MVAbase)
     rescale_power = x -> x/MVAbase
-    PowerModels._apply_func!(branchdc, "rateA", rescale_power)
-    PowerModels._apply_func!(branchdc, "rateB", rescale_power)
-    PowerModels._apply_func!(branchdc, "rateC", rescale_power)
+    _PM._apply_func!(branchdc, "rateA", rescale_power)
+    _PM._apply_func!(branchdc, "rateB", rescale_power)
+    _PM._apply_func!(branchdc, "rateC", rescale_power)
 end
 
 function set_busdc_pu(busdc, MVAbase)
     rescale_power = x -> x/MVAbase
-    PowerModels._apply_func!(busdc, "Pdc", rescale_power)
+    _PM._apply_func!(busdc, "Pdc", rescale_power)
 end
 
 function set_conv_pu_power(conv, MVAbase)
     rescale_power = x -> x/MVAbase
-    PowerModels._apply_func!(conv, "P_g", rescale_power)
-    PowerModels._apply_func!(conv, "Q_g", rescale_power)
-    PowerModels._apply_func!(conv, "Pdcset", rescale_power)
-    PowerModels._apply_func!(conv, "LossA", rescale_power)
-    PowerModels._apply_func!(conv, "Pacmax", rescale_power)
-    PowerModels._apply_func!(conv, "Pacmin", rescale_power)
-    PowerModels._apply_func!(conv, "Qacmax", rescale_power)
-    PowerModels._apply_func!(conv, "Qacmin", rescale_power)
-    PowerModels._apply_func!(conv, "Pacrated", rescale_power)
-    PowerModels._apply_func!(conv, "Qacrated", rescale_power)
+    _PM._apply_func!(conv, "P_g", rescale_power)
+    _PM._apply_func!(conv, "Q_g", rescale_power)
+    _PM._apply_func!(conv, "Pdcset", rescale_power)
+    _PM._apply_func!(conv, "LossA", rescale_power)
+    _PM._apply_func!(conv, "Pacmax", rescale_power)
+    _PM._apply_func!(conv, "Pacmin", rescale_power)
+    _PM._apply_func!(conv, "Qacmax", rescale_power)
+    _PM._apply_func!(conv, "Qacmin", rescale_power)
+    _PM._apply_func!(conv, "Pacrated", rescale_power)
+    _PM._apply_func!(conv, "Qacrated", rescale_power)
 end
 
 function set_conv_pu_volt(conv, kVbase)
     rescale_volt = x -> x  / (kVbase)
-    PowerModels._apply_func!(conv, "LossB", rescale_volt)
+    _PM._apply_func!(conv, "LossB", rescale_volt)
 end
 
 function set_conv_pu_ohm(conv, Zbase)
     rescale_ohm = x -> x / Zbase
-    PowerModels._apply_func!(conv, "LossCrec", rescale_ohm)
-    PowerModels._apply_func!(conv, "LossCinv", rescale_ohm)
+    _PM._apply_func!(conv, "LossCrec", rescale_ohm)
+    _PM._apply_func!(conv, "LossCinv", rescale_ohm)
 end
 
 function check_conv_parameters(conv)
@@ -332,14 +407,14 @@ function check_conv_parameters(conv)
     conv["Pacrated"] = max(abs(conv["Pacmax"]),abs(conv["Pacmin"]))
     conv["Qacrated"] = max(abs(conv["Qacmax"]),abs(conv["Qacmin"]))
     if conv["Imax"] < sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
-        Memento.warn(PowerModels._LOGGER, "Inconsistent current limit for converter $conv_id, it will be updated.")
+        Memento.warn(_PM._LOGGER, "Inconsistent current limit for converter $conv_id, it will be updated.")
         conv["Imax"] = sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
     end
     if conv["LossCrec"] != conv["LossCinv"]
-        Memento.warn(PowerModels._LOGGER, "The losses of converter $conv_id are different in inverter and rectifier mode, inverter losses are used.")
+        Memento.warn(_PM._LOGGER, "The losses of converter $conv_id are different in inverter and rectifier mode, inverter losses are used.")
     end
     if conv["islcc"] == 1
-        Memento.warn(PowerModels._LOGGER, "Converter $conv_id is an LCC, reactive power limits might be updated.")
+        Memento.warn(_PM._LOGGER, "Converter $conv_id is an LCC, reactive power limits might be updated.")
         if abs(conv["Pacmax"]) >= abs(conv["Pacmin"])
             conv["phimin"] = 0
             conv["phimax"] = acos(conv["Pacmin"] / conv["Pacmax"])
