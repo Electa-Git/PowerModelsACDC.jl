@@ -16,7 +16,7 @@ import Juniper
 
 using Test
 
-local_test = true
+local_test = false
 
 ipopt_solver = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
 scs_solver = JuMP.with_optimizer(SCS.Optimizer)
@@ -24,7 +24,7 @@ cbc = JuMP.with_optimizer(Cbc.Optimizer, tol=1e-4, print_level=0)
 juniper = JuMP.with_optimizer(Juniper.Optimizer, nl_solver = ipopt_solver, mip_solver= cbc, time_limit= 7200)
 
 
-if local_test == false
+if local_test == true
     ### ONLY for local testing, not supported intravis due to licensces ##############
     import Gurobi
     import Mosek
