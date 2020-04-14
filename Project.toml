@@ -12,6 +12,7 @@ PowerModels = "c36e90e8-916a-50a6-bd94-075b64ef4655"
 
 [compat]
 InfrastructureModels = "≥ 0.4.2"
+Memento = "1.0"
 PowerModels = "~ 0.15.3"
 julia = "≥ 1.1.0"
 
