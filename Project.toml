@@ -1,6 +1,6 @@
 name = "PowerModelsACDC"
 uuid = "ff45984e-d068-5f4c-9e32-c4133509d236"
-autors = ["Hakan Ergun", "Frederik Geth", "Jay Dave"]
+autors = ["Hakan Ergun", "Frederik Geth"]
 repo = "https://github.com/hakanergun/PowerModelsACDC.jl.git"
 version = "0.3.0"
 
