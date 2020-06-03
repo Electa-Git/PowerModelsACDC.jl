@@ -36,9 +36,9 @@ Pkg.add("PowerModelsACDC")
 The current version of PowerModelsACDC is 0.3.0 and is compatible with PowerModels v0.15.3, InfrastrucureModels v0.4.3
 
 
-!!! Importany
-    Versions from 0.3.1 are hosted from https://github.com/Electa-Git/PowerModelsACDC.jl/
-    This is a research-grade optimization package.
+!!! Important
+Versions from 0.3.1 are hosted from https://github.com/Electa-Git/PowerModelsACDC.jl/.
+This is a research-grade optimization package.
 
 
 ## Special Thanks To
