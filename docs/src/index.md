@@ -19,6 +19,7 @@ PowerModelsACDC.jl extends the formulation hierarchy developed for AC grids, wit
 - SDPWRMPowerModel
 - QCWRPowerModel
 - QCWRTriPowerModel
+- LPACPowerModels
 
 Developed by:
 - Hakan Ergun, Jay Dave KU Leuven / EnergyVille
@@ -29,14 +30,19 @@ Developed by:
 
 The latest stable release of PowerModelACDC can be installed using the Julia package manager with
 
-```julia
-Pkg.clone("https://github.com/hakanergun/PowerModelsACDC.jl.git")
-```
-The package is compatible with PowerModels v0.12.2, InfrastrucureModels v0.0.13 and julia v1.1.1
+The latest stable release of PowerModelACDC can be installed using the Julia package manager with
 
-!!! note
+```julia
+Pkg.add("PowerModelsACDC")
+```
+The current version of PowerModelsACDC is 0.3.0 and is compatible with PowerModels v0.15.3, InfrastrucureModels v0.4.3
+
+
+!!! Importany
+    Versions from 0.3.1 are hosted from https://github.com/Electa-Git/PowerModelsACDC.jl/
     This is a research-grade optimization package. Eventually, we hope to make this a
     stable julia package.
+    Version
 
 
 ## Special Thanks To
