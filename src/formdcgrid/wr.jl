@@ -47,14 +47,11 @@ wdcr[(i,j)] <= wdc[i]*wdc[j]
 """
 function constraint_voltage_dc_ne(pm::_PM.AbstractWRModel, n::Int)
     wdc = _PM.var(pm, n, :wdc_ne)
-    wdc_frto = _PM.var(pm, n, :wdcr_ne)#J:12/07 ----<<
-    wdc_du_frto = _PM.var(pm, n, :wdcr_du) #J:12/07 ||
-    wdc_du_to = _PM.var(pm, n, :wdc_du_to) #J:12/07 note: Wdc_ne defined over buses and Wdc_du_to over dc lines..
-    wdc_du_fr = _PM.var(pm, n, :wdc_du_fr) #J:12/07  ||
+    wdc_frto = _PM.var(pm, n, :wdcr_ne)
+    wdc_du_frto = _PM.var(pm, n, :wdcr_du)
+    wdc_du_to = _PM.var(pm, n, :wdc_du_to)
+    wdc_du_fr = _PM.var(pm, n, :wdc_du_fr)
     z  = _PM.var(pm, n, :branch_ne)
-    # wdcr = _PM.var(pm, n, :wdcr_ne, (f_bus, t_bus))
-# Wdcr_ne and wdc_ne are defined over bus. this will require duplicate variable. PowerModels go around this problem by defining it for each _ne branch.
-# We can do this but problem is how the variables are extracted at the end and how it will be coordinated with PMACDC.
     for (l,i,j) in pm.ref[:nw][n][:arcs_dcgrid_from_ne]
     wdc_to = []
     wdc_fr = []
@@ -63,20 +60,13 @@ function constraint_voltage_dc_ne(pm::_PM.AbstractWRModel, n::Int)
     end
 end
 
-# function constraint_voltage_dc_ne(pm::_PM.AbstractWRModel, n::Int)
-#     wdc = _PM.var(pm, n, :wdc_ne)
-#     wdcr = _PM.var(pm, n, :wdcr_ne)
-#     for (i,j) in _PM.ids(pm, n, :buspairsdc_ne)
-#         _IM.relaxation_complex_product(pm.model, wdc[i], wdc[j], wdcr[(i,j)], 0)
-#     end
-# end
 
 function constraint_voltage_dc_ne(pm::_PM.AbstractWRConicModel, n::Int)
     wdc = _PM.var(pm, n, :wdc_ne)
-    wdc_frto = _PM.var(pm, n, :wdcr_ne)#J:12/07 ----<<
-    wdc_du_frto = _PM.var(pm, n, :wdcr_du) #J:12/07 ||
-    wdc_du_to = _PM.var(pm, n, :wdc_du_to) #J:12/07 note: Wdc_ne defined over buses and Wdc_du_to over dc lines..
-    wdc_du_fr = _PM.var(pm, n, :wdc_du_fr) #J:12/07  ||
+    wdc_frto = _PM.var(pm, n, :wdcr_ne)
+    wdc_du_frto = _PM.var(pm, n, :wdcr_du)
+    wdc_du_to = _PM.var(pm, n, :wdc_du_to)
+    wdc_du_fr = _PM.var(pm, n, :wdc_du_fr) 
     z  = var(pm, n, :branch_ne)
     for (l,i,j) in pm.ref[:nw][n][:arcs_dcgrid_from_ne]
     wdc_to = []

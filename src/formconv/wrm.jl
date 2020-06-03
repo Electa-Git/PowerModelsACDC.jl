@@ -1,6 +1,4 @@
 function constraint_voltage_product_converter(pm::_PM.AbstractWRMModel, wr, wi, w_fr, w_to)
-    # # JuMP.@constraint(pm.model, norm([ 2*wr;  2*wi; w_fr-w_to ]) <= w_fr+w_to )
-    # JuMP.@constraint(pm.model, [ 2*wr,  2*wi, w_fr-w_to, w_fr+w_to] in JuMP.RotatedSecondOrderCone())
     JuMP.@constraint(pm.model, [w_fr/sqrt(2), w_to/sqrt(2), wr, wi] in JuMP.RotatedSecondOrderCone())
 end
 
@@ -19,8 +17,6 @@ function constraint_converter_current(pm::_PM.AbstractWRMModel, n::Int,  i::Int,
     iconv = _PM.var(pm, n,  :iconv_ac, i)
     iconv_sq = _PM.var(pm, n,  :iconv_ac_sq, i)
 
-    # _PM.con(pm, n,  :conv_i)[i]  = JuMP.@constraint(pm.model, [wc/sqrt(2), iconv_sq/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
-    # _PM.con(pm, n,  :conv_i_sqrt)[i] = JuMP.@constraint(pm.model, [Umax * iconv/sqrt(2), Umax * iconv/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
     JuMP.@constraint(pm.model, [wc/sqrt(2), iconv_sq/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
     JuMP.@constraint(pm.model, [Umax * iconv/sqrt(2), Umax * iconv/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
     JuMP.@constraint(pm.model, iconv_sq <= iconv*Imax)
@@ -49,10 +45,8 @@ function constraint_converter_current_ne(pm::_PM.AbstractWRMModel, n::Int, i::In
     qconv_ac = _PM.var(pm, n, :qconv_ac_ne, i)
     iconv = _PM.var(pm, n, :iconv_ac_ne, i)
     iconv_sq = _PM.var(pm, n, :iconv_ac_sq_ne, i)
-    # irc_sq = _PM.var(pm, n, :irc_sq_ne, i)
 
     JuMP.@constraint(pm.model, [wc/sqrt(2), iconv_sq/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
     JuMP.@constraint(pm.model, [Umax * iconv/sqrt(2), Umax * iconv/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
-    # @constraint(pm.model, norm([2*iconv; 1 - iconv_sq]) <= 1 + iconv_sq)
     JuMP.@constraint(pm.model, iconv_sq <= iconv*Imax)
 end

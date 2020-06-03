@@ -23,9 +23,9 @@ function post_mp_tnepopf_bf(pm::_PM.AbstractPowerModel)
     #     add_candidate_dcgrid!(pm, n)
     # end
     for (n, networks) in pm.ref[:nw]
-        _PM.variable_voltage(pm; nw = n)
-        _PM.variable_generation(pm; nw = n)
-        _PM.variable_branch_flow(pm; nw = n)
+        _PM.variable_bus_voltage(pm; nw = n)
+        _PM.variable_gen_power(pm; nw = n)
+        _PM.variable_branch_power(pm; nw = n)
 
         _PM.variable_branch_current(pm; nw = n)
         variable_voltage_slack(pm; nw = n)
@@ -56,7 +56,7 @@ function post_mp_tnepopf_bf(pm::_PM.AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, n, :branch)
-            _PM.constraint_flow_losses(pm, i; nw = n)
+            _PM.constraint_power_losses(pm, i; nw = n)
             _PM.constraint_voltage_magnitude_difference(pm, i; nw = n)
             _PM.constraint_voltage_angle_difference(pm, i; nw = n)
             _PM.constraint_thermal_limit_from(pm, i; nw = n)

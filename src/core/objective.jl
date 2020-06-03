@@ -64,7 +64,6 @@ function objective_min_polynomial_fuel_cost(pm::_PM.AbstractConicModel)
                 upper_bound = _PM.ref(pm, n, :gen, i, "pmax", cnd)^2
             )
             for (i, gen) in nw_ref[:gen]
-                # JuMP.@constraint(pm.model, norm([2*var(pm, n, cnd, :pg, i), pg_sqr[i]-1]) <= pg_sqr[i]+1)
                 JuMP.@constraint(pm.model, [pg_sqr[i], var(pm, n, cnd, :pg, i)/sqrt(2), var(pm, n, cnd, :pg, i)/sqrt(2)] in JuMP.SecondOrderCone())
             end
 

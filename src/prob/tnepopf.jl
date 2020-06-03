@@ -16,9 +16,9 @@ end
 function post_tnepopf(pm::_PM.AbstractPowerModel)
     # PowerModelsACDC.add_ref_dcgrid!(pm)
     # add_candidate_dcgrid!(pm)
-    _PM.variable_voltage(pm)
-    _PM.variable_generation(pm)
-    _PM.variable_branch_flow(pm)
+    _PM.variable_bus_voltage(pm)
+    _PM.variable_gen_power(pm)
+    _PM.variable_branch_power(pm)
     variable_voltage_slack(pm)
 
     variable_active_dcbranch_flow(pm)

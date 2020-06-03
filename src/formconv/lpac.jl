@@ -136,7 +136,7 @@ function variable_converter_filter_voltage_angle_cs(pm::_PM.AbstractLPACModel; n
         end
     end
 
-    report && _PM.sol_component_value(pm, nw, :convdc, :cs_vaf, _PM.ids(pm, nw, :convdc), csvaf)
+    report && _IM.sol_component_value(pm, nw, :convdc, :cs_vaf, _PM.ids(pm, nw, :convdc), csvaf)
 end
 
 function variable_converter_internal_voltage_angle_cs(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true, report = true)
@@ -152,7 +152,7 @@ function variable_converter_internal_voltage_angle_cs(pm::_PM.AbstractLPACModel;
         end
     end
 
-    report && _PM.sol_component_value(pm, nw, :convdc, :cs_vac, _PM.ids(pm, nw, :convdc), csvac)
+    report && _IM.sol_component_value(pm, nw, :convdc, :cs_vac, _PM.ids(pm, nw, :convdc), csvac)
 end
 
 function variable_converter_filter_voltage_magnitude(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true, report = true)
@@ -168,7 +168,7 @@ function variable_converter_filter_voltage_magnitude(pm::_PM.AbstractLPACModel; 
             end
         end
 
-        report && _PM.sol_component_value(pm, nw, :convdc, :phi_vmf, _PM.ids(pm, nw, :convdc), phivmf)
+        report && _IM.sol_component_value(pm, nw, :convdc, :phi_vmf, _PM.ids(pm, nw, :convdc), phivmf)
 end
 
 function variable_converter_internal_voltage_magnitude(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true, report = true)
@@ -184,7 +184,7 @@ function variable_converter_internal_voltage_magnitude(pm::_PM.AbstractLPACModel
             end
         end
 
-        report && _PM.sol_component_value(pm, nw, :convdc, :phi_vmc, _PM.ids(pm, nw, :convdc), phivmc)
+        report && _IM.sol_component_value(pm, nw, :convdc, :phi_vmc, _PM.ids(pm, nw, :convdc), phivmc)
 end
 
 function constraint_conv_capacity_PWL(pm::_PM.AbstractLPACModel, n::Int, ppr_to, qpr_to, Umax, Imax, Smax)

@@ -1,5 +1,4 @@
-# Not necessary after PowerModels v0.15.3
-
+# Not used from v0.3.0 on (PowerModels v0.15.3) - Kept for sentimental reasons
 function get_solution_acdc(pm::_PM.AbstractPowerModel, sol::Dict{String,Any})
     _PM.add_setpoint_bus_voltage!(sol, pm)
     _PM.add_setpoint_generator_power!(sol, pm)
@@ -147,11 +146,7 @@ function add_dcconverter_voltage_setpoint_ne(sol, pm::_PM.AbstractPowerModel)
     _PM.add_setpoint!(sol, pm, "convdc_ne", "vafilt", :vaf_ne)
     _PM.add_setpoint!(sol, pm, "convdc_ne", "wf", :wf_ac_ne)
     _PM.add_setpoint!(sol, pm, "convdc_ne", "w_du", :w_du)
-    # _PM.add_setpoint!(sol, pm, "convdc_ne", "wf_fr", :wf_fr)
     _PM.add_setpoint!(sol, pm, "convdc_ne", "wc", :wc_ac_ne)
-    # _PM.add_setpoint!(sol, pm, "convdc_ne", "wr_fr", :wr_fr)
-    # _PM.add_setpoint!(sol, pm, "convdc_ne", "wr_to", :wr_to)
-    # _PM.add_setpoint!(sol, pm, "convdc_ne", "wf_fl", :wf_fl)
 end
 
 function add_dcgrid_flow_setpoint_ne(sol, pm::_PM.AbstractPowerModel)

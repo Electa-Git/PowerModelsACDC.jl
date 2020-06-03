@@ -15,8 +15,6 @@ function constraint_kcl_shunt(pm::_PM.AbstractLPACModel, n::Int,  i::Int, bus_ar
     qconv_grid_ac = _PM.var(pm, n, :qconv_tf_fr)
 
 
-#     _PM.con(pm, n, :kcl_p)[i] = JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)   - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*(1.0 + 2*phi))
-#     _PM.con(pm, n, :kcl_q)[i] = JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)   - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*(1.0 + 2*phi))
     JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)   - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*(1.0 + 2*phi))
     JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)   - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*(1.0 + 2*phi))
 end
@@ -57,7 +55,6 @@ end
 ############# TNEP Constraints #################
 
 function constraint_kcl_shunt_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
-    # vm = _PM.var(pm, n, :vm, i)
     phi = _PM.var(pm, n, :phi, i)
     p = _PM.var(pm, n, :p)
     q = _PM.var(pm, n, :q)
@@ -86,8 +83,6 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractLPACModel, n::Int, f_bus, 
         JuMP.@constraint(pm.model, p_dc_fr + p_dc_to == 0)
     else
         g = 1 / r
-        # @NLconstraint(pm.model, p_dc_fr == p * g *  (phi_fr - phi_to - phi_fr^2 - phi_fr*phi_to))
-        # @NLconstraint(pm.model, p_dc_to == p * g *  (phi_to - phi_fr - phi_to^2 - phi_to*phi_fr))
         JuMP.@constraint(pm.model, p_dc_fr == p * g *  (phi_fr_du - phi_to_du))
         JuMP.@constraint(pm.model, p_dc_to == p * g *  (phi_to_du - phi_fr_du))
 
@@ -114,24 +109,17 @@ function contraint_ohms_dc_branch_busvoltage_structure_phi(pm::_PM.AbstractPower
     for i in _PM.ids(pm, n, :busdc_ne)
         if t_bus == i
             phi_to = _PM.var(pm, n, :phi_vdcm_ne, t_bus)
-            # display(wdc_to)
-            #wdc_to_du = _PM.var(pm, n, :wdc_ne_du, t_bus)
         end
         if f_bus == i
             phi_fr = _PM.var(pm, n, :phi_vdcm_ne, f_bus)
-            #wdc_fr_du = _PM.var(pm, n, :wdc_ne_du, f_bus)
         end
     end
     for i in _PM.ids(pm, n, :busdc)
         if t_bus == i
             phi_to = _PM.var(pm, n, :phi_vdcm, t_bus)
-            # display(wdc_to)
-            #wdc_to_du = _PM.var(pm, n, :wdc_du, t_bus)
         end
         if f_bus == i
             phi_fr = _PM.var(pm, n, :phi_vdcm, f_bus)
-            # display(wdc_fr)
-            #wdc_fr_du = _PM.var(pm, n, :wdc_du, f_bus)
         end
     end
     return phi_to, phi_fr

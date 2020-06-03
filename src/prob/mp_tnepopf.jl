@@ -25,9 +25,9 @@ function post_mp_tnepopf(pm::_PM.AbstractPowerModel)
     #     add_candidate_dcgrid!(pm, n)
     # end
     for (n, networks) in pm.ref[:nw]
-        _PM.variable_voltage(pm; nw = n)
-        _PM.variable_generation(pm; nw = n)
-        _PM.variable_branch_flow(pm; nw = n)
+        _PM.variable_bus_voltage(pm; nw = n)
+        _PM.variable_gen_power(pm; nw = n)
+        _PM.variable_branch_power(pm; nw = n)
         variable_voltage_slack(pm; nw = n)
 
         variable_active_dcbranch_flow(pm; nw = n)

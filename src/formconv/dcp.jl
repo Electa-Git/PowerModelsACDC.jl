@@ -250,5 +250,5 @@ function variable_voltage_slack(pm::_PM.AbstractDCPModel; nw::Int=pm.cnw, bounde
     upper_bound = 2*pi,
     start = 0,
     )
-    report && _PM.sol_component_value(pm, nw, :convdc_ne, :va, _PM.ids(pm, nw, :convdc_ne), va_ne)
+    report && _IM.sol_component_value(pm, nw, :convdc_ne, :va, _PM.ids(pm, nw, :convdc_ne), va_ne)
 end

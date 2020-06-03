@@ -39,7 +39,6 @@ function multinetwork_data(sn_data::Dict{String,Any}, extradata::Dict{String,Any
                         if haskey(mn_data["nw"]["$n"][key], l)
                             mn_data["nw"]["$n"][key][l] = deepcopy(sn_data_tmp[key][l])
                             for (m, property) in extradata[key][l]
-                                #mn_data["nw"]["$n"][key][l][m] = deepcopy(sn_data_tmp[key][l][m])
                                 if haskey(mn_data["nw"]["$n"][key][l], m)
                                     mn_data["nw"]["$n"][key][l][m] = property[n]
                                 else

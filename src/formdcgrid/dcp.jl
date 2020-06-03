@@ -11,7 +11,6 @@ function constraint_kcl_shunt(pm::_PM.AbstractDCPModel, n::Int,  i::Int, bus_arc
     pconv_grid_ac = _PM.var(pm, n, :pconv_tf_fr)
     v = 1
 
-    # _PM.con(pm, n, :kcl_p)[i] = JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens) - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*v^2)
     JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens) - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*v^2)
 end
 
@@ -57,7 +56,6 @@ function constraint_kcl_shunt_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int, bus_a
     pconv_ac = _PM.var(pm, n, :pconv_ac)
     pconv_ac_ne = _PM.var(pm, n, :pconv_ac_ne)
     v = 1
-    #display(pconv_grid_ac)
     JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac) + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(pg[g] for g in bus_gens) - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*v^2)
 end
 

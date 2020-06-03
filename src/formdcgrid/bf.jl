@@ -68,7 +68,6 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractBFQPModel, n::Int, f_bus, 
     wdc_fr = []
 
     wdc_to, wdc_fr = contraint_ohms_dc_branch_busvoltage_structure_W(pm, n, f_bus, t_bus, wdc_to, wdc_fr)
-    # display("branch_ohms")
     wdc_du_to = _PM.var(pm, n, :wdc_du_to, l)
     wdc_du_fr = _PM.var(pm, n, :wdc_du_fr, l)
 
@@ -100,13 +99,11 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractBFConicModel, n::Int, f_bu
     wdc_fr = []
 
     wdc_to, wdc_fr = contraint_ohms_dc_branch_busvoltage_structure_W(pm, n, f_bus, t_bus, wdc_to, wdc_fr)
-    # display("branch_ohms")
     wdc_du_to = _PM.var(pm, n, :wdc_du_to, l)
     wdc_du_fr = _PM.var(pm, n, :wdc_du_fr, l)
 
 
     JuMP.@constraint(pm.model, p_dc_fr + p_dc_to ==  r * p * ccm_dcgrid)
-    # JuMP.@constraint(pm.model, norm([2*p_dc_fr/p; wdc_fr - ccm_dcgrid]) <= wdc_fr + ccm_dcgrid)
     JuMP.@constraint(pm.model, [p*wdc_fr/sqrt(2), p*ccm_dcgrid/sqrt(2), p_dc_fr/sqrt(2), p_dc_fr/sqrt(2)] in JuMP.RotatedSecondOrderCone())
 
     # different type of on_off constraint
@@ -138,25 +135,17 @@ function contraint_ohms_dc_branch_busvoltage_structure_W(pm::_PM.AbstractPowerMo
     for i in _PM.ids(pm, n, :busdc_ne)
         if t_bus == i
             wdc_to = _PM.var(pm, n, :wdc_ne, t_bus)
-            # display(wdc_to)
-            #wdc_to_du = _PM.var(pm, n, :wdc_ne_du, t_bus)
         end
         if f_bus == i
             wdc_fr = _PM.var(pm, n, :wdc_ne, f_bus)
-            # display(wdc_fr)
-            #wdc_fr_du = _PM.var(pm, n, :wdc_ne_du, f_bus)
         end
     end
     for i in _PM.ids(pm, n, :busdc)
         if t_bus == i
             wdc_to = _PM.var(pm, n, :wdc, t_bus)
-            # display(wdc_to)
-            #wdc_to_du = _PM.var(pm, n, :wdc_du, t_bus)
         end
         if f_bus == i
             wdc_fr = _PM.var(pm, n, :wdc, f_bus)
-            # display(wdc_fr)
-            #wdc_fr_du = _PM.var(pm, n, :wdc_du, f_bus)
         end
     end
     return wdc_to, wdc_fr

@@ -14,9 +14,9 @@ end
 
 ""
 function post_acdcpf(pm::_PM.AbstractPowerModel)
-    _PM.variable_voltage(pm, bounded = false)
-    _PM.variable_generation(pm, bounded = false)
-    _PM.variable_branch_flow(pm, bounded = false)
+    _PM.variable_bus_voltage(pm, bounded = false)
+    _PM.variable_gen_power(pm, bounded = false)
+    _PM.variable_branch_power(pm, bounded = false)
 
     # dirty, should be improved in the future TODO
     if typeof(pm) <: _PM.SOCBFPowerModel
@@ -46,7 +46,7 @@ function post_acdcpf(pm::_PM.AbstractPowerModel)
             @assert bus["bus_type"] == 2
             _PM.constraint_voltage_magnitude_setpoint(pm, i)
             for j in _PM.ref(pm, :bus_gens, i)
-                _PM.constraint_active_gen_setpoint(pm, j)
+                _PM.constraint_gen_setpoint_active(pm, j)
             end
         end
     end
@@ -54,7 +54,7 @@ function post_acdcpf(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :branch)
         # dirty, should be improved in the future TODO
         if typeof(pm) <: _PM.SOCBFPowerModel
-            _PM.constraint_flow_losses(pm, i)
+            _PM.constraint_power_losses(pm, i)
             _PM.constraint_voltage_magnitude_difference(pm, i)
             _PM.constraint_branch_current(pm, i)
         else
@@ -69,7 +69,6 @@ function post_acdcpf(pm::_PM.AbstractPowerModel)
         constraint_ohms_dc_branch(pm, i)
     end
     for (c, conv) in _PM.ref(pm, :convdc)
-        #constraint_converter_filter_transformer_reactor(pm, c)
         constraint_conv_transformer(pm, c)
         constraint_conv_reactor(pm, c)
         constraint_conv_filter(pm, c)

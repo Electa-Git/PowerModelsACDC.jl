@@ -9,7 +9,6 @@ function constraint_converter_losses(pm::_PM.AbstractACPModel, n::Int, i::Int, a
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
     iconv = _PM.var(pm, n, :iconv_ac, i)
 
-    # _PM.con(pm, n, :conv_loss)[i] = JuMP.@NLconstraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv^2)
     JuMP.@NLconstraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv^2)
 end
 """
@@ -24,7 +23,6 @@ function constraint_converter_current(pm::_PM.AbstractACPModel, n::Int, i::Int, 
     qconv_ac = _PM.var(pm, n, :qconv_ac, i)
     iconv = _PM.var(pm, n, :iconv_ac, i)
 
-    # _PM.con(pm, n, :conv_i)[i] = JuMP.@NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == vmc^2 * iconv^2)
     JuMP.@NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == vmc^2 * iconv^2)
 end
 """
@@ -54,15 +52,7 @@ function constraint_conv_transformer(pm::_PM.AbstractACPModel, n::Int, i::Int, r
         btf = imag(ytf)
         gtf_sh = 0
         c1, c2, c3, c4 = ac_power_flow_constraints(pm.model, gtf, btf, gtf_sh, vm, vmf, va, vaf, ptf_fr, ptf_to, qtf_fr, qtf_to, tm)
-
-        # _PM.con(pm, n, :conv_tf_p_fr)[i] = c1
-        # _PM.con(pm, n, :conv_tf_q_fr)[i] = c2
-        #
-        # _PM.con(pm, n, :conv_tf_p_to)[i] = c3
-        # _PM.con(pm, n, :conv_tf_q_to)[i] = c4
     else
-        # _PM.con(pm, n, :conv_tf_p_fr)[i] = JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
-        # _PM.con(pm, n, :conv_tf_q_fr)[i] = JuMP.@constraint(pm.model, qtf_fr + qtf_to == 0)
         JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
         JuMP.@constraint(pm.model, qtf_fr + qtf_to == 0)
         JuMP.@constraint(pm.model, va == vaf)
@@ -102,8 +92,6 @@ function constraint_conv_reactor(pm::_PM.AbstractACPModel, n::Int, i::Int, rc, x
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)
-        # _PM.con(pm, n, :conv_pr_p)[i] = JuMP.@NLconstraint(pm.model, -pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf))
-        # _PM.con(pm, n, :conv_pr_q)[i] = JuMP.@NLconstraint(pm.model, -qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf))
         JuMP.@NLconstraint(pm.model, -pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf))
         JuMP.@NLconstraint(pm.model, -qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf))
         JuMP.@NLconstraint(pm.model, ppr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac))
@@ -111,8 +99,6 @@ function constraint_conv_reactor(pm::_PM.AbstractACPModel, n::Int, i::Int, rc, x
     else
         ppr_to = -pconv_ac
         qpr_to = -qconv_ac
-        # _PM.con(pm, n, :conv_pr_p)[i] = JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
-        # _PM.con(pm, n, :conv_pr_q)[i] = JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
         JuMP.@constraint(pm.model, vac == vaf)
@@ -135,8 +121,6 @@ function constraint_conv_filter(pm::_PM.AbstractACPModel, n::Int, i::Int, bv, fi
 
     vmf = _PM.var(pm, n, :vmf, i)
 
-    # _PM.con(pm, n, :conv_kcl_p)[i] = JuMP.@constraint(pm.model,   ppr_fr + ptf_to == 0 )
-    # _PM.con(pm, n, :conv_kcl_q)[i] = JuMP.@NLconstraint(pm.model, qpr_fr + qtf_to +  (-bv) * filter *vmf^2 == 0)
     JuMP.@constraint(pm.model,   ppr_fr + ptf_to == 0 )
     JuMP.@NLconstraint(pm.model, qpr_fr + qtf_to +  (-bv) * filter *vmf^2 == 0)
 end
@@ -152,8 +136,6 @@ function constraint_conv_firing_angle(pm::_PM.AbstractACPModel, n::Int, i::Int, 
     q = _PM.var(pm, n, :qconv_ac, i)
     phi = _PM.var(pm, n, :phiconv, i)
 
-    # _PM.con(pm, n, :conv_cosphi)[i] = JuMP.@NLconstraint(pm.model,   p == cos(phi) * S)
-    # _PM.con(pm, n, :conv_sinphi)[i] = JuMP.@NLconstraint(pm.model,   q == sin(phi) * S)
     JuMP.@NLconstraint(pm.model,   p == cos(phi) * S)
     JuMP.@NLconstraint(pm.model,   q == sin(phi) * S)
 end
@@ -162,7 +144,6 @@ function constraint_dc_droop_control(pm::_PM.AbstractACPModel, n::Int, i::Int, b
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
     vdc = _PM.var(pm, n, :vdcm, busdc_i)
 
-    # _PM.con(pm, n, :conv_dc_droop)[i] = JuMP.@constraint(pm.model, pconv_dc == pref_dc - sign(pref_dc) * 1 / k_droop * (vdc - vref_dc))
     JuMP.@constraint(pm.model, pconv_dc == pref_dc - sign(pref_dc) * 1 / k_droop * (vdc - vref_dc))
 end
 
@@ -181,7 +162,6 @@ function constraint_converter_losses_ne(pm::_PM.AbstractACPModel, n::Int, i::Int
     iconv = _PM.var(pm, n, :iconv_ac_ne, i)
     z = _PM.var(pm, n, :conv_ne, i)
 
-    # _PM.con(pm, n, :conv_loss_ne)[i] = @NLconstraint(pm.model, pconv_ac + pconv_dc == a*z + b*iconv + c*iconv^2)
     JuMP.@NLconstraint(pm.model, pconv_ac + pconv_dc == a*z + b*iconv + c*iconv^2)
 end
 
@@ -231,12 +211,6 @@ function constraint_conv_transformer_ne(pm::_PM.AbstractACPModel, n::Int, i::Int
         btf = imag(ytf)
         gtf_sh = 0
         c1, c2, c3, c4 = ac_power_flow_constraints(pm.model, gtf, btf, gtf_sh, vm, vmf, va, vaf, ptf_fr, ptf_to, qtf_fr, qtf_to, tm, z)
-
-        # _PM.con(pm, n, :conv_tf_p_fr_ne)[i] = c1
-        # _PM.con(pm, n, :conv_tf_q_fr_ne)[i] = c2
-        #
-        # _PM.con(pm, n, :conv_tf_p_to_ne)[i] = c3
-        # _PM.con(pm, n, :conv_tf_q_to_ne)[i] = c4
     else
         JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
         JuMP.@constraint(pm.model, qtf_fr + qtf_to == 0)

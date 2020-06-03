@@ -506,9 +506,6 @@ end
 function convert_to_dcbranch_and_converters(data, dcline, branchdc_id, conv_i, fbusdc, tbusdc)
     # make one more DC branch
     branchdc = get_branchdc(dcline, branchdc_id, fbusdc, tbusdc)
-    #pminf, pmaxf, pmint, pmaxt = converter_bounds(dcline["Pmin"], dcline["Pmax"], dcline["loss0"], dcline["loss1"])
-    # converter 1
-    #conv_i = conv_i + 1
     vmaxf = data["bus"]["$fbusdc"]["vmax"]
     vminf = data["bus"]["$fbusdc"]["vmin"]
     vmaxt =  data["bus"]["$tbusdc"]["vmax"]

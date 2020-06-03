@@ -1,4 +1,4 @@
-constraint_voltage_dc(pm::_PM.AbstractPowerModel) = constraint_voltage_dc(pm, pm.cnw) # TODO check this
+constraint_voltage_dc(pm::_PM.AbstractPowerModel) = constraint_voltage_dc(pm, pm.cnw)
 # no data, so no further templating is needed, constraint goes directly to the formulations
 function constraint_kcl_shunt(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     bus = _PM.ref(pm, nw, :bus, i)
@@ -121,19 +121,8 @@ end
 function constraint_voltage_dc_ne(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw)
     constraint_voltage_dc_ne(pm, nw)
 end
-# function constraint_voltage_dc_ne_bus(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw)
-#     constraint_voltage_dc_ne_bus(pm, nw)
-# end
 # no data, so no further templating is needed, constraint goes directly to the formulations
 function constraint_kcl_shunt_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    #
-    # if !haskey(PowerModels.con(pm, nw), :kcl_p)
-    #     PowerModels.con(pm, nw)[:kcl_p] = Dict{Int,ConstraintRef}()
-    # end
-    # if !haskey(PowerModels.con(pm, nw), :kcl_q)
-    #     PowerModels.con(pm, nw)[:kcl_q] = Dict{Int,ConstraintRef}()
-    # end
-
     bus = PowerModels.ref(pm, nw, :bus, i)
     bus_arcs = PowerModels.ref(pm, nw, :bus_arcs, i)
     bus_arcs_dc = PowerModels.ref(pm, nw, :bus_arcs_dc, i)
@@ -166,9 +155,6 @@ function constraint_converter_limit_on_off(pm::_PM.AbstractPowerModel, i::Int; n
 end
 
 function constraint_kcl_shunt_dcgrid_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    # if !haskey(PowerModels.con(pm, nw), :kcl_dcgrid)
-    #     PowerModels.con(pm, nw)[:kcl_dcgrid] = Dict{Int,ConstraintRef}()
-    # end
     bus_arcs_dcgrid = PowerModels.ref(pm, nw, :bus_arcs_dcgrid, i)
     if haskey(PowerModels.ref(pm, nw, :bus_arcs_dcgrid_ne), i)
         bus_arcs_dcgrid_ne = PowerModels.ref(pm, nw, :bus_arcs_dcgrid_ne, i)
@@ -182,9 +168,6 @@ function constraint_kcl_shunt_dcgrid_ne(pm::_PM.AbstractPowerModel, i::Int; nw::
 end
 
 function constraint_kcl_shunt_dcgrid_ne_bus(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    # if !haskey(PowerModels.con(pm, nw), :kcl_dcgrid_ne)
-    #     PowerModels.con(pm, nw)[:kcl_dcgrid_ne] = Dict{Int,ConstraintRef}()
-    # end
     bus_i = PowerModels.ref(pm, nw, :busdc_ne, i)["busdc_i"]
     if haskey(PowerModels.ref(pm, nw, :bus_arcs_dcgrid_ne), bus_i)
         bus_arcs_dcgrid_ne = PowerModels.ref(pm, nw, :bus_arcs_dcgrid_ne, bus_i)
@@ -197,9 +180,6 @@ function constraint_kcl_shunt_dcgrid_ne_bus(pm::_PM.AbstractPowerModel, i::Int; 
 end
 
 function constraint_ohms_dc_branch_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    # if !haskey(PowerModels.con(pm, nw), :dc_branch_ne)
-    #     PowerModels.con(pm, nw)[:dc_branch_ne] = Dict{Int,ConstraintRef}()
-    # end
     branch = PowerModels.ref(pm, nw, :branchdc_ne, i)
     f_bus = branch["fbusdc"]
     t_bus = branch["tbusdc"]
@@ -213,12 +193,6 @@ end
 
 function constraint_branch_limit_on_off(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     branch = PowerModels.ref(pm, nw, :branchdc_ne, i)
-    # if !haskey(PowerModels.con(pm, nw), :brdc_ne_pminto)
-    #     PowerModels.con(pm, nw)[:brdc_ne_pminto] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:brdc_ne_pmaxto] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:brdc_ne_pminfr] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:brdc_ne_pmaxfr] = Dict{Int,ConstraintRef}()
-    # end
     f_bus = branch["fbusdc"]
     t_bus = branch["tbusdc"]
     f_idx = (i, f_bus, t_bus)
@@ -234,11 +208,6 @@ end
 
 #
 function constraint_converter_losses_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    # if !haskey(PowerModels.con(pm, nw), :conv_loss_ne)
-    #     PowerModels.con(pm, nw)[:conv_loss_ne] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:conv_loss_ne_aux] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:conv_loss_ne_plmax] = Dict{Int,ConstraintRef}()
-    # end
     conv = PowerModels.ref(pm, nw, :convdc_ne, i)
     a = conv["LossA"]
     b = conv["LossB"]
@@ -248,12 +217,7 @@ function constraint_converter_losses_ne(pm::_PM.AbstractPowerModel, i::Int; nw::
     constraint_converter_losses_ne(pm, nw, i, a, b, c, plmax)
 end
 #
-#
  function constraint_converter_current_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    # if !haskey(PowerModels.con(pm, nw), :conv_i_ne)
-    #     PowerModels.con(pm, nw)[:conv_i_ne] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:conv_i_sqrt_ne] = Dict{Int,ConstraintRef}()
-    #  end
      conv = PowerModels.ref(pm, nw, :convdc_ne, i)
      Vmax = conv["Vmmax"]
      Imax = conv["Imax"]
@@ -261,47 +225,24 @@ end
  end
 
 function constraint_conv_reactor_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    # if !haskey(PowerModels.con(pm, nw), :conv_pr_p_fr_ne)
-    #     PowerModels.con(pm, nw)[:conv_pr_p_fr_ne] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:conv_pr_p_to_ne] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:conv_pr_q_ne] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:conv_pr_p_ne] = Dict{Int,ConstraintRef}() # added_06_07
-    # end
     conv = PowerModels.ref(pm, nw, :convdc_ne, i)
     constraint_conv_reactor_ne(pm, nw, i, conv["rc"], conv["xc"], Bool(conv["reactor"]))
 end
 
 #
 function constraint_conv_filter_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    # if !haskey(PowerModels.con(pm, nw), :conv_kcl_p_ne)
-    #     PowerModels.con(pm, nw)[:conv_kcl_p_ne] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:conv_kcl_q_ne] = Dict{Int,ConstraintRef}()
-    # end
     conv = PowerModels.ref(pm, nw, :convdc_ne, i)
     constraint_conv_filter_ne(pm, nw, i, conv["bf"], Bool(conv["filter"]) )
 end
 
 #
 function constraint_conv_transformer_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    # if !haskey(PowerModels.con(pm, nw), :conv_tf_p_fr_ne)
-    #     PowerModels.con(pm, nw)[:conv_tf_p_fr_ne] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:conv_tf_q_fr_ne] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:conv_tf_p_to_ne] = Dict{Int,ConstraintRef}()
-    #     PowerModels.con(pm, nw)[:conv_tf_q_to_ne] = Dict{Int,ConstraintRef}()
-    # end
     conv = PowerModels.ref(pm, nw, :convdc_ne, i)
     constraint_conv_transformer_ne(pm, nw, i, conv["rtf"], conv["xtf"], conv["busac_i"], conv["tm"], Bool(conv["transformer"]))
 end
 #
 function constraint_conv_firing_angle_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    # if !haskey(PowerModels.con(pm, nw), :conv_cosphi_ne)
-    #      PowerModels.con(pm, nw)[:conv_cosphi_ne] = Dict{Int,ConstraintRef}()
-    #      PowerModels.con(pm, nw)[:conv_sinphi_ne] = Dict{Int,ConstraintRef}()
-    #  end
-    # if !haskey(PowerModels.con(pm, nw), :conv_socphi_ne)
-    #      PowerModels.con(pm, nw)[:conv_socphi_ne] = Dict{Int,ConstraintRef}()
-    #  end
-     conv = PowerModels.ref(pm, n, :convdc_ne, i) #changed by me from convdc to convdc_ne
+     conv = PowerModels.ref(pm, n, :convdc_ne, i)
      S = conv["Pacrated"]
      P1 = cos(0) * S
      Q1 = sin(0) * S

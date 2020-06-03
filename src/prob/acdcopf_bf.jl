@@ -13,9 +13,9 @@ function run_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwa
 end
 
 function post_acdcopf_bf(pm::_PM.AbstractPowerModel)
-    _PM.variable_voltage(pm)
-    _PM.variable_generation(pm)
-    _PM.variable_branch_flow(pm)
+    _PM.variable_bus_voltage(pm)
+    _PM.variable_gen_power(pm)
+    _PM.variable_branch_power(pm)
     _PM.variable_branch_current(pm)
 
     variable_active_dcbranch_flow(pm)
@@ -38,7 +38,7 @@ function post_acdcopf_bf(pm::_PM.AbstractPowerModel)
 
     for i in _PM.ids(pm, :branch)
 
-        _PM.constraint_flow_losses(pm, i)
+        _PM.constraint_power_losses(pm, i)
         _PM.constraint_voltage_magnitude_difference(pm, i)
 
 

@@ -29,17 +29,11 @@ function constraint_conv_transformer(pm::_PM.AbstractBFQPModel, n::Int,  i::Int,
 
 
     if transformer
-        # _PM.con(pm, n,  :conv_tf_p_fr)[i] = JuMP.@constraint(pm.model,   ptf_fr + ptf_to ==  rtf*itf)
-        # _PM.con(pm, n,  :conv_tf_q_fr)[i] = JuMP.@constraint(pm.model,   qtf_fr + qtf_to ==  xtf*itf)
-        # _PM.con(pm, n,  :conv_tf_p_to)[i] = JuMP.@constraint(pm.model,   ptf_fr^2 + qtf_fr^2 <= w/tm^2 * itf)
-        # _PM.con(pm, n,  :conv_tf_q_to)[i] = JuMP.@constraint(pm.model,   wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf)
         JuMP.@constraint(pm.model,   ptf_fr + ptf_to ==  rtf*itf)
         JuMP.@constraint(pm.model,   qtf_fr + qtf_to ==  xtf*itf)
         JuMP.@constraint(pm.model,   ptf_fr^2 + qtf_fr^2 <= w/tm^2 * itf)
         JuMP.@constraint(pm.model,   wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf)
     else
-        # _PM.con(pm, n,  :conv_tf_p_fr)[i] = JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
-        # _PM.con(pm, n,  :conv_tf_q_fr)[i] = JuMP.@constraint(pm.model, qtf_fr + qtf_to == 0)
         JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
         JuMP.@constraint(pm.model, qtf_fr + qtf_to == 0)
         JuMP.@constraint(pm.model, wf == w )
@@ -59,17 +53,11 @@ function constraint_conv_transformer(pm::_PM.AbstractBFConicModel, n::Int,  i::I
 
 
     if transformer
-        # _PM.con(pm, n,  :conv_tf_p_fr)[i] = JuMP.@constraint(pm.model,   ptf_fr + ptf_to ==  rtf*itf)
-        # _PM.con(pm, n,  :conv_tf_q_fr)[i] = JuMP.@constraint(pm.model,   qtf_fr + qtf_to ==  xtf*itf)
-        # _PM.con(pm, n,  :conv_tf_p_to)[i] = JuMP.@constraint(pm.model,   [w/(sqrt(2)*tm), itf/(sqrt(2)*tm), ptf_fr, qtf_fr] in JuMP.RotatedSecondOrderCone())
-        # _PM.con(pm, n,  :conv_tf_q_to)[i] = JuMP.@constraint(pm.model,   wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf)
         JuMP.@constraint(pm.model,   ptf_fr + ptf_to ==  rtf*itf)
         JuMP.@constraint(pm.model,   qtf_fr + qtf_to ==  xtf*itf)
         JuMP.@constraint(pm.model,   [w/(sqrt(2)*tm), itf/(sqrt(2)*tm), ptf_fr, qtf_fr] in JuMP.RotatedSecondOrderCone())
         JuMP.@constraint(pm.model,   wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf)
     else
-        # _PM.con(pm, n,  :conv_tf_p_fr)[i] = JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
-        # _PM.con(pm, n,  :conv_tf_q_fr)[i] = JuMP.@constraint(pm.model, qtf_fr + qtf_to == 0)
         JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
         JuMP.@constraint(pm.model, qtf_fr + qtf_to == 0)
         JuMP.@constraint(pm.model, wf == w/tm^2 )
@@ -95,16 +83,12 @@ function constraint_conv_reactor(pm::_PM.AbstractBFQPModel, n::Int,  i::Int, rc,
     qpr_fr = _PM.var(pm, n,  :qconv_pr_fr, i)
 
     if reactor
-        # _PM.con(pm, n,  :conv_pr_p)[i] = JuMP.@constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
-        # _PM.con(pm, n,  :conv_pr_q)[i] = JuMP.@constraint(pm.model, qpr_fr + qpr_to == xc*ipr)
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == xc*ipr)
         JuMP.@constraint(pm.model, ppr_fr^2 + qpr_fr^2 <= wf * ipr)
         JuMP.@constraint(pm.model, wc == wf -2*(rc*ppr_fr + xc*qpr_fr) + (rc^2 + xc^2)*ipr)
 
     else
-        # _PM.con(pm, n,  :conv_pr_p)[i] = JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
-        # _PM.con(pm, n,  :conv_pr_q)[i] = JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
         JuMP.@constraint(pm.model, wc == wf)
@@ -121,16 +105,12 @@ function constraint_conv_reactor(pm::_PM.AbstractBFConicModel, n::Int,  i::Int, 
     qpr_fr = _PM.var(pm, n,  :qconv_pr_fr, i)
 
     if reactor
-        # _PM.con(pm, n,  :conv_pr_p)[i] = JuMP.@constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
-        # _PM.con(pm, n,  :conv_pr_q)[i] = JuMP.@constraint(pm.model, qpr_fr + qpr_to == xc*ipr)
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == xc*ipr)
         JuMP.@constraint(pm.model, [wf/sqrt(2), ipr/sqrt(2), ppr_fr, qpr_fr] in JuMP.RotatedSecondOrderCone())
         JuMP.@constraint(pm.model, wc == wf -2*(rc*ppr_fr + xc*qpr_fr) + (rc^2 + xc^2)*ipr)
 
     else
-        # _PM.con(pm, n,  :conv_pr_p)[i] = JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
-        # _PM.con(pm, n,  :conv_pr_q)[i] = JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
         JuMP.@constraint(pm.model, wc == wf)
@@ -150,8 +130,6 @@ function constraint_converter_current(pm::_PM.AbstractBFQPModel, n::Int,  i::Int
     iconv = _PM.var(pm, n,  :iconv_ac, i)
     iconv_sq = _PM.var(pm, n,  :iconv_ac_sq, i)
 
-    # _PM.con(pm, n,  :conv_i)[i] = JuMP.@constraint(pm.model,      pconv_ac^2 + qconv_ac^2 <=  wc * iconv_sq)
-    # _PM.con(pm, n,  :conv_i_sqrt)[i] = JuMP.@constraint(pm.model, pconv_ac^2 + qconv_ac^2 <= (Umax)^2 * iconv^2)
     JuMP.@constraint(pm.model, pconv_ac^2 + qconv_ac^2 <=  wc * iconv_sq)
     JuMP.@constraint(pm.model, pconv_ac^2 + qconv_ac^2 <= (Umax)^2 * iconv^2)
     JuMP.@constraint(pm.model, iconv^2 <= iconv_sq)
@@ -165,9 +143,6 @@ function constraint_converter_current(pm::_PM.AbstractBFConicModel, n::Int,  i::
     iconv = _PM.var(pm, n,  :iconv_ac, i)
     iconv_sq = _PM.var(pm, n,  :iconv_ac_sq, i)
 
-    # Normal form
-    # _PM.con(pm, n,  :conv_i)[i] = JuMP.@constraint(pm.model, [wc/sqrt(2), iconv_sq/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
-    # _PM.con(pm, n,  :conv_i_sqrt)[i] = JuMP.@constraint(pm.model, [Umax * iconv/sqrt(2), Umax * iconv/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
     JuMP.@constraint(pm.model, [wc/sqrt(2), iconv_sq/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
     JuMP.@constraint(pm.model, [Umax * iconv/sqrt(2), Umax * iconv/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
     JuMP.@constraint(pm.model, [iconv_sq, iconv/sqrt(2), iconv/sqrt(2)] in JuMP.RotatedSecondOrderCone())
@@ -201,7 +176,6 @@ function constraint_conv_transformer_ne(pm::_PM.AbstractBFQPModel, n::Int, i::In
     itf = _PM.var(pm, n, :itf_sq_ne, i)
     wf = _PM.var(pm, n, :wf_ac_ne, i)
     w_du = _PM.var(pm, n, :w_du, i)
-    # wf_fr = _PM.var(pm, n, :wf_fr, i)
     ptf_fr = _PM.var(pm, n, :pconv_tf_fr_ne, i)
     qtf_fr = _PM.var(pm, n, :qconv_tf_fr_ne, i)
     ptf_to = _PM.var(pm, n, :pconv_tf_to_ne, i)
@@ -219,7 +193,6 @@ function constraint_conv_transformer_ne(pm::_PM.AbstractBFQPModel, n::Int, i::In
     else
         JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
         JuMP.@constraint(pm.model, qtf_fr + qtf_to == 0)
-        # @constraint(pm.model, wf + wf_fr == w/tm^2 + w_du/tm^2)
         JuMP.@constraint(pm.model, wf == w_du)
         _IM.relaxation_equality_on_off(pm.model, w, w_du, z)
         JuMP.@constraint(pm.model, w_du >= z*JuMP.lower_bound(w))
@@ -232,7 +205,6 @@ function constraint_conv_transformer_ne(pm::_PM.AbstractBFConicModel, n::Int, i:
     itf = _PM.var(pm, n, :itf_sq_ne, i)
     wf = _PM.var(pm, n, :wf_ac_ne, i)
     w_du = _PM.var(pm, n, :w_du, i)
-    # wf_fr = _PM.var(pm, n, :wf_fr, i)
     ptf_fr = _PM.var(pm, n, :pconv_tf_fr_ne, i)
     qtf_fr = _PM.var(pm, n, :qconv_tf_fr_ne, i)
     ptf_to = _PM.var(pm, n, :pconv_tf_to_ne, i)
@@ -242,7 +214,6 @@ function constraint_conv_transformer_ne(pm::_PM.AbstractBFConicModel, n::Int, i:
     if transformer
         JuMP.@constraint(pm.model,   ptf_fr + ptf_to ==  rtf*itf)
         JuMP.@constraint(pm.model,   qtf_fr + qtf_to ==  xtf*itf)
-        # _PM.con(pm, n, :conv_tf_p_to_ne)[i] = @constraint(pm.model,   norm([2*ptf_fr; 2*qtf_fr; w_du/tm - itf/tm]) <= w_du/tm + itf/tm)
         JuMP.@constraint(pm.model,   [w_du/(sqrt(2)*tm), itf/(sqrt(2)*tm), ptf_fr, qtf_fr] in JuMP.RotatedSecondOrderCone())
         JuMP.@constraint(pm.model,   wf  == w_du/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf)
         _IM.relaxation_equality_on_off(pm.model, w, w_du, z)
@@ -276,8 +247,6 @@ function constraint_conv_reactor_ne(pm::_PM.AbstractBFQPModel, n::Int, i::Int, r
     qpr_to = -_PM.var(pm, n, :qconv_ac_ne, i)
     ppr_fr = _PM.var(pm, n, :pconv_pr_fr_ne, i)
     qpr_fr = _PM.var(pm, n, :qconv_pr_fr_ne, i)
-    # wr_fr = _PM.var(pm, n, :wr_fr, i)
-    # wr_to = _PM.var(pm, n, :wr_to, i)
 
     if reactor
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
@@ -304,7 +273,6 @@ function constraint_conv_reactor_ne(pm::_PM.AbstractBFConicModel, n::Int, i::Int
     if reactor
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == xc*ipr)
-        # @constraint(pm.model, norm([2*ppr_fr; 2*qpr_fr; wf - ipr]) <= wf + ipr)
         JuMP.@constraint(pm.model, [wf/sqrt(2), ipr/sqrt(2), ppr_fr, qpr_fr] in JuMP.RotatedSecondOrderCone())
         JuMP.@constraint(pm.model, wc  == wf  -2*(rc*ppr_fr + xc*qpr_fr) + (rc^2 + xc^2)*ipr)
     else
@@ -343,9 +311,6 @@ function constraint_converter_current_ne(pm::_PM.AbstractBFConicModel, n::Int, i
     iconv_sq = _PM.var(pm, n, :iconv_ac_sq_ne, i)
     irc_sq = _PM.var(pm, n, :irc_sq_ne, i)
 
-    # _PM.con(pm, n, :conv_i_ne)[i] = @constraint(pm.model, norm([2*pconv_ac; 2*qconv_ac;  wc - iconv_sq]) <=  wc + iconv_sq)
-    # _PM.con(pm, n, :conv_i_sqrt_ne)[i] = @constraint(pm.model, norm([pconv_ac; qconv_ac]) <= (Umax)*iconv)
-    # @constraint(pm.model, norm([2*iconv; 1 - iconv_sq]) <= 1 + iconv_sq)
     JuMP.@constraint(pm.model, [wc/sqrt(2), iconv_sq/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
     JuMP.@constraint(pm.model, [Umax * iconv/sqrt(2), Umax * iconv/sqrt(2), pconv_ac, qconv_ac] in JuMP.RotatedSecondOrderCone())
 

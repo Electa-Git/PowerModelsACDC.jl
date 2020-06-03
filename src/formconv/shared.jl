@@ -19,7 +19,6 @@ function constraint_converter_losses(pm::_PM.AbstractWModels, n::Int, i::Int, a,
     iconv = _PM.var(pm, n,  :iconv_ac, i)
     iconv_sq = _PM.var(pm, n,  :iconv_ac_sq, i)
 
-    # _PM.con(pm, n,  :conv_loss)[i] = JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv_sq)
     JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv_sq)
 end
 """
@@ -48,12 +47,6 @@ function constraint_conv_transformer(pm::_PM.AbstractWRModels, n::Int, i::Int, r
         gtf = real(ytf)
         btf = imag(ytf)
         c1, c2, c3, c4 = ac_power_flow_constraints_w(pm, gtf, btf, w, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to, tm)
-        # _PM.con(pm, n,  :conv_tf_p_fr)[i] = c1
-        # _PM.con(pm, n,  :conv_tf_q_fr)[i] = c2
-        # _PM.con(pm, n,  :conv_tf_p_to)[i] = c3
-        # _PM.con(pm, n,  :conv_tf_q_to)[i] = c4
-
-        #JuMP.@constraint(pm.model, (wrf)^2 + (wif)^2 <= wf*w)
         constraint_voltage_product_converter(pm, wrf, wif, wf, w)
     else
         pcon, qcon = constraint_lossless_section(pm, w, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to)
@@ -95,12 +88,8 @@ function constraint_conv_reactor(pm::_PM.AbstractWRModels, n::Int, i::Int, rc, x
         bc = imag(yc)
         constraint_voltage_product_converter(pm, wrc, wic, wf, wc)
         c1, c2, c3, c4 = ac_power_flow_constraints_w(pm, gc, bc, wf, wc, wrc, wic, ppr_fr, ppr_to, qpr_fr, qpr_to, 1)
-        # _PM.con(pm, n,  :conv_pr_p)[i] = c1
-        # _PM.con(pm, n,  :conv_pr_q)[i] = c2
     else
         pcon, qcon = constraint_lossless_section(pm, wf, wc, wrc, wic, ppr_fr, ppr_to, qpr_fr, qpr_to)
-        # _PM.con(pm, n,  :conv_pr_p)[i] = pcon
-        # _PM.con(pm, n,  :conv_pr_q)[i] = qcon
     end
 end
 """
@@ -119,8 +108,6 @@ function constraint_conv_filter(pm::_PM.AbstractWModels, n::Int, i::Int, bv, fil
 
     wf = _PM.var(pm, n,  :wf_ac, i)
 
-    # _PM.con(pm, n,  :conv_kcl_p)[i] = JuMP.@constraint(pm.model, ppr_fr + ptf_to == 0 )
-    # _PM.con(pm, n,  :conv_kcl_q)[i] = JuMP.@constraint(pm.model, qpr_fr + qtf_to + -bv*filter*wf == 0)
     JuMP.@constraint(pm.model, ppr_fr + ptf_to == 0 )
     JuMP.@constraint(pm.model, qpr_fr + qtf_to + -bv*filter*wf == 0)
 end
@@ -157,7 +144,6 @@ function constraint_conv_firing_angle(pm::_PM.AbstractWModels, n::Int, i::Int, S
     qc = _PM.var(pm, n,  :qconv_ac, i)
     coeff = (Q2-Q1)/(P2-P1)
 
-    # _PM.con(pm, n,  :conv_socphi)[i] = JuMP.@constraint(pm.model, qc >= Q1 + (pc-P1) * coeff )
     JuMP.@constraint(pm.model, qc >= Q1 + (pc-P1) * coeff )
 end
 
@@ -218,17 +204,12 @@ function constraint_conv_transformer_ne(pm::_PM.AbstractWRModels, n::Int, i::Int
         gtf = real(ytf)
         btf = imag(ytf)
         c1, c2, c3, c4 = ac_power_flow_constraints_w(pm, gtf, btf, w_du, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to, tm)
-        # _PM.con(pm, n, :conv_tf_p_fr_ne)[i] = c1
-        # _PM.con(pm, n, :conv_tf_q_fr_ne)[i] = c2
-        # _PM.con(pm, n, :conv_tf_p_to_ne)[i] = c3
-        # _PM.con(pm, n, :conv_tf_q_to_ne)[i] = c4
 
         _IM.relaxation_equality_on_off(pm.model, w, w_du, z)
         JuMP.@constraint(pm.model, w_du >= z*JuMP.lower_bound(w))
         JuMP.@constraint(pm.model, w_du <= z*JuMP.upper_bound(w))
         constraint_voltage_product_converter_ne(pm, wrf, wif, wf, w, z)
     else
-        #pcon, qcon or pcon_ne, qcon_ne
         pcon, qcon = constraint_lossless_section_ne(pm, w_du, wf, wrf, wif, ptf_fr, ptf_to, qtf_fr, qtf_to)
         _IM.relaxation_equality_on_off(pm.model, w, w_du, z)
         JuMP.@constraint(pm.model, w_du >= z*JuMP.lower_bound(w))
@@ -263,15 +244,10 @@ function constraint_conv_reactor_ne(pm::_PM.AbstractWRModels, n::Int, i::Int, rc
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)
-#        _PM.relaxation_complex_product(pm.model, wf, wc, wrc, wic)
         c1, c2, c3, c4 = ac_power_flow_constraints_w(pm, gc, bc, wf, wc, wrc, wic, ppr_fr, ppr_to, qpr_fr, qpr_to, 1)
-        # _PM.con(pm, n, :conv_pr_p_ne)[i] = c1
-        # _PM.con(pm, n, :conv_pr_q_ne)[i] = c2
         constraint_voltage_product_converter_ne(pm, wrc, wic, wf, wc, z)
     else
         pcon, qcon = constraint_lossless_section_ne(pm, wf, wc, wrc, wic, ppr_fr, ppr_to, qpr_fr, qpr_to)
-        # _PM.con(pm, n, :conv_pr_p_ne)[i] = pcon
-        # _PM.con(pm, n, :conv_pr_q_ne)[i] = qcon
     end
 end
 
@@ -289,9 +265,7 @@ function constraint_conv_filter_ne(pm::_PM.AbstractWModels, n::Int, i::Int, bv, 
     ptf_to = _PM.var(pm, n, :pconv_tf_to_ne, i)
     qtf_to = _PM.var(pm, n, :qconv_tf_to_ne, i)
     wf = _PM.var(pm, n, :wf_ac_ne, i)
-    # wf_fl = _PM.var(pm, n, :wf_fl, i)
     JuMP.@constraint(pm.model, ppr_fr + ptf_to == 0 )
-    # _PM.con(pm, n, :conv_kcl_q_ne)[i] = @constraint(pm.model, qpr_fr + qtf_to + (-bv) * filter * (wf + wf_fl) == 0)
 
     JuMP.@constraint(pm.model, qpr_fr + qtf_to + (-bv) * filter * (wf) == 0)
 
