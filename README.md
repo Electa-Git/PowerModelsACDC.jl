@@ -8,6 +8,15 @@ Dev:
 PowerModelsACDC.jl is a Julia/JuMP/PowerModels package with models for DC lines, meshed DC networks, and AC DC converters.
 Building upon the PowerModels architecture, the code is engineered to decouple problem specifications (e.g. Power Flow, Optimal Power Flow, ...) from the power network formulations (e.g. AC, DC-approximation, SOC-relaxation, ...).
 
+**Installation**
+The latest stable release of PowerModelACDC can be installed using the Julia package manager with
+
+```julia
+Pkg.add("PowerModelsACDC")
+```
+The current version of PowerModelsACDC is 0.3.1 and is compatible with PowerModels v0.17.1, InfrastrucureModels v0.5.0
+
+
 **Core Problem Specifications**
 * Optimal Power Flow with both point-to-point and meshed and dc grid support
 * Power Flow with both point-to-point and meshed ac and dc grid support
