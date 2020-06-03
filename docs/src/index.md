@@ -38,8 +38,7 @@ The current version of PowerModelsACDC is 0.3.0 and is compatible with PowerMode
 
 !!! Importany
     Versions from 0.3.1 are hosted from https://github.com/Electa-Git/PowerModelsACDC.jl/
-    This is a research-grade optimization package. Eventually, we hope to make this a
-    stable julia package.
+    This is a research-grade optimization package.
 
 
 ## Special Thanks To
