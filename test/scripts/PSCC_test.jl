@@ -1,11 +1,11 @@
-using PowerModelsACDCInv, PowerModelsACDC, PowerModels, Ipopt, Juniper, JuMP, Cbc, Gurobi, Cbc
+using PowerModelsACDC, PowerModels, Ipopt, Juniper, JuMP, Cbc, Gurobi, Cbc
 casename = "case9"
 bt = 100 ## constraint tightening setting 95, 90, 85, 80
-include("conv_spec.jl")
-    file = "../test/data/tnep/PSCC/$casename.m"
+    include("./test/data/tnep/PSCC/conv_spec.jl")
+    file = "./test/data/tnep/PSCC/$casename.m"
     data1 = PowerModels.parse_file(file)
     PowerModelsACDC.process_additional_data!(data1)
-    PowerModelsACDCInv.process_additional_data!(data1)
+    # PowerModelsACDCInv.process_additional_data!(data1)
     data = deepcopy(data1)
 
     #increase load and generation by 3 times (except 6 and 24 bus)
@@ -18,7 +18,7 @@ include("conv_spec.jl")
         data["gen"]["$j"]["qmax"] = 3*data1["gen"]["$j"]["qmax"]
         data["gen"]["$j"]["qmin"] = 3*data1["gen"]["$j"]["qmin"]
     end
-    #bound tightening
+    #constraint tightening
     for (b,branch) in data["branch"]
         branch["rate_a"] = bt/100* branch["rate_a"]
     end
