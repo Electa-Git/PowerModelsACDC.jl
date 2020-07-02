@@ -17,6 +17,7 @@ jobs:
       before_install:
       - julia -e 'using Pkg; Pkg.add("Documenter")'
       script:
+        - julia -e 'using Pkg; Pkg.add("Documenter")'
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
         - julia --project=docs/ docs/make.jl
       after_success: skip
