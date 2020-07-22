@@ -14,6 +14,7 @@ import Cbc
 
 
 file = "./test/data/tnep/case4_original.m"
+file_acdc = "./test/data/tnep/case6_acdc_test.m"
 data = _PM.parse_file(file)
 _PMACDC.process_additional_data!(data)
 
@@ -31,20 +32,23 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => false, "p
 
 
 resultDC = _PMACDC.run_tnepopf(file, _PM.DCPPowerModel, gurobi, setting = s)
-resultAC = _PMACDC.run_tnepopf(file, _PM.ACPPowerModel, juniper, setting = s)
-resultSOCBF = _PMACDC.run_tnepopf_bf(file, _PM.SOCBFPowerModel, gurobi, setting = s)
-resultSOCWR = _PMACDC.run_tnepopf(file, _PM.SOCWRPowerModel, gurobi, setting = s)
-resultQC     =  _PMACDC.run_tnepopf(file, _PM.QCRMPowerModel, gurobi; setting = s)
+#resultAC = _PMACDC.run_tnepopf(file, _PM.ACPPowerModel, juniper, setting = s)
+#resultSOCBF = _PMACDC.run_tnepopf_bf(file, _PM.SOCBFPowerModel, gurobi, setting = s)
+#resultSOCWR = _PMACDC.run_tnepopf(file, _PM.SOCWRPowerModel, gurobi, setting = s)
+#resultQC     =  _PMACDC.run_tnepopf(file, _PM.QCRMPowerModel, gurobi; setting = s)
 # resultSDP     =  _PMACDC.run_tnepopf(file, _PM.SDPWRMPowerModel, gurobi; setting = s)
-resultLPAC     =  _PMACDC.run_tnepopf(file, _PM.LPACCPowerModel, gurobi; setting = s)
+#resultLPAC     =  _PMACDC.run_tnepopf(file, _PM.LPACCPowerModel, gurobi; setting = s)
 
-_PMACDC.display_results_tnep(resultDC)
-_PMACDC.display_results_tnep(resultAC)
-_PMACDC.display_results_tnep(resultSOCBF)
-_PMACDC.display_results_tnep(resultSOCWR)
-_PMACDC.display_results_tnep(resultLPAC)
-_PMACDC.display_results_tnep(resultQC)
-##
+#_PMACDC.display_results_tnep(resultDC)
+#_PMACDC.display_results_tnep(resultAC)
+#_PMACDC.display_results_tnep(resultSOCBF)
+#_PMACDC.display_results_tnep(resultSOCWR)
+#_PMACDC.display_results_tnep(resultLPAC)
+#_PMACDC.display_results_tnep(resultQC)
+## TEST ACDC TNEP
+
+resultACDC_dcp = _PMACDC.run_acdctnepopf(file_acdc, _PM.DCPPowerModel, gurobi, setting = s)
+
 
 t = 1:2
 function build_mn_data(file)
