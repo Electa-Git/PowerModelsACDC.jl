@@ -62,7 +62,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractBFQPModel, n::Int, f_bus, 
     p_dc_fr = _PM.var(pm, n, :p_dcgrid_ne, f_idx)
     p_dc_to = _PM.var(pm, n, :p_dcgrid_ne, t_idx)
     ccm_dcgrid = _PM.var(pm, n, :ccm_dcgrid_ne, l)
-    z = _PM.var(pm, n, :branch_ne, l)
+    z = _PM.var(pm, n, :branchdc_ne, l)
 
     wdc_to = []
     wdc_fr = []
@@ -93,7 +93,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractBFConicModel, n::Int, f_bu
     p_dc_fr = _PM.var(pm, n, :p_dcgrid_ne, f_idx)
     p_dc_to = _PM.var(pm, n, :p_dcgrid_ne, t_idx)
     ccm_dcgrid = _PM.var(pm, n, :ccm_dcgrid_ne, l)
-    z = _PM.var(pm, n, :branch_ne, l)
+    z = _PM.var(pm, n, :branchdc_ne, l)
 
     wdc_to = []
     wdc_fr = []

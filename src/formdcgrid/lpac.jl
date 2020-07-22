@@ -77,7 +77,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractLPACModel, n::Int, f_bus, 
     phi_to = []
     phi_fr_du = _PM.var(pm, n, :phi_vdcm_fr, l)
     phi_to_du = _PM.var(pm, n, :phi_vdcm_to, l)
-    z = _PM.var(pm, n, :branch_ne, l)
+    z = _PM.var(pm, n, :branchdc_ne, l)
     phi_to, phi_fr = contraint_ohms_dc_branch_busvoltage_structure_phi(pm, n, f_bus, t_bus, phi_to, phi_fr)
     if r == 0
         JuMP.@constraint(pm.model, p_dc_fr + p_dc_to == 0)

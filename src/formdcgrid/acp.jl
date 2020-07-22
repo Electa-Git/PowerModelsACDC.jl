@@ -79,7 +79,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractACPModel, n::Int,  f_bus, 
     p_dc_to = _PM.var(pm, n, :p_dcgrid_ne, t_idx)
     vmdc_fr = []
     vmdc_to = []
-    z = _PM.var(pm, n, :branch_ne, f_idx[1])
+    z = _PM.var(pm, n, :branchdc_ne, f_idx[1])
     vmdc_to, vmdc_fr = contraint_ohms_dc_branch_busvoltage_structure(pm, n, f_bus, t_bus, vmdc_to, vmdc_fr)
     if r == 0
         JuMP.@constraint(pm.model, p_dc_fr + p_dc_to == 0)

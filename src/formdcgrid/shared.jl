@@ -106,7 +106,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractWRModels, n::Int, f_bus, t
     l = f_idx[1]
     p_dc_fr = _PM.var(pm, n, :p_dcgrid_ne, f_idx)
     p_dc_to = _PM.var(pm, n, :p_dcgrid_ne, t_idx)
-    z = _PM.var(pm, n, :branch_ne, l)
+    z = _PM.var(pm, n, :branchdc_ne, l)
     wdc_to = []
     wdc_fr = []
 

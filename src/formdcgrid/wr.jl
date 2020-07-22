@@ -51,7 +51,7 @@ function constraint_voltage_dc_ne(pm::_PM.AbstractWRModel, n::Int)
     wdc_du_frto = _PM.var(pm, n, :wdcr_du)
     wdc_du_to = _PM.var(pm, n, :wdc_du_to)
     wdc_du_fr = _PM.var(pm, n, :wdc_du_fr)
-    z  = _PM.var(pm, n, :branch_ne)
+    z  = _PM.var(pm, n, :branchdc_ne)
     for (l,i,j) in pm.ref[:nw][n][:arcs_dcgrid_from_ne]
     wdc_to = []
     wdc_fr = []
@@ -66,8 +66,8 @@ function constraint_voltage_dc_ne(pm::_PM.AbstractWRConicModel, n::Int)
     wdc_frto = _PM.var(pm, n, :wdcr_ne)
     wdc_du_frto = _PM.var(pm, n, :wdcr_du)
     wdc_du_to = _PM.var(pm, n, :wdc_du_to)
-    wdc_du_fr = _PM.var(pm, n, :wdc_du_fr) 
-    z  = var(pm, n, :branch_ne)
+    wdc_du_fr = _PM.var(pm, n, :wdc_du_fr)
+    z  = var(pm, n, :branchdc_ne)
     for (l,i,j) in pm.ref[:nw][n][:arcs_dcgrid_from_ne]
     wdc_to = []
     wdc_fr = []

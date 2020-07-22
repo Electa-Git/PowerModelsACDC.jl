@@ -153,7 +153,7 @@ function add_dcgrid_flow_setpoint_ne(sol, pm::_PM.AbstractPowerModel)
     # check the branch flows were requested
     _PM.add_setpoint!(sol, pm, "branchdc_ne", "pf", :p_dcgrid_ne; status_name="status",  var_key = (idx,item) -> (idx, item["fbusdc"], item["tbusdc"]))
     _PM.add_setpoint!(sol, pm, "branchdc_ne", "pt", :p_dcgrid_ne; status_name="status",  var_key = (idx,item) -> (idx, item["tbusdc"], item["fbusdc"]))
-    _PM.add_setpoint!(sol, pm, "branchdc_ne", "isbuilt", :branch_ne)
+    _PM.add_setpoint!(sol, pm, "branchdc_ne", "isbuilt", :branchdc_ne)
     _PM.add_setpoint!(sol, pm, "branchdc_ne", "wdc_to", :wdc_du_to; status_name="status")
 end
 
