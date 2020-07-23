@@ -1,6 +1,6 @@
 constraint_voltage_dc(pm::_PM.AbstractPowerModel) = constraint_voltage_dc(pm, pm.cnw)
 # no data, so no further templating is needed, constraint goes directly to the formulations
-function constraint_kcl_shunt(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_power_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     bus = _PM.ref(pm, nw, :bus, i)
     bus_arcs = _PM.ref(pm, nw, :bus_arcs, i)
     bus_arcs_dc = _PM.ref(pm, nw, :bus_arcs_dc, i)
@@ -15,14 +15,14 @@ function constraint_kcl_shunt(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw
     gs = Dict(k => _PM.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
     bs = Dict(k => _PM.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
 
-    constraint_kcl_shunt(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
+    constraint_power_balance_ac(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
 end
 
-function constraint_kcl_shunt_dcgrid(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_power_balance_dc(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     bus_arcs_dcgrid = _PM.ref(pm, nw, :bus_arcs_dcgrid, i)
     bus_convs_dc = _PM.ref(pm, nw, :bus_convs_dc, i)
     pd = _PM.ref(pm, nw, :busdc, i)["Pdc"]
-    constraint_kcl_shunt_dcgrid(pm, nw, i, bus_arcs_dcgrid, bus_convs_dc, pd)
+    constraint_power_balance_dc(pm, nw, i, bus_arcs_dcgrid, bus_convs_dc, pd)
 end
 #
 function constraint_ohms_dc_branch(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
@@ -122,7 +122,7 @@ function constraint_voltage_dc_ne(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw)
     constraint_voltage_dc_ne(pm, nw)
 end
 # no data, so no further templating is needed, constraint goes directly to the formulations
-function constraint_kcl_shunt_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_power_balance_ac_dcne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     bus = PowerModels.ref(pm, nw, :bus, i)
     bus_arcs = PowerModels.ref(pm, nw, :bus_arcs, i)
     bus_arcs_dc = PowerModels.ref(pm, nw, :bus_arcs_dc, i)
@@ -137,10 +137,10 @@ function constraint_kcl_shunt_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.
 
     gs = Dict(k => PowerModels.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
     bs = Dict(k => PowerModels.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
-    constraint_kcl_shunt_ne(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
+    constraint_power_balance_ac_dcne(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
 end
 
-function constraint_acne_dcne_power_balance(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_power_balance_acne_dcne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     bus = PowerModels.ref(pm, nw, :bus, i)
     bus_arcs = PowerModels.ref(pm, nw, :bus_arcs, i)
     bus_arcs_ne = PowerModels.ref(pm, nw, :ne_bus_arcs, i)
@@ -156,7 +156,7 @@ function constraint_acne_dcne_power_balance(pm::_PM.AbstractPowerModel, i::Int; 
 
     gs = Dict(k => PowerModels.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
     bs = Dict(k => PowerModels.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
-    constraint_acne_dcne_power_balance(pm, nw, i, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
+    constraint_power_balance_acne_dcne(pm, nw, i, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
 end
 
 function constraint_converter_limit_on_off(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
@@ -173,7 +173,7 @@ function constraint_converter_limit_on_off(pm::_PM.AbstractPowerModel, i::Int; n
     constraint_converter_limit_on_off(pm, nw, i, pmax, pmin, qmax, qmin, pmaxdc, pmindc, imax)
 end
 
-function constraint_kcl_shunt_dcgrid_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_power_balance_dc_dcne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     bus_arcs_dcgrid = PowerModels.ref(pm, nw, :bus_arcs_dcgrid, i)
     if haskey(PowerModels.ref(pm, nw, :bus_arcs_dcgrid_ne), i)
         bus_arcs_dcgrid_ne = PowerModels.ref(pm, nw, :bus_arcs_dcgrid_ne, i)
@@ -183,10 +183,10 @@ function constraint_kcl_shunt_dcgrid_ne(pm::_PM.AbstractPowerModel, i::Int; nw::
     bus_convs_dc = PowerModels.ref(pm, nw, :bus_convs_dc, i)
     bus_convs_dc_ne = PowerModels.ref(pm, nw, :bus_convs_dc_ne, i)
     pd = PowerModels.ref(pm, nw, :busdc, i)["Pdc"]
-    constraint_kcl_shunt_dcgrid_ne(pm, nw, i, bus_arcs_dcgrid, bus_arcs_dcgrid_ne, bus_convs_dc, bus_convs_dc_ne, pd)
+    constraint_power_balance_dc_dcne(pm, nw, i, bus_arcs_dcgrid, bus_arcs_dcgrid_ne, bus_convs_dc, bus_convs_dc_ne, pd)
 end
 
-function constraint_kcl_shunt_dcgrid_ne_bus(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_power_balance_dcne_dcne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     bus_i = PowerModels.ref(pm, nw, :busdc_ne, i)["busdc_i"]
     if haskey(PowerModels.ref(pm, nw, :bus_arcs_dcgrid_ne), bus_i)
         bus_arcs_dcgrid_ne = PowerModels.ref(pm, nw, :bus_arcs_dcgrid_ne, bus_i)
@@ -195,7 +195,7 @@ function constraint_kcl_shunt_dcgrid_ne_bus(pm::_PM.AbstractPowerModel, i::Int; 
     end
     bus_ne_convs_dc_ne = PowerModels.ref(pm, nw, :bus_ne_convs_dc_ne, bus_i)
     pd_ne = PowerModels.ref(pm, nw, :busdc_ne, i)["Pdc"]
-    constraint_kcl_shunt_dcgrid_ne_bus(pm, nw, i, bus_arcs_dcgrid_ne, bus_ne_convs_dc_ne, pd_ne)
+    constraint_power_balance_dcne_dcne(pm, nw, i, bus_arcs_dcgrid_ne, bus_ne_convs_dc_ne, pd_ne)
 end
 
 function constraint_ohms_dc_branch_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)

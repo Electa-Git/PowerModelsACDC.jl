@@ -35,7 +35,7 @@ function post_acdctnepopf(pm::_PM.AbstractPowerModel)
     variable_dc_converter_ne(pm)
     variable_dcbranch_current_ne(pm)
     variable_dcgrid_voltage_magnitude_ne(pm)
-    objective_min_cost(pm)
+    objective_min_cost_acdc(pm)
 
     _PM.constraint_model_voltage(pm)
     _PM.constraint_ne_model_voltage(pm)
@@ -45,7 +45,7 @@ function post_acdctnepopf(pm::_PM.AbstractPowerModel)
         _PM.constraint_theta_ref(pm, i)
     end
     for i in _PM.ids(pm, :bus)
-        constraint_acne_dcne_power_balance(pm, i)
+        constraint_power_balance_acne_dcne(pm, i)
     end
     for i in _PM.ids(pm, :branch)
         _PM.constraint_ohms_yt_from(pm, i)
@@ -63,10 +63,10 @@ function post_acdctnepopf(pm::_PM.AbstractPowerModel)
     end
 
     for i in _PM.ids(pm, :busdc)
-        constraint_kcl_shunt_dcgrid_ne(pm, i)
+        constraint_power_balance_dc_dcne(pm, i)
     end
     for i in _PM.ids(pm, :busdc_ne)
-        constraint_kcl_shunt_dcgrid_ne_bus(pm, i)
+        constraint_power_balance_dcne_dcne(pm, i)
     end
 
     for i in _PM.ids(pm, :branchdc)

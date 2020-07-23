@@ -5,7 +5,7 @@ Shunt constraint using linearized voltage magnitude difference phi
 sum(p) + sum(pconv_grid_ac)  == sum(pg) - sum(pd) - sum(gs*(1.0 + 2*phi)
 ```
 """
-function constraint_kcl_shunt(pm::_PM.AbstractLPACModel, n::Int,  i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
+function constraint_power_balance_ac(pm::_PM.AbstractLPACModel, n::Int,  i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
     phi = _PM.var(pm, n, :phi, i)
     p = _PM.var(pm, n, :p)
     q = _PM.var(pm, n, :q)
@@ -54,7 +54,7 @@ end
 
 ############# TNEP Constraints #################
 
-function constraint_kcl_shunt_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
+function constraint_power_balance_ac_dcne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
     phi = _PM.var(pm, n, :phi, i)
     p = _PM.var(pm, n, :p)
     q = _PM.var(pm, n, :q)

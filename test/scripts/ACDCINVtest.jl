@@ -10,6 +10,7 @@ import MosekTools
 import JuMP
 import Gurobi
 import Cbc
+import CPLEX
 
 
 
@@ -21,7 +22,7 @@ _PMACDC.process_additional_data!(data)
 data_bf=data
 scs = JuMP.with_optimizer(SCS.Optimizer, max_iters=100000)
 ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-4, print_level=0)
-# cplex = JuMP.with_optimizer(CPLEX.Optimizer)
+cplex = JuMP.with_optimizer(CPLEX.Optimizer)
 cbc = JuMP.with_optimizer(Cbc.Optimizer, tol=1e-4, print_level=0)
 gurobi = JuMP.with_optimizer(Gurobi.Optimizer)
 mosek = JuMP.with_optimizer(Mosek.Optimizer)
@@ -32,19 +33,19 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => false, "p
 
 
 resultDC = _PMACDC.run_tnepopf(file, _PM.DCPPowerModel, gurobi, setting = s)
-#resultAC = _PMACDC.run_tnepopf(file, _PM.ACPPowerModel, juniper, setting = s)
-#resultSOCBF = _PMACDC.run_tnepopf_bf(file, _PM.SOCBFPowerModel, gurobi, setting = s)
-#resultSOCWR = _PMACDC.run_tnepopf(file, _PM.SOCWRPowerModel, gurobi, setting = s)
-#resultQC     =  _PMACDC.run_tnepopf(file, _PM.QCRMPowerModel, gurobi; setting = s)
-# resultSDP     =  _PMACDC.run_tnepopf(file, _PM.SDPWRMPowerModel, gurobi; setting = s)
-#resultLPAC     =  _PMACDC.run_tnepopf(file, _PM.LPACCPowerModel, gurobi; setting = s)
+resultAC = _PMACDC.run_tnepopf(file, _PM.ACPPowerModel, juniper, setting = s)
+resultSOCBF = _PMACDC.run_tnepopf_bf(file, _PM.SOCBFPowerModel, gurobi, setting = s)
+resultSOCWR = _PMACDC.run_tnepopf(file, _PM.SOCWRPowerModel, gurobi, setting = s)
+resultQC     =  _PMACDC.run_tnepopf(file, _PM.QCRMPowerModel, gurobi; setting = s)
+# resultSDP     =  _PMACDC.run_tnepopf(file, _PM.SDPWRMPowerModel, mosek; setting = s)
+resultLPAC     =  _PMACDC.run_tnepopf(file, _PM.LPACCPowerModel, gurobi; setting = s)
 
-#_PMACDC.display_results_tnep(resultDC)
-#_PMACDC.display_results_tnep(resultAC)
-#_PMACDC.display_results_tnep(resultSOCBF)
-#_PMACDC.display_results_tnep(resultSOCWR)
-#_PMACDC.display_results_tnep(resultLPAC)
-#_PMACDC.display_results_tnep(resultQC)
+_PMACDC.display_results_tnep(resultDC)
+_PMACDC.display_results_tnep(resultAC)
+_PMACDC.display_results_tnep(resultSOCBF)
+_PMACDC.display_results_tnep(resultSOCWR)
+_PMACDC.display_results_tnep(resultLPAC)
+_PMACDC.display_results_tnep(resultQC)
 ## TEST ACDC TNEP
 
 resultACDC_dcp = _PMACDC.run_acdctnepopf(file_acdc, _PM.DCPPowerModel, gurobi, setting = s)

@@ -51,7 +51,7 @@ function post_mp_tnepopf(pm::_PM.AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, n, :bus)
-            constraint_kcl_shunt_ne(pm, i; nw = n)
+            constraint_power_balance_ac_dcne(pm, i; nw = n)
         end
 
         for i in _PM.ids(pm, n, :branch)
@@ -63,10 +63,10 @@ function post_mp_tnepopf(pm::_PM.AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, n, :busdc)
-            constraint_kcl_shunt_dcgrid_ne(pm, i; nw = n)
+            constraint_power_balance_dc_dcne(pm, i; nw = n)
         end
         for i in _PM.ids(pm, n, :busdc_ne)
-            constraint_kcl_shunt_dcgrid_ne_bus(pm, i; nw = n)
+            constraint_power_balance_dcne_dcne(pm, i; nw = n)
         end
 
         for i in _PM.ids(pm, n, :branchdc)

@@ -190,7 +190,7 @@ function variable_dcgrid_voltage_magnitude_sqr_ne(pm::_PM.AbstractPowerModel; nw
             end
         end
         report && _IM.sol_component_value(pm, nw, :busdc_ne, :wdc_ne, _PM.ids(pm, nw, :busdc_ne), wdc_ne)
-        report && _IM.sol_component_value(pm, nw, :busdc_ne, :wdcr_ne, _PM.ids(pm, nw, :busdc_ne), wdcr_ne)
+        report && _IM.sol_component_value(pm, nw, :branchdc_ne, :wdcr_ne, _PM.ids(pm, nw, :branchdc_ne), wdcr_ne)
 end
 
 function variable_dcgrid_voltage_magnitude_sqr_du(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true) # this has to to every branch, different than its counterpart(Wdc_fr) since two candidate branches can be connected to same node and two duplicate variables will be needed
@@ -219,9 +219,9 @@ function variable_dcgrid_voltage_magnitude_sqr_du(pm::_PM.AbstractPowerModel; nw
             JuMP.set_upper_bound(wdcr_frto_ne[i],  1.21)
         end
     end
-    report && _IM.sol_component_value(pm, nw, :busdc_ne, :wdc_du_fr, _PM.ids(pm, nw, :busdc_ne), wdc_fr_ne)
-    report && _IM.sol_component_value(pm, nw, :busdc_ne, :wdc_du_to, _PM.ids(pm, nw, :busdc_ne), wdc_to_ne)
-    report && _IM.sol_component_value(pm, nw, :busdc_ne, :wdcr_du, _PM.ids(pm, nw, :busdc_ne), wdcr_frto_ne)
+    report && _IM.sol_component_value(pm, nw, :branchdc_ne, :wdc_du_fr, _PM.ids(pm, nw, :branchdc_ne), wdc_fr_ne)
+    report && _IM.sol_component_value(pm, nw, :branchdc_ne, :wdc_du_to, _PM.ids(pm, nw, :branchdc_ne), wdc_to_ne)
+    report && _IM.sol_component_value(pm, nw, :branchdc_ne, :wdcr_du, _PM.ids(pm, nw, :branchdc_ne), wdcr_frto_ne)
 end
 
 "variable: `p_dcgrid[l,i,j]` for `(l,i,j)` in `arcs_dcgrid`"

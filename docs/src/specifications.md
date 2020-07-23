@@ -36,7 +36,7 @@ for i in _PM.ids(pm, :ref_buses)
 end
 
 for i in _PM.ids(pm, :bus)
-    constraint_kcl_shunt(pm, i)
+    constraint_power_balance_ac(pm, i)
 end
 
 for i in _PM.ids(pm, :branch)
@@ -56,7 +56,7 @@ for i in _PM.ids(pm, :branch)
     constraint_thermal_limit_to(pm, i)
 end
 for i in _PM.ids(pm, :busdc)
-    constraint_kcl_shunt_dcgrid(pm, i)
+    constraint_power_balance_dc(pm, i)
 end
 for i in _PM.ids(pm, :branchdc)
     constraint_ohms_dc_branch(pm, i)

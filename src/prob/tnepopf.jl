@@ -41,7 +41,7 @@ function post_tnepopf(pm::_PM.AbstractPowerModel)
         _PM.constraint_theta_ref(pm, i)
     end
     for i in _PM.ids(pm, :bus)
-        constraint_kcl_shunt_ne(pm, i)
+        constraint_power_balance_ac_dcne(pm, i)
     end
     for i in _PM.ids(pm, :branch)
         _PM.constraint_ohms_yt_from(pm, i)
@@ -51,10 +51,10 @@ function post_tnepopf(pm::_PM.AbstractPowerModel)
         _PM.constraint_thermal_limit_to(pm, i)
     end
     for i in _PM.ids(pm, :busdc)
-        constraint_kcl_shunt_dcgrid_ne(pm, i)
+        constraint_power_balance_dc_dcne(pm, i)
     end
     for i in _PM.ids(pm, :busdc_ne)
-        constraint_kcl_shunt_dcgrid_ne_bus(pm, i)
+        constraint_power_balance_dcne_dcne(pm, i)
     end
 
     for i in _PM.ids(pm, :branchdc)

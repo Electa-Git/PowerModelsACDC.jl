@@ -7,7 +7,7 @@ end
 sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == pd
 ```
 """
-function constraint_kcl_shunt_dcgrid(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_convs_dc, pd)
+function constraint_power_balance_dc(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_convs_dc, pd)
     p_dcgrid = _PM.var(pm, n, :p_dcgrid)
     pconv_dc = _PM.var(pm, n, :pconv_dc)
 
@@ -327,7 +327,7 @@ function constraint_candidate_branches_mp(pm::_PM.AbstractPowerModel, n::Int, i:
     JuMP.@constraint(pm.model,  z == z_1)
 end
 
-function constraint_kcl_shunt_dcgrid_ne(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_arcs_dcgrid_ne, bus_convs_dc, bus_convs_dc_ne, pd)
+function constraint_power_balance_dc_dcne(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_arcs_dcgrid_ne, bus_convs_dc, bus_convs_dc_ne, pd)
     p_dcgrid = _PM.var(pm, n, :p_dcgrid)
     p_dcgrid_ne = _PM.var(pm, n, :p_dcgrid_ne)
     pconv_dc = _PM.var(pm, n, :pconv_dc)
@@ -337,7 +337,7 @@ function constraint_kcl_shunt_dcgrid_ne(pm::_PM.AbstractPowerModel, n::Int, i::I
 end
 
 
-function constraint_kcl_shunt_dcgrid_ne_bus(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid_ne, bus_ne_convs_dc_ne, pd_ne)
+function constraint_power_balance_dcne_dcne(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid_ne, bus_ne_convs_dc_ne, pd_ne)
     p_dcgrid_ne = _PM.var(pm, n, :p_dcgrid_ne)
     pconv_dc_ne = _PM.var(pm, n, :pconv_dc_ne)
     xb = _PM.var(pm, n, :branchdc_ne)

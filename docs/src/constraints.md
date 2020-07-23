@@ -22,13 +22,13 @@ constraint_dc_voltage_magnitude_setpoint
 ### KCL Constraints
 
 ```@docs
-constraint_kcl_shunt_dcgrid
+constraint_power_balance_dc
 ```
 ## AC Bus Constraints
 
 ### KCL Constraints
 ```@docs
-constraint_kcl_shunt
+constraint_power_balance_ac
 ```
 
 ## DC Branch Constraints

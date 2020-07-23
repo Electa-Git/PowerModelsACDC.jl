@@ -39,7 +39,7 @@ function post_acdcpf(pm::_PM.AbstractPowerModel)
     end
 
     for (i, bus) in _PM.ref(pm, :bus)# _PM.ids(pm, :bus)
-        constraint_kcl_shunt(pm, i)
+        constraint_power_balance_ac(pm, i)
         # PV Bus Constraints
         if length(_PM.ref(pm, :bus_gens, i)) > 0 && !(i in _PM.ids(pm,:ref_buses))
             # this assumes inactive generators are filtered out of bus_gens
@@ -63,7 +63,7 @@ function post_acdcpf(pm::_PM.AbstractPowerModel)
         end
     end
     for i in _PM.ids(pm, :busdc)
-        constraint_kcl_shunt_dcgrid(pm, i)
+        constraint_power_balance_dc(pm, i)
     end
     for i in _PM.ids(pm, :branchdc)
         constraint_ohms_dc_branch(pm, i)
