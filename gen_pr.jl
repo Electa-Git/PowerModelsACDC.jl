@@ -3,6 +3,7 @@
 import Pkg
 import Pkg.Types: VersionSpec, VersionRange, VersionBound, semver_spec
 import Base: thismajor, thisminor, thispatch, nextmajor, nextminor, nextpatch
+import UUIDs
 
 const STDLIBS = [
     "Base64"
@@ -42,7 +43,10 @@ function uuid(name::AbstractString)
     elseif name == "Statistics"
         return "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
     else
-        string(Pkg.METADATA_compatible_uuid(String(name)))
+        rng = UUIDs.MersenneTwister(1234);
+        u4 = UUIDs.uuid4(rng)
+        u5 = UUIDs.uuid5(u4, "julia")
+        # string(Pkg.METADATA_compatible_uuid(String(name)))
     end
 end
 
@@ -120,7 +124,7 @@ for arg in ARGS
         "uuid" => uuid(name),
         "autors" => ["Hakan Ergun", "Frederik Geth", "Jay Dave"],
         "repo" => "https://github.com/hakanergun/PowerModelsACDC.jl",
-        "version" => "0.3.1",
+        "version" => "0.3.2",
         "deps" => Dict{String,String}(),
         "compat" => Dict{String,String}(),
         "extras" => Dict{String,String}(),

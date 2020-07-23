@@ -2,7 +2,7 @@ name = "PowerModelsACDC"
 uuid = "ff45984e-d068-5f4c-9e32-c4133509d236"
 autors = ["Hakan Ergun", "Frederik Geth", "Jay Dave"]
 repo = "https://github.com/hakanergun/PowerModelsACDC.jl"
-version = "0.3.1"
+version = "0.3.2"
 
 [deps]
 Cbc = "9961bab8-2fa3-5c5a-9d89-47fab24efd76"
@@ -16,12 +16,12 @@ SCS = "c946c3f1-0d1f-5ce8-9dea-7daa1f7e2d13"
 
 [compat]
 Cbc = "~0.4.0, ~0.5, =0.6.0, =0.6.1, =0.6.2, =0.6.3, =0.6.4, =0.6.5, =0.6.6, =0.6.7"
-InfrastructureModels = "=0.5.1"
+InfrastructureModels = "=0.5.3"
 Ipopt = "~0.4.0, ~0.5, =0.6.0, =0.6.1"
 JuMP = "~0.19.1, ~0.21.0"
 Juniper = "=0.6.3"
 Memento = "~0.10.0, ~0.12.0, ~1.0.0"
-PowerModels = "=0.17.1"
+PowerModels = "=0.17.2"
 SCS = "~0.4.0, ~0.5, =0.6.0, =0.6.1, =0.6.2, =0.6.3, =0.6.4, =0.6.5, =0.6.6"
 julia = "^1.1.0"
 

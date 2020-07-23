@@ -94,6 +94,27 @@ function constraint_power_balance_ac_dcne(pm::_PM.AbstractWModels, n::Int, i::In
     JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac) + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(pg[g] for g in bus_gens)  - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*w)
     JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*w)
 end
+"""
+```
+sum(p[a] for a in bus_arcs) + sum(p_ne[a] for a in bus_arcs_ne) + sum(pconv_grid_ac[c] for c in bus_convs_ac) + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne) == sum(pg[g] for g in bus_gens)  - pd - gs*w
+sum(q[a] for a in bus_arcs) + sum(q_ne[a] for a in bus_arcs_ne) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne) == sum(qg[g] for g in bus_gens)  - qd + bs*w
+```
+"""
+function constraint_power_balance_acne_dcne(pm::_PM.AbstractWModels, n::Int, i::Int, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
+    w = _PM.var(pm, n, :w, i)
+    p = _PM.var(pm, n, :p)
+    p_ne = _PM.var(pm, n, :p_ne)
+    q = _PM.var(pm, n, :q)
+    q_ne = _PM.var(pm, n, :q_ne)
+    pg = _PM.var(pm, n, :pg)
+    qg = _PM.var(pm, n, :qg)
+    pconv_grid_ac = _PM.var(pm, n, :pconv_tf_fr)
+    qconv_grid_ac = _PM.var(pm, n, :qconv_tf_fr)
+    pconv_grid_ac_ne = _PM.var(pm, n, :pconv_tf_fr_ne)
+    qconv_grid_ac_ne = _PM.var(pm, n, :qconv_tf_fr_ne)
+    JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(p_ne[a] for a in bus_arcs_ne) + sum(pconv_grid_ac[c] for c in bus_convs_ac) + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(pg[g] for g in bus_gens)  - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*w)
+    JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(q_ne[a] for a in bus_arcs_ne) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*w)
+end
 
 """
 Creates Ohms constraints for DC branches

@@ -49,7 +49,10 @@ _PMACDC.display_results_tnep(resultQC)
 ## TEST ACDC TNEP
 
 resultACDC_dcp = _PMACDC.run_acdctnepopf(file_acdc, _PM.DCPPowerModel, gurobi, setting = s)
-
+resultACDC_acp = _PMACDC.run_acdctnepopf(file_acdc, _PM.ACPPowerModel, juniper, setting = s)
+resultACDC_socwr = _PMACDC.run_acdctnepopf(file_acdc, _PM.SOCWRPowerModel, gurobi, setting = s)
+resultACDC_qc = _PMACDC.run_acdctnepopf(file_acdc, _PM.QCRMPowerModel, gurobi, setting = s)
+resultACDC_lpac = _PMACDC.run_acdctnepopf(file_acdc, _PM.LPACCPowerModel, gurobi, setting = s)
 
 t = 1:2
 function build_mn_data(file)
