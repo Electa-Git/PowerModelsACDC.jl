@@ -1,8 +1,7 @@
-v0.3.0 Release Notes
+v0.3.2 Release Notes
 
-- Added TNEP problems in single and multiperiod
-- TNEP formulated in DCP, LPAC, SOCBFM, SOCBIM, SDP, QC and ACP
-- TNEP test cases and unit tests integrated
-- Update code base for compliance with PowerModels v0.15.3
--- Variable definitions & reporting
--- Conductors removed
+- AC/DC TNEP in single and multi period
+- Renaming nodal power balance constraints
+- New test cases and unit tests for AC/DC TNEP
+- Update code base for compliance with PowerModels v0.17.2
+- Bug fix DCP formulation
