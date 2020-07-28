@@ -17,7 +17,7 @@ makedocs(
             "Modeling Components" => [
                 "Objective" => "objective.md",
                 "Variables" => "variables.md",
-                "Constraints" => "constraints.md"
+                "Constraints" => "constraints.md",
                 "Problem Types" => "problems.md"
             ],
             "File IO" => "parser.md"
@@ -26,9 +26,5 @@ makedocs(
 )
 
 deploydocs(
-    # deps = nothing,
-    # make = nothing,
-    # target = "build",
-    # julia = "1.1",
     repo = "github.com/hakanergun/PowerModelsACDC.jl.git"
 )
