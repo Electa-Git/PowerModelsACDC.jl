@@ -2,7 +2,7 @@ using Documenter, PowerModelsACDC
 
 makedocs(
     modules = [PowerModelsACDC],
-    format = :html,
+    format = Documenter.HTML(),
     sitename = "PowerModelsACDC",
     authors = "Frederik Geth, Hakan Ergun",
     pages = [
@@ -26,9 +26,5 @@ makedocs(
 )
 
 deploydocs(
-    deps = nothing,
-    make = nothing,
-    target = "build",
-    repo = "github.com/hakanergun/PowerModelsACDC.jl.git",
-    julia = "1.1"
+    repo = "github.com/hakanergun/PowerModelsACDC.jl.git"
 )
