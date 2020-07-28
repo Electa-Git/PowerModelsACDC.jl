@@ -70,10 +70,12 @@ q_pr_to == -b*w_to +  b/(tm)*wr     + -g/(tm)*(-wi))
 ```
 """
 function constraint_conv_reactor(pm::_PM.AbstractWRModels, n::Int, i::Int, rc, xc, reactor)
+    pconv_ac = _PM.var(pm, n,  :pconv_ac, i)
+    qconv_ac = _PM.var(pm, n,  :qconv_ac, i)
+    ppr_to = - pconv_ac
+    qpr_to = - qconv_ac
     ppr_fr = _PM.var(pm, n,  :pconv_pr_fr, i)
     qpr_fr = _PM.var(pm, n,  :qconv_pr_fr, i)
-    ppr_to = -_PM.var(pm, n,  :pconv_ac, i)
-    qpr_to = -_PM.var(pm, n,  :qconv_ac, i)
 
     wf = _PM.var(pm, n,  :wf_ac, i)
     wc = _PM.var(pm, n,  :wc_ac, i)
@@ -228,10 +230,12 @@ q_pr_to == -b*w_to +  b/(tm)*wr     + -g/(tm)*(-wi))
 ```
 """
 function constraint_conv_reactor_ne(pm::_PM.AbstractWRModels, n::Int, i::Int, rc, xc, reactor)
+    pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)
+    qconv_ac = _PM.var(pm, n, :qconv_ac_ne, i)
+    ppr_to = - pconv_ac
+    qpr_to = - qconv_ac
     ppr_fr = _PM.var(pm, n, :pconv_pr_fr_ne, i)
     qpr_fr = _PM.var(pm, n, :qconv_pr_fr_ne, i)
-    ppr_to = -_PM.var(pm, n, :pconv_ac_ne, i)
-    qpr_to = -_PM.var(pm, n, :qconv_ac_ne, i)
 
     wf = _PM.var(pm, n, :wf_ac_ne, i)
     wc = _PM.var(pm, n, :wc_ac_ne, i)
@@ -265,11 +269,11 @@ function constraint_conv_filter_ne(pm::_PM.AbstractWModels, n::Int, i::Int, bv, 
     ptf_to = _PM.var(pm, n, :pconv_tf_to_ne, i)
     qtf_to = _PM.var(pm, n, :qconv_tf_to_ne, i)
     wf = _PM.var(pm, n, :wf_ac_ne, i)
+
     JuMP.@constraint(pm.model, ppr_fr + ptf_to == 0 )
-
     JuMP.@constraint(pm.model, qpr_fr + qtf_to + (-bv) * filter * (wf) == 0)
-
 end
+
 function constraint_lossless_section_ne(pm::_PM.AbstractWModels, w_fr, w_to, wr, wi, p_fr, p_to, q_fr, q_to)
     JuMP.@constraint(pm.model, w_fr ==  w_to)
     JuMP.@constraint(pm.model, wr   ==  w_fr)

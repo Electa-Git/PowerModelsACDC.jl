@@ -320,9 +320,16 @@ function constraint_candidate_converters_mp(pm::_PM.AbstractPowerModel, n::Int, 
     JuMP.@constraint(pm.model,  z == z_1)
 end
 
-function constraint_candidate_branches_mp(pm::_PM.AbstractPowerModel, n::Int, i::Int)
+function constraint_candidate_dcbranches_mp(pm::_PM.AbstractPowerModel, n::Int, i::Int)
     z = _PM.var(pm, n, :branchdc_ne, i)
     z_1 = _PM.var(pm, n-1, :branchdc_ne, i)
+
+    JuMP.@constraint(pm.model,  z == z_1)
+end
+
+function constraint_candidate_acbranches_mp(pm::_PM.AbstractPowerModel, n::Int, i::Int)
+    z = _PM.var(pm, n, :branch_ne, i)
+    z_1 = _PM.var(pm, n-1, :branch_ne, i)
 
     JuMP.@constraint(pm.model,  z == z_1)
 end

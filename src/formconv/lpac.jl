@@ -3,7 +3,6 @@ function constraint_converter_losses(pm::_PM.AbstractLPACModel, n::Int, i::Int, 
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
     iconv = _PM.var(pm, n, :iconv_ac, i)
 
-    # _PM.con(pm, n, :conv_loss)[i] = JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv)
     JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv)
 end
 
@@ -26,13 +25,7 @@ function constraint_conv_transformer(pm::_PM.AbstractLPACModel, n::Int, i::Int, 
         btf = imag(ytf)
         c1, c2, c3, c4 = lpac_power_flow_constraints(pm.model, gtf, btf, phi, phi_vmf, va, vaf, ptf_fr, ptf_to, qtf_fr, qtf_to, tm, cs)
         c5 = constraint_cos_angle_diff_PWL(pm, n, cs, va, vaf)
-        # _PM.con(pm, n, :conv_tf_p_fr)[i] = c1
-        # _PM.con(pm, n, :conv_tf_q_fr)[i] = c2
-        # _PM.con(pm, n, :conv_tf_p_to)[i] = c3
-        # _PM.con(pm, n, :conv_tf_q_to)[i] = c4
     else
-        # _PM.con(pm, n, :conv_tf_p_fr)[i] = JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
-        # _PM.con(pm, n, :conv_tf_q_fr)[i] = JuMP.@constraint(pm.model, qtf_fr + qtf_to == 0)
         JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
         JuMP.@constraint(pm.model, qtf_fr + qtf_to == 0)
         JuMP.@constraint(pm.model, va == vaf)
@@ -53,10 +46,13 @@ end
 
 
 function constraint_conv_reactor(pm::_PM.AbstractLPACModel, n::Int, i::Int, rc, xc, reactor)
+    pconv_ac  = _PM.var(pm, n, :pconv_ac, i)
+    qconv_ac  = _PM.var(pm, n, :qconv_ac, i)
+    ppr_to = - pconv_ac
+    qpr_to = - qconv_ac
     ppr_fr = _PM.var(pm, n, :pconv_pr_fr, i)
     qpr_fr = _PM.var(pm, n, :qconv_pr_fr, i)
-    ppr_to = -_PM.var(pm, n, :pconv_ac, i)
-    qpr_to = -_PM.var(pm, n, :qconv_ac, i)
+
     phi_vmc = _PM.var(pm, n, :phi_vmc, i)
     phi_vmf = _PM.var(pm, n, :phi_vmf, i)
     vac = _PM.var(pm, n, :vac, i)
@@ -74,12 +70,8 @@ function constraint_conv_reactor(pm::_PM.AbstractLPACModel, n::Int, i::Int, rc, 
         bc = imag(yc)
         c1, c2, c3, c4 = lpac_power_flow_constraints(pm.model, gc, bc, phi_vmf, phi_vmc, vaf, vac, ppr_fr, ppr_to, qpr_fr, qpr_to, 1, cs)
         c5 = constraint_cos_angle_diff_PWL(pm, n, cs, vaf, vac)
-        # _PM.con(pm, n, :conv_pr_p)[i] = c3
-        # _PM.con(pm, n, :conv_pr_q)[i] = c4
         c6 = constraint_conv_capacity_PWL(pm, n, ppr_to, qpr_to, ppr_to_ub, qpr_to_ub, Smax)
    else
-        # _PM.con(pm, n, :conv_pr_p)[i] = JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
-        # _PM.con(pm, n, :conv_pr_q)[i] = JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
         JuMP.@constraint(pm.model, vac == vaf)
@@ -95,8 +87,6 @@ function constraint_conv_filter(pm::_PM.AbstractLPACModel, n::Int, i::Int, bv, f
     qtf_to = _PM.var(pm, n, :qconv_tf_to, i)
     phi_vmf = _PM.var(pm, n, :phi_vmf, i)
 
-    # _PM.con(pm, n, :conv_kcl_p)[i] = JuMP.@constraint(pm.model, ppr_fr + ptf_to == 0 )
-    # _PM.con(pm, n, :conv_kcl_q)[i] = JuMP.@constraint(pm.model, qpr_fr + qtf_to + -bv*filter*(1+2*phi_vmf) == 0)
     JuMP.@constraint(pm.model, ppr_fr + ptf_to == 0 )
     JuMP.@constraint(pm.model, qpr_fr + qtf_to + -bv*filter*(1+2*phi_vmf) == 0)
 end
@@ -254,10 +244,6 @@ function constraint_conv_transformer_ne(pm::_PM.AbstractLPACModel, n::Int, i::In
         btf = imag(ytf)
         c1, c2, c3, c4 = lpac_power_flow_constraints(pm.model, gtf, btf, phi_du, phi_vmf, va_du, vaf, ptf_fr, ptf_to, qtf_fr, qtf_to, tm, cs, z)
         c5 = constraint_cos_angle_diff_PWL(pm, n, cs, va, vaf)
-        # _PM.con(pm, n, :conv_tf_p_fr_ne)[i] = c1
-        # _PM.con(pm, n, :conv_tf_q_fr_ne)[i] = c2
-        # _PM.con(pm, n, :conv_tf_p_to_ne)[i] = c3
-        # _PM.con(pm, n, :conv_tf_q_to_ne)[i] = c4
         relaxation_semicont_variable_on_off(pm.model, cs, z) # cos not yet semicont. but once put ub and lb acc. to angle difference, it can be semi-cont
     else
         JuMP.@constraint(pm.model, ptf_fr + ptf_to == 0)
@@ -266,10 +252,10 @@ function constraint_conv_transformer_ne(pm::_PM.AbstractLPACModel, n::Int, i::In
         JuMP.@constraint(pm.model, (1*z+phi_du) == (1*z+phi_vmf))
     end
 
-    relaxation_variable_on_off(pm.model, phi, phi_du, z)
+    # relaxation_variable_on_off(pm.model, phi, phi_du, z)
     _IM.relaxation_equality_on_off(pm.model, phi, phi_du, z)
 
-    relaxation_variable_on_off(pm.model, va, va_du, z)
+    # relaxation_variable_on_off(pm.model, va, va_du, z)
     _IM.relaxation_equality_on_off(pm.model, va, va_du, z)
 
     relaxation_semicont_variable_on_off(pm.model, phi_vmf, z)
@@ -279,7 +265,6 @@ end
 "constraints for a voltage magnitude transformer + series impedance"
 
 function lpac_power_flow_constraints(model, g, b, phi_fr, phi_to, va_fr, va_to, p_fr, p_to, q_fr, q_to, tm, cs, z)
-
     c1 = JuMP.@constraint(model, p_fr ==  g/(tm^2)*(1.0*z + 2*phi_fr) + (-g/tm)*(cs + phi_fr + phi_to) + (-b/tm)*(va_fr-va_to))
     c2 = JuMP.@constraint(model, q_fr == -b/(tm^2)*(1.0*z + 2*phi_fr) - (-b/tm)*(cs + phi_fr + phi_to) + (-g/tm)*(va_fr-va_to))
     c3 = JuMP.@constraint(model, p_to ==  g*(1.0*z + 2*phi_to) + (-g/tm)*(cs + phi_fr + phi_to) + (-b/tm)*-(va_fr-va_to))
@@ -289,10 +274,13 @@ end
 
 
 function constraint_conv_reactor_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, rc, xc, reactor)
+    pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)
+    qconv_ac = _PM.var(pm, n, :qconv_ac_ne, i)
+    ppr_to = - pconv_ac
+    qpr_to = - qconv_ac
     ppr_fr = _PM.var(pm, n, :pconv_pr_fr_ne, i)
     qpr_fr = _PM.var(pm, n, :qconv_pr_fr_ne, i)
-    ppr_to = -_PM.var(pm, n, :pconv_ac_ne, i)
-    qpr_to = -_PM.var(pm, n, :qconv_ac_ne, i)
+
     phi_vmc = _PM.var(pm, n, :phi_vmc_ne, i)
     phi_vmf = _PM.var(pm, n, :phi_vmf_ne, i)
     vac = _PM.var(pm, n, :vac_ne, i)
@@ -312,8 +300,6 @@ function constraint_conv_reactor_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, r
         bc = imag(yc)
         c1, c2, c3, c4 = lpac_power_flow_constraints(pm.model, gc, bc, phi_vmf, phi_vmc, vaf, vac, ppr_fr, ppr_to, qpr_fr, qpr_to, 1, cs, z)
         c5 = constraint_cos_angle_diff_PWL(pm, n, cs, vaf, vac)
-        # _PM.con(pm, n, :conv_pr_p_ne)[i] = c3
-        # _PM.con(pm, n, :conv_pr_q_ne)[i] = c4
         relaxation_semicont_variable_on_off(pm.model, cs, z) # cos not yet semicont. but once put ub and lb acc. to angle difference, it can be semi-cont
     else
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
@@ -396,6 +382,7 @@ function variable_converter_internal_voltage_magnitude_ne(pm::_PM.AbstractLPACMo
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc_ne, i), "phi_start")
     )
 end
+
 
 function variable_voltage_slack(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded::Bool = true)
     _PM.var(pm, nw)[:phi_du] = JuMP.@variable(pm.model,

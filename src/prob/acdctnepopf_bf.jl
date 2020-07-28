@@ -1,19 +1,19 @@
-export run_tnepopf_bf
+export run_acdctnepopf_bf
 
 ""
-function run_tnepopf_bf(file::String, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
+function run_acdctnepopf_bf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
     process_additional_data!(data)
-    return run_tnepopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!],  kwargs...)
+    return run_acdctnepopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], kwargs...)
 end
 
 ""
-function run_tnepopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...)  where T <: _PM.AbstractBFModel
-    return _PM.run_model(data, model_type, solver, post_tnepopf_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!],  kwargs...)
+function run_acdctnepopf_bf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
+    return _PM.run_model(data, model_type, solver, post_acdctnepopf_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], kwargs...)
 end
 
 ""
-function post_tnepopf_bf(pm::_PM.AbstractPowerModel)
+function post_acdctnepopf_bf(pm::_PM.AbstractPowerModel)
     # PowerModelsACDC.add_ref_dcgrid!(pm)
     # add_candidate_dcgrid!(pm)
     _PM.variable_bus_voltage(pm)
@@ -30,30 +30,41 @@ function post_tnepopf_bf(pm::_PM.AbstractPowerModel)
     variable_dcgrid_voltage_magnitude(pm)
 
     # new variables for TNEP problem
+    _PM.variable_ne_branch_indicator(pm)
+    _PM.variable_ne_branch_power(pm)
+    _PM.variable_ne_branch_current(pm)
     variable_active_dcbranch_flow_ne(pm)
     variable_branch_ne(pm)
-    variable_dc_converter_ne(pm)# add more variables in variableconv.jl
+    variable_dc_converter_ne(pm)
     variable_dcbranch_current_ne(pm)
     variable_dcgrid_voltage_magnitude_ne(pm)
-
-    objective_min_cost(pm)
+    objective_min_cost_acdc(pm)
 
     _PM.constraint_model_voltage(pm)
+    _PM.constraint_ne_model_voltage(pm)
     constraint_voltage_dc(pm)
     constraint_voltage_dc_ne(pm)
     for i in _PM.ids(pm, :ref_buses)
         _PM.constraint_theta_ref(pm, i)
     end
     for i in _PM.ids(pm, :bus)
-        constraint_power_balance_ac_dcne(pm, i)
+        constraint_power_balance_acne_dcne(pm, i)
     end
     for i in _PM.ids(pm, :branch)
-        _PM.constraint_power_losses(pm, i)
-        _PM.constraint_voltage_magnitude_difference(pm, i)
+        _PM.constraint_ohms_yt_from(pm, i)
+        _PM.constraint_ohms_yt_to(pm, i)
         _PM.constraint_voltage_angle_difference(pm, i)
         _PM.constraint_thermal_limit_from(pm, i)
         _PM.constraint_thermal_limit_to(pm, i)
     end
+    for i in _PM.ids(pm, :ne_branch)
+        _PM.constraint_ne_ohms_yt_from(pm, i)
+        _PM.constraint_ne_ohms_yt_to(pm, i)
+        _PM.constraint_ne_voltage_angle_difference(pm, i)
+        _PM.constraint_ne_thermal_limit_from(pm, i)
+        _PM.constraint_ne_thermal_limit_to(pm, i)
+    end
+
     for i in _PM.ids(pm, :busdc)
         constraint_power_balance_dc_dcne(pm, i)
     end

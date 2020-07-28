@@ -18,6 +18,7 @@ makedocs(
                 "Objective" => "objective.md",
                 "Variables" => "variables.md",
                 "Constraints" => "constraints.md"
+                "Problem Types" => "problems.md"
             ],
             "File IO" => "parser.md"
         ],

@@ -77,10 +77,12 @@ q_pr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac
 ```
 """
 function constraint_conv_reactor(pm::_PM.AbstractACPModel, n::Int, i::Int, rc, xc, reactor)
-    pconv_ac = _PM.var(pm, n, :pconv_ac, i)
-    qconv_ac = _PM.var(pm, n, :qconv_ac, i)
-    ppr_fr = _PM.var(pm, n, :pconv_pr_fr, i)
-    qpr_fr = _PM.var(pm, n, :qconv_pr_fr, i)
+    pconv_ac = _PM.var(pm, n,  :pconv_ac, i)
+    qconv_ac = _PM.var(pm, n,  :qconv_ac, i)
+    ppr_to = - pconv_ac
+    qpr_to = - qconv_ac
+    ppr_fr = _PM.var(pm, n,  :pconv_pr_fr, i)
+    qpr_fr = _PM.var(pm, n,  :qconv_pr_fr, i)
 
     vmf = _PM.var(pm, n, :vmf, i)
     vaf = _PM.var(pm, n, :vaf, i)
@@ -92,18 +94,15 @@ function constraint_conv_reactor(pm::_PM.AbstractACPModel, n::Int, i::Int, rc, x
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)
-        JuMP.@NLconstraint(pm.model, -pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf))
-        JuMP.@NLconstraint(pm.model, -qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf))
+        JuMP.@NLconstraint(pm.model, - pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf)) # JuMP doesn't allow affine expressions in NL constraints
+        JuMP.@NLconstraint(pm.model, - qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf)) # JuMP doesn't allow affine expressions in NL constraints
         JuMP.@NLconstraint(pm.model, ppr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac))
         JuMP.@NLconstraint(pm.model, qpr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac))
     else
-        ppr_to = -pconv_ac
-        qpr_to = -qconv_ac
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
         JuMP.@constraint(pm.model, vac == vaf)
         JuMP.@constraint(pm.model, vmc == vmf)
-
     end
 end
 """
@@ -240,10 +239,12 @@ q_pr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac
 ```
 """
 function constraint_conv_reactor_ne(pm::_PM.AbstractACPModel, n::Int, i::Int, rc, xc, reactor)
-    pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)
-    qconv_ac = _PM.var(pm, n, :qconv_ac_ne, i)
-    ppr_fr = _PM.var(pm, n, :pconv_pr_fr_ne, i)
-    qpr_fr = _PM.var(pm, n, :qconv_pr_fr_ne, i)
+    pconv_ac = _PM.var(pm, n,  :pconv_ac_ne, i)
+    qconv_ac = _PM.var(pm, n,  :qconv_ac_ne, i)
+    ppr_to = - pconv_ac
+    qpr_to = - qconv_ac
+    ppr_fr = _PM.var(pm, n,  :pconv_pr_fr_ne, i)
+    qpr_fr = _PM.var(pm, n,  :qconv_pr_fr_ne, i)
 
     vmf = _PM.var(pm, n, :vmf_ne, i)
     vaf = _PM.var(pm, n, :vaf_ne, i)
@@ -256,13 +257,11 @@ function constraint_conv_reactor_ne(pm::_PM.AbstractACPModel, n::Int, i::Int, rc
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)
-        JuMP.@NLconstraint(pm.model, -pconv_ac == z*(gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf)))
-        JuMP.@NLconstraint(pm.model, -qconv_ac == z*(-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf)))
+        JuMP.@NLconstraint(pm.model, - pconv_ac == z*(gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf))) # JuMP doesn't allow affine expressions in NL constraints
+        JuMP.@NLconstraint(pm.model, - qconv_ac == z*(-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf))) # JuMP doesn't allow affine expressions in NL constraints
         JuMP.@NLconstraint(pm.model, ppr_fr ==  z*(gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac)))
         JuMP.@NLconstraint(pm.model, qpr_fr ==  z*(-bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac)))
     else
-        ppr_to = -pconv_ac
-        qpr_to = -qconv_ac
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
         JuMP.@constraint(pm.model, vac == vaf)

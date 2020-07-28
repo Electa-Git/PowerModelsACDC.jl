@@ -1,4 +1,6 @@
-constraint_voltage_dc(pm::_PM.AbstractPowerModel) = constraint_voltage_dc(pm, pm.cnw)
+function constraint_voltage_dc(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw)
+    constraint_voltage_dc(pm, nw)
+end
 # no data, so no further templating is needed, constraint goes directly to the formulations
 function constraint_power_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     bus = _PM.ref(pm, nw, :bus, i)

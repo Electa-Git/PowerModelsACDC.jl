@@ -74,13 +74,16 @@ wc == wf -2*(rc*ppr_fr + xc*qpr_fr) + (rc^2 + xc^2)*ipr
 ```
 """
 function constraint_conv_reactor(pm::_PM.AbstractBFQPModel, n::Int,  i::Int, rc, xc, reactor)
+    pconv_ac = _PM.var(pm, n,  :pconv_ac, i)
+    qconv_ac = _PM.var(pm, n,  :qconv_ac, i)
+    ppr_to = - pconv_ac
+    qpr_to = - qconv_ac
+    ppr_fr = _PM.var(pm, n,  :pconv_pr_fr, i)
+    qpr_fr = _PM.var(pm, n,  :qconv_pr_fr, i)
+
     wf = _PM.var(pm, n,  :wf_ac, i)
     ipr = _PM.var(pm, n,  :irc_sq, i)
     wc = _PM.var(pm, n,  :wc_ac, i)
-    ppr_to = -_PM.var(pm, n,  :pconv_ac, i)
-    qpr_to = -_PM.var(pm, n,  :qconv_ac, i)
-    ppr_fr = _PM.var(pm, n,  :pconv_pr_fr, i)
-    qpr_fr = _PM.var(pm, n,  :qconv_pr_fr, i)
 
     if reactor
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
@@ -96,13 +99,16 @@ function constraint_conv_reactor(pm::_PM.AbstractBFQPModel, n::Int,  i::Int, rc,
 end
 
 function constraint_conv_reactor(pm::_PM.AbstractBFConicModel, n::Int,  i::Int, rc, xc, reactor)
+    pconv_ac = _PM.var(pm, n,  :pconv_ac, i)
+    qconv_ac = _PM.var(pm, n,  :qconv_ac, i)
+    ppr_to = - pconv_ac
+    qpr_to = - qconv_ac
+    ppr_fr = _PM.var(pm, n,  :pconv_pr_fr, i)
+    qpr_fr = _PM.var(pm, n,  :qconv_pr_fr, i)
+
     wf = _PM.var(pm, n,  :wf_ac, i)
     ipr = _PM.var(pm, n,  :irc_sq, i)
     wc = _PM.var(pm, n,  :wc_ac, i)
-    ppr_to = -_PM.var(pm, n,  :pconv_ac, i)
-    qpr_to = -_PM.var(pm, n,  :qconv_ac, i)
-    ppr_fr = _PM.var(pm, n,  :pconv_pr_fr, i)
-    qpr_fr = _PM.var(pm, n,  :qconv_pr_fr, i)
 
     if reactor
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
@@ -240,13 +246,16 @@ wc == wf -2*(rc*ppr_fr + xc*qpr_fr) + (rc^2 + xc^2)*ipr
 ```
 """
 function constraint_conv_reactor_ne(pm::_PM.AbstractBFQPModel, n::Int, i::Int, rc, xc, reactor)
+    pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)
+    qconv_ac = _PM.var(pm, n, :qconv_ac_ne, i)
+    ppr_to = - pconv_ac
+    qpr_to = - qconv_ac
+    ppr_fr = _PM.var(pm, n, :pconv_pr_fr_ne, i)
+    qpr_fr = _PM.var(pm, n, :qconv_pr_fr_ne, i)
+
     wf = _PM.var(pm, n, :wf_ac_ne, i)
     ipr = _PM.var(pm, n, :iconv_ac_sq_ne, i)
     wc = _PM.var(pm, n, :wc_ac_ne, i)
-    ppr_to = -_PM.var(pm, n, :pconv_ac_ne, i)
-    qpr_to = -_PM.var(pm, n, :qconv_ac_ne, i)
-    ppr_fr = _PM.var(pm, n, :pconv_pr_fr_ne, i)
-    qpr_fr = _PM.var(pm, n, :qconv_pr_fr_ne, i)
 
     if reactor
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == rc*ipr)
@@ -261,14 +270,16 @@ function constraint_conv_reactor_ne(pm::_PM.AbstractBFQPModel, n::Int, i::Int, r
 end
 
 function constraint_conv_reactor_ne(pm::_PM.AbstractBFConicModel, n::Int, i::Int, rc, xc, reactor)
-    wf = _PM.var(pm, n, :wf_ac_ne, i)
-    ipr = _PM.var(pm, n, :irc_sq_ne, i)
-    wc = _PM.var(pm, n, :wc_ac_ne, i)
-    ppr_to = -_PM.var(pm, n, :pconv_ac_ne, i)
-    qpr_to = -_PM.var(pm, n, :qconv_ac_ne, i)
+    pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)
+    qconv_ac = _PM.var(pm, n, :qconv_ac_ne, i)
+    ppr_to = - pconv_ac
+    qpr_to = - qconv_ac
     ppr_fr = _PM.var(pm, n, :pconv_pr_fr_ne, i)
     qpr_fr = _PM.var(pm, n, :qconv_pr_fr_ne, i)
 
+    wf = _PM.var(pm, n, :wf_ac_ne, i)
+    ipr = _PM.var(pm, n, :irc_sq_ne, i)
+    wc = _PM.var(pm, n, :wc_ac_ne, i)
 
     if reactor
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == rc*ipr)

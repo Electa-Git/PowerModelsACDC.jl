@@ -29,10 +29,14 @@ if local_test == true
     import Gurobi
     import Mosek
     import MosekTools
+    import CPLEX
     gurobi = JuMP.with_optimizer(Gurobi.Optimizer)
+    cplex = JuMP.with_optimizer(CPLEX.Optimizer)
     mosek = JuMP.with_optimizer(Mosek.Optimizer)
     ##############################
 end
+include("common.jl")
+data_dc = build_mn_data("../test/data/tnep/case4_original.m")
 
 @testset "PowerModelsACDC" begin
 

@@ -1,5 +1,5 @@
 # Constraints
-All the OPF constraints for the AC grids have been re-used from _PM.jl, and are therefore not repeated here.
+All the OPF constraints for the AC grids have been re-used from PowerModels.jl, and are therefore not repeated here.
 
 ```@meta
 CurrentModule = PowerModelsACDC
@@ -19,14 +19,14 @@ constraint_active_load_gen_aggregation
 constraint_dc_voltage_magnitude_setpoint
 ```
 
-### KCL Constraints
+### KCL Constraints existing dc buses
 
 ```@docs
 constraint_power_balance_dc
 ```
 ## AC Bus Constraints
 
-### KCL Constraints
+### KCL Constraints existing ac buses 
 ```@docs
 constraint_power_balance_ac
 ```

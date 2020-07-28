@@ -133,15 +133,20 @@ function to_pu_multinetwork!(data)
                 set_conv_pu_power(conv, MVAbase)
                 set_conv_pu_volt(conv, kVbase*sqrt(3))
                 set_conv_pu_ohm(conv, Zbase)
-                conv["cost"] = conv["cost"]/length(data["nw"])
+                # conv["cost"] = conv["cost"]/length(data["nw"])
             end
         end
         if haskey(data["nw"][n], "branchdc_ne")
             for (i, branchdc) in data["nw"][n]["branchdc_ne"]
                 set_branchdc_pu(branchdc, MVAbase)
-                branchdc["cost"] = branchdc["cost"]/length(data["nw"])
+                # branchdc["cost"] = branchdc["cost"]/length(data["nw"])
             end
         end
+        # if haskey(data["nw"][n], "ne_branch")
+        #     for (i, ne_branch) in data["nw"][n]["ne_branch"]
+        #         ne_branch["construction_cost"] = ne_branch["construction_cost"]/length(data["nw"])
+        #     end
+        # end
         if haskey(data["nw"][n], "busdc_ne")
             new_busdc_ne = Dict{String, Any}()
             for (i, busdc) in data["nw"][n]["busdc_ne"]

@@ -69,7 +69,6 @@ function objective_min_polynomial_fuel_cost(pm::_PM.AbstractConicModel)
 
         end
     end
-    print("pipi")
     return JuMP.@objective(pm.model, Min,
         sum(
             sum( gen["cost"][1]*sum(_PM.var(pm, n, cnd, :pg_sqr, i) for cnd in _PM.conductor__PM.ids(pm, n)) +

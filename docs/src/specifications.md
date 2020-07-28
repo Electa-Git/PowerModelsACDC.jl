@@ -2,11 +2,7 @@
 
 ## ACDCOPF
 
-
 OPF with support for AC and DC grids at the same time, including AC/DC converters.
-
-
-
 
 #### Variables
 ```julia

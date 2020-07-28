@@ -77,7 +77,7 @@ function post_mp_tnepopf_bf(pm::_PM.AbstractPowerModel)
             constraint_ohms_dc_branch_ne(pm, i; nw = n)
             constraint_branch_limit_on_off(pm, i; nw = n)
             if n > 1
-                constraint_candidate_branches_mp(pm, n, i)
+                constraint_candidate_dcbranches_mp(pm, n, i)
             end
         end
 

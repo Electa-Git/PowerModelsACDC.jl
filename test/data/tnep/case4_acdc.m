@@ -30,6 +30,11 @@ mpc.branch = [
     1   2   0.02    0.06    0    250   250   250     0       0       1 -90 90;
 ];
 
+%column_names% f_bus	t_bus	br_r	br_x	br_b	rate_a	rate_b	rate_c	tap	shift	br_status	angmin	angmax	construction_cost
+mpc.ne_branch = [
+  1  4   0.020   0.200   0.00   150  150  150  0  0  1 -60  60 1;
+];
+
 
 %% dc grid topology
 %colunm_names% dcpoles
@@ -62,7 +67,7 @@ mpc.branchdc = [
 %	1	startup	shutdown	n	x1	y1	...	xn	yn
 %	2	startup	shutdown	n	c(n-1)	...	c0
 mpc.gencost = [
-	2	0	0	2	 0	0;
+	2	0	0	2	 1	0;
 ];
 %% candidate dc bus data
 %column_names%   busdc_i grid    Pdc     Vdc     basekVdc    Vdcmax  Vdcmin  Cdc
@@ -75,18 +80,18 @@ mpc.busdc_ne = [
 %% candidate branches
 %column_names%   fbusdc  tbusdc  r      l        c   rateA   rateB   rateC status cost
 mpc.branchdc_ne = [
-    3       4       0.052   0   0    200.0     150     150     1 1;
-    3       5       0.052   0   0    201.0     150     150     1 1;
-    3       1       0.052   0   0    200.0     150     150     1 1;
+    3       4       0.052   0   0    200     150     150     1 1;
+    3       5       0.052   0   0    200     150     150     1 1;
+    3       1       0.052   0   0    200     150     150     1 1;
  ];
 
 %% candidate converters
 %column_names%   busdc_i busac_i type_dc type_ac P_g   Q_g  islcc  Vtar rtf xtf  transformer tm   bf filter    rc      xc  reactor   basekVac Vmmax   Vmmin   Imax    status   LossA LossB  LossCrec LossCinv  droop Pdcset    Vdcset  dVdcset Pacmax Pacmin Qacmax Qacmin cost
 mpc.convdc_ne = [
     3       4   1       1       0       0    0 1     0.01  0.01 1 1 0.01 1 0.01   0.01 1  345         1.1     0.9     2.2     1     1.103 0.887  2.885    1.885       0.0050    -58.6274   1.0079   0 100 -100 50 -50 1;
-    3       4   1       1       0       0    0 1     0.01  0.01 1 1 0.01 1 0.01   0.01 1  345         1.1     0.9     5.0     1     1.103 2.885  2.885    1.885      0.0050    -58.6274   1.0079   0 250 -250 100 -100 2;
+    3       4   1       1       0       0    0 1     0.01  0.01 1 1 0.01 1 0.01   0.01 1  345         1.1     0.9     5.0     1     1.103 0.887  2.885    1.885      0.0050    -58.6274   1.0079   0 250 -250 100 -100 2;
     4       1   1       1       0       0    0 1     0.01  0.01 1 1 0.01 1 0.01   0.01 1  345         1.1     0.9     2.2     1     1.103 0.887  2.885    1.885      0.0050    -58.6274   1.0079   0 100 -100 50 -50 1.2;
-    5       2   1       1       0       0    0 1     0.01  0.01 1 1 0.01 1 0.01   0.01 1  345         1.1     0.9     2.2     1     1.103 0.887  2.885    1.885     0.0050    -58.6274   1.0079   0 250 -250 100 -100 1.1;
+    5       2   1       1       0       0    0 1     0.01  0.01 1 1 0.01 1 0.01   0.01 0  345         1.1     0.9     2.2     1     1.103 0.887  2.885    1.885     0.0050    -58.6274   1.0079   0 250 -250 100 -100 1.1;
 ];
 
 %     3       4   1       1       0       0    0 1     0.01  0.01 1 1 0.01 1 0.01   0.01 1  345         1.1     0.9     1.1     1       1.103 0.887  2.885    1.885      0.0050    -58.6274   1.0079   0 100 -100 10 -10 1;
