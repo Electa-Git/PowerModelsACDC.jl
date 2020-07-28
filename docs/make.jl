@@ -26,9 +26,9 @@ makedocs(
 )
 
 deploydocs(
-    deps = nothing,
-    make = nothing,
-    target = "build",
-    repo = "github.com/hakanergun/PowerModelsACDC.jl.git",
-    julia = "1.1"
+    # deps = nothing,
+    # make = nothing,
+    # target = "build",
+    # julia = "1.1",
+    repo = "github.com/hakanergun/PowerModelsACDC.jl.git"
 )
