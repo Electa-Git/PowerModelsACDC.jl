@@ -1,6 +1,6 @@
 using Documenter, PowerModelsACDC
 
-makedocs(
+Documneter.makedocs(
     modules = [PowerModelsACDC],
     format = Documenter.HTML(),
     sitename = "PowerModelsACDC",
@@ -25,6 +25,6 @@ makedocs(
     ]
 )
 
-deploydocs(
+Documneter.deploydocs(
     repo = "github.com/hakanergun/PowerModelsACDC.jl.git"
 )
