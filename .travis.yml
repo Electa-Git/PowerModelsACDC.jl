@@ -18,6 +18,7 @@ jobs:
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
         - julia --project=docs/ docs/make.jl
       after_success: skip
+      after_success:  - julia -e 'using Pkg; cd(Pkg.dir("PowerModelsACDC")); include(joinpath("docs", "make.jl"))'
 # language: julia
 # os:
 #   - linux
