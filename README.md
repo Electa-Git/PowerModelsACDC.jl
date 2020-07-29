@@ -14,7 +14,7 @@ The latest stable release of PowerModelACDC can be installed using the Julia pac
 ```julia
 Pkg.add("PowerModelsACDC")
 ```
-The current version of PowerModelsACDC is 0.3.1 and is compatible with PowerModels v0.17.1, InfrastrucureModels v0.5.0
+The current version of PowerModelsACDC is 0.3.2 and is compatible with PowerModels v0.17.2, InfrastrucureModels v0.5.3
 
 
 **Core Problem Specifications**
