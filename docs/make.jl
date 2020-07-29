@@ -1,7 +1,7 @@
-using Documenter, PowerModelsACDC
+import Documenter, PowerModelsACDC
 
-Documneter.makedocs(
-    modules = [PowerModelsACDC],
+Documenter.makedocs(
+    modules = PowerModelsACDC,
     format = Documenter.HTML(),
     sitename = "PowerModelsACDC",
     authors = "Frederik Geth, Hakan Ergun",
@@ -14,11 +14,11 @@ Documneter.makedocs(
         "Library" => [
             "Network Formulations" => "formulations.md",
             "Problem Specifications" => "specifications.md",
+            "Problem Types" => "problems.md",
             "Modeling Components" => [
                 "Objective" => "objective.md",
                 "Variables" => "variables.md",
                 "Constraints" => "constraints.md",
-                "Problem Types" => "problems.md"
             ],
             "File IO" => "parser.md"
         ],
