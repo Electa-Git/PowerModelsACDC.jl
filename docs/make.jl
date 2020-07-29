@@ -2,7 +2,7 @@ using Documenter, PowerModelsACDC
 
 makedocs(
     modules = PowerModelsACDC,
-    format = Documenter.HTML(),
+    format = Documenter.HTML(analytics = "UA-367975-10", mathengine = Documenter.MathJax()),
     sitename = "PowerModelsACDC",
     authors = "Frederik Geth, Hakan Ergun",
     pages = [
@@ -20,11 +20,15 @@ makedocs(
                 "Variables" => "variables.md",
                 "Constraints" => "constraints.md",
             ],
-            "File IO" => "parser.md"
+            "File IO" => "parser.md",
         ],
     ]
 )
 
 deploydocs(
+<<<<<<< Updated upstream
     repo = "github.com/hakanergun/PowerModelsACDC.jl.git",
+=======
+    repo = "github.com/hakanergun/PowerModelsACDC.jl.git"
+>>>>>>> Stashed changes
 )
