@@ -1,4 +1,4 @@
-import Documenter, PowerModelsACDC
+using Documenter, PowerModelsACDC
 
 Documenter.makedocs(
     modules = PowerModelsACDC,
@@ -25,6 +25,6 @@ Documenter.makedocs(
     ]
 )
 
-Documneter.deploydocs(
+Documenter.deploydocs(
     repo = "github.com/hakanergun/PowerModelsACDC.jl.git"
 )
