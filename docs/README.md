@@ -1,10 +1,5 @@
 # PowerModelsACDC.jl
 
-Dev:
-[![Build Status](https://travis-ci.org/hakanergun/PowerModelsACDC.jl.svg?branch=master)](https://travis-ci.org/hakanergun/PowerModelsACDC.jl)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://github.com/hakanergun/hakanergun.github.io/PowerModelsACDC.jl/latest)
-
-
 PowerModelsACDC.jl is a Julia/JuMP/PowerModels package with models for DC lines, meshed DC networks, and AC DC converters.
 Building upon the PowerModels architecture, the code is engineered to decouple problem specifications (e.g. Power Flow, Optimal Power Flow, ...) from the power network formulations (e.g. AC, DC-approximation, SOC-relaxation, ...).
 
