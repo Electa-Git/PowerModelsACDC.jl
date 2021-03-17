@@ -19,9 +19,9 @@ using Test
 local_test = false   # as some tests require Mosek, only limited set sent to travis.
 
 ipopt_solver = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
-scs_solver = JuMP.with_optimizer(SCS.Optimizer)
-cbc = JuMP.with_optimizer(Cbc.Optimizer, tol=1e-4, print_level=0)
-juniper = JuMP.with_optimizer(Juniper.Optimizer, nl_solver = ipopt_solver, mip_solver= cbc, time_limit= 7200)
+scs_solver = JuMP.with_optimizer(SCS.Optimizer, verbose=0)
+cbc = JuMP.with_optimizer(Cbc.Optimizer, logLevel=0)
+juniper = JuMP.with_optimizer(Juniper.Optimizer, nl_solver=ipopt_solver, mip_solver=cbc, time_limit=7200, log_levels=[])
 
 
 if local_test == true
