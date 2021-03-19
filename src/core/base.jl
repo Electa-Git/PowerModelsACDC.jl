@@ -1,5 +1,5 @@
 function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
-    for (n, nw_ref) in ref[:nw]
+    for (n, nw_ref) in ref[:it][:pm][:nw]
         if haskey(nw_ref, :convdc)
             #Filter converters & DC branches with status 0 as well as wrong bus numbers
             nw_ref[:convdc] = Dict([x for x in nw_ref[:convdc] if (x.second["status"] == 1 && x.second["busdc_i"] in keys(nw_ref[:busdc]) && x.second["busac_i"] in keys(nw_ref[:bus]))])
@@ -70,22 +70,6 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
                 end
                 Memento.warn(_PM._LOGGER, "multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
             end
-
-
-            # if haskey(pm.setting, "find_all_ac_grids") && pm.tetting["find_all_ac_grids"] == true
-            #     ACgrids = find_all_ac_grids(nw_ref[:branch], nw_ref[:bus])
-            #     for (i, grid) in ACgrids
-            #         a = 0
-            #         for (j, bus) in nw_ref[:ref_buses]
-            #             if (bus["bus_i"] in grid["Buses"])
-            #                 a = 1
-            #             end
-            #         end
-            #         if a == 0
-            #             Memento.warn(_PM._LOGGER, "Grid $i does not have any voltage reference bus, this might cause infeasibility")
-            #         end
-            #     end
-            # end
             nw_ref[:ref_buses_dc] = ref_buses_dc
             nw_ref[:buspairsdc] = buspair_parameters_dc(nw_ref[:arcs_dcgrid_from], nw_ref[:branchdc], nw_ref[:busdc])
         else
@@ -203,7 +187,7 @@ function find_all_ac_grids(branches_ac, buses_ac)
 end
 
 function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
-    for (n, nw_ref) in ref[:nw]
+    for (n, nw_ref) in ref[:it][:pm][:nw]
         if haskey(nw_ref, :convdc_ne)
             nw_ref[:arcs_dcgrid_from_ne] = [(i,branch["fbusdc"],branch["tbusdc"]) for (i,branch) in nw_ref[:branchdc_ne]]
             nw_ref[:arcs_dcgrid_to_ne]   = [(i,branch["tbusdc"],branch["fbusdc"]) for (i,branch) in nw_ref[:branchdc_ne]]

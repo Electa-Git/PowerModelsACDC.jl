@@ -114,7 +114,7 @@ function variable_converter_internal_voltage(pm::_PM.AbstractLPACModel; kwargs..
     variable_converter_internal_voltage_angle(pm; kwargs...)
 end
 
-function variable_converter_filter_voltage_angle_cs(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true, report = true)
+function variable_converter_filter_voltage_angle_cs(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true, report = true)
     csvaf = _PM.var(pm, nw)[:cs_vaf] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_cs_vaf",
     start = 0
@@ -126,10 +126,10 @@ function variable_converter_filter_voltage_angle_cs(pm::_PM.AbstractLPACModel; n
         end
     end
 
-    report && _IM.sol_component_value(pm, nw, :convdc, :cs_vaf, _PM.ids(pm, nw, :convdc), csvaf)
+    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :cs_vaf, _PM.ids(pm, nw, :convdc), csvaf)
 end
 
-function variable_converter_internal_voltage_angle_cs(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true, report = true)
+function variable_converter_internal_voltage_angle_cs(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true, report = true)
     csvac = _PM.var(pm, nw)[:cs_vac] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_cs_vac",
     start = 0
@@ -142,10 +142,10 @@ function variable_converter_internal_voltage_angle_cs(pm::_PM.AbstractLPACModel;
         end
     end
 
-    report && _IM.sol_component_value(pm, nw, :convdc, :cs_vac, _PM.ids(pm, nw, :convdc), csvac)
+    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :cs_vac, _PM.ids(pm, nw, :convdc), csvac)
 end
 
-function variable_converter_filter_voltage_magnitude(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true, report = true)
+function variable_converter_filter_voltage_magnitude(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true, report = true)
     phivmf = _PM.var(pm, nw)[:phi_vmf] = JuMP.@variable(pm.model,
             [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_phi_vmf",
             start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "phi_start")
@@ -158,10 +158,10 @@ function variable_converter_filter_voltage_magnitude(pm::_PM.AbstractLPACModel; 
             end
         end
 
-        report && _IM.sol_component_value(pm, nw, :convdc, :phi_vmf, _PM.ids(pm, nw, :convdc), phivmf)
+        report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :phi_vmf, _PM.ids(pm, nw, :convdc), phivmf)
 end
 
-function variable_converter_internal_voltage_magnitude(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true, report = true)
+function variable_converter_internal_voltage_magnitude(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true, report = true)
     phivmc = _PM.var(pm, nw)[:phi_vmc] = JuMP.@variable(pm.model,
         [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_phi_vmc",
         start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "phi_start")
@@ -174,7 +174,7 @@ function variable_converter_internal_voltage_magnitude(pm::_PM.AbstractLPACModel
             end
         end
 
-        report && _IM.sol_component_value(pm, nw, :convdc, :phi_vmc, _PM.ids(pm, nw, :convdc), phivmc)
+        report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :phi_vmc, _PM.ids(pm, nw, :convdc), phivmc)
 end
 
 function constraint_conv_capacity_PWL(pm::_PM.AbstractLPACModel, n::Int, ppr_to, qpr_to, Umax, Imax, Smax)
@@ -347,7 +347,7 @@ function variable_converter_internal_voltage_ne(pm::_PM.AbstractLPACModel; kwarg
     variable_converter_internal_voltage_angle_ne(pm; kwargs...)
 end
 
-function variable_converter_filter_voltage_angle_cs_ne(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true)
+function variable_converter_filter_voltage_angle_cs_ne(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true)
     _PM.var(pm, nw)[:cs_vaf_ne] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_cs_vaf_ne",
     lower_bound =  0, # using the maximum bound allowed in cosine linearization. can be changed to bus angle +/- 10 degree?
@@ -356,7 +356,7 @@ function variable_converter_filter_voltage_angle_cs_ne(pm::_PM.AbstractLPACModel
     )
 end
 
-function variable_converter_internal_voltage_angle_cs_ne(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true)
+function variable_converter_internal_voltage_angle_cs_ne(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true)
     _PM.var(pm, nw)[:cs_vac_ne] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_cs_vac_ne",
     lower_bound =  0, # using the maximum bound allowed in cosine linearization. can be changed to bus angle +/- 10 degree?
@@ -365,7 +365,7 @@ function variable_converter_internal_voltage_angle_cs_ne(pm::_PM.AbstractLPACMod
     )
 end
 
-function variable_converter_filter_voltage_magnitude_ne(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true)
+function variable_converter_filter_voltage_magnitude_ne(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true)
     _PM.var(pm, nw)[:phi_vmf_ne] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_phi_vmf_ne",
     lower_bound = _PM.ref(pm, nw, :convdc_ne, i, "Vmmin") - 1.0,
@@ -374,7 +374,7 @@ function variable_converter_filter_voltage_magnitude_ne(pm::_PM.AbstractLPACMode
     )
 end
 
-function variable_converter_internal_voltage_magnitude_ne(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded = true)
+function variable_converter_internal_voltage_magnitude_ne(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true)
     _PM.var(pm, nw)[:phi_vmc_ne] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_phi_vmc_ne",
     lower_bound = _PM.ref(pm, nw, :convdc_ne, i, "Vmmin") - 1.0,
@@ -384,7 +384,7 @@ function variable_converter_internal_voltage_magnitude_ne(pm::_PM.AbstractLPACMo
 end
 
 
-function variable_voltage_slack(pm::_PM.AbstractLPACModel; nw::Int=pm.cnw, bounded::Bool = true)
+function variable_voltage_slack(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded::Bool = true)
     _PM.var(pm, nw)[:phi_du] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_phi_du",
     lower_bound = -0.2,
