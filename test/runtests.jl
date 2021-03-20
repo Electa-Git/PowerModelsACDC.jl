@@ -29,9 +29,9 @@ if local_test == true
     import Gurobi
     import Mosek
     import MosekTools
-    import CPLEX
+    # import CPLEX
     gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer)
-    cplex = JuMP.optimizer_with_attributes(CPLEX.Optimizer)
+    # cplex = JuMP.optimizer_with_attributes(CPLEX.Optimizer)
     mosek = JuMP.optimizer_with_attributes(Mosek.Optimizer)
     ##############################
 end
