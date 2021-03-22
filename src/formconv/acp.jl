@@ -308,5 +308,5 @@ function constraint_conv_firing_angle_ne(pm::_PM.AbstractACPModel, n::Int, i::In
     JuMP.@NLconstraint(pm.model,   q == sin(phi) * S)
 end
 
-function variable_voltage_slack(pm::_PM.AbstractACPModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=false)
+function variable_voltage_slack(pm::_PM.AbstractACPModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=false)
 end

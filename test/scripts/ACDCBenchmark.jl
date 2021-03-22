@@ -23,9 +23,9 @@ files =
 
 
 
-ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
-mosek = JuMP.with_optimizer(Mosek.Optimizer)
-scs = JuMP.with_optimizer(SCS.Optimizer)
+ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
+mosek = JuMP.optimizer_with_attributes(Mosek.Optimizer)
+scs = JuMP.optimizer_with_attributes(SCS.Optimizer)
 #mosek = MosekSolver()
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 

@@ -20,13 +20,13 @@ data = _PM.parse_file(file)
 _PMACDC.process_additional_data!(data)
 
 data_bf=data
-scs = JuMP.with_optimizer(SCS.Optimizer, max_iters=100000)
-ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-4, print_level=0)
-cplex = JuMP.with_optimizer(CPLEX.Optimizer)
-cbc = JuMP.with_optimizer(Cbc.Optimizer, tol=1e-4, print_level=0)
-gurobi = JuMP.with_optimizer(Gurobi.Optimizer)
-mosek = JuMP.with_optimizer(Mosek.Optimizer)
-juniper = JuMP.with_optimizer(Juniper.Optimizer, nl_solver = ipopt, mip_solver= cbc, time_limit= 7200)
+scs = JuMP.optimizer_with_attributes(SCS.Optimizer, "max_iters" => 100000)
+ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-4, "print_level" => 0)
+cplex = JuMP.optimizer_with_attributes(CPLEX.Optimizer)
+cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "tol" => 1e-4, "print_level" => 0)
+gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer)
+mosek = JuMP.optimizer_with_attributes(Mosek.Optimizer)
+juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => cbc, "time_limit" => 7200)
 #
 #
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => false, "process_data_internally" => false)

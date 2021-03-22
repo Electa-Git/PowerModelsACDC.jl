@@ -37,7 +37,7 @@ Model to approximate cross products of node voltages
 wdcr[(i,j)] <= wdc[i]*wdc[j]
 ```
 """
-function constraint_voltage_dc(pm::_PM.AbstractBFModel, n::Int = pm.cnw)
+function constraint_voltage_dc(pm::_PM.AbstractBFModel, n::Int = _PM.nw_id_default)
 # do nothing
 end
 

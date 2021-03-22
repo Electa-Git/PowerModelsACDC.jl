@@ -30,11 +30,11 @@ data = _PM.parse_file(file)
 
 _PMACDC.process_additional_data!(data)
 
-ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
-mosek = JuMP.with_optimizer(Mosek.Optimizer)
-scs = JuMP.with_optimizer(SCS.Optimizer)
-gurobi = JuMP.with_optimizer(Gurobi.Optimizer, Presolve=0)
-# cplex = JuMP.with_optimizer(CPLEX.Optimizer)
+ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
+mosek = JuMP.optimizer_with_attributes(Mosek.Optimizer)
+scs = JuMP.optimizer_with_attributes(SCS.Optimizer)
+gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, Presolve=0)
+# cplex = JuMP.optimizer_with_attributes(CPLEX.Optimizer)
 
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
