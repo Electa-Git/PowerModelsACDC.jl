@@ -26,10 +26,10 @@ bt = 100 ## constraint tightening setting 95, 90, 85, 80
         branchdc["rateA"] = bt/100* branchdc["rateA"]
     end
 
-    ipopt = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-4, print_level=1)
-    cbc_solver = JuMP.with_optimizer(Cbc.Optimizer)
-    gurobi = JuMP.with_optimizer(Gurobi.Optimizer)
-    juniper = JuMP.with_optimizer(Juniper.Optimizer, mip_solver=cbc_solver, nl_solver = ipopt)
+    ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-4, "print_level" => 1)
+    cbc_solver = JuMP.optimizer_with_attributes(Cbc.Optimizer)
+    gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer)
+    juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "mip_solver" => cbc_solver, "nl_solver" => ipopt)
 
     s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => false, "process_data_internally" => false)
 
