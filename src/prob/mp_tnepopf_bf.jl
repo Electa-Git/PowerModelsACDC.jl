@@ -18,11 +18,11 @@ end
 
 ""
 function post_mp_tnepopf_bf(pm::_PM.AbstractPowerModel)
-    # for (n, networks) in pm.ref[:nw]
+    # for (n, networks) in pm.ref[:it][:pm][:nw]
     #     PowerModelsACDC.add_ref_dcgrid!(pm, n)
     #     add_candidate_dcgrid!(pm, n)
     # end
-    for (n, networks) in pm.ref[:nw]
+    for (n, networks) in pm.ref[:it][:pm][:nw]
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
         _PM.variable_branch_power(pm; nw = n)
@@ -43,10 +43,10 @@ function post_mp_tnepopf_bf(pm::_PM.AbstractPowerModel)
         variable_dcgrid_voltage_magnitude_ne(pm; nw = n)
     end
     objective_min_cost(pm)
-    for (n, networks) in pm.ref[:nw]
+    for (n, networks) in pm.ref[:it][:pm][:nw]
         _PM.constraint_model_voltage(pm; nw = n)
-        constraint_voltage_dc(pm)
-        constraint_voltage_dc_ne(pm)
+        constraint_voltage_dc(pm; nw = n)
+        constraint_voltage_dc_ne(pm; nw = n)
         for i in _PM.ids(pm, n, :ref_buses)
             _PM.constraint_theta_ref(pm, i, nw = n)
         end
@@ -73,7 +73,7 @@ function post_mp_tnepopf_bf(pm::_PM.AbstractPowerModel)
         for i in _PM.ids(pm, n, :branchdc)
             PowerModelsACDC.constraint_ohms_dc_branch(pm, i; nw = n)
         end
-        for i in _PM.ids(pm, :branchdc_ne)
+        for i in _PM.ids(pm, n, :branchdc_ne)
             constraint_ohms_dc_branch_ne(pm, i; nw = n)
             constraint_branch_limit_on_off(pm, i; nw = n)
             if n > 1
@@ -81,13 +81,13 @@ function post_mp_tnepopf_bf(pm::_PM.AbstractPowerModel)
             end
         end
 
-        for i in _PM.ids(pm, :convdc)
+        for i in _PM.ids(pm, n, :convdc)
             constraint_converter_losses(pm, i; nw = n)
             constraint_converter_current(pm, i; nw = n)
             constraint_conv_transformer(pm, i; nw = n)
             constraint_conv_reactor(pm, i; nw = n)
             constraint_conv_filter(pm, i; nw = n)
-            if pm.ref[:nw][n][:convdc][i]["islcc"] == 1
+            if pm.ref[:it][:pm][:nw][n][:convdc][i]["islcc"] == 1
                 constraint_conv_firing_angle(pm, i; nw = n)
             end
         end
@@ -101,7 +101,7 @@ function post_mp_tnepopf_bf(pm::_PM.AbstractPowerModel)
             constraint_conv_transformer_ne(pm, i; nw = n)
             constraint_conv_reactor_ne(pm, i; nw = n)
             constraint_conv_filter_ne(pm, i; nw = n)
-            if pm.ref[:nw][n][:convdc_ne][i]["islcc"] == 1
+            if pm.ref[:it][:pm][:nw][n][:convdc_ne][i]["islcc"] == 1
                 constraint_conv_firing_angle_ne(pm, i; nw = n)
             end
         end

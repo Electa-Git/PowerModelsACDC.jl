@@ -33,7 +33,7 @@ function constraint_dc_voltage_magnitude_setpoint(pm::_PM.AbstractDCPModel, n::I
 end
 
 function variable_dcgrid_voltage_magnitude(pm::_PM.AbstractDCPModel; kwrags...)
-    # not used nw::Int=pm.cnw
+    # not used nw::Int=_PM.nw_id_default
 end
 
 function constraint_dc_branch_current(pm::_PM.AbstractDCPModel, n::Int,  f_bus, f_idx, ccm_max, p)
@@ -89,7 +89,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractDCPModel, n::Int, f_bus, t
     JuMP.@constraint(pm.model, p_dc_fr_ne + p_dc_to_ne == 0)
 end
 
-function variable_dcgrid_voltage_magnitude_ne(pm::_PM.AbstractDCPModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true)
+function variable_dcgrid_voltage_magnitude_ne(pm::_PM.AbstractDCPModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     # not used
 end
 
