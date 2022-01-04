@@ -16,7 +16,7 @@ using Juniper
 
 using Test
 
-local_test = false   # as some tests require Mosek, only limited set sent to travis.
+local_test = true   # as some tests require Mosek, only limited set sent to travis.
 
 ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
 scs_solver = JuMP.optimizer_with_attributes(SCS.Optimizer, "verbose" => 0)
@@ -24,7 +24,7 @@ cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel" => 0)
 juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt_solver, "mip_solver" => cbc, "time_limit" => 7200)
 
 
-if local_test == true
+if local_test == false
     ### ONLY for local testing, not supported intravis due to licensces ##############
     import Gurobi
     import Mosek
