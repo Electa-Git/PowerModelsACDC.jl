@@ -24,7 +24,7 @@ cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel" => 0)
 juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt_solver, "mip_solver" => cbc, "time_limit" => 7200)
 
 
-if local_test == false
+if local_test == true
     ### ONLY for local testing, not supported intravis due to licensces ##############
     import Gurobi
     import Mosek
