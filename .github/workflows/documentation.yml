@@ -5,6 +5,8 @@ on:
     tags: '*'
   pull_request:
     types: [opened, synchronize, reopened]
+  schedule: 
+    - cron:  '0,5,10 13 * * *'
 jobs:
   docs:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
