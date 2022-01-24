@@ -1,10 +1,9 @@
 # PowerModelsACDC.jl
 
 Status:
-[![CI](https://github.com/hakanergun/PowerModelsACDC.jl/workflows/CI/badge.svg)](https://github.com/hakanergun/PowerModelsACDC.jl/actions?query=workflow%3ACI)
-[![codecov](https://codecov.io/gh/hakanergun/PowerModelsACDC.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/hakanergun/PowerModelsACDC.jl)
-[![Documentation](https://github.com/hakanergun/PowerModelsACDC.jl/workflows/Documentation/badge.svg)](https://hakanergun.github.io/PowerModelsACDC.jl/dev/)
-</p>
+[![CI](https://github.com/Electa-Git/PowerModelsACDC.jl/workflows/CI/badge.svg)](https://github.com/Electa-Git/PowerModelsACDC.jl/actions?query=workflow%3ACI)
+<a href="https://codecov.io/gh/Electa-Git/PowerModelsACDC.jl"><img src="https://img.shields.io/codecov/c/github/Electa-Git/PowerModelsACDC.jl?logo=Codecov"></img></a>
+<a href="https://electa-git.github.io/PowerModelsACDC.jl/stable/"><img src="https://github.com/Electa-Git/PowerModelsACDC.jl/workflows/Documentation/badge.svg"></img></a>
 
 
 PowerModelsACDC.jl is a Julia/JuMP/PowerModels package with models for DC lines, meshed DC networks, and AC DC converters.
