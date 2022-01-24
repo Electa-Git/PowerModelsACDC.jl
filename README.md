@@ -15,12 +15,13 @@ The latest stable release of PowerModelACDC can be installed using the Julia pac
 ```julia
 Pkg.add("PowerModelsACDC")
 ```
-The current version of PowerModelsACDC is 0.4.0 and is compatible with PowerModels v0.18, InfrastrucureModels v0.6
+The current version of PowerModelsACDC is 0.5.0 and is compatible with PowerModels v0.19.1, InfrastrucureModels v0.7.2
 
 
 **Core Problem Specifications**
 * Optimal Power Flow with both point-to-point and meshed and dc grid support
 * Power Flow with both point-to-point and meshed ac and dc grid support
+* TNEP problem for point-to-point and meashed ac and dc grids
 
 
 **Core Formulations**
@@ -40,7 +41,7 @@ AC/DC converter stations, connecting ac nodes and dc nodes, are composed of a tr
 **Network Data Formats**
 * MatACDC-style ".m" files (matpower ".m"-derived).
 * Matpower-style ".m" files, including matpower's dcline extenstions.
-* PTI
+* PTI ".raw" files, using PowerModels.jl parser
 
 Note that the matpower-style `dcline` is transformed internally to two converters + a dcline connecting them. Such a transformation is exact for the 'dc'-style linearized models, but not for the AC models.
 
@@ -90,6 +91,19 @@ month={July},}
    publisher ={Institution of Engineering and Technology},
    copyright = {© The Institution of Engineering and Technology},
    url = {https://digital-library.theiet.org/content/journals/10.1049/iet-gtd.2019.0383}
+}
+```
+[TNEP Extension 2](https://doi.org/10.1016/j.epsr.2020.106683):
+```
+@ARTICLE{dave2021relaxations,
+  title={Relaxations and approximations of HVdc grid TNEP problem},
+  author={Dave, Jay and Ergun, Hakan and Van Hertem, Dirk},
+  journal={Electric Power Systems Research},
+  volume={192},
+  pages={106683},
+  year={2021},
+  publisher={Elsevier}
+}
 }
 ```
 ## License
