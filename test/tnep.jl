@@ -57,7 +57,7 @@ if local_test == true
                 @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
                 @test isapprox(resultSOCBF["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
                 @test isapprox(resultSOCBF["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol = 1e-2)
-                @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["1"]["pf"], 1.029695717391926; atol = 1e-2)
+                @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["1"]["pf"], 0.9547343363830544; atol = 1e-2) #1.029695717391926
                 @test isapprox(resultSOCBF["solution"]["busdc_ne"]["2"]["wdc_ne"], 0.9607722492758961; atol = 1e-2)
             end
         end
@@ -152,7 +152,7 @@ end
         @test isapprox(resultACP["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultACP["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultACP["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol = 1e-2)
-        @test isapprox(resultACP["solution"]["branchdc_ne"]["1"]["pf"], 0.838; atol = 1e-2)
+        @test isapprox(resultACP["solution"]["branchdc_ne"]["1"]["pf"], 0.849; atol = 1e-2) #0.838
         @test isapprox(resultACP["solution"]["busdc_ne"]["2"]["vm"], 0.99; atol = 1e-2)
     end
 end

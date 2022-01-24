@@ -26,5 +26,5 @@ Documenter.makedocs(
 )
 
 Documenter.deploydocs(
-    repo = "github.com/hakanergun/PowerModelsACDC.jl.git"
+    repo = "github.com/Electa-Git/PowerModelsACDC.jl.git"
 )
