@@ -219,7 +219,7 @@ function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
             bus_convs_dc_ne = Dict([(bus["busdc_i"], []) for (i,bus) in nw_ref[:busdc]])
             for (i,conv) in nw_ref[:convdc_ne]
                 if haskey(bus_convs_dc_ne, conv["busdc_i"])
-                    push!(bus_convs_dc_ne, i)
+                    push!(bus_convs_dc_ne[conv["busdc_i"]], i)
                 end
             end
             nw_ref[:bus_convs_dc_ne] = bus_convs_dc_ne
