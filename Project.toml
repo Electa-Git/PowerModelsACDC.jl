@@ -2,7 +2,7 @@ name = "PowerModelsACDC"
 uuid = "ff45984e-d068-5f4c-9e32-c4133509d236"
 autors = ["Hakan Ergun", "Frederik Geth", "Jay Dave"]
 repo = "https://github.com/Electa-Git/PowerModelsACDC.jl"
-version = "0.5.1"
+version = "0.5.2"
 
 [deps]
 InfrastructureModels = "2030c09a-7f63-5d83-885d-db604e0e9cc0"

@@ -774,7 +774,7 @@ function variable_converter_internal_voltage_magnitude_ne(pm::_PM.AbstractPowerM
     start = _PM.ref(pm, nw, :convdc_ne, i, "Vtar")
     )
     if bounded
-        for (c, convdc) in _PM.ref(pm, nw, :convdc)
+        for (c, convdc) in _PM.ref(pm, nw, :convdc_ne)
             JuMP.set_lower_bound(vmc_ne[c], convdc["Vmmin"])
             JuMP.set_upper_bound(vmc_ne[c], convdc["Vmmax"])
         end
