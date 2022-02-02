@@ -1,21 +1,21 @@
 #################### COLLECT ALL CONVERTER VARIABLES ######################
 function variable_dc_converter(pm::_PM.AbstractIVRModel; kwargs...)
-    variable_filter_voltage_real(pm; kwargs...)
-    variable_filter_voltage_imaginary(pm; kwargs...)
-    variable_converter_voltage_real(pm; kwargs...)
-    variable_converter_voltage_imaginary(pm; kwargs...)
-    variable_transformer_current_real_from(pm; kwargs...)
-    variable_transformer_current_real_to(pm; kwargs...)
-    variable_transformer_current_imaginary_from(pm; kwargs...)
-    variable_transformer_current_imaginary_to(pm; kwargs...)
-    variable_reactor_current_real_from(pm; kwargs...)
-    variable_reactor_current_real_to(pm; kwargs...)
-    variable_reactor_current_imaginary_from(pm; kwargs...)
-    variable_reactor_current_imaginary_to(pm; kwargs...)
-    variable_converter_current_real(pm; kwargs...)
-    variable_converter_current_imaginary(pm; kwargs...)
-    variable_converter_current_dc(pm; kwargs...)
-    variable_converter_current_lin(pm; kwargs...)
+    variable_filter_voltage_real(pm; kwargs...) #
+    variable_filter_voltage_imaginary(pm; kwargs...) #
+    variable_converter_voltage_real(pm; kwargs...) #
+    variable_converter_voltage_imaginary(pm; kwargs...) #
+    variable_transformer_current_real_from(pm; kwargs...) #
+    variable_transformer_current_real_to(pm; kwargs...)#
+    variable_transformer_current_imaginary_from(pm; kwargs...) #
+    variable_transformer_current_imaginary_to(pm; kwargs...)#
+    variable_reactor_current_real_from(pm; kwargs...)#
+    variable_reactor_current_real_to(pm; kwargs...)#
+    variable_reactor_current_imaginary_from(pm; kwargs...)#
+    variable_reactor_current_imaginary_to(pm; kwargs...)#
+    variable_converter_current_real(pm; kwargs...)#
+    variable_converter_current_imaginary(pm; kwargs...)#
+    variable_converter_current_dc(pm; kwargs...)#
+    variable_converter_current_lin(pm; kwargs...)#
     variable_converter_active_power(pm; kwargs...)
     variable_converter_reactive_power(pm; kwargs...)
     variable_dcside_power(pm; kwargs...)
@@ -91,15 +91,16 @@ function variable_converter_voltage_imaginary(pm::_PM.AbstractPowerModel; nw::In
 end
 ###################  CONVERTER AC SIDE CURRENT VARIABLES #########################################
 function variable_transformer_current_real_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2;
+    bigM = 1;
+    vpu = 1;
     iik_r = _PM.var(pm, nw)[:iik_r] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iik_r",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(iik_r[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(iik_r[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(iik_r[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(iik_r[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -107,15 +108,16 @@ function variable_transformer_current_real_from(pm::_PM.AbstractPowerModel; nw::
 end
 
 function variable_transformer_current_imaginary_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2;
+    bigM = 1;
+    vpu = 1;
     iik_i = _PM.var(pm, nw)[:iik_i] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iik_i",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(iik_i[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(iik_i[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(iik_i[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(iik_i[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -123,15 +125,16 @@ function variable_transformer_current_imaginary_from(pm::_PM.AbstractPowerModel;
 end
 
 function variable_transformer_current_real_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2;
+    bigM = 1;
+    vpu = 1;
     iki_r = _PM.var(pm, nw)[:iki_r] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iki_r",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(iki_r[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(iki_r[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(iki_r[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(iki_r[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -139,15 +142,16 @@ function variable_transformer_current_real_to(pm::_PM.AbstractPowerModel; nw::In
 end
 
 function variable_transformer_current_imaginary_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2;
+    bigM = 1;
+    vpu = 1;
     iki_i = _PM.var(pm, nw)[:iki_i] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iki_i",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(iki_i[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(iki_i[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(iki_i[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(iki_i[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -155,15 +159,16 @@ function variable_transformer_current_imaginary_to(pm::_PM.AbstractPowerModel; n
 end
 
 function variable_reactor_current_real_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2;
+    bigM = 1;
+    vpu = 1;
     ikc_r = _PM.var(pm, nw)[:ikc_r] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_ikc_r",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ikc_r[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(ikc_r[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(ikc_r[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(ikc_r[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -171,15 +176,16 @@ function variable_reactor_current_real_from(pm::_PM.AbstractPowerModel; nw::Int=
 end
 
 function variable_reactor_current_imaginary_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2;
+    bigM = 1;
+    vpu = 1;
     ikc_i = _PM.var(pm, nw)[:ikc_i] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_ikc_i",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ikc_i[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(ikc_i[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(ikc_i[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(ikc_i[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -187,15 +193,16 @@ function variable_reactor_current_imaginary_from(pm::_PM.AbstractPowerModel; nw:
 end
 
 function variable_reactor_current_real_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2;
+    bigM = 1;
+    vpu = 1;
     ick_r = _PM.var(pm, nw)[:ick_r] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_ick_r",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ick_r[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(ick_r[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(ick_r[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(ick_r[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -203,15 +210,16 @@ function variable_reactor_current_real_to(pm::_PM.AbstractPowerModel; nw::Int=_P
 end
 
 function variable_reactor_current_imaginary_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2;
+    bigM = 1;
+    vpu = 1;
     ick_i = _PM.var(pm, nw)[:ick_i] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_ick_i",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ick_i[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(ick_i[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(ick_i[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(ick_i[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -220,14 +228,15 @@ end
 
 function variable_converter_current_real(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
+    vpu = 1;
     ic_r = _PM.var(pm, nw)[:ic_r] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_ic_r",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ic_r[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(ic_r[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(ic_r[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(ic_r[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -236,14 +245,15 @@ end
 
 function variable_converter_current_imaginary(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
+    vpu = 1;
     ic_i = _PM.var(pm, nw)[:ic_i] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_ic_i",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ic_i[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(ic_i[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(ic_i[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(ic_i[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -252,14 +262,15 @@ end
 
 function variable_converter_current_dc(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
+    vpu = 1;
     iconv_dc = _PM.var(pm, nw)[:iconv_dc] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iconv_dc",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(iconv_dc[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(iconv_dc[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(iconv_dc[c],  -convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(iconv_dc[c],   convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -268,14 +279,15 @@ end
 
 function variable_converter_current_lin(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
+    vpu = 1;
     iconv_lin = _PM.var(pm, nw)[:iconv_lin] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iconv_lin",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(iconv_lin[c],  -convdc["Pacrated"] * bigM)
-            JuMP.set_upper_bound(iconv_lin[c],   convdc["Pacrated"] * bigM)
+            JuMP.set_lower_bound(iconv_lin[c],  0)
+            JuMP.set_upper_bound(iconv_lin[c],  convdc["Pacrated"]/vpu * bigM)
         end
     end
 
@@ -305,17 +317,18 @@ function constraint_converter_limits(pm::_PM.AbstractIVRModel, n::Int, i, imax, 
     vc_r = _PM.var(pm, n, :vc_r)[i]
     vc_i = _PM.var(pm, n, :vc_i)[i]
 
-
-    JuMP.@NLconstraint(pm.model, (iik_r)^2 + (iik_i)^2 <=  imax^2)
-    JuMP.@NLconstraint(pm.model, (iki_r)^2 + (iki_i)^2 <=  imax^2)
-    JuMP.@NLconstraint(pm.model, (ikc_r)^2 + (ikc_i)^2 <=  imax^2)
-    JuMP.@NLconstraint(pm.model, (ick_r)^2 + (ick_i)^2 <=  imax^2)
-    JuMP.@NLconstraint(pm.model, (ic_r)^2 + (ic_i)^2 <=  imax^2)
-    JuMP.@NLconstraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2)   ## relaxed version JuMP.@NLconstraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2)
-    JuMP.@NLconstraint(pm.model, (vk_r)^2 + (vk_i)^2 <=  vmax^2)
-    JuMP.@NLconstraint(pm.model, (vk_r)^2 + (vk_i)^2 >=  vmin^2)
-    JuMP.@NLconstraint(pm.model, (vc_r)^2 + (vc_i)^2 <=  vmax^2)
-    JuMP.@NLconstraint(pm.model, (vc_r)^2 + (vc_i)^2 >=  vmin^2)
+    JuMP.@NLconstraint(pm.model, (iik_r)^2 + (iik_i)^2 <=  imax^2) #(32)
+    JuMP.@NLconstraint(pm.model, (iki_r)^2 + (iki_i)^2 <=  imax^2) #(33)
+    JuMP.@NLconstraint(pm.model, (ikc_r)^2 + (ikc_i)^2 <=  imax^2) #(34)
+    JuMP.@NLconstraint(pm.model, (ick_r)^2 + (ick_i)^2 <=  imax^2) #(35)
+    JuMP.@NLconstraint(pm.model, (ic_r)^2 + (ic_i)^2 <=  imax^2) #(39)
+    JuMP.@NLconstraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2) #(47)  
+    ## relaxed version 
+    #JuMP.@NLconstraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2) #(49)
+    JuMP.@NLconstraint(pm.model, (vk_r)^2 + (vk_i)^2 <=  vmax^2) #(22)
+    JuMP.@NLconstraint(pm.model, (vk_r)^2 + (vk_i)^2 >=  vmin^2) #(22)
+    JuMP.@NLconstraint(pm.model, (vc_r)^2 + (vc_i)^2 <=  vmax^2) #(23)
+    JuMP.@NLconstraint(pm.model, (vc_r)^2 + (vc_i)^2 >=  vmin^2) #(23)
 
 
     vc = _PM.var(pm, n, :vdcm)[b_idx]
@@ -337,7 +350,7 @@ end
 
 function constraint_converter_current(pm::_PM.AbstractIVRModel, n::Int, i::Int, Umax, Imax)
     vc_r = _PM.var(pm, n, :vc_r, i)
-    vc_i = _PM.var(pm, n, :vc_r, i)
+    vc_i = _PM.var(pm, n, :vc_i, i)
     ic_r = _PM.var(pm, n, :ic_r, i)
     ic_i = _PM.var(pm, n, :ic_i, i)
     pconv_ac = _PM.var(pm, n, :pconv_ac, i)
@@ -362,11 +375,13 @@ function constraint_conv_transformer(pm::_PM.AbstractIVRModel, n::Int, i::Int, r
 
     #TODO add transformation ratio.....
 
-    JuMP.@constraint(pm.model, iik_r + iki_r == 0)
-    JuMP.@constraint(pm.model, iik_i + iki_i == 0)
+    # JuMP.@constraint(pm.model, iik_r + iki_r == 0) #(26)
+    # JuMP.@constraint(pm.model, iik_i + iki_i == 0) #(27)
     if transformer
-        JuMP.@constraint(pm.model, vk_r == vi_r - rtf * iik_r + xtf * iik_i)
-        JuMP.@constraint(pm.model, vk_i == vi_i - rtf * iik_i - xtf * iik_r)
+        JuMP.@constraint(pm.model, vk_r == vi_r - rtf * iik_r + xtf * iik_i) #(24)
+        JuMP.@constraint(pm.model, vk_i == vi_i - rtf * iik_i - xtf * iik_r) #(25)
+        JuMP.@constraint(pm.model, vi_r == vk_r - rtf * iki_r + xtf * iki_i) #reverse
+        JuMP.@constraint(pm.model, vi_i == vk_i - rtf * iki_i - xtf * iki_r) #reverse
     else
         JuMP.@constraint(pm.model, vk_r == vi_r)
         JuMP.@constraint(pm.model, vk_i == vi_i)
@@ -386,15 +401,17 @@ function constraint_conv_reactor(pm::_PM.AbstractIVRModel, n::Int, i::Int, rc, x
     ic_r = _PM.var(pm, n, :ic_r, i)
     ic_i = _PM.var(pm, n, :ic_i, i)
 
-    JuMP.@constraint(pm.model, ikc_r + ick_r == 0)
-    JuMP.@constraint(pm.model, ikc_i + ick_i == 0)
+    # JuMP.@constraint(pm.model, ikc_r + ick_r == 0) #(30)
+    # JuMP.@constraint(pm.model, ikc_i + ick_i == 0) #(31)
 
-    JuMP.@constraint(pm.model, ick_r + ic_r == 0)
-    JuMP.@constraint(pm.model, ick_i + ic_i == 0)
+    JuMP.@constraint(pm.model, ick_r + ic_r == 0) #(20)
+    JuMP.@constraint(pm.model, ick_i + ic_i == 0) #(21)
 
     if reactor
-        JuMP.@constraint(pm.model, vc_r == vk_r - rc * ikc_r + xc * ikc_i)
-        JuMP.@constraint(pm.model, vc_i == vk_i - rc * ikc_i - xc * ikc_r)
+        JuMP.@constraint(pm.model, vc_r == vk_r - rc * ikc_r + xc * ikc_i) #(28)
+        JuMP.@constraint(pm.model, vc_i == vk_i - rc * ikc_i - xc * ikc_r) #(29)
+        JuMP.@constraint(pm.model, vk_r == vc_r - rc * ick_r + xc * ick_i) #reverse
+        JuMP.@constraint(pm.model, vk_i == vc_i - rc * ick_i - xc * ick_r) #reverse
     else
         JuMP.@constraint(pm.model, vk_r == vi_r)
         JuMP.@constraint(pm.model, vk_i == vi_i)
@@ -424,25 +441,23 @@ function constraint_current_balance_ac(pm::_PM.AbstractIVRModel, n::Int, i, bus_
     ci =  _PM.var(pm, n, :ci)
     cidc = _PM.var(pm, n, :cidc)
 
-    iki_r = _PM.var(pm, n, :iik_r)
-    iki_i = _PM.var(pm, n, :iik_i)
+    iik_r = _PM.var(pm, n, :iik_r)
+    iik_i = _PM.var(pm, n, :iik_i)
 
     crg = _PM.var(pm, n, :crg)
     cig = _PM.var(pm, n, :cig)
 
-    JuMP.@NLconstraint(pm.model, sum(cr[a] for a in bus_arcs)
+    JuMP.@NLconstraint(pm.model, sum(cr[a] for a in bus_arcs) + sum(iik_r[c] for c in bus_convs_ac)
                                 ==
                                 sum(crg[g] for g in bus_gens)
                                 - (sum(pd for pd in values(bus_pd))*vr + sum(qd for qd in values(bus_qd))*vi)/(vr^2 + vi^2)
-                                - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi
-                                - sum(iki_r[c] for c in bus_convs_ac) 
+                                - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi 
                                 )
-    JuMP.@NLconstraint(pm.model, sum(ci[a] for a in bus_arcs)
+    JuMP.@NLconstraint(pm.model, sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
                                 + sum(cidc[d] for d in bus_arcs_dc)
                                 ==
                                 sum(cig[g] for g in bus_gens)
                                 - (sum(pd for pd in values(bus_pd))*vi - sum(qd for qd in values(bus_qd))*vr)/(vr^2 + vi^2)
-                                - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
-                                - sum(iki_i[c] for c in bus_convs_ac) 
+                                - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr 
                                 )
 end

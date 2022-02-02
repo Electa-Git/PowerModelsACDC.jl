@@ -20,7 +20,7 @@ function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, n::Int, bus_arc
     igrid_dc = _PM.var(pm, n, :igrid_dc)
     iconv_dc = _PM.var(pm, n, :iconv_dc)
 
-    JuMP.@constraint(pm.model, sum(igrid_dc[a] for a in bus_arcs_dcgrid) + sum(iconv_dc[c] for c in bus_convs_dc) == (-pd))
+    JuMP.@constraint(pm.model, sum(igrid_dc[a] for a in bus_arcs_dcgrid) + sum(iconv_dc[c] for c in bus_convs_dc) == 0) # deal with pd
 end
 
 # Ohm's law for DC branches
@@ -33,8 +33,7 @@ function constraint_ohms_dc_branch(pm::_PM.AbstractIVRModel, n::Int,  f_bus, t_b
     if r == 0
         JuMP.@constraint(pm.model, p_dc_fr + p_dc_to == 0)
     else
-        g = 1 / r
-        JuMP.@constraint(pm.model, vmdc_to ==  vmdc_fr - p * g * i_dc_fr)
-        JuMP.@constraint(pm.model, vmdc_fr ==  vmdc_to - p * g * i_dc_to)
+        JuMP.@constraint(pm.model, vmdc_to ==  vmdc_fr - 1/p * r * i_dc_fr)
+        JuMP.@constraint(pm.model, vmdc_fr ==  vmdc_to - 1/p * r * i_dc_to)
     end
 end

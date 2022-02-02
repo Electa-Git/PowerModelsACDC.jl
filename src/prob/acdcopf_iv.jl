@@ -19,10 +19,10 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
 
     _PM.objective_min_fuel_and_flow_cost(pm)
 
-    # DC grid variables
+    #DC grid variables
     variable_dcbranch_current(pm)
     variable_dcgrid_voltage_magnitude(pm)
-    # DC converter variables
+    #DC converter variables
     variable_dc_converter(pm)
 
     for i in _PM.ids(pm, :ref_buses)

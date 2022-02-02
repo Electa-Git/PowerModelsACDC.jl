@@ -300,7 +300,8 @@ end
 
 
 function constraint_converter_limits(pm::_PM.AbstractIVRModel, i::Int; nw::Int=_PM.nw_id_default)
-    bigM = 1.2
+    bigM = 1.1;
+    vpu = 1;
     conv = _PM.ref(pm, nw, :convdc, i)
     # pmax = conv["Pacrated"]
     # pmin = -conv["Pacrated"]
@@ -308,12 +309,12 @@ function constraint_converter_limits(pm::_PM.AbstractIVRModel, i::Int; nw::Int=_
     # qmin = -conv["Qacrated"]
     # pmaxdc = conv["Pacrated"] * bigM
     # pmindc = -conv["Pacrated"] * bigM
-    imax = conv["Imax"]
+    imax = conv["Pacrated"]/vpu
     vmax = conv["Vmmax"]
     vmin = conv["Vmmin"]
-    pdcmin = -conv["Pacrated"] * bigM
-    pdcmax = conv["Pacrated"] * bigM
-    b_idx = conv["busdc_i"]
+    pdcmin = -conv["Pacrated"] * bigM # to account for losses
+    pdcmax =  conv["Pacrated"] * bigM # to account for losses
+    b_idx =   conv["busdc_i"]
 
     constraint_converter_limits(pm, nw, i, imax, vmax, vmin, b_idx, pdcmin, pdcmax)
 end
