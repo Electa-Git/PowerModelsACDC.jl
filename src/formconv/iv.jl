@@ -235,8 +235,8 @@ function variable_converter_current_real(pm::_PM.AbstractPowerModel; nw::Int=_PM
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ic_r[c],  -convdc["Pacrated"]/vpu * bigM)
-            JuMP.set_upper_bound(ic_r[c],   convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_lower_bound(ic_r[c],  -convdc["Imax"] * bigM)
+            JuMP.set_upper_bound(ic_r[c],   convdc["Imax"]* bigM)
         end
     end
 
@@ -252,8 +252,8 @@ function variable_converter_current_imaginary(pm::_PM.AbstractPowerModel; nw::In
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ic_i[c],  -convdc["Pacrated"]/vpu * bigM)
-            JuMP.set_upper_bound(ic_i[c],   convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_lower_bound(ic_i[c],  -convdc["Imax"] * bigM)
+            JuMP.set_upper_bound(ic_i[c],   convdc["Imax"] * bigM)
         end
     end
 
@@ -261,7 +261,7 @@ function variable_converter_current_imaginary(pm::_PM.AbstractPowerModel; nw::In
 end
 
 function variable_converter_current_dc(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1;
+    bigM = 1.2;
     vpu = 1;
     iconv_dc = _PM.var(pm, nw)[:iconv_dc] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iconv_dc",
@@ -287,7 +287,7 @@ function variable_converter_current_lin(pm::_PM.AbstractPowerModel; nw::Int=_PM.
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
             JuMP.set_lower_bound(iconv_lin[c],  0)
-            JuMP.set_upper_bound(iconv_lin[c],  convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_upper_bound(iconv_lin[c],  convdc["Imax"] * bigM)
         end
     end
 
@@ -374,9 +374,6 @@ function constraint_conv_transformer(pm::_PM.AbstractIVRModel, n::Int, i::Int, r
     iki_i = _PM.var(pm, n, :iki_i, i)
 
     #TODO add transformation ratio.....
-
-    # JuMP.@constraint(pm.model, iik_r + iki_r == 0) #(26)
-    # JuMP.@constraint(pm.model, iik_i + iki_i == 0) #(27)
     if transformer
         JuMP.@constraint(pm.model, vk_r == vi_r - rtf * iik_r + xtf * iik_i) #(24)
         JuMP.@constraint(pm.model, vk_i == vi_i - rtf * iik_i - xtf * iik_r) #(25)
@@ -385,6 +382,8 @@ function constraint_conv_transformer(pm::_PM.AbstractIVRModel, n::Int, i::Int, r
     else
         JuMP.@constraint(pm.model, vk_r == vi_r)
         JuMP.@constraint(pm.model, vk_i == vi_i)
+        JuMP.@constraint(pm.model, iik_r + iki_r == 0)
+        JuMP.@constraint(pm.model, iik_i + iki_i == 0)
     end
 end
 
@@ -401,9 +400,6 @@ function constraint_conv_reactor(pm::_PM.AbstractIVRModel, n::Int, i::Int, rc, x
     ic_r = _PM.var(pm, n, :ic_r, i)
     ic_i = _PM.var(pm, n, :ic_i, i)
 
-    # JuMP.@constraint(pm.model, ikc_r + ick_r == 0) #(30)
-    # JuMP.@constraint(pm.model, ikc_i + ick_i == 0) #(31)
-
     JuMP.@constraint(pm.model, ick_r + ic_r == 0) #(20)
     JuMP.@constraint(pm.model, ick_i + ic_i == 0) #(21)
 
@@ -413,8 +409,10 @@ function constraint_conv_reactor(pm::_PM.AbstractIVRModel, n::Int, i::Int, rc, x
         JuMP.@constraint(pm.model, vk_r == vc_r - rc * ick_r + xc * ick_i) #reverse
         JuMP.@constraint(pm.model, vk_i == vc_i - rc * ick_i - xc * ick_r) #reverse
     else
-        JuMP.@constraint(pm.model, vk_r == vi_r)
-        JuMP.@constraint(pm.model, vk_i == vi_i)
+        JuMP.@constraint(pm.model, vk_r == vc_r)
+        JuMP.@constraint(pm.model, vk_i == vc_i)
+        JuMP.@constraint(pm.model, ikc_r + ick_r == 0)
+        JuMP.@constraint(pm.model, ikc_i + ick_i == 0)
     end
 end
 
@@ -427,8 +425,8 @@ function constraint_conv_filter(pm::_PM.AbstractIVRModel, n::Int, i::Int, bv, fi
     vk_r = _PM.var(pm, n, :vk_r, i)
     vk_i = _PM.var(pm, n, :vk_i, i)
 
-    JuMP.@constraint(pm.model,   iki_r + ikc_r + bv * filter * vk_r == 0)
-    JuMP.@constraint(pm.model,   iki_i + ikc_i - bv * filter * vk_i == 0)
+    JuMP.@constraint(pm.model,   iki_r + ikc_r + bv * filter * vk_i == 0)
+    JuMP.@constraint(pm.model,   iki_i + ikc_i - bv * filter * vk_r == 0)
 end
 
 ################# Kicrchhoff's current law ############################################
