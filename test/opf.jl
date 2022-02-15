@@ -25,6 +25,22 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
     end
 end
 
+@testset "test IVR OPF" begin
+    @testset "5-bus ac dc case" begin
+        result = PowerModelsACDC.run_acdcopf_iv("../test/data/case5_acdc.m", IVRPowerModel, ipopt_solver; setting = s)
+
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 194.16; atol = 1e0)
+    end
+
+    @testset "39-bus ac dc case" begin
+        result = PowerModelsACDC.run_acdcopf_iv("../test/data/case39_acdc.m", IVRPowerModel, ipopt_solver; setting = s)
+
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 41968.88; atol = 1e0)
+    end
+end
+
 @testset "test dc opf" begin
     @testset "3-bus case" begin
         result = run_acdcopf("../test/data/case3.m", DCPPowerModel, ipopt_solver; setting = s)

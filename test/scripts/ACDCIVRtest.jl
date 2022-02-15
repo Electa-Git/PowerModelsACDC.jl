@@ -7,8 +7,8 @@ import Memento
 import JuMP
 
 
-file_case5acdc = "./test/data/case3120sp_acdc.m"
-file = file_case5acdc
+file = "./test/data/case3120sp_acdc.m"
+
 
 data = _PM.parse_file(file)
 
