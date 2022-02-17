@@ -20,12 +20,38 @@ function constraint_power_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int
     constraint_power_balance_ac(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
 end
 
+function constraint_current_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    bus = _PM.ref(pm, nw, :bus, i)
+    bus_arcs = _PM.ref(pm, nw, :bus_arcs, i)
+    bus_arcs_dc = _PM.ref(pm, nw, :bus_arcs_dc, i)
+    bus_gens = _PM.ref(pm, nw, :bus_gens, i)
+    bus_convs_ac = _PM.ref(pm, nw, :bus_convs_ac, i)
+    bus_loads = _PM.ref(pm, nw, :bus_loads, i)
+    bus_shunts = _PM.ref(pm, nw, :bus_shunts, i)
+
+    pd = Dict(k => _PM.ref(pm, nw, :load, k, "pd") for k in bus_loads)
+    qd = Dict(k => _PM.ref(pm, nw, :load, k, "qd") for k in bus_loads)
+
+    gs = Dict(k => _PM.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
+    bs = Dict(k => _PM.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
+
+    constraint_current_balance_ac(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
+end
+
 function constraint_power_balance_dc(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     bus_arcs_dcgrid = _PM.ref(pm, nw, :bus_arcs_dcgrid, i)
     bus_convs_dc = _PM.ref(pm, nw, :bus_convs_dc, i)
     pd = _PM.ref(pm, nw, :busdc, i)["Pdc"]
     constraint_power_balance_dc(pm, nw, i, bus_arcs_dcgrid, bus_convs_dc, pd)
 end
+
+function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, i::Int; nw::Int=_PM.nw_id_default)
+    bus_arcs_dcgrid = _PM.ref(pm, nw, :bus_arcs_dcgrid, i)
+    bus_convs_dc = _PM.ref(pm, nw, :bus_convs_dc, i)
+    pd = _PM.ref(pm, nw, :busdc, i)["Pdc"]
+    constraint_current_balance_dc(pm, nw, bus_arcs_dcgrid, bus_convs_dc, pd)
+end
+
 #
 function constraint_ohms_dc_branch(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     branch = _PM.ref(pm, nw, :branchdc, i)
@@ -270,4 +296,25 @@ function constraint_conv_firing_angle_ne(pm::_PM.AbstractPowerModel, i::Int; nw:
      P2 = cos(pi) * S
      Q2 = sin(pi) * S
      constraint_conv_firing_angle_ne(pm, n, i, S, P1, Q1, P2, Q2)
+end
+
+
+function constraint_converter_limits(pm::_PM.AbstractIVRModel, i::Int; nw::Int=_PM.nw_id_default)
+    bigM = 1.1;
+    vpu = 1;
+    conv = _PM.ref(pm, nw, :convdc, i)
+    # pmax = conv["Pacrated"]
+    # pmin = -conv["Pacrated"]
+    # qmax = conv["Qacrated"]
+    # qmin = -conv["Qacrated"]
+    # pmaxdc = conv["Pacrated"] * bigM
+    # pmindc = -conv["Pacrated"] * bigM
+    imax = conv["Pacrated"]/vpu
+    vmax = conv["Vmmax"]
+    vmin = conv["Vmmin"]
+    pdcmin = -conv["Pacrated"] * bigM # to account for losses
+    pdcmax =  conv["Pacrated"] * bigM # to account for losses
+    b_idx =   conv["busdc_i"]
+
+    constraint_converter_limits(pm, nw, i, imax, vmax, vmin, b_idx, pdcmin, pdcmax)
 end

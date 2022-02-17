@@ -48,6 +48,12 @@ function constraint_dc_branch_current(pm::_PM.AbstractBFModel, n::Int, f_bus, f_
 # do nothing
 end
 
+function constraint_dc_branch_current(pm::_PM.AbstractIVRModel, n::Int, f_bus, f_idx, ccm_max, p)
+    variable_dcbranch_current_iv(pm; kwargs...)
+end
+
+
+
 ########## TNEP constraints #####################
 
 """
