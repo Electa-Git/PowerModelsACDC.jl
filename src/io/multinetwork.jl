@@ -42,15 +42,15 @@ function multinetwork_data(sn_data::Dict{String,Any}, extradata::Dict{String,Any
                                 if haskey(mn_data["nw"]["$n"][key][l], m)
                                     mn_data["nw"]["$n"][key][l][m] = property[n]
                                 else
-                                    warn(_PM.LOGGER, ["Property ", m ," for , ", key, " " , l, " not found, will be ingnored"])
+                                    Memento.warn(_PM._LOGGER, ["Property ", m ," for , ", key, " " , l, " not found, will be ingnored"])
                                 end
                             end
                         else
-                            warn(_PM.LOGGER, [key, " " , l,  " not found, will be ingnored"])
+                            Memento.warn(_PM._LOGGER, [key, " " , l,  " not found, will be ingnored"])
                         end
                     end
                 else
-                    warn(_PM.LOGGER, ["Key ", key, " not found, will be ingnored"])
+                    Memento.warn(_PM._LOGGER, ["Key ", key, " not found, will be ingnored"])
                 end
             end
         end
