@@ -1,7 +1,7 @@
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 @testset "test dc tnep" begin
     @testset "6-bus case" begin
-        resultDC = run_tnepopf("../test/data/tnep/case6_test.m", DCPPowerModel, cbc; setting = s)
+        resultDC = run_tnepopf("../test/data/tnep/case6_test.m", DCPPowerModel, highs; setting = s)
         @test isapprox(resultDC["objective"], 26.3331; atol = 1e-1)
         @test isapprox(resultDC["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultDC["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol = 1e-2)
@@ -12,20 +12,20 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
     end
 
     @testset "9-bus case" begin
-        resultDC = run_tnepopf("../test/data/tnep/case9_test.m", DCPPowerModel, cbc; setting = s)
+        resultDC = run_tnepopf("../test/data/tnep/case9_test.m", DCPPowerModel, highs; setting = s)
         @test isapprox(resultDC["objective"], 10.7; atol = 1e-1)
         @test isapprox(resultDC["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol = 1e-2)
     end
     #
     @testset "14-bus case" begin
-        resultDC =  run_tnepopf("../test/data/tnep/case14_test.m",  DCPPowerModel, cbc, setting = s)
+        resultDC =  run_tnepopf("../test/data/tnep/case14_test.m",  DCPPowerModel, highs, setting = s)
         @test isapprox(resultDC["objective"], 15.6921; atol = 1e-1)
         @test isapprox(resultDC["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultDC["solution"]["convdc_ne"]["7"]["isbuilt"], 0; atol = 1e-2)
     end
     #
     @testset "39-bus case" begin
-        resultDC =  run_tnepopf("../test/data/tnep/case39_test.m",  DCPPowerModel, cbc, setting = s)
+        resultDC =  run_tnepopf("../test/data/tnep/case39_test.m",  DCPPowerModel, highs, setting = s)
         @test isapprox(resultDC["objective"], 25.1605; atol = 1e-1)
         @test isapprox(resultDC["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultDC["solution"]["convdc_ne"]["4"]["isbuilt"], 1; atol = 1e-2)
@@ -184,7 +184,7 @@ end
 
 @testset "ACDC tnep" begin
     @testset "DCP" begin
-        resultDCP = run_acdctnepopf("../test/data/tnep/case4_acdc.m", DCPPowerModel, cbc; setting = s)
+        resultDCP = run_acdctnepopf("../test/data/tnep/case4_acdc.m", DCPPowerModel, highs; setting = s)
         @test isapprox(resultDCP["objective"], 329.95456; atol = 1e-1)
         @test isapprox(resultDCP["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultDCP["solution"]["branchdc_ne"]["3"]["pf"], -1.009; atol = 1e-2)
@@ -233,7 +233,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "pr
     @testset "dc tnep" begin
         @testset "DCP" begin
             data_dc = build_mn_data("../test/data/tnep/case4_original.m")
-            resultDCP = run_mp_tnepopf(data_dc, DCPPowerModel, cbc, multinetwork=true; setting = s)
+            resultDCP = run_mp_tnepopf(data_dc, DCPPowerModel, highs, multinetwork=true; setting = s)
             @test isapprox(resultDCP["objective"], 8.2; atol = 1e-1)
             @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"], 1; atol = 1e-2)
             @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["2"]["pf"], -2.0013; atol = 1e-2)
@@ -287,7 +287,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "pr
     @testset "acdc tnep" begin
         @testset "DCP" begin
             data_acdc = build_mn_data("../test/data/tnep/case4_acdc.m")
-            resultDCP = run_mp_acdctnepopf(data_acdc, DCPPowerModel, cbc, multinetwork=true; setting = s)
+            resultDCP = run_mp_acdctnepopf(data_acdc, DCPPowerModel, highs, multinetwork=true; setting = s)
             @test isapprox(resultDCP["objective"], 659.90; atol = 1e-1)
             @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
             @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"], -1.009; atol = 1e-2)

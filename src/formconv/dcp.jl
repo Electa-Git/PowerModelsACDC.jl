@@ -147,7 +147,7 @@ function constraint_converter_losses_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int
         JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a * z + b*cm_conv_ac )
     else
         JuMP.@constraint(pm.model, pconv_ac + pconv_dc >=   a * z + b*cm_conv_ac )
-        JuMP.@constraint(pm.model, pconv_ac + pconv_dc >= -(a * z - b*cm_conv_ac) )
+        JuMP.@constraint(pm.model, pconv_ac + pconv_dc >=   a * z - b*cm_conv_ac )
         JuMP.@constraint(pm.model, pconv_ac + pconv_dc <= plmax)
     end
 end
