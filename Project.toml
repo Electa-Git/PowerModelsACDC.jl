@@ -28,4 +28,4 @@ Juniper = "2ddba703-00a4-53a7-87a5-e8b9971dde84"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Ipopt", "Cbc", "Juniper"]
+test = ["Test", "Ipopt", "HiGHS", "Juniper"]
