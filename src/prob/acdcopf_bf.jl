@@ -9,7 +9,7 @@ end
 
 ""
 function run_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
-    return _PM.run_model(data, model_type, solver, post_acdcopf_bf; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, post_acdcopf_bf; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
 function post_acdcopf_bf(pm::_PM.AbstractPowerModel)

@@ -9,7 +9,7 @@ end
 
 ""
 function run_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return _PM.run_model(data, model_type, solver, post_acdcpf; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, post_acdcpf; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
 ""

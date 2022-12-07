@@ -6,7 +6,7 @@ function run_acdcopf_iv(file::String, model_type, optimizer; kwargs...)
 end
 
 function run_acdcopf_iv(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.run_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
 ""
