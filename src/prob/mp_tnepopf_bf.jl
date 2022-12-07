@@ -16,7 +16,7 @@ function run_mp_tnepopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; 
     if haskey(data, "nw") && haskey(data["nw"]["1"], "ne_branch") # combined AC and DC TNEP
         return _PM.solve_model(data, model_type, solver, post_mp_acdctnepopf_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], setting = s, kwargs...)
     else
-        return _PM.run_model(data, model_type, solver, post_mp_tnepopf_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
+        return _PM.solve_model(data, model_type, solver, post_mp_tnepopf_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
     end
 end
 
