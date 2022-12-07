@@ -188,12 +188,16 @@ end
 
 function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (n, nw_ref) in ref[:it][:pm][:nw]
-        if haskey(nw_ref, :convdc_ne)
+        if !haskey(nw_ref, :busdc_ne)
+            nw_ref[:busdc_ne] = Dict{String, Any}()
+            nw_ref[:ref_buses_dc_ne] = Dict{String, Any}()
+        else
+            nw_ref[:ref_buses_dc_ne] = Dict{String, Any}()
+        end
+        if haskey(nw_ref, :branchdc_ne)
             nw_ref[:arcs_dcgrid_from_ne] = [(i,branch["fbusdc"],branch["tbusdc"]) for (i,branch) in nw_ref[:branchdc_ne]]
             nw_ref[:arcs_dcgrid_to_ne]   = [(i,branch["tbusdc"],branch["fbusdc"]) for (i,branch) in nw_ref[:branchdc_ne]]
             nw_ref[:arcs_dcgrid_ne] = [nw_ref[:arcs_dcgrid_from_ne]; nw_ref[:arcs_dcgrid_to_ne]]
-            nw_ref[:arcs_conv_acdc_ne] = [(i,conv["busac_i"],conv["busdc_i"]) for (i,conv) in nw_ref[:convdc_ne]]
-            nw_ref[:arcs_conv_acdc_acbus_ne] = [(i,conv["busac_i"]) for (i,conv) in nw_ref[:convdc_ne]]
             #bus arcs of the DC grid
             bus_arcs_dcgrid_ne = Dict([(bus["busdc_i"], []) for (i,bus) in nw_ref[:busdc_ne]])
             for (l,i,j) in nw_ref[:arcs_dcgrid_ne]
@@ -207,13 +211,25 @@ function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
                 end
             end
             nw_ref[:bus_arcs_dcgrid_ne] = bus_arcs_dcgrid_ne
+            nw_ref[:buspairsdc_ne] = buspair_parameters_dc_ne(nw_ref[:arcs_dcgrid_from_ne], nw_ref[:branchdc_ne], nw_ref[:busdc_ne], nw_ref[:busdc])
+        else
+            nw_ref[:arcs_dcgrid_from_ne] = Dict{String, Any}()
+            nw_ref[:arcs_dcgrid_to_ne]   = Dict{String, Any}()
+            nw_ref[:arcs_dcgrid_ne] = Dict{String, Any}()
+            nw_ref[:bus_arcs_dcgrid_ne] = Dict{String, Any}()
+            nw_ref[:buspairsdc_ne] = Dict{String, Any}()
+            nw_ref[:branchdc_ne] = Dict{String, Any}()
+        end
+        if haskey(nw_ref, :convdc_ne)
+            nw_ref[:arcs_conv_acdc_ne] = [(i,conv["busac_i"],conv["busdc_i"]) for (i,conv) in nw_ref[:convdc_ne]]
+            nw_ref[:arcs_conv_acdc_acbus_ne] = [(i,conv["busac_i"]) for (i,conv) in nw_ref[:convdc_ne]]
+
             # bus_convs for AC side power injection of DC converters
             bus_convs_ac = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
             for (i,conv) in nw_ref[:convdc_ne]
                 push!(bus_convs_ac[conv["busac_i"]], i)
             end
             nw_ref[:bus_convs_ac_ne] = bus_convs_ac
-
 
             # add new converters to existting DC buses
             bus_convs_dc_ne = Dict([(bus["busdc_i"], []) for (i,bus) in nw_ref[:busdc]])
@@ -231,24 +247,13 @@ function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
                 end
             end
             nw_ref[:bus_ne_convs_dc_ne] = bus_ne_convs_dc_ne
-            nw_ref[:ref_buses_dc_ne] = Dict{String, Any}()
-            nw_ref[:buspairsdc_ne] = buspair_parameters_dc_ne(nw_ref[:arcs_dcgrid_from_ne], nw_ref[:branchdc_ne], nw_ref[:busdc_ne], nw_ref[:busdc])
         else
-            nw_ref[:convdc_ne] = Dict{String, Any}()
-            nw_ref[:busdc_ne] = Dict{String, Any}()
-            nw_ref[:branchdc_ne] = Dict{String, Any}()
-            # DC grid arcs for DC grid branches
-            nw_ref[:arcs_dcgrid_ne] = Dict{String, Any}()
             nw_ref[:arcs_conv_acdc_ne] = Dict{String, Any}()
-            nw_ref[:bus_arcs_dcgrid_ne] = Dict{String, Any}()
-            bus_convs_ac = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
-            for (i,conv) in nw_ref[:convdc_ne]
-                push!(bus_convs_ac[conv["busac_i"]], i)
-            end
-            nw_ref[:bus_convs_ac_ne] = bus_convs_ac
+            nw_ref[:arcs_conv_acdc_acbus_ne] = Dict{String, Any}()
+            nw_ref[:bus_convs_ac_ne] = Dict{String, Any}() 
+            nw_ref[:convdc_ne] = Dict{String, Any}()
             nw_ref[:bus_convs_dc_ne] = Dict{String, Any}()
-            nw_ref[:ref_buses_dc_ne] = Dict{String, Any}()
-            nw_ref[:buspairsdc_ne] = Dict{String, Any}()
+            nw_ref[:bus_ne_convs_dc_ne] = Dict{String, Any}()
         end
     end
 end

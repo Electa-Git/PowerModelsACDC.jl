@@ -184,7 +184,7 @@ end
 
 @testset "ACDC tnep" begin
     @testset "DCP" begin
-        resultDCP = run_acdctnepopf("../test/data/tnep/case4_acdc.m", DCPPowerModel, highs; setting = s)
+        resultDCP = run_tnepopf("../test/data/tnep/case4_acdc.m", DCPPowerModel, highs; setting = s)
         @test isapprox(resultDCP["objective"], 329.95456; atol = 1e-1)
         @test isapprox(resultDCP["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultDCP["solution"]["branchdc_ne"]["3"]["pf"], -1.009; atol = 1e-2)
@@ -194,7 +194,7 @@ end
         @test isapprox(resultDCP["solution"]["ne_branch"]["1"]["built"], 1; atol = 1e-2)
     end
     @testset "ACP" begin
-        resultACP = run_acdctnepopf("../test/data/tnep/case4_acdc.m", ACPPowerModel, juniper; setting = s)
+        resultACP = run_tnepopf("../test/data/tnep/case4_acdc.m", ACPPowerModel, juniper; setting = s)
         @test isapprox(resultACP["objective"], 348.0219; atol = 1e-1)
         @test isapprox(resultACP["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultACP["solution"]["branchdc_ne"]["3"]["pf"], -0.631; atol = 1e-2)
@@ -204,7 +204,7 @@ end
         @test isapprox(resultACP["solution"]["ne_branch"]["1"]["built"], 1; atol = 1e-2)
     end
     @testset "LPAC" begin
-        resultLPAC = run_acdctnepopf("../test/data/tnep/case4_acdc.m", LPACCPowerModel, juniper; setting = s)
+        resultLPAC = run_tnepopf("../test/data/tnep/case4_acdc.m", LPACCPowerModel, juniper; setting = s)
         @test isapprox(resultLPAC["objective"], 333.095; atol = 1e-1)
         @test isapprox(resultLPAC["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultLPAC["solution"]["branchdc_ne"]["3"]["pf"], -1.009; atol = 1e-2)
@@ -215,7 +215,7 @@ end
     end
     if local_test == true
         @testset "SOCWR" begin
-            resultSOCWR = run_acdctnepopf("../test/data/tnep/case4_acdc.m", SOCWRPowerModel, gurobi; setting = s)
+            resultSOCWR = run_tnepopf("../test/data/tnep/case4_acdc.m", SOCWRPowerModel, gurobi; setting = s)
             @test isapprox(resultSOCWR["objective"], 348.021; atol = 1e-1)
             @test isapprox(resultSOCWR["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
             @test isapprox(resultSOCWR["solution"]["branchdc_ne"]["3"]["pf"], -0.631; atol = 1e-2)
@@ -287,7 +287,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "pr
     @testset "acdc tnep" begin
         @testset "DCP" begin
             data_acdc = build_mn_data("../test/data/tnep/case4_acdc.m")
-            resultDCP = run_mp_acdctnepopf(data_acdc, DCPPowerModel, highs, multinetwork=true; setting = s)
+            resultDCP = run_mp_tnepopf(data_acdc, DCPPowerModel, highs, multinetwork=true; setting = s)
             @test isapprox(resultDCP["objective"], 659.90; atol = 1e-1)
             @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
             @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"], -1.009; atol = 1e-2)
@@ -310,7 +310,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "pr
         if local_test == true
             @testset "ACP" begin # Normally fine but fails on travis
                 data_acdc = build_mn_data("../test/data/tnep/case4_acdc.m")
-                resultACP = run_mp_acdctnepopf(data_acdc, ACPPowerModel, juniper, multinetwork=true; setting = s)
+                resultACP = run_mp_tnepopf(data_acdc, ACPPowerModel, juniper, multinetwork=true; setting = s)
                 @test isapprox(resultACP["objective"], 696.043; atol = 1e-1)
                 @test isapprox(resultACP["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
                 @test isapprox(resultACP["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"], -0.631; atol = 1e-2)
@@ -321,7 +321,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "pr
             end
             @testset "SOCWR" begin
                 data_acdc = build_mn_data("../test/data/tnep/case4_acdc.m")
-                resultSOCWR = run_mp_acdctnepopf(data_acdc, SOCWRPowerModel, gurobi, multinetwork=true; setting = s)
+                resultSOCWR = run_mp_tnepopf(data_acdc, SOCWRPowerModel, gurobi, multinetwork=true; setting = s)
                 @test isapprox(resultSOCWR["objective"], 696.04; atol = 1e-1)
                 @test isapprox(resultSOCWR["solution"]["nw"]["2"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
                 @test isapprox(resultSOCWR["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"], -0.631; atol = 1e-2)
