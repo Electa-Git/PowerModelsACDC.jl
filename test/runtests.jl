@@ -11,7 +11,6 @@ Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
 Memento.setlevel!(Memento.getlogger(PowerModels), "error")
 
 using Ipopt
-using SCS
 using Juniper
 
 using Test
