@@ -1,7 +1,7 @@
 name: CI
 on:
-  push: master
-  pull_request: master
+  push:
+  pull_request:
   schedule:
     - cron:  '0 0 * * 3' # on every Wednesday
 jobs:
