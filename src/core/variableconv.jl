@@ -237,7 +237,7 @@ function variable_acside_current(pm::_PM.AbstractWModels; nw::Int=_PM.nw_id_defa
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :iconv_ac_sq, _PM.ids(pm, nw, :convdc), icsq)
 end
 
-"variable: `iconv_ac[j]` and `iconv_ac_sq[j]` for `j` in `convdc`"
+"variable: `iconv_ac[j]` and `iconv_ac_sq[j]` for `j` in `convdc` for ACR formulation"
 function variable_acside_current(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     ic = _PM.var(pm, nw)[:iconv_ac] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iconv_ac",

@@ -14,6 +14,7 @@ PowerModelsACDC.jl adds new problem types:
 
 PowerModelsACDC.jl extends the formulation hierarchy developed for AC grids, with equivalent DC grid and converter station formulations:
 - ACPPowerModel
+- ACRPowerModel
 - DCPPowerModel
 - SOCWRPowerModel
 - SDPWRMPowerModel
@@ -22,7 +23,7 @@ PowerModelsACDC.jl extends the formulation hierarchy developed for AC grids, wit
 - LPACPowerModel
 
 Developed by:
-- Hakan Ergun, Jay Dave KU Leuven / EnergyVille
+- Hakan Ergun, Jay Dave, KU Leuven / EnergyVille
 - Frederik Geth, CSIRO
 
 ## Installation of PowerModelACDC
