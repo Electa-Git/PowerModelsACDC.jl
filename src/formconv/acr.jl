@@ -1,13 +1,11 @@
 """
-Links the converter current magnitude variable with the squared converter current magnitude variable
-```
-iconv_sq[i] == iconv[i]^2 
-```
-"""
-"""
 Creates lossy converter model between AC and DC grid using a lifted converter current magnitude variable
 ```
 pconv_ac[i] + pconv_dc[i] == a + b * iconv[i] + c * iconv_sq[i]
+```
+Links the converter current magnitude variable with the squared converter current magnitude variable
+```
+iconv_sq[i] == iconv[i]^2 
 ```
 """
 function constraint_converter_losses(pm::_PM.AbstractACRModel, n::Int, i::Int, a, b, c, plmax)
