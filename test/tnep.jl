@@ -249,20 +249,20 @@ end
     result = run_tnepopf("../test/data/tnep/case6acdc_dc_tnep.m", DCPPowerModel, highs; setting = s)
     @test isapprox(result["objective"], 22.8442; atol = 1e-1)
     @test isapprox(result["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pf"], -4; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pt"], 4; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pf"], -3.72760; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pt"], 3.72760; atol = 1e-2)
     @test isapprox(result["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol = 1e-2)
-    @test isapprox(result["solution"]["convdc_ne"]["6"]["pconv"], 4.01699; atol = 1e-2)
+    @test isapprox(result["solution"]["convdc_ne"]["6"]["pconv"], 3.74419; atol = 1e-2)
 
     result = run_tnepopf("../test/data/tnep/case6acdc_dc_branch_tnep.m", DCPPowerModel, highs; setting = s)
     @test isapprox(result["objective"], 13.3663; atol = 1e-1)
     @test isapprox(result["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pf"], -4; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pt"], 4; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pf"], -3.738639; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pt"], 3.738639; atol = 1e-2)
     @test isapprox(result["solution"]["branchdc_ne"]["4"]["isbuilt"], 0; atol = 1e-2)
     @test isapprox(result["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pf"], 1.5365404; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pt"], -1.5365404; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pf"], 1.382799; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pt"], -1.382799; atol = 1e-2)
 
 end
 

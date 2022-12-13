@@ -11,7 +11,7 @@ Memento = "f28f55f0-a522-5efc-85c2-fe41dfb9b2d9"
 PowerModels = "c36e90e8-916a-50a6-bd94-075b64ef4655"
 
 [compat]
-HiGHS = "~0.3, ~1"
+HiGHS = "~0.3, ~1.4"
 InfrastructureModels = "~0.6, ~0.7"
 Ipopt = "~0.8, ~0.9, 1"
 JuMP = "~0.22.0, ~0.23, ~1"
