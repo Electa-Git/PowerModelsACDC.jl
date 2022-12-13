@@ -13,14 +13,14 @@ function run_mp_tnepopf(data::Dict{String,Any}, model_type::Type, solver; ref_ex
     end
     s = setting
     if haskey(data, "nw") && haskey(data["nw"]["1"], "ne_branch") # combined AC and DC TNEP
-        return _PM.solve_model(data, model_type, solver, post_mp_acdctnepopf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], setting = s, kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_mp_acdctnepopf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], setting = s, kwargs...)
     else
-        return _PM.solve_model(data, model_type, solver, post_mp_tnepopf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_mp_tnepopf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
     end
 end
 
 ""
-function post_mp_tnepopf(pm::_PM.AbstractPowerModel)
+function build_mp_tnepopf(pm::_PM.AbstractPowerModel)
     for (n, networks) in pm.ref[:it][:pm][:nw]
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
@@ -105,7 +105,7 @@ function post_mp_tnepopf(pm::_PM.AbstractPowerModel)
 end
 
 ""
-function post_mp_acdctnepopf(pm::_PM.AbstractPowerModel)
+function build_mp_acdctnepopf(pm::_PM.AbstractPowerModel)
     for (n, networks) in pm.ref[:it][:pm][:nw]
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)

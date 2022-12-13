@@ -13,11 +13,11 @@ end
 
 ""
 function run_tnepopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...)  where T <: _PM.AbstractBFModel
-    return _PM.solve_model(data, model_type, solver, post_tnepopf_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!],  kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_tnepopf_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!],  kwargs...)
 end
 
 ""
-function post_tnepopf_bf(pm::_PM.AbstractPowerModel)
+function build_tnepopf_bf(pm::_PM.AbstractPowerModel)
     # PowerModelsACDC.add_ref_dcgrid!(pm)
     # add_candidate_dcgrid!(pm)
     _PM.variable_bus_voltage(pm)
@@ -101,11 +101,11 @@ end
 
 ""
 function run_acdctnepopf_bf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return _PM.solve_model(data, model_type, solver, post_acdctnepopf_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_acdctnepopf_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], kwargs...)
 end
 
 ""
-function post_acdctnepopf_bf(pm::_PM.AbstractPowerModel)
+function build_acdctnepopf_bf(pm::_PM.AbstractPowerModel)
     # PowerModelsACDC.add_ref_dcgrid!(pm)
     # add_candidate_dcgrid!(pm)
     _PM.variable_bus_voltage(pm)

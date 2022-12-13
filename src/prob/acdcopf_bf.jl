@@ -9,10 +9,10 @@ end
 
 ""
 function run_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
-    return _PM.solve_model(data, model_type, solver, post_acdcopf_bf; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_acdcopf_bf; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
-function post_acdcopf_bf(pm::_PM.AbstractPowerModel)
+function build_acdcopf_bf(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_gen_power(pm)
     _PM.variable_branch_power(pm)
