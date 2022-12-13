@@ -7,6 +7,7 @@ For details on `GenericPowerModel`, see _PM.jl [documentation](https://lanl-ansi
 
 Extending PowerModels,  formulations for balanced  OPF in DC grids have been implemented and mapped to the following AC grid formulations:
 - ACPPowerModel
+- ACRPowerModel
 - DCPPowerModel
 - LPACPowerModel
 - SOCWRPowerModel
@@ -45,11 +46,25 @@ Note that generally, $a \geq 0, b \geq 0, c \geq 0$ as physical losses are posit
 
 ### ACDC converters
 - Power balance: $P^{conv, ac}_{ij} + P^{conv, dc}_{ji}$ = $a + b \cdot I^{conv, ac} + c \cdot (I^{conv, ac})^2$.
-- Current variable model: $(P^{conv,ac}_{ij})^2$ + $(Q^{conv,ac}_{ij})^2$ = $U_i^2 \cdot  (I^{conv, ac})^2$.
+- Converter current variable model: $(P^{conv,ac}_{ij})^2$ + $(Q^{conv,ac}_{ij})^2$ = $U_i^2 \cdot  (I^{conv, ac})^2$.
 - LCC converters, active /reactive power:
 
 $P^{conv, ac} = \cos\varphi_{c} \cdot S^{conv,ac,rated}$
 $Q^{conv, ac} = \sin\varphi_{c} \cdot S^{conv,ac,rated}$
+
+
+## ACRPowerModel (BIM)
+### DC lines
+- Same model as ACP formulation
+
+
+### ACDC converters
+Two separate current variables, $I^{conv, ac}$ and $i^{conv, ac, sq}$ are defined, the nonconvex relation $i^{conv, ac, sq} = (I^{conv, ac})^2$ is convexified.
+- Linking both current variables: $(I^{conv, ac})^2$ $\leq$ $i^{conv, ac, sq}$
+- Power balance: $P^{conv, ac}_{ij} + P^{conv, dc}_{ji}$ = $a + b\cdot I^{conv, ac} + c\cdot i^{conv, ac, sq}$.
+- Converter current variable model: $(P^{conv,ac}_{ij})^2$ + $(Q^{conv,ac}_{ij})^2$ = $(U_{ri}^2+U_{ii}^2) \cdot  i^{conv, ac, sq}$.
+- LCC converters, active /reactive power: Same model as ACP formulation
+
 
 ## DCPPowerModel (NF)
 Due to the absence of voltage angles in DC grids, the DC power flow model reduces to network flow (NF) under the 'DC' assumptions

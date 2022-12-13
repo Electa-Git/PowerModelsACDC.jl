@@ -24,7 +24,31 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
     @test isapprox(result["objective"], 150228.15; atol = 1e0)
     end
 end
+@testset "test ac rectangular opf" begin
+    @testset "3-bus case" begin
+        result = run_acdcopf("../test/data/case3.m", ACRPowerModel, ipopt_solver; setting = s)
 
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 5907; atol = 1e0)
+    end
+    @testset "5-bus ac dc case" begin
+        result = run_acdcopf("../test/data/case5_acdc.m", ACRPowerModel, ipopt_solver; setting = s)
+
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 194.14; atol = 1e0)
+    end
+    @testset "5-bus ac dc case with 2 seperate ac grids" begin
+        result = run_acdcopf("../test/data/case5_2grids.m", ACRPowerModel, ipopt_solver; setting = s)
+
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 397.36; atol = 1e0)
+    end
+    @testset "24-bus rts ac dc case with three zones" begin
+        result = run_acdcopf("../test/data/case24_3zones_acdc.m", ACRPowerModel, ipopt_solver; setting = s)
+
+    @test isapprox(result["objective"], 150228.15; atol = 1e0)
+    end
+end
 @testset "test IVR OPF" begin
     @testset "5-bus ac dc case" begin
         result = PowerModelsACDC.run_acdcopf_iv("../test/data/case5_acdc.m", IVRPowerModel, ipopt_solver; setting = s)
