@@ -51,6 +51,13 @@ For further information, consult the PowerModels [documentation](https://lanl-an
 
 The developers thank Carleton Coffrin (LANL) for his support.
 
+## Contributors
+
+- Hakan Ergun (KU Leuven / EnergyVille): Main developer
+- Frederik Geth (KU Leuven / EnergyVille): Formulations & relaxations of the OPF problem
+- Jay Dave (KU Leuven / EnergyVille): Transmission expansion plannning
+- Ghulam Mohy Ud Din (CSIRO): ACR formulation of the OPF problem
+
 ## Citing PowerModelsACDC
 
 If you find PowerModelsACDC useful in your work, we kindly request that you cite the following publications:
