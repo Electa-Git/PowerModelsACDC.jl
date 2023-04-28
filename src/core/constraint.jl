@@ -11,7 +11,11 @@ function constraint_power_balance_dc(pm::_PM.AbstractPowerModel, n::Int, i::Int,
     p_dcgrid = _PM.var(pm, n, :p_dcgrid)
     pconv_dc = _PM.var(pm, n, :pconv_dc)
 
-    JuMP.@constraint(pm.model, sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == (-pd))
+    cstr_p = JuMP.@constraint(pm.model, sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == (-pd))
+
+    if _IM.report_duals(pm)
+        _PM.sol(pm, n, :busdc, i)[:lam_kcl_r] = cstr_p
+    end
 end
 
 "`pconv[i] == pconv`"
@@ -340,7 +344,11 @@ function constraint_power_balance_dc_dcne(pm::_PM.AbstractPowerModel, n::Int, i:
     pconv_dc = _PM.var(pm, n, :pconv_dc)
     pconv_dc_ne = _PM.var(pm, n, :pconv_dc_ne)
 
-    JuMP.@constraint(pm.model, sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(p_dcgrid_ne[a] for a in bus_arcs_dcgrid_ne) + sum(pconv_dc[c] for c in bus_convs_dc) + sum(pconv_dc_ne[c] for c in bus_convs_dc_ne)  == (-pd))
+    cstr_p = JuMP.@constraint(pm.model, sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(p_dcgrid_ne[a] for a in bus_arcs_dcgrid_ne) + sum(pconv_dc[c] for c in bus_convs_dc) + sum(pconv_dc_ne[c] for c in bus_convs_dc_ne)  == (-pd))
+
+    if _IM.report_duals(pm)
+        _PM.sol(pm, n, :busdc, i)[:lam_kcl_r] = cstr_p
+    end
 end
 
 
@@ -349,5 +357,10 @@ function constraint_power_balance_dcne_dcne(pm::_PM.AbstractPowerModel, n::Int, 
     pconv_dc_ne = _PM.var(pm, n, :pconv_dc_ne)
     xb = _PM.var(pm, n, :branchdc_ne)
     xc = _PM.var(pm, n, :conv_ne)
-    JuMP.@constraint(pm.model, sum(p_dcgrid_ne[a] for a in bus_arcs_dcgrid_ne) + sum(pconv_dc_ne[c] for c in bus_ne_convs_dc_ne)  == (-pd_ne))
+
+    cstr_p = JuMP.@constraint(pm.model, sum(p_dcgrid_ne[a] for a in bus_arcs_dcgrid_ne) + sum(pconv_dc_ne[c] for c in bus_ne_convs_dc_ne)  == (-pd_ne))
+
+    if _IM.report_duals(pm)
+        _PM.sol(pm, n, :busdcne, i)[:lam_kcl_r] = cstr_p
+    end
 end
