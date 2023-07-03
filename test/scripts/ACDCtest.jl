@@ -4,12 +4,7 @@ import PowerModels
 const _PM = PowerModels
 import Ipopt
 import Memento
-# import CPLEX
-import SCS
-import Mosek
-import MosekTools
 import JuMP
-import Gurobi  # needs startvalues for all variables!
 
 file_pf_droop = "./test/data/case5_acdc_droop.m"
 
@@ -31,27 +26,26 @@ data = _PM.parse_file(file)
 _PMACDC.process_additional_data!(data)
 
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
-mosek = JuMP.optimizer_with_attributes(Mosek.Optimizer)
-scs = JuMP.optimizer_with_attributes(SCS.Optimizer)
-gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, Presolve=0)
-# cplex = JuMP.optimizer_with_attributes(CPLEX.Optimizer)
 
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
-resultAC = _PMACDC.run_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
+result = _PMACDC.run_acdcpf(file, _PM.ACRPowerModel, ipopt; setting = s)
+result_droop = _PMACDC.run_acdcpf(file_pf_droop, _PM.ACRPowerModel, ipopt; setting = s)
 
-resultLPAC = _PMACDC.run_acdcopf(file, _PM.LPACCPowerModel, ipopt; setting = s)
+# resultAC = _PMACDC.run_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
 
-resultQC = _PMACDC.run_acdcopf(file, _PM.QCRMPowerModel, ipopt; setting = s)
+# resultLPAC = _PMACDC.run_acdcopf(file, _PM.LPACCPowerModel, ipopt; setting = s)
 
-resultSOCBIM = _PMACDC.run_acdcopf(file, _PM.SOCWRPowerModel, ipopt; setting = s)
-resultACSOCBIM = _PM.run_opf(file, _PM.SOCWRPowerModel, ipopt; setting = s)
-# #
-resultSOCBFM = _PMACDC.run_acdcopf_bf(file, _PM.SOCBFPowerModel, ipopt; setting = s)
-resultSOCBFMConic = _PMACDC.run_acdcopf_bf(file, _PM.SOCBFConicPowerModel, mosek; setting = s)
-resultSOCBFMConicSCS = _PMACDC.run_acdcopf_bf(file, _PM.SOCBFConicPowerModel, scs; setting = s)
-# #
-resultSDP = _PMACDC.run_acdcopf(file, _PM.SDPWRMPowerModel, mosek; setting = s)
-# #
-resultDC = _PMACDC.run_acdcopf(file, _PM.DCPPowerModel, gurobi; setting = s)
-resultACPF5 = _PMACDC.run_acdcpf(file_case5acdc, _PM.ACPPowerModel, ipopt; setting = s)
+# resultQC = _PMACDC.run_acdcopf(file, _PM.QCRMPowerModel, ipopt; setting = s)
+
+# resultSOCBIM = _PMACDC.run_acdcopf(file, _PM.SOCWRPowerModel, ipopt; setting = s)
+# resultACSOCBIM = _PM.run_opf(file, _PM.SOCWRPowerModel, ipopt; setting = s)
+# # #
+# resultSOCBFM = _PMACDC.run_acdcopf_bf(file, _PM.SOCBFPowerModel, ipopt; setting = s)
+# resultSOCBFMConic = _PMACDC.run_acdcopf_bf(file, _PM.SOCBFConicPowerModel, mosek; setting = s)
+# resultSOCBFMConicSCS = _PMACDC.run_acdcopf_bf(file, _PM.SOCBFConicPowerModel, scs; setting = s)
+# # #
+# resultSDP = _PMACDC.run_acdcopf(file, _PM.SDPWRMPowerModel, mosek; setting = s)
+# # #
+# resultDC = _PMACDC.run_acdcopf(file, _PM.DCPPowerModel, gurobi; setting = s)
+# resultACPF5 = _PMACDC.run_acdcpf(file_case5acdc, _PM.ACPPowerModel, ipopt; setting = s)
