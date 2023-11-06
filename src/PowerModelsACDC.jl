@@ -10,6 +10,8 @@ const _PM = PowerModels
 import InfrastructureModels
 # import InfrastructureModels: ids, ref, var, con, sol, nw_ids, nws, optimize_model!, @im_fields
 const _IM = InfrastructureModels
+import SparseArrays
+import NLsolve
 
 import JuMP: with_optimizer
 export with_optimizer
@@ -30,6 +32,7 @@ include("prob/tnepopf.jl")
 include("prob/tnepopf_bf.jl")
 include("prob/mp_tnepopf.jl")
 include("prob/mp_tnepopf_bf.jl")
+include("prob/sacdcpf.jl")
 
 
 
