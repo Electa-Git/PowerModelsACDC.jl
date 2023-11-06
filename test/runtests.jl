@@ -44,6 +44,6 @@ include("opf.jl")
 
 include("tnep.jl")
 
-include("pf_seq.jl")
+include("spf.jl")
 
 end
