@@ -1,5 +1,35 @@
 # Problem Specifications
 
+
+## ACDCPF
+
+PF with support for AC and DC grids at the same time, including AC/DC converters.
+
+## Generic AC DC Power Flow
+
+The general purpose ac dc power flow solver in PowerModelsACDC is,
+
+```@docs
+run_acdcpf
+```
+
+This function builds a JuMP model for a wide variety of the power flow formulations
+supported by PowerModelsACDC. 
+
+## Sequential AC DC Power Flow (Native)
+
+The sequential ac dc power flow solver in PowerModelsACDC uses the package
+[NLSolve](https://github.com/JuliaNLSolvers/NLsolve.jl) for solving the AC 
+DC power flow problem in `ACPPowerModel` formulation sequentially.
+
+```@docs
+run_sacdcpf
+```
+
+!!! tip
+    If `run_sacdcpf` fails to converge try `run_acdcpf` instead.
+
+
 ## ACDCOPF
 
 OPF with support for AC and DC grids at the same time, including AC/DC converters.

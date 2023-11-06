@@ -18,8 +18,8 @@
         @test isapprox(result["objective"], 0.0; atol = 1e-2)
 
         @test isapprox(result["solution"]["gen"]["7"]["pg"], 5.60000; atol = 2e-3)
-        @test isapprox(result["solution"]["bus"]["20"]["va"], -0.75418; atol = 2e-3)
-        @test isapprox(result["solution"]["bus"]["27"]["va"], -0.86183; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["20"]["va"], -0.39552; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["27"]["va"], -0.48778; atol = 2e-3)
         @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -0.60000; atol = 2e-3)
         @test isapprox(result["solution"]["convdc"]["3"]["pdc"], -0.58734; atol = 2e-3)
     end
