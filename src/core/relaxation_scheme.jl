@@ -9,7 +9,7 @@ function relaxation_complex_product_conic(m::JuMP.Model, a::JuMP.VariableRef, b:
 end
 
 
-
+"constraint: `c^2 + d^2 <= a*b`"
 function relaxation_complex_product_conic_on_off(m::JuMP.Model, a::JuMP.VariableRef, b::JuMP.VariableRef, c::JuMP.VariableRef, d::JuMP.VariableRef, z::JuMP.VariableRef)
     a_lb, a_ub = _IM.variable_domain(a)
     b_lb, b_ub = _IM.variable_domain(b)
@@ -25,6 +25,7 @@ function relaxation_complex_product_conic_on_off(m::JuMP.Model, a::JuMP.Variable
     JuMP.@constraint(m, [a/sqrt(2), b_ub/sqrt(2)*z, c, d] in JuMP.RotatedSecondOrderCone())
 end
 
+"constraint: `c^2 + d^2 <= a*b*z`"
 function relaxation_complex_product_on_off(m::JuMP.Model, a::JuMP.VariableRef, b::JuMP.VariableRef, c::JuMP.VariableRef, d::JuMP.VariableRef) #to be moved to _IM
     a_lb, a_ub = _IM.variable_domain(a)
     b_lb, b_ub = _IM.variable_domain(b)
@@ -47,14 +48,14 @@ function relaxation_complex_product(m::JuMP.Model, a::JuMP.VariableRef, b::JuMP.
     JuMP.@constraint(m, c^2 <= a*b)
 end
 
-
+"constraint: `|c| <= z*b`"
 function relaxation_semicont_variable_on_off(m::JuMP.Model, a::JuMP.VariableRef, z::JuMP.VariableRef)
     a_lb, a_ub = _IM.variable_domain(a)
     
     JuMP.@constraint(m, a <= a_ub*z)
     JuMP.@constraint(m, a >= a_lb*z)
 end
-
+"constraint: `|c| <= z*b`"
 function relaxation_variable_on_off(m::JuMP.Model, x::JuMP.VariableRef, y::JuMP.VariableRef, z::JuMP.VariableRef)
     x_lb, x_ub = _IM.variable_domain(x)
 

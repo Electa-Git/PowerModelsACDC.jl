@@ -980,7 +980,7 @@ function variable_converter_internal_voltage_magnitude_sqr_ne(pm::_PM.AbstractPo
     end
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :wconv, _PM.ids(pm, nw, :convdc_ne), wcac_ne)
 end
-
+"variable: `w_du[j]` for `j` in `candidate convdc`"
 function variable_voltage_slack(pm::_PM.AbstractWModels; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=false)
     w_du = _PM.var(pm, nw)[:w_du] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_w_du",
@@ -995,7 +995,7 @@ function variable_voltage_slack(pm::_PM.AbstractWModels; nw::Int=_PM.nw_id_defau
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :wdu, _PM.ids(pm, nw, :convdc_ne), w_du)
 end
 
-
+"variable: cos voltage fro LPAC"
 function variable_cos_voltage_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     #only for lpac
 end
