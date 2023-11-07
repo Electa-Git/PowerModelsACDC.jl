@@ -11,7 +11,6 @@ function objective_min_fuel_cost(pm::_PM.AbstractPowerModel)
 
 end
 
-""
 function objective_min_polynomial_fuel_cost(pm::_PM.AbstractPowerModel)
     order = _PM.calc_max_cost_index(pm.data)-1
 
@@ -23,7 +22,6 @@ function objective_min_polynomial_fuel_cost(pm::_PM.AbstractPowerModel)
         error("cost model order of $(order) is not supported")
     end
 end
-
 function _objective_min_polynomial_fuel_cost_linear(pm::_PM.AbstractPowerModel)
     from_idx = Dict()
     for (n, nw_ref) in nws(pm)
@@ -37,7 +35,6 @@ function _objective_min_polynomial_fuel_cost_linear(pm::_PM.AbstractPowerModel)
         for (n, nw_ref) in nws(pm))
     )
 end
-""
 function _objective_min_polynomial_fuel_cost_quadratic(pm::_PM.AbstractPowerModel)
     from_idx = Dict()
     for (n, nw_ref) in nws(pm)
@@ -52,7 +49,6 @@ function _objective_min_polynomial_fuel_cost_quadratic(pm::_PM.AbstractPowerMode
         for (n, nw_ref) in nws(pm))
     )
 end
-""
 function objective_min_polynomial_fuel_cost(pm::_PM.AbstractConicModel)
     _PM.check_polynomial_cost_models(pm)
     pg_sqr = Dict()
@@ -77,7 +73,6 @@ function objective_min_polynomial_fuel_cost(pm::_PM.AbstractConicModel)
         for (n, nw_ref) in _PM.nws(pm))
     )
 end
-""
 function objective_min_pwl_fuel_cost(pm::_PM.AbstractPowerModel)
 
     for (n, nw_ref) in _PM.nws(pm)
