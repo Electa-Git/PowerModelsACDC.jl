@@ -44,4 +44,6 @@ include("opf.jl")
 
 include("tnep.jl")
 
+include("spf.jl")
+
 end
