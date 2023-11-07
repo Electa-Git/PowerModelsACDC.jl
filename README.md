@@ -56,7 +56,7 @@ The developers thank Carleton Coffrin (LANL) for his support.
 - Hakan Ergun (KU Leuven / EnergyVille): Main developer
 - Frederik Geth (KU Leuven / EnergyVille): Formulations & relaxations of the OPF problem
 - Jay Dave (KU Leuven / EnergyVille): Transmission expansion plannning
-- Ghulam Mohy Ud Din (CSIRO): ACR formulation of the OPF problem
+- Ghulam Mohy Ud Din (CSIRO): ACR formulation of the OPF problem, Sequential AC/DC Grid Power Flow using NLsolve
 
 ## Citing PowerModelsACDC
 

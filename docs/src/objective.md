@@ -9,12 +9,18 @@
 * Minimisation of consturction cost for HVDC branches and converters and generation costs and AC branches(acdc_tnep)
 
 
-
 ```@meta
 CurrentModule = PowerModelsACDC
 ```
 
+```@docs
+objective_min_fuel_cost
+```
 
 ```@docs
-_PM.objective_min_fuel_cost
+objective_min_cost
+```
+
+```@docs
+objective_min_cost_acdc
 ```
