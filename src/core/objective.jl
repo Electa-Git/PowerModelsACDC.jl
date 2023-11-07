@@ -1,4 +1,4 @@
-""
+" Minimum fuel cost objective using lienar and quadratic terms or piecewise linear functions, as defined in Matpower" 
 function objective_min_fuel_cost(pm::_PM.AbstractPowerModel)
     model = _PM.check_cost_models(pm)
     if model == 1
@@ -104,6 +104,7 @@ function objective_min_pwl_fuel_cost(pm::_PM.AbstractPowerModel)
 end
 
 ##################### TNEP Objective   ###################
+" Objective consisting of generation cost + investment costs of HVDC lines and converters"
 function objective_min_cost(pm::_PM.AbstractPowerModel)
         gen_cost = Dict()
         for (n, nw_ref) in _PM.nws(pm)
@@ -134,6 +135,7 @@ function objective_min_cost(pm::_PM.AbstractPowerModel)
         )
 end
 
+" Objective consisting of generation cost + investment costs of HVDC lines and converters + investment costs of AC lines"
 function objective_min_cost_acdc(pm::_PM.AbstractPowerModel)
         gen_cost = Dict()
         for (n, nw_ref) in _PM.nws(pm)
