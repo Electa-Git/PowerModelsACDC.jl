@@ -10,6 +10,7 @@ JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 Memento = "f28f55f0-a522-5efc-85c2-fe41dfb9b2d9"
 NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
 PowerModels = "c36e90e8-916a-50a6-bd94-075b64ef4655"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
 HiGHS = "~0.3, ~1.4"
