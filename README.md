@@ -10,7 +10,7 @@ PowerModelsACDC.jl is a Julia/JuMP/PowerModels package with models for DC lines,
 Building upon the PowerModels architecture, the code is engineered to decouple problem specifications (e.g. Power Flow, Optimal Power Flow, ...) from the power network formulations (e.g. AC, DC-approximation, SOC-relaxation, ...).
 
 **Installation**
-The latest stable release of PowerModelACDC can be installed using the Julia package manager with
+The latest stable release of PowerModelsACDC can be installed using the Julia package manager with
 
 ```julia
 Pkg.add("PowerModelsACDC")
@@ -89,7 +89,7 @@ month={July},}
    ISSN = {1751-8687},
    title = {TNEP of meshed HVDC grids: ‘AC’, ‘DC’ and convex formulations},
    journal = {IET Generation, Transmission & Distribution},
-   issue = {24},   
+   issue = {24},
    volume = {13},
    year = {2019},
    month = {December},
