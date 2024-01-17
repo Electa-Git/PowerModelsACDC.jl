@@ -1,4 +1,4 @@
-# PowerModelACDC.jl Documentation
+# PowerModelsACDC.jl Documentation
 
 ```@meta
 CurrentModule = PowerModelsACDC
@@ -26,16 +26,17 @@ Developed by:
 - Hakan Ergun, Jay Dave, KU Leuven / EnergyVille
 - Frederik Geth, CSIRO
 
-## Installation of PowerModelACDC
+## Installation of PowerModelsACDC
 
-The latest stable release of PowerModelACDC can be installed using the Julia package manager with
+The latest stable release of PowerModelsACDC can be installed using the Julia package manager with
 
 ```julia
 Pkg.add("PowerModelsACDC")
 ```
-!!! Important
+!!! note
     This is a research-grade optimization package.
 
 ## Special Thanks To
-Jef Beerten (KU Leuven/EnergyVille) for his insights in AC/DC power flow modelling.
-Carleton Coffrin (Los Alamos National Laboratory) for his countless design tips.  
+
+- Jef Beerten (KU Leuven/EnergyVille), for his insights in AC/DC power flow modelling.
+- Carleton Coffrin (Los Alamos National Laboratory), for his countless design tips.

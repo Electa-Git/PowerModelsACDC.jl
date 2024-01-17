@@ -1,30 +1,29 @@
 using Documenter, PowerModelsACDC
 
-Documenter.makedocs(
-    modules = PowerModelsACDC,
-    format = Documenter.HTML(),
+makedocs(
+    modules = [PowerModelsACDC],
     sitename = "PowerModelsACDC",
-    authors = "Frederik Geth, Hakan Ergun",
+    warnonly = :missing_docs,
     pages = [
-        "Home" => "index.md",
+        "Home" => "index.md"
         "Manual" => [
-            "Getting Started" => "quickguide.md",
-            "Results" => "result-data.md",
-        ],
+            "Getting Started" => "quickguide.md"
+            "Results" => "result-data.md"
+        ]
         "Library" => [
-            "Network Formulations" => "formulations.md",
-            "Problem Specifications" => "specifications.md",
-            "Problem Types" => "problems.md",
+            "Network Formulations" => "formulations.md"
+            "Problem Specifications" => "specifications.md"
+            "Problem Types" => "problems.md"
             "Modeling Components" => [
-                "Objective" => "objective.md",
-                "Variables" => "variables.md",
-                "Constraints" => "constraints.md",
-            ],
+                "Objective" => "objective.md"
+                "Variables" => "variables.md"
+                "Constraints" => "constraints.md"
+            ]
             "File IO" => "parser.md"
-        ],
+        ]
     ]
 )
 
-Documenter.deploydocs(
+deploydocs(
     repo = "github.com/Electa-Git/PowerModelsACDC.jl.git"
 )
