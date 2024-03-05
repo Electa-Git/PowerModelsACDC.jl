@@ -13,8 +13,8 @@ const _IM = InfrastructureModels
 import SparseArrays
 import NLsolve
 
-import JuMP: with_optimizer
-export with_optimizer
+import JuMP: optimizer_with_attributes
+export optimizer_with_attributes
 
 # Create our module level logger (this will get precompiled)
 const _LOGGER = Memento.getlogger(@__MODULE__)
