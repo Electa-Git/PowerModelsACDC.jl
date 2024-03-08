@@ -134,7 +134,6 @@ function find_all_ac_grids(branches_ac, buses_ac)
         ACgrids["1"]["Buses"] = [branches_ac[1]["f_bus"] branches_ac[1]["t_bus"]]
         closed_buses = [branches_ac[1]["f_bus"] branches_ac[1]["t_bus"]]
         closed_branches = [1]
-        connections = []
         buses = []
         for (i, bus) in buses_ac
             if VERSION < v"0.7.0-"
