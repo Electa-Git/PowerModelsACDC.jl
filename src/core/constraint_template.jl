@@ -145,6 +145,13 @@ function constraint_dc_droop_control(pm::_PM.AbstractPowerModel, i::Int; nw::Int
     constraint_dc_droop_control(pm, nw, i, conv["busdc_i"], conv["Vdcset"], conv["Pdcset"], conv["droop"])
 end
 
+function constraint_ac_voltage_droop_control(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    conv = _PM.ref(pm, nw, :convdc, i)
+    bus = _PM.ref(pm, nw, :bus, conv["busac_i"])
+    v_ref = conv["Vtar"]
+    constraint_ac_voltage_droop_control(pm, nw, i, bus["index"], v_ref, conv["Q_g"], conv["kq_droop"])
+end
+
 ############## TNEP Constraints #####################
 function constraint_voltage_dc_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default)
     constraint_voltage_dc_ne(pm, nw)
