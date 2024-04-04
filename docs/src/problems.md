@@ -11,6 +11,11 @@ run_acdcopf(file or data, formulation, solver, setting)
 run_acdcpf(file or data, formulation, solver, setting)
 ```
 
+## Sequential Hybrid AC/DC power flow (Native)
+```julia
+run_sacdcpf(file or data)
+```
+
 ## DC grid TNEP problem (optimal placement of converters and dc branches)
 ```julia
 run_tnepopf(file or data, formulation, solver, setting)

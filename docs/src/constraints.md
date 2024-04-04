@@ -5,12 +5,6 @@ All the OPF constraints for the AC grids have been re-used from PowerModels.jl, 
 CurrentModule = PowerModelsACDC
 ```
 
-## Unit Constraints
-
-```@docs
-constraint_active_load_gen_aggregation
-```
-
 ## DC Bus Constraints
 
 ### Setpoint Constraints

@@ -1,4 +1,5 @@
 
+"variable: DC branch currents - not used"
 function variable_dcbranch_current(pm::_PM.AbstractPowerModel; kwargs...)
 end
 
@@ -19,7 +20,7 @@ function variable_dcgrid_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::Int=_
 
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :busdc, :vm, _PM.ids(pm, nw, :busdc), vdcm)
 end
-
+"variable: `vdcm[i]` for `i` in `dcbus`es"
 function variable_dcgrid_voltage_magnitude(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true, report::Bool=true)
     phivdcm = _PM.var(pm, nw)[:phi_vdcm] = JuMP.JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :busdc)], base_name="$(nw)_phi_vdcm",
@@ -99,11 +100,11 @@ end
 
 
 ####################### TNEP variables ################################
-
+"variable: DC branch currents - not used"
 function variable_dcbranch_current_ne(pm::_PM.AbstractPowerModel; kwargs...)
 end
 
-"variable: `vdcm[i]` for `i` in `dcbus`es"
+"variable: `vdcm[i]` for `i` in `ne_dcbus`es"
 function variable_dcgrid_voltage_magnitude_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     vdcm_ne = _PM.var(pm, nw)[:vdcm_ne] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :busdc_ne)], base_name="$(nw)_vdcm_ne",
@@ -118,7 +119,7 @@ function variable_dcgrid_voltage_magnitude_ne(pm::_PM.AbstractPowerModel; nw::In
 
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :busdc_ne, :vm, _PM.ids(pm, nw, :busdc_ne), vdcm_ne)
 end
-
+"variable: `vdcm[i]` for `i` in `ne_dcbus`es"
 function variable_dcgrid_voltage_magnitude_ne(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
         phivdcm_ne = _PM.var(pm, nw)[:phi_vdcm_ne] = JuMP.@variable(pm.model,
         [i in _PM.ids(pm, nw, :busdc_ne)], base_name="$(nw)_phi_vdcm_ne",
@@ -163,7 +164,7 @@ function variable_dcgrid_voltage_magnitude_ne(pm::_PM.AbstractLPACModel; nw::Int
         report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :branchdc_ne, :phivdcm_to, _PM.ids(pm, nw, :branchdc_ne), phivdcm_to_ne)
 end
 
-"variable: `vdcm[i]` for `i` in `dcbus`es"
+"variable: `wdcm[i]` for `i` in `ne_dcbus`es"
 function variable_dcgrid_voltage_magnitude_sqr_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bi_bp = Dict([(i, (b["fbusdc"], b["tbusdc"])) for (i,b) in _PM.ref(pm, nw, :branchdc_ne)])
     bus_vdcmax = merge(Dict([(b,bus["Vdcmax"]) for (b,bus) in _PM.ref(pm, nw, :busdc)]),
@@ -192,7 +193,7 @@ function variable_dcgrid_voltage_magnitude_sqr_ne(pm::_PM.AbstractPowerModel; nw
         report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :busdc_ne, :wdc_ne, _PM.ids(pm, nw, :busdc_ne), wdc_ne)
         report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :branchdc_ne, :wdcr_ne, _PM.ids(pm, nw, :branchdc_ne), wdcr_ne)
 end
-
+"variable: `wdcm[i]` for `i` in `ne_dcbus`es"
 function variable_dcgrid_voltage_magnitude_sqr_du(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true) # this has to to every branch, different than its counterpart(Wdc_fr) since two candidate branches can be connected to same node and two duplicate variables will be needed
     bi_bp = Dict([(i, (b["fbusdc"], b["tbusdc"])) for (i,b) in _PM.ref(pm, nw, :branchdc_ne)])
     wdc_fr_ne = _PM.var(pm, nw)[:wdc_du_fr] = JuMP.@variable(pm.model,
