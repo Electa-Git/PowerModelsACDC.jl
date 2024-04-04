@@ -146,6 +146,12 @@ function constraint_dc_droop_control(pm::_PM.AbstractACPModel, n::Int, i::Int, b
     JuMP.@constraint(pm.model, pconv_dc == pref_dc - sign(pref_dc) * 1 / k_droop * (vdc - vref_dc))
 end
 
+function constraint_ac_voltage_droop_control(pm::_PM.AbstractACPModel, n::Int, i::Int, busac_i, v_ref, qref, kq_droop)
+    q_inj = _PM.var(pm, n, :qconv_tf_fr, i)
+    vac = _PM.var(pm, n, :vm, busac_i)
+    # Arranging the signs of reactive powers below
+    JuMP.@constraint(pm.model, q_inj == -qref - kq_droop * (v_ref - vac))
+end
 
 #################### TNEP Constraints #########################
 """

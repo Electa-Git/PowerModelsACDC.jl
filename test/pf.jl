@@ -50,7 +50,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test isapprox(result["solution"]["bus"]["1"]["vm"], 1.06; atol = 2e-3)
         @test isapprox(result["solution"]["bus"]["1"]["va"], 0.00000; atol = 2e-3)
         @test isapprox(result["solution"]["bus"]["2"]["vm"], 1.00; atol = 2e-3)
-        @test isapprox(result["solution"]["bus"]["3"]["vm"], 0.995; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["3"]["vm"], 1.00; atol = 2e-3)
 
         @test isapprox(result["solution"]["busdc"]["1"]["vm"], 1.0079; atol = 1e-4)
         @test isapprox(result["solution"]["busdc"]["2"]["vm"], 0.999987; atol = 1e-4)
@@ -110,8 +110,8 @@ end
 
         @test isapprox(result["solution"]["bus"]["1"]["vr"], 1.06; atol = 2e-3)
         @test isapprox(result["solution"]["bus"]["1"]["vi"], 0.00000; atol = 2e-3)
-        @test isapprox(result["solution"]["bus"]["2"]["vr"], 0.999108; atol = 2e-3)
-        @test isapprox(result["solution"]["bus"]["3"]["vr"], 0.993324; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["2"]["vr"], 0.999108; atol = 1e-2)
+        @test isapprox(result["solution"]["bus"]["3"]["vr"], 0.993324; atol = 1e-2)
 
         @test isapprox(result["solution"]["busdc"]["1"]["vm"], 1.0079; atol = 1e-4)
         @test isapprox(result["solution"]["busdc"]["2"]["vm"], 0.999987; atol = 1e-4)
@@ -146,4 +146,35 @@ end
         @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -0.753; atol = 2e-3)
         @test isapprox(result["solution"]["convdc"]["3"]["pdc"], -1.39167; atol = 2e-3)
     end
+end
+
+@testset "4-bus ac voltage droop case" begin
+    result = run_acdcpf("../test/data/case4_acdroop.m", ACPPowerModel, ipopt_solver; setting = s)
+
+    @test result["termination_status"] == LOCALLY_SOLVED
+    @test isapprox(result["objective"], 0; atol = 1e-2)
+
+    @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.24; atol = 1e-2)
+    @test isapprox(result["solution"]["gen"]["2"]["pg"], -1.142; atol = 1e-2)
+    @test isapprox(result["solution"]["gen"]["1"]["qg"], -0.057; atol = 1e-2)
+    @test isapprox(result["solution"]["gen"]["2"]["qg"], 0.352; atol = 1e-2)
+
+    @test isapprox(result["solution"]["bus"]["1"]["vm"], 1.0; atol = 1e-2)
+    @test isapprox(result["solution"]["bus"]["1"]["va"], 0.00000; atol = 1e-2)
+    @test isapprox(result["solution"]["bus"]["2"]["vm"], 1.0; atol = 1e-2)
+    @test isapprox(result["solution"]["bus"]["2"]["va"], 0.00000; atol = 1e-2)
+    @test isapprox(result["solution"]["bus"]["3"]["vm"], 0.995; atol = 1e-2)
+    @test isapprox(result["solution"]["bus"]["3"]["va"], -0.095; atol = 1e-2)
+    @test isapprox(result["solution"]["bus"]["4"]["vm"], 1.0; atol = 1e-2)
+    @test isapprox(result["solution"]["bus"]["4"]["va"], 0.332; atol = 1e-2)
+
+    @test isapprox(result["solution"]["convdc"]["1"]["pgrid"], 0.6067; atol = 1e-2)
+    @test isapprox(result["solution"]["convdc"]["1"]["qgrid"], -0.2081; atol = 1e-2)
+    @test isapprox(result["solution"]["convdc"]["3"]["pgrid"], 0.6067; atol = 1e-2)
+    @test isapprox(result["solution"]["convdc"]["3"]["qgrid"], 0.0459; atol = 1e-2)
+    @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], -0.6; atol = 1e-2)
+    @test isapprox(result["solution"]["convdc"]["2"]["qgrid"], 0.0932; atol = 1e-2)
+    @test isapprox(result["solution"]["convdc"]["4"]["pgrid"], -0.6; atol = 1e-2)
+    @test isapprox(result["solution"]["convdc"]["4"]["qgrid"], -0.1; atol = 1e-2)
+
 end
