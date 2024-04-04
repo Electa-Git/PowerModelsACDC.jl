@@ -57,6 +57,7 @@ The developers thank Carleton Coffrin (LANL) for his support.
 - Frederik Geth (KU Leuven / EnergyVille): Formulations & relaxations of the OPF problem
 - Jay Dave (KU Leuven / EnergyVille): Transmission expansion plannning
 - Ghulam Mohy Ud Din (CSIRO): ACR formulation of the OPF problem, Sequential AC/DC Grid Power Flow using NLsolve
+- Özgür Can Sakinci (KU Leuven / EnergyVille): AC Voltage - Reactive Power droop for DC converters
 
 ## Citing PowerModelsACDC
 
