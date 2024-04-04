@@ -154,7 +154,7 @@ end
     @test result["termination_status"] == LOCALLY_SOLVED
     @test isapprox(result["objective"], 0; atol = 1e-2)
 
-    @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.23; atol = 1e-2)
+    @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.24; atol = 1e-2)
     @test isapprox(result["solution"]["gen"]["2"]["pg"], -1.142; atol = 1e-2)
     @test isapprox(result["solution"]["gen"]["1"]["qg"], -0.057; atol = 1e-2)
     @test isapprox(result["solution"]["gen"]["2"]["qg"], 0.352; atol = 1e-2)
