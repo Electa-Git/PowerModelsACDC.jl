@@ -143,7 +143,7 @@ function constraint_dc_droop_control(pm::_PM.AbstractACPModel, n::Int, i::Int, b
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
     vdc = _PM.var(pm, n, :vdcm, busdc_i)
 
-    JuMP.@constraint(pm.model, pconv_dc == pref_dc - sign(pref_dc) * 1 / k_droop * (vdc - vref_dc))
+    JuMP.@constraint(pm.model, pconv_dc == pref_dc -  1 / k_droop * (vdc - vref_dc))
 end
 
 function constraint_ac_voltage_droop_control(pm::_PM.AbstractACPModel, n::Int, i::Int, busac_i, v_ref, qref, kq_droop)

@@ -151,7 +151,7 @@ function constraint_dc_droop_control(pm::_PM.AbstractACRModel, n::Int, i::Int, b
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
     vdc = _PM.var(pm, n, :vdcm, busdc_i)
 
-    JuMP.@constraint(pm.model, pconv_dc == pref_dc - sign(pref_dc) * 1 / k_droop * (vdc - vref_dc))
+    JuMP.@constraint(pm.model, pconv_dc == pref_dc - 1 / k_droop * (vdc - vref_dc))
 end
 
 #################### TNEP Constraints #########################
