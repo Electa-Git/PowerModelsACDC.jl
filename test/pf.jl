@@ -57,6 +57,25 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test isapprox(result["solution"]["busdc"]["3"]["vm"], 0.997813; atol = 1e-4)
 
     end
+    @testset "5-bus ac dc droop case with ac side refernce power" begin
+        result = run_acdcpf("../test/data/case5_acdc_droop_acside.m", ACPPowerModel, ipopt_solver; setting = s)
+
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 0; atol = 1e-2)
+
+        @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.3450; atol = 2e-3)
+        @test isapprox(result["solution"]["gen"]["2"]["pg"], 0.40; atol = 2e-3)
+
+        @test isapprox(result["solution"]["bus"]["1"]["vm"], 1.06; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["1"]["va"], 0.00000; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["2"]["vm"], 1.00; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["3"]["vm"], 1.00; atol = 2e-3)
+
+        @test isapprox(result["solution"]["busdc"]["1"]["vm"], 1.003738; atol = 1e-4)
+        @test isapprox(result["solution"]["busdc"]["2"]["vm"], 1.00062; atol = 1e-4)
+        @test isapprox(result["solution"]["busdc"]["3"]["vm"], 1.000096; atol = 1e-4)
+
+    end
     # REMOVED for TRAVIS, otherwise case ok
     # @testset "24-bus rts ac dc case with three zones" begin
     #     result = run_acdcpf("../test/data/case24_3zones_acdc.m", ACPPowerModel, ipopt_solver; setting = s)
@@ -117,6 +136,23 @@ end
         @test isapprox(result["solution"]["busdc"]["2"]["vm"], 0.999987; atol = 1e-4)
         @test isapprox(result["solution"]["busdc"]["3"]["vm"], 0.997813; atol = 1e-4)
 
+    end
+    @testset "5-bus ac dc droop case with ac side refernce power" begin
+        result = run_acdcpf("../test/data/case5_acdc_droop_acside.m", ACRPowerModel, ipopt_solver; setting = s)
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 0; atol = 1e-2)
+
+        @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.3450847; atol = 2e-3)
+        @test isapprox(result["solution"]["gen"]["2"]["pg"], 0.40; atol = 2e-3)
+
+        @test isapprox(result["solution"]["bus"]["1"]["vr"], 1.06; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["1"]["vi"], 0.00000; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["2"]["vr"], 0.999108; atol = 1e-2)
+        @test isapprox(result["solution"]["bus"]["3"]["vr"], 0.993324; atol = 1e-2)
+
+        @test isapprox(result["solution"]["busdc"]["1"]["vm"], 1.003738; atol = 1e-4)
+        @test isapprox(result["solution"]["busdc"]["2"]["vm"], 1.0006219; atol = 1e-4)
+        @test isapprox(result["solution"]["busdc"]["3"]["vm"], 1.000096; atol = 1e-4)
     end
 end
 

@@ -74,7 +74,7 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         constraint_conv_filter(pm, c)
         if conv["type_dc"] == 2
             constraint_dc_voltage_magnitude_setpoint(pm, c)
-        elseif conv["type_dc"] == 3
+        elseif conv["type_dc"] == 3 || conv["type_dc"] == 4
             if typeof(pm) <: _PM.AbstractACPModel || typeof(pm) <: _PM.AbstractACRModel
                 constraint_dc_droop_control(pm, c)
             else
