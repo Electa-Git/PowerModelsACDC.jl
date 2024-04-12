@@ -146,7 +146,7 @@ function constraint_dc_droop_control(pm::_PM.AbstractPowerModel, i::Int; nw::Int
     if type == 3
         constraint_dc_droop_control(pm, nw, i, conv["busdc_i"], conv["Vdcset"], conv["Pdcset"], conv["droop"]; dc_power = true)
     elseif type == 4
-        constraint_dc_droop_control(pm, nw, i, conv["busdc_i"], conv["Vdcset"], conv["P_g"], conv["droop"];  dc_power = false)
+        constraint_dc_droop_control(pm, nw, i, conv["busdc_i"], conv["Vdcset"], conv["Pacset"], conv["droop"]; dc_power = false)
     else
         Memento.warn(_PM._LOGGER, "Invalid setting for DC converter control type, droop constraint will be ignored")
     end
