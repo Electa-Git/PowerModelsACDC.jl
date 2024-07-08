@@ -30,7 +30,7 @@ function constraint_converter_current(pm::_PM.AbstractACRModel, n::Int, i::Int, 
     qconv_ac = _PM.var(pm, n, :qconv_ac, i)
     iconv_sq = _PM.var(pm, n, :iconv_ac_sq, i)
     
-    JuMP.@NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == (vrc^2 + vic^2) * iconv_sq)         
+    JuMP.@constraint(pm.model, pconv_ac^2 + qconv_ac^2 == (vrc^2 + vic^2) * iconv_sq)         
 end
 """
 Converter transformer constraints
@@ -58,10 +58,10 @@ function constraint_conv_transformer(pm::_PM.AbstractACRModel, n::Int, i::Int, r
         gtf = real(ytf)
         btf = imag(ytf)
         
-        JuMP.@NLconstraint(pm.model, ptf_fr ==  gtf / tm^2 * (vr^2 + vi^2)  + -gtf / tm * (vr * vrf + vi * vif) + -btf / tm * (vi * vrf - vr * vif) )
-        JuMP.@NLconstraint(pm.model, qtf_fr == -btf / tm^2 * (vr^2 + vi^2)  - -btf / tm * (vr * vrf + vi * vif) + -gtf / tm * (vi * vrf - vr * vif) )
-        JuMP.@NLconstraint(pm.model, ptf_to ==  gtf * (vrf^2 + vif^2)       + -gtf / tm * (vr * vrf + vi * vif) + -btf / tm * (-(vi * vrf - vr * vif)) )
-        JuMP.@NLconstraint(pm.model, qtf_to == -btf * (vrf^2 + vif^2)       - -btf / tm * (vr * vrf + vi * vif) + -gtf / tm * (-(vi * vrf - vr * vif)) )
+        JuMP.@constraint(pm.model, ptf_fr ==  gtf / tm^2 * (vr^2 + vi^2)  + -gtf / tm * (vr * vrf + vi * vif) + -btf / tm * (vi * vrf - vr * vif) )
+        JuMP.@constraint(pm.model, qtf_fr == -btf / tm^2 * (vr^2 + vi^2)  - -btf / tm * (vr * vrf + vi * vif) + -gtf / tm * (vi * vrf - vr * vif) )
+        JuMP.@constraint(pm.model, ptf_to ==  gtf * (vrf^2 + vif^2)       + -gtf / tm * (vr * vrf + vi * vif) + -btf / tm * (-(vi * vrf - vr * vif)) )
+        JuMP.@constraint(pm.model, qtf_to == -btf * (vrf^2 + vif^2)       - -btf / tm * (vr * vrf + vi * vif) + -gtf / tm * (-(vi * vrf - vr * vif)) )
 
     else
         
@@ -98,10 +98,10 @@ function constraint_conv_reactor(pm::_PM.AbstractACRModel, n::Int, i::Int, rc, x
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)                                      
-        JuMP.@NLconstraint(pm.model, - pconv_ac ==  gc * (vrc^2 + vic^2) + -gc * (vrc * vrf + vic * vif) + -bc * (vic * vrf - vrc * vif))  
-        JuMP.@NLconstraint(pm.model, - qconv_ac == -bc * (vrc^2 + vic^2) +  bc * (vrc * vrf + vic * vif) + -gc * (vic * vrf - vrc * vif)) 
-        JuMP.@NLconstraint(pm.model, ppr_fr ==  gc * (vrf^2 + vif^2) + -gc * (vrc * vrf + vic * vif) + -bc * (-(vic * vrf - vrc * vif)))
-        JuMP.@NLconstraint(pm.model, qpr_fr == -bc * (vrf^2 + vif^2) +  bc * (vrc * vrf + vic * vif) + -gc * (-(vic * vrf - vrc * vif)))
+        JuMP.@constraint(pm.model, - pconv_ac ==  gc * (vrc^2 + vic^2) + -gc * (vrc * vrf + vic * vif) + -bc * (vic * vrf - vrc * vif))  
+        JuMP.@constraint(pm.model, - qconv_ac == -bc * (vrc^2 + vic^2) +  bc * (vrc * vrf + vic * vif) + -gc * (vic * vrf - vrc * vif)) 
+        JuMP.@constraint(pm.model, ppr_fr ==  gc * (vrf^2 + vif^2) + -gc * (vrc * vrf + vic * vif) + -bc * (-(vic * vrf - vrc * vif)))
+        JuMP.@constraint(pm.model, qpr_fr == -bc * (vrf^2 + vif^2) +  bc * (vrc * vrf + vic * vif) + -gc * (-(vic * vrf - vrc * vif)))
 
 
     else
@@ -143,8 +143,8 @@ function constraint_conv_firing_angle(pm::_PM.AbstractACRModel, n::Int, i::Int, 
     q = _PM.var(pm, n, :qconv_ac, i)
     phi = _PM.var(pm, n, :phiconv, i)
 
-    JuMP.@NLconstraint(pm.model,   p == cos(phi) * S)
-    JuMP.@NLconstraint(pm.model,   q == sin(phi) * S)
+    JuMP.@constraint(pm.model,   p == cos(phi) * S)
+    JuMP.@constraint(pm.model,   q == sin(phi) * S)
 end
 
 function constraint_dc_droop_control(pm::_PM.AbstractACRModel, n::Int, i::Int, busdc_i, vref_dc, pref, k_droop; dc_power = true)

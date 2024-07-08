@@ -317,25 +317,25 @@ function constraint_converter_limits(pm::_PM.AbstractIVRModel, n::Int, i, imax, 
     vc_r = _PM.var(pm, n, :vc_r)[i]
     vc_i = _PM.var(pm, n, :vc_i)[i]
 
-    JuMP.@NLconstraint(pm.model, (iik_r)^2 + (iik_i)^2 <=  imax^2) #(32)
-    JuMP.@NLconstraint(pm.model, (iki_r)^2 + (iki_i)^2 <=  imax^2) #(33)
-    JuMP.@NLconstraint(pm.model, (ikc_r)^2 + (ikc_i)^2 <=  imax^2) #(34)
-    JuMP.@NLconstraint(pm.model, (ick_r)^2 + (ick_i)^2 <=  imax^2) #(35)
-    JuMP.@NLconstraint(pm.model, (ic_r)^2 + (ic_i)^2 <=  imax^2) #(39)
-    JuMP.@NLconstraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2) #(47)  
+    JuMP.@constraint(pm.model, (iik_r)^2 + (iik_i)^2 <=  imax^2) #(32)
+    JuMP.@constraint(pm.model, (iki_r)^2 + (iki_i)^2 <=  imax^2) #(33)
+    JuMP.@constraint(pm.model, (ikc_r)^2 + (ikc_i)^2 <=  imax^2) #(34)
+    JuMP.@constraint(pm.model, (ick_r)^2 + (ick_i)^2 <=  imax^2) #(35)
+    JuMP.@constraint(pm.model, (ic_r)^2 + (ic_i)^2 <=  imax^2) #(39)
+    JuMP.@constraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2) #(47)  
     ## relaxed version 
-    #JuMP.@NLconstraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2) #(49)
-    JuMP.@NLconstraint(pm.model, (vk_r)^2 + (vk_i)^2 <=  vmax^2) #(22)
-    JuMP.@NLconstraint(pm.model, (vk_r)^2 + (vk_i)^2 >=  vmin^2) #(22)
-    JuMP.@NLconstraint(pm.model, (vc_r)^2 + (vc_i)^2 <=  vmax^2) #(23)
-    JuMP.@NLconstraint(pm.model, (vc_r)^2 + (vc_i)^2 >=  vmin^2) #(23)
+    #JuMP.@constraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2) #(49)
+    JuMP.@constraint(pm.model, (vk_r)^2 + (vk_i)^2 <=  vmax^2) #(22)
+    JuMP.@constraint(pm.model, (vk_r)^2 + (vk_i)^2 >=  vmin^2) #(22)
+    JuMP.@constraint(pm.model, (vc_r)^2 + (vc_i)^2 <=  vmax^2) #(23)
+    JuMP.@constraint(pm.model, (vc_r)^2 + (vc_i)^2 >=  vmin^2) #(23)
 
 
     vc = _PM.var(pm, n, :vdcm)[b_idx]
     pconv_dc = _PM.var(pm, n, :pconv_dc)[i]
     iconv_dc = _PM.var(pm, n, :iconv_dc)[i]
 
-    JuMP.@NLconstraint(pm.model, pconv_dc ==  vc * iconv_dc)
+    JuMP.@constraint(pm.model, pconv_dc ==  vc * iconv_dc)
 end
 
 
@@ -345,7 +345,7 @@ function constraint_converter_losses(pm::_PM.AbstractIVRModel, n::Int, i::Int, a
     pconv_ac = _PM.var(pm, n, :pconv_ac, i)
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
 
-    JuMP.@NLconstraint(pm.model, pconv_ac + pconv_dc == a + b*iconv_lin + c*(iconv_lin)^2)
+    JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv_lin + c*(iconv_lin)^2)
 end
 
 function constraint_converter_current(pm::_PM.AbstractIVRModel, n::Int, i::Int, Umax, Imax)
@@ -358,8 +358,8 @@ function constraint_converter_current(pm::_PM.AbstractIVRModel, n::Int, i::Int, 
 
 
 
-    JuMP.@NLconstraint(pm.model, pconv_ac == vc_r * ic_r + vc_i * ic_i)
-    JuMP.@NLconstraint(pm.model, qconv_ac == vc_i * ic_r - vc_r * ic_i)
+    JuMP.@constraint(pm.model, pconv_ac == vc_r * ic_r + vc_i * ic_i)
+    JuMP.@constraint(pm.model, qconv_ac == vc_i * ic_r - vc_r * ic_i)
 end
 
 function constraint_conv_transformer(pm::_PM.AbstractIVRModel, n::Int, i::Int, rtf, xtf, acbus, tm, transformer)
@@ -445,13 +445,13 @@ function constraint_current_balance_ac(pm::_PM.AbstractIVRModel, n::Int, i, bus_
     crg = _PM.var(pm, n, :crg)
     cig = _PM.var(pm, n, :cig)
 
-    JuMP.@NLconstraint(pm.model, sum(cr[a] for a in bus_arcs) + sum(iik_r[c] for c in bus_convs_ac)
+    JuMP.@constraint(pm.model, sum(cr[a] for a in bus_arcs) + sum(iik_r[c] for c in bus_convs_ac)
                                 ==
                                 sum(crg[g] for g in bus_gens)
                                 - (sum(pd for pd in values(bus_pd))*vr + sum(qd for qd in values(bus_qd))*vi)/(vr^2 + vi^2)
                                 - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi 
                                 )
-    JuMP.@NLconstraint(pm.model, sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
+    JuMP.@constraint(pm.model, sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
                                 + sum(cidc[d] for d in bus_arcs_dc)
                                 ==
                                 sum(cig[g] for g in bus_gens)
