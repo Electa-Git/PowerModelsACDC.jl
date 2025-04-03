@@ -2,7 +2,7 @@ name = "PowerModelsACDC"
 uuid = "ff45984e-d068-5f4c-9e32-c4133509d236"
 autors = ["Hakan Ergun", "Frederik Geth", "Jay Dave"]
 repo = "https://github.com/Electa-Git/PowerModelsACDC.jl"
-version = "0.7.0"
+version = "0.8.0"
 
 [deps]
 InfrastructureModels = "2030c09a-7f63-5d83-885d-db604e0e9cc0"
@@ -13,7 +13,7 @@ PowerModels = "c36e90e8-916a-50a6-bd94-075b64ef4655"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-HiGHS = "~0.3, ~1.4"
+HiGHS = "~0.3, ~1.4, ~1.7, ~1.9"
 InfrastructureModels = "~0.6, ~0.7"
 Ipopt = "~0.8, ~0.9, 1"
 JuMP = "~0.22.0, ~0.23, ~1"

@@ -39,6 +39,6 @@ function constraint_ohms_dc_branch(pm::_PM.AbstractIVRModel, n::Int,  f_bus, t_b
         JuMP.@constraint(pm.model, vmdc_fr ==  vmdc_to - 1/p * r * i_dc_to)
     end
 
-    JuMP.@NLconstraint(pm.model, p_fr ==  vmdc_fr * i_dc_fr)
-    JuMP.@NLconstraint(pm.model, p_to ==  vmdc_to * i_dc_to)
+    JuMP.@constraint(pm.model, p_fr ==  vmdc_fr * i_dc_fr)
+    JuMP.@constraint(pm.model, p_to ==  vmdc_to * i_dc_to)
 end

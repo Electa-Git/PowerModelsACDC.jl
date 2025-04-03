@@ -13,8 +13,8 @@ function constraint_power_balance_ac(pm::_PM.AbstractACPModel, n::Int,  i::Int, 
     pconv_grid_ac = _PM.var(pm, n,  :pconv_tf_fr)
     qconv_grid_ac = _PM.var(pm, n,  :qconv_tf_fr)
 
-    cstr_p = JuMP.@NLconstraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)   - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*vm^2)
-    cstr_q = JuMP.@NLconstraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*vm^2)
+    cstr_p = JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)   - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*vm^2)
+    cstr_q = JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*vm^2)
 
     if _IM.report_duals(pm)
         _PM.sol(pm, n, :bus, i)[:lam_kcl_r] = cstr_p
@@ -38,8 +38,8 @@ function constraint_ohms_dc_branch(pm::_PM.AbstractACPModel, n::Int,  f_bus, t_b
         JuMP.@constraint(pm.model, p_dc_fr + p_dc_to == 0)
     else
         g = 1 / r
-        JuMP.@NLconstraint(pm.model, p_dc_fr == p * g * vmdc_fr * (vmdc_fr - vmdc_to))
-        JuMP.@NLconstraint(pm.model, p_dc_to == p * g * vmdc_to * (vmdc_to - vmdc_fr))
+        JuMP.@constraint(pm.model, p_dc_fr == p * g * vmdc_fr * (vmdc_fr - vmdc_to))
+        JuMP.@constraint(pm.model, p_dc_to == p * g * vmdc_to * (vmdc_to - vmdc_fr))
     end
 end
 "`vdc[i] == vdcm`"
@@ -123,8 +123,8 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractACPModel, n::Int,  f_bus, 
     else
         g = 1 / r
 
-        JuMP.@NLconstraint(pm.model, p_dc_fr == z * p * g * vmdc_fr * (vmdc_fr - vmdc_to))
-        JuMP.@NLconstraint(pm.model, p_dc_to == z * p * g * vmdc_to * (vmdc_to - vmdc_fr))
+        JuMP.@constraint(pm.model, p_dc_fr == z * p * g * vmdc_fr * (vmdc_fr - vmdc_to))
+        JuMP.@constraint(pm.model, p_dc_to == z * p * g * vmdc_to * (vmdc_to - vmdc_fr))
     end
 end
 

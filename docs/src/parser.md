@@ -34,7 +34,7 @@ The .m matpower files have been extended with the fields as described in the Mat
 ## AC DC converter
 - `busdc_i`     - converter bus number (DC bus numbering)
 - `busac_i`     - converter bus number (AC bus numbering)  
-- `type_dc`     - DC bus type (1 = constant power, 2 = DC slack, 3 = DC droop) (only power flow)  
+- `type_dc`     - DC bus type (1 = constant power, 2 = DC slack, 3 = DC voltage droop with DC side active power, 4 = DC voltage droop with AC side active power) (only power flow)  
 - `type_ac`     - AC bus type (1 = PQ, 2 = PV), should be consistent with AC bus  (only power flow)  
 - `P_g`         - active power injected in the AC grid (MW)
 - `Q_g`         - reactive power injected in the AC grid (MVAr)    

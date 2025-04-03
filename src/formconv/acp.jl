@@ -9,7 +9,7 @@ function constraint_converter_losses(pm::_PM.AbstractACPModel, n::Int, i::Int, a
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
     iconv = _PM.var(pm, n, :iconv_ac, i)
 
-    JuMP.@NLconstraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv^2)
+    JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv + c*iconv^2)
 end
 """
 Links converter power & current
@@ -23,7 +23,7 @@ function constraint_converter_current(pm::_PM.AbstractACPModel, n::Int, i::Int, 
     qconv_ac = _PM.var(pm, n, :qconv_ac, i)
     iconv = _PM.var(pm, n, :iconv_ac, i)
 
-    JuMP.@NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == vmc^2 * iconv^2)
+    JuMP.@constraint(pm.model, pconv_ac^2 + qconv_ac^2 == vmc^2 * iconv^2)
 end
 """
 Converter transformer constraints
@@ -61,10 +61,10 @@ function constraint_conv_transformer(pm::_PM.AbstractACPModel, n::Int, i::Int, r
 end
 "constraints for a voltage magnitude transformer + series impedance"
 function ac_power_flow_constraints(model, g, b, gsh_fr, vm_fr, vm_to, va_fr, va_to, p_fr, p_to, q_fr, q_to, tm)
-    c1 = JuMP.@NLconstraint(model, p_fr ==  g/(tm^2)*vm_fr^2 + -g/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -b/(tm)*vm_fr*vm_to*sin(va_fr-va_to))
-    c2 = JuMP.@NLconstraint(model, q_fr == -b/(tm^2)*vm_fr^2 +  b/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -g/(tm)*vm_fr*vm_to*sin(va_fr-va_to))
-    c3 = JuMP.@NLconstraint(model, p_to ==  g*vm_to^2 + -g/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -b/(tm)*vm_to*vm_fr    *sin(va_to - va_fr))
-    c4 = JuMP.@NLconstraint(model, q_to == -b*vm_to^2 +  b/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g/(tm)*vm_to*vm_fr    *sin(va_to - va_fr))
+    c1 = JuMP.@constraint(model, p_fr ==  g/(tm^2)*vm_fr^2 + -g/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -b/(tm)*vm_fr*vm_to*sin(va_fr-va_to))
+    c2 = JuMP.@constraint(model, q_fr == -b/(tm^2)*vm_fr^2 +  b/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -g/(tm)*vm_fr*vm_to*sin(va_fr-va_to))
+    c3 = JuMP.@constraint(model, p_to ==  g*vm_to^2 + -g/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -b/(tm)*vm_to*vm_fr    *sin(va_to - va_fr))
+    c4 = JuMP.@constraint(model, q_to == -b*vm_to^2 +  b/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g/(tm)*vm_to*vm_fr    *sin(va_to - va_fr))
     return c1, c2, c3, c4
 end
 """
@@ -94,10 +94,10 @@ function constraint_conv_reactor(pm::_PM.AbstractACPModel, n::Int, i::Int, rc, x
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)
-        JuMP.@NLconstraint(pm.model, - pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf)) # JuMP doesn't allow affine expressions in NL constraints
-        JuMP.@NLconstraint(pm.model, - qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf)) # JuMP doesn't allow affine expressions in NL constraints
-        JuMP.@NLconstraint(pm.model, ppr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac))
-        JuMP.@NLconstraint(pm.model, qpr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac))
+        JuMP.@constraint(pm.model, - pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf)) # JuMP doesn't allow affine expressions in NL constraints
+        JuMP.@constraint(pm.model, - qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf)) # JuMP doesn't allow affine expressions in NL constraints
+        JuMP.@constraint(pm.model, ppr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac))
+        JuMP.@constraint(pm.model, qpr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac))
     else
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
@@ -121,7 +121,7 @@ function constraint_conv_filter(pm::_PM.AbstractACPModel, n::Int, i::Int, bv, fi
     vmf = _PM.var(pm, n, :vmf, i)
 
     JuMP.@constraint(pm.model,   ppr_fr + ptf_to == 0 )
-    JuMP.@NLconstraint(pm.model, qpr_fr + qtf_to +  (-bv) * filter *vmf^2 == 0)
+    JuMP.@constraint(pm.model, qpr_fr + qtf_to +  (-bv) * filter *vmf^2 == 0)
 end
 """
 LCC firing angle constraints
@@ -135,17 +135,28 @@ function constraint_conv_firing_angle(pm::_PM.AbstractACPModel, n::Int, i::Int, 
     q = _PM.var(pm, n, :qconv_ac, i)
     phi = _PM.var(pm, n, :phiconv, i)
 
-    JuMP.@NLconstraint(pm.model,   p == cos(phi) * S)
-    JuMP.@NLconstraint(pm.model,   q == sin(phi) * S)
+    JuMP.@constraint(pm.model,   p == cos(phi) * S)
+    JuMP.@constraint(pm.model,   q == sin(phi) * S)
 end
 
-function constraint_dc_droop_control(pm::_PM.AbstractACPModel, n::Int, i::Int, busdc_i, vref_dc, pref_dc, k_droop)
+function constraint_dc_droop_control(pm::_PM.AbstractACPModel, n::Int, i::Int, busdc_i, vref_dc, pref, k_droop; dc_power = true)
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
+    pconv_ac = _PM.var(pm, n, :pconv_ac, i)
     vdc = _PM.var(pm, n, :vdcm, busdc_i)
 
-    JuMP.@constraint(pm.model, pconv_dc == pref_dc - sign(pref_dc) * 1 / k_droop * (vdc - vref_dc))
+    if dc_power == true
+        JuMP.@constraint(pm.model, pconv_dc == pref -  1 / k_droop * (vdc - vref_dc))
+    else
+        JuMP.@constraint(pm.model, pconv_ac == pref -  1 / k_droop * (vdc - vref_dc))
+    end
 end
 
+function constraint_ac_voltage_droop_control(pm::_PM.AbstractACPModel, n::Int, i::Int, busac_i, v_ref, qref, kq_droop)
+    q_inj = _PM.var(pm, n, :qconv_tf_fr, i)
+    vac = _PM.var(pm, n, :vm, busac_i)
+    # Arranging the signs of reactive powers below
+    JuMP.@constraint(pm.model, q_inj == -qref - kq_droop * (v_ref - vac))
+end
 
 #################### TNEP Constraints #########################
 """
@@ -161,7 +172,7 @@ function constraint_converter_losses_ne(pm::_PM.AbstractACPModel, n::Int, i::Int
     iconv = _PM.var(pm, n, :iconv_ac_ne, i)
     z = _PM.var(pm, n, :conv_ne, i)
 
-    JuMP.@NLconstraint(pm.model, pconv_ac + pconv_dc == a*z + b*iconv + c*iconv^2)
+    JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a*z + b*iconv + c*iconv^2)
 end
 
 
@@ -178,7 +189,7 @@ function constraint_converter_current_ne(pm::_PM.AbstractACPModel, n::Int, i::In
     qconv_ac = _PM.var(pm, n, :qconv_ac_ne, i)
     iconv = _PM.var(pm, n, :iconv_ac_ne, i)
 
-    JuMP.@NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 == vmc^2 * iconv^2)
+    JuMP.@constraint(pm.model, pconv_ac^2 + qconv_ac^2 == vmc^2 * iconv^2)
 end
 
 """
@@ -220,10 +231,10 @@ end
 
 "constraints for a voltage magnitude transformer + series impedance"
 function ac_power_flow_constraints(model, g, b, gsh_fr, vm_fr, vm_to, va_fr, va_to, p_fr, p_to, q_fr, q_to, tm, z)
-    c1 = JuMP.@NLconstraint(model, p_fr ==  z* (g/(tm^2)*vm_fr^2 + -g/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -b/(tm)*vm_fr*vm_to*sin(va_fr-va_to)))
-    c2 = JuMP.@NLconstraint(model, q_fr == z* (-b/(tm^2)*vm_fr^2 +  b/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -g/(tm)*vm_fr*vm_to*sin(va_fr-va_to)))
-    c3 = JuMP.@NLconstraint(model, p_to == z* (g*vm_to^2 + -g/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -b/(tm)*vm_to*vm_fr    *sin(va_to - va_fr)))
-    c4 = JuMP.@NLconstraint(model, q_to == z* (-b*vm_to^2 +  b/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g/(tm)*vm_to*vm_fr    *sin(va_to - va_fr)))
+    c1 = JuMP.@constraint(model, p_fr ==  z* (g/(tm^2)*vm_fr^2 + -g/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -b/(tm)*vm_fr*vm_to*sin(va_fr-va_to)))
+    c2 = JuMP.@constraint(model, q_fr == z* (-b/(tm^2)*vm_fr^2 +  b/(tm)*vm_fr*vm_to * cos(va_fr-va_to) + -g/(tm)*vm_fr*vm_to*sin(va_fr-va_to)))
+    c3 = JuMP.@constraint(model, p_to == z* (g*vm_to^2 + -g/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -b/(tm)*vm_to*vm_fr    *sin(va_to - va_fr)))
+    c4 = JuMP.@constraint(model, q_to == z* (-b*vm_to^2 +  b/(tm)*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g/(tm)*vm_to*vm_fr    *sin(va_to - va_fr)))
     return c1, c2, c3, c4
 end
 
@@ -257,10 +268,10 @@ function constraint_conv_reactor_ne(pm::_PM.AbstractACPModel, n::Int, i::Int, rc
         yc = 1/(zc)
         gc = real(yc)
         bc = imag(yc)
-        JuMP.@NLconstraint(pm.model, - pconv_ac == z*(gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf))) # JuMP doesn't allow affine expressions in NL constraints
-        JuMP.@NLconstraint(pm.model, - qconv_ac == z*(-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf))) # JuMP doesn't allow affine expressions in NL constraints
-        JuMP.@NLconstraint(pm.model, ppr_fr ==  z*(gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac)))
-        JuMP.@NLconstraint(pm.model, qpr_fr ==  z*(-bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac)))
+        JuMP.@constraint(pm.model, - pconv_ac == z*(gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf))) # JuMP doesn't allow affine expressions in NL constraints
+        JuMP.@constraint(pm.model, - qconv_ac == z*(-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf))) # JuMP doesn't allow affine expressions in NL constraints
+        JuMP.@constraint(pm.model, ppr_fr ==  z*(gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac)))
+        JuMP.@constraint(pm.model, qpr_fr ==  z*(-bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac)))
     else
         JuMP.@constraint(pm.model, ppr_fr + ppr_to == 0)
         JuMP.@constraint(pm.model, qpr_fr + qpr_to == 0)
@@ -288,7 +299,7 @@ function constraint_conv_filter_ne(pm::_PM.AbstractACPModel, n::Int, i::Int, bv,
     z = _PM.var(pm, n, :conv_ne)[i]
 
     JuMP.@constraint(pm.model,   ppr_fr + ptf_to == 0 )
-    JuMP.@NLconstraint(pm.model, qpr_fr + qtf_to +  z*(-bv) * filter *vmf^2 == 0)
+    JuMP.@constraint(pm.model, qpr_fr + qtf_to +  z*(-bv) * filter *vmf^2 == 0)
 end
 
 """
@@ -304,8 +315,8 @@ function constraint_conv_firing_angle_ne(pm::_PM.AbstractACPModel, n::Int, i::In
     q = _PM.var(pm, n, :qconv_ac_ne, i)
     phi = _PM.var(pm, n, :phiconv_ne, i)
 
-    JuMP.@NLconstraint(pm.model,   p == cos(phi) * S)
-    JuMP.@NLconstraint(pm.model,   q == sin(phi) * S)
+    JuMP.@constraint(pm.model,   p == cos(phi) * S)
+    JuMP.@constraint(pm.model,   q == sin(phi) * S)
 end
 
 function variable_voltage_slack(pm::_PM.AbstractACPModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=false)
