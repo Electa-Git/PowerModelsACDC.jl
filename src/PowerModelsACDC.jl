@@ -28,10 +28,7 @@ include("prob/acdcopf.jl")
 include("prob/acdcpf.jl")
 include("prob/acdcopf_bf.jl")
 include("prob/acdcopf_iv.jl")
-include("prob/tnepopf.jl")
-include("prob/tnepopf_bf.jl")
-include("prob/mp_tnepopf.jl")
-include("prob/mp_tnepopf_bf.jl")
+include("prob/tnep.jl")
 include("prob/sacdcpf.jl")
 
 

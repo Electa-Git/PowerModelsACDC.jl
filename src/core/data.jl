@@ -24,9 +24,9 @@ function get_pu_bases(MVAbase, kVbase)
     return bases
 end
 
-function process_additional_data!(data)
+function process_additional_data!(data; tnep = false)
     to_pu!(data)
-    fix_data!(data)
+    fix_data!(data; tnep = tnep)
     convert_matpowerdcline_to_branchdc!(data)
 end
 
@@ -274,19 +274,19 @@ function convert_matpowerdcline_to_branchdc_multinetwork!(data)
 end
 
 
-function fix_data!(data)
+function fix_data!(data; tnep = false)
 
 
     rescale_energy_cost = x -> (MWhbase/dollarbase)*x
 
     if is_single_network(data)
-        fix_data_single_network!(data)
+        fix_data_single_network!(data; tnep = tnep)
     else
-        fix_data_multinetwork!(data)
+        fix_data_multinetwork!(data; tnep = tnep)
     end
 end
 
-function fix_data_single_network!(data)
+function fix_data_single_network!(data; tnep = false)
     MVAbase = data["baseMVA"]
     @assert(MVAbase>0)
     if haskey(data, "convdc")
@@ -320,9 +320,14 @@ function fix_data_single_network!(data)
             check_branchdc_parameters(branchdc)
         end
     end
+    if tnep
+        if !haskey(data, "ne_branch")
+            data["ne_branch"] = Dict()
+        end
+    end
 end
 
-function fix_data_multinetwork!(data)
+function fix_data_multinetwork!(data; tnep = false)
     for (n, network) in data["nw"]
         MVAbase = network["baseMVA"]
         @assert(MVAbase>0)
@@ -355,6 +360,11 @@ function fix_data_multinetwork!(data)
         if haskey(data["nw"][n], "branchdc_ne")
             for (i, branchdc) in data["nw"][n]["branchdc_ne"]
                 check_branchdc_parameters(branchdc)
+            end
+        end
+        if tnep
+            if !haskey(data["nw"][n],  "ne_branch")
+                data["nw"][n]["ne_branch"] = Dict()
             end
         end
     end

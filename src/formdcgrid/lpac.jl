@@ -58,28 +58,7 @@ end
 
 
 ############# TNEP Constraints #################
-
-function constraint_power_balance_ac_dcne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
-    phi = _PM.var(pm, n, :phi, i)
-    p = _PM.var(pm, n, :p)
-    q = _PM.var(pm, n, :q)
-    pg = _PM.var(pm, n, :pg)
-    qg = _PM.var(pm, n, :qg)
-    pconv_grid_ac = _PM.var(pm, n, :pconv_tf_fr)
-    qconv_grid_ac = _PM.var(pm, n, :qconv_tf_fr)
-    pconv_grid_ac_ne = _PM.var(pm, n, :pconv_tf_fr_ne)
-    qconv_grid_ac_ne = _PM.var(pm, n, :qconv_tf_fr_ne)
-
-    cstr_p = JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac) + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(pg[g] for g in bus_gens)  - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*(1.0 + 2*phi))
-    cstr_q = JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*(1.0 + 2*phi))
-
-    if _IM.report_duals(pm)
-        _PM.sol(pm, n, :bus, i)[:lam_kcl_r] = cstr_p
-        _PM.sol(pm, n, :bus, i)[:lam_kcl_i] = cstr_q
-    end
-end
-
-function constraint_power_balance_acne_dcne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
+function constraint_power_balance_acdc_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
     phi = _PM.var(pm, n, :phi, i)
     p = _PM.var(pm, n, :p)
     p_ne = _PM.var(pm, n, :p_ne)

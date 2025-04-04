@@ -1,7 +1,3 @@
-v0.3.2 Release Notes
+v0.9.0 Release Notes
 
-- AC/DC TNEP in single and multi period
-- Renaming nodal power balance constraints
-- New test cases and unit tests for AC/DC TNEP
-- Update code base for compliance with PowerModels v0.17.2
-- Bug fix DCP formulation
+-
