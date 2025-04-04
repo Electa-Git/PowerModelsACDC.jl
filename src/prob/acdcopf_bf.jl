@@ -1,14 +1,14 @@
-export run_acdcopf_bf
+export solve_acdcopf_bf
 
 ""
-function run_acdcopf_bf(file::String, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
+function solve_acdcopf_bf(file::String, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
     data = _PM.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return solve_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
 ""
-function run_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
+function solve_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
     return _PM.solve_model(data, model_type, solver, build_acdcopf_bf; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 

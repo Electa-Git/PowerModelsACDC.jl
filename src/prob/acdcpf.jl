@@ -1,14 +1,14 @@
-export run_acdcpf
+export solve_acdcpf
 
 ""
-function run_acdcpf(file::String, model_type::Type, solver; kwargs...)
+function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return solve_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
 ""
-function run_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
+function solve_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
     return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 

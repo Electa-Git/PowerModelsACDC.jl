@@ -1,11 +1,11 @@
 ""
-function run_acdcopf_iv(file::String, model_type, optimizer; kwargs...)
+function solve_acdcopf_iv(file::String, model_type, optimizer; kwargs...)
     data = _PM.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcopf_iv(data, model_type, optimizer; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return solve_acdcopf_iv(data, model_type, optimizer; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 
-function run_acdcopf_iv(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
+function solve_acdcopf_iv(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
     return _PM.solve_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!], kwargs...)
 end
 

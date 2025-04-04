@@ -1,7 +1,7 @@
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 @testset "test ac polar pf" begin
     @testset "5-bus ac dc case" begin
-        result = run_acdcpf("../test/data/case5_acdc.m", ACPPowerModel, ipopt_solver; setting = s)
+        result = solve_acdcpf("../test/data/case5_acdc.m", ACPPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
@@ -20,7 +20,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
     end
     @testset "5-bus ac dc case with 2 seperate ac grids" begin
-        result = run_acdcpf("../test/data/case5_2grids.m", ACPPowerModel, ipopt_solver; setting = s)
+        result = solve_acdcpf("../test/data/case5_2grids.m", ACPPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
@@ -39,7 +39,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test isapprox(result["solution"]["busdc"]["1"]["vm"], 1.015; atol = 2e-3)
     end
     @testset "5-bus ac dc droop case" begin
-        result = run_acdcpf("../test/data/case5_acdc_droop.m", ACPPowerModel, ipopt_solver; setting = s)
+        result = solve_acdcpf("../test/data/case5_acdc_droop.m", ACPPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
@@ -58,7 +58,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
     end
     @testset "5-bus ac dc droop case with ac side refernce power" begin
-        result = run_acdcpf("../test/data/case5_acdc_droop_acside.m", ACPPowerModel, ipopt_solver; setting = s)
+        result = solve_acdcpf("../test/data/case5_acdc_droop_acside.m", ACPPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
@@ -78,7 +78,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
     end
     # REMOVED for TRAVIS, otherwise case ok
     # @testset "24-bus rts ac dc case with three zones" begin
-    #     result = run_acdcpf("../test/data/case24_3zones_acdc.m", ACPPowerModel, ipopt_solver; setting = s)
+    #     result = solve_acdcpf("../test/data/case24_3zones_acdc.m", ACPPowerModel, ipopt_solver; setting = s)
     
     #     @test result["termination_status"] == LOCALLY_SOLVED
     #     @test isapprox(result["objective"], 0; atol = 1e-2)
@@ -100,7 +100,7 @@ end
 
 @testset "test ac rectangular pf" begin
     @testset "5-bus ac dc case" begin
-        result = run_acdcpf("../test/data/case5_acdc.m", ACRPowerModel, ipopt_solver; setting = s)
+        result = solve_acdcpf("../test/data/case5_acdc.m", ACRPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
@@ -119,7 +119,7 @@ end
 
     end
     @testset "5-bus ac dc droop case" begin
-        result = run_acdcpf("../test/data/case5_acdc_droop.m", ACRPowerModel, ipopt_solver; setting = s)
+        result = solve_acdcpf("../test/data/case5_acdc_droop.m", ACRPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
@@ -138,7 +138,7 @@ end
 
     end
     @testset "5-bus ac dc droop case with ac side refernce power" begin
-        result = run_acdcpf("../test/data/case5_acdc_droop_acside.m", ACRPowerModel, ipopt_solver; setting = s)
+        result = solve_acdcpf("../test/data/case5_acdc_droop_acside.m", ACRPowerModel, ipopt_solver; setting = s)
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
 
@@ -158,7 +158,7 @@ end
 
 @testset "test dc pf" begin
     @testset "5-bus ac dc case" begin
-        result = run_acdcpf("../test/data/case5_acdc.m", DCPPowerModel, ipopt_solver; setting = s)
+        result = solve_acdcpf("../test/data/case5_acdc.m", DCPPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
@@ -170,7 +170,7 @@ end
         @test isapprox(result["solution"]["convdc"]["3"]["pdc"], 0.36051; atol = 2e-3)
     end
     @testset "24-bus rts ac dc case with three zones" begin
-        result = run_acdcpf("../test/data/case24_3zones_acdc.m", DCPPowerModel, ipopt_solver; setting = s)
+        result = solve_acdcpf("../test/data/case24_3zones_acdc.m", DCPPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
@@ -185,7 +185,7 @@ end
 end
 
 @testset "4-bus ac voltage droop case" begin
-    result = run_acdcpf("../test/data/case4_acdroop.m", ACPPowerModel, ipopt_solver; setting = s)
+    result = solve_acdcpf("../test/data/case4_acdroop.m", ACPPowerModel, ipopt_solver; setting = s)
 
     @test result["termination_status"] == LOCALLY_SOLVED
     @test isapprox(result["objective"], 0; atol = 1e-2)
