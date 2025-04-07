@@ -29,7 +29,7 @@ mpc.bus = [
 %	bus	Pg      Qg	Qmax	Qmin	Vg	mBase       status	Pmax	Pmin	pc1 pc2 qlcmin qlcmax qc2min qc2max ramp_agc ramp_10 ramp_30 ramp_q apf
 mpc.gen = [
 	1	0       0	500      -500    1.06	100       1       250     10 0 0 0 0 0 0 0 0 0 0 0;
-  2	40      0	300      -300    1      100       1       300     10 0 0 0 0 0 0 0 0 0 0 0;
+    2	40      0	300      -300    1      100       1       300     10 0 0 0 0 0 0 0 0 0 0 0;
 ];
 
 %% branch data

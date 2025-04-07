@@ -2,29 +2,30 @@
 function solve_acdcopf_iv(file::String, model_type, optimizer; kwargs...)
     data = _PM.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return solve_acdcopf_iv(data, model_type, optimizer; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return solve_acdcopf_iv(data, model_type, optimizer; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
 end
 
 function solve_acdcopf_iv(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
 end
 
 ""
 function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_branch_current(pm)
-
+    _PM.variable_storage_power(pm)
     _PM.variable_gen_current(pm)
     _PM.variable_dcline_current(pm)
 
     _PM.objective_min_fuel_and_flow_cost(pm)
 
-    #DC grid variables
     variable_active_dcbranch_flow(pm)
     variable_dcbranch_current(pm)
     variable_dcgrid_voltage_magnitude(pm)
-    #DC converter variables
     variable_dc_converter(pm)
+    variable_flexible_demand(pm)
+    variable_load_current(pm)
+    variable_pst(pm)
 
     for i in _PM.ids(pm, :ref_buses)
         _PM.constraint_theta_ref(pm, i)
@@ -43,6 +44,18 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
 
         _PM.constraint_thermal_limit_from(pm, i)
         _PM.constraint_thermal_limit_to(pm, i)
+    end
+
+    for i in _PM.ids(pm, :flex_load)
+        constraint_total_flexible_demand(pm, i)
+    end
+    
+    for i in _PM.ids(pm, :fixed_load) 
+        constraint_total_fixed_demand(pm, i)
+    end
+
+    for i in _PM.ids(pm, :pst)
+        Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for PSTs")
     end
 
     for i in _PM.ids(pm, :busdc)

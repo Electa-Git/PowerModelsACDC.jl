@@ -275,10 +275,7 @@ end
 
 
 function fix_data!(data; tnep = false)
-
-
     rescale_energy_cost = x -> (MWhbase/dollarbase)*x
-
     if is_single_network(data)
         fix_data_single_network!(data; tnep = tnep)
     else
@@ -318,6 +315,13 @@ function fix_data_single_network!(data; tnep = false)
     if haskey(data, "branchdc_ne")
         for (i, branchdc) in data["branchdc_ne"]
             check_branchdc_parameters(branchdc)
+        end
+    end
+    if haskey(data, "load")
+        for (l, load) in data["load"]
+            if !haskey(load, "flex")
+                load["flex"] = 0
+            end
         end
     end
     if tnep
@@ -360,6 +364,13 @@ function fix_data_multinetwork!(data; tnep = false)
         if haskey(data["nw"][n], "branchdc_ne")
             for (i, branchdc) in data["nw"][n]["branchdc_ne"]
                 check_branchdc_parameters(branchdc)
+            end
+        end
+        if haskey(data["nw"][n], "load")
+            for (l, load) in data["nw"][n]["load"]
+                if !haskey(load, "flex")
+                    load["flex"] = 0
+                end
             end
         end
         if tnep

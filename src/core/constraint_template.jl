@@ -5,20 +5,40 @@ end
 function constraint_power_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     bus = _PM.ref(pm, nw, :bus, i)
     bus_arcs = _PM.ref(pm, nw, :bus_arcs, i)
-    bus_arcs_dc = _PM.ref(pm, nw, :bus_arcs_dc, i)
+    bus_arcs_pst = _PM.ref(pm, nw, :bus_arcs_pst, i)
+    bus_arcs_sw = _PM.ref(pm, nw, :bus_arcs_sw, i)
     bus_gens = _PM.ref(pm, nw, :bus_gens, i)
-    bus_convs_ac = _PM.ref(pm, nw, :bus_convs_ac, i)
     bus_loads = _PM.ref(pm, nw, :bus_loads, i)
     bus_shunts = _PM.ref(pm, nw, :bus_shunts, i)
+    bus_storage = _PM.ref(pm, nw, :bus_storage, i)
+    bus_convs_ac = _PM.ref(pm, nw, :bus_convs_ac, i)
 
-    pd = Dict(k => _PM.ref(pm, nw, :load, k, "pd") for k in bus_loads)
-    qd = Dict(k => _PM.ref(pm, nw, :load, k, "qd") for k in bus_loads)
+    bus_pd = Dict(k => _PM.ref(pm, nw, :load, k, "pd") for k in bus_loads)
+    bus_qd = Dict(k => _PM.ref(pm, nw, :load, k, "qd") for k in bus_loads)
 
-    gs = Dict(k => _PM.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
-    bs = Dict(k => _PM.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
+    bus_gs = Dict(k => _PM.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
+    bus_bs = Dict(k => _PM.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
 
-    constraint_power_balance_ac(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
+    constraint_power_balance_ac(pm, nw, i, bus_arcs, bus_arcs_pst, bus_convs_ac, bus_arcs_sw, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
 end
+
+# function constraint_power_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+#     bus = _PM.ref(pm, nw, :bus, i)
+#     bus_arcs = _PM.ref(pm, nw, :bus_arcs, i)
+#     bus_arcs_dc = _PM.ref(pm, nw, :bus_arcs_dc, i)
+#     bus_gens = _PM.ref(pm, nw, :bus_gens, i)
+#     bus_convs_ac = _PM.ref(pm, nw, :bus_convs_ac, i)
+#     bus_loads = _PM.ref(pm, nw, :bus_loads, i)
+#     bus_shunts = _PM.ref(pm, nw, :bus_shunts, i)
+
+#     pd = Dict(k => _PM.ref(pm, nw, :load, k, "pd") for k in bus_loads)
+#     qd = Dict(k => _PM.ref(pm, nw, :load, k, "qd") for k in bus_loads)
+
+#     gs = Dict(k => _PM.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
+#     bs = Dict(k => _PM.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
+
+#     constraint_power_balance_ac(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
+# end
 
 function constraint_current_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     bus = _PM.ref(pm, nw, :bus, i)
@@ -35,7 +55,7 @@ function constraint_current_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::I
     gs = Dict(k => _PM.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
     bs = Dict(k => _PM.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
 
-    constraint_current_balance_ac(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
+    constraint_current_balance_ac(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, gs, bs)
 end
 
 function constraint_power_balance_dc(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)

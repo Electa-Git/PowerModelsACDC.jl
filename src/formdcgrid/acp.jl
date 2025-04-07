@@ -4,17 +4,42 @@ sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[
 sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*v^2
 ```
 """
-function constraint_power_balance_ac(pm::_PM.AbstractACPModel, n::Int,  i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
-    vm = _PM.var(pm, n,  :vm, i)
-    p = _PM.var(pm, n,  :p)
-    q = _PM.var(pm, n,  :q)
-    pg = _PM.var(pm, n,  :pg)
-    qg = _PM.var(pm, n,  :qg)
+function constraint_power_balance_ac(pm::_PM.AbstractACPModel, n::Int, i::Int, bus_arcs, bus_arcs_pst, bus_convs_ac, bus_arcs_sw, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
+    vm   = _PM.var(pm, n, :vm, i)
+    p    = _PM.var(pm, n, :p)
+    q    = _PM.var(pm, n, :q)
+    ppst    = _PM.var(pm, n,    :ppst)
+    qpst    = _PM.var(pm, n,    :qpst)
+    pg   = _PM.var(pm, n,   :pg)
+    qg   = _PM.var(pm, n,   :qg)
     pconv_grid_ac = _PM.var(pm, n,  :pconv_tf_fr)
     qconv_grid_ac = _PM.var(pm, n,  :qconv_tf_fr)
+    pflex = _PM.var(pm, n, :pflex)
+    qflex = _PM.var(pm, n, :qflex)
+    ps    = _PM.var(pm, n, :ps)
+    qs    = _PM.var(pm, n, :qs)
 
-    cstr_p = JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac)  == sum(pg[g] for g in bus_gens)   - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*vm^2)
-    cstr_q = JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*vm^2)
+
+    cstr_p = JuMP.@constraint(pm.model,
+        sum(p[a] for a in bus_arcs)
+        + sum(ppst[a] for a in bus_arcs_pst)
+        + sum(pconv_grid_ac[c] for c in bus_convs_ac)
+        ==
+        sum(pg[g] for g in bus_gens)
+        - sum(ps[s] for s in bus_storage)
+        - sum(pflex[d] for d in bus_loads)
+        - sum(gs for (i,gs) in bus_gs)*vm^2
+    )
+    cstr_q = JuMP.@constraint(pm.model,
+        sum(q[a] for a in bus_arcs)
+        + sum(qpst[a] for a in bus_arcs_pst)
+        + sum(qconv_grid_ac[c] for c in bus_convs_ac)
+        ==
+        sum(qg[g] for g in bus_gens)
+        - sum(qs[s] for s in bus_storage)
+        - sum(qflex[d] for d in bus_loads)
+        + sum(bs for (i,bs) in bus_bs)*vm^2
+    )
 
     if _IM.report_duals(pm)
         _PM.sol(pm, n, :bus, i)[:lam_kcl_r] = cstr_p

@@ -4,24 +4,27 @@ export solve_acdcopf_bf
 function solve_acdcopf_bf(file::String, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
     data = _PM.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return solve_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return solve_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
 end
 
 ""
 function solve_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
-    return _PM.solve_model(data, model_type, solver, build_acdcopf_bf; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_acdcopf_bf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
 end
 
 function build_acdcopf_bf(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_gen_power(pm)
     _PM.variable_branch_power(pm)
+    _PM.variable_storage_power(pm)
     _PM.variable_branch_current(pm)
 
     variable_active_dcbranch_flow(pm)
     variable_dcbranch_current(pm)
     variable_dc_converter(pm)
     variable_dcgrid_voltage_magnitude(pm)
+    variable_flexible_demand(pm)
+    variable_pst(pm)
 
     _PM.objective_min_fuel_cost(pm)
 
@@ -46,6 +49,21 @@ function build_acdcopf_bf(pm::_PM.AbstractPowerModel)
         _PM.constraint_thermal_limit_from(pm, i)
         _PM.constraint_thermal_limit_to(pm, i)
     end
+
+    for i in _PM.ids(pm, :flex_load)
+        constraint_total_flexible_demand(pm, i)
+    end
+    
+    for i in _PM.ids(pm, :fixed_load) 
+        constraint_total_fixed_demand(pm, i)
+    end
+
+    for i in _PM.ids(pm, :pst)
+        constraint_ohms_y_from_pst(pm, i)
+        constraint_ohms_y_to_pst(pm, i)
+        constraint_limits_pst(pm, i)
+    end
+
     for i in _PM.ids(pm, :busdc)
         constraint_power_balance_dc(pm, i)
     end
