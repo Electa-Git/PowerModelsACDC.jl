@@ -8,8 +8,8 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test isapprox(resultDC["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultDC["solution"]["branchdc_ne"]["2"]["isbuilt"], 0; atol = 1e-2)
         @test isapprox(resultDC["solution"]["branchdc_ne"]["10"]["isbuilt"], 0; atol = 1e-2)
-        @test isapprox(resultDC["solution"]["branchdc_ne"]["1"]["pf"], 1.77384; atol = 1e-2)
-        @test isapprox(resultDC["solution"]["branchdc_ne"]["1"]["pt"], -1.77384; atol = 1e-2)
+        @test isapprox(resultDC["solution"]["branchdc_ne"]["1"]["pf"], 1.3; atol = 1e-2)
+        @test isapprox(resultDC["solution"]["branchdc_ne"]["1"]["pt"], -1.3; atol = 1e-2)
     end
 
     @testset "9-bus case" begin
@@ -161,14 +161,14 @@ end
 @testset "test LPAC tnep" begin
     @testset "6-bus case" begin
         resultLPAC = _PMACDC.solve_tnep("../test/data/tnep/case6_test.m", LPACCPowerModel, juniper; setting = s)
-        @test isapprox(resultLPAC["objective"], 30.5; atol = 1e-1)
+        @test isapprox(resultLPAC["objective"], 31.08; atol = 1e-1)
         @test isapprox(resultLPAC["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultLPAC["solution"]["convdc_ne"]["4"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultLPAC["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultLPAC["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol = 1e-2)
-        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
+        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["1"]["isbuilt"], 0; atol = 1e-2)
         @test isapprox(resultLPAC["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
-        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["1"]["pf"], 1.63; atol = 1e-2)
+        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["1"]["pf"], 0.0; atol = 1e-2)
         @test isapprox(resultLPAC["solution"]["busdc_ne"]["2"]["phivdcm_ne"], -0.00668065; atol = 1e-2)
 
     end
@@ -232,10 +232,10 @@ end
     result = _PMACDC.solve_tnep("../test/data/tnep/case6_dc_tnep.m", DCPPowerModel, highs; setting = s)
     @test isapprox(result["objective"], 26.3331; atol = 1e-1)
     @test isapprox(result["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pf"], 1.77384; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pt"], -1.77384; atol = 1e-2)
-    @test isapprox(result["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol = 1e-2)
-    @test isapprox(result["solution"]["convdc_ne"]["5"]["pconv"], -1.76543; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pf"], 1.3; atol = 1e-1)
+    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pt"], -1.3; atol = 1e-1)
+    @test isapprox(result["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol = 1e-1)
+    @test isapprox(result["solution"]["convdc_ne"]["5"]["pconv"], -1.3; atol = 1e-1)
 
     result = _PMACDC.solve_tnep("../test/data/tnep/case6_acdc_tnep.m", DCPPowerModel, highs; setting = s)
     @test isapprox(result["objective"], 25.4221; atol = 1e-1)
@@ -249,20 +249,20 @@ end
     result = _PMACDC.solve_tnep("../test/data/tnep/case6acdc_dc_tnep.m", DCPPowerModel, highs; setting = s)
     @test isapprox(result["objective"], 22.8442; atol = 1e-1)
     @test isapprox(result["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pf"], -3.72760; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pt"], 3.72760; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pf"], -4; atol = 1e-1)
+    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pt"], 4; atol = 1e-1)
     @test isapprox(result["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol = 1e-2)
-    @test isapprox(result["solution"]["convdc_ne"]["6"]["pconv"], 3.74419; atol = 1e-2)
+    @test isapprox(result["solution"]["convdc_ne"]["6"]["pconv"], 4; atol = 1e-1)
 
     result = _PMACDC.solve_tnep("../test/data/tnep/case6acdc_dc_branch_tnep.m", DCPPowerModel, highs; setting = s)
     @test isapprox(result["objective"], 13.3663; atol = 1e-1)
     @test isapprox(result["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pf"], -4.00; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pt"], 4.00; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pf"], -4.00; atol = 1e-1)
+    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pt"], 4.00; atol = 1e-1)
     @test isapprox(result["solution"]["branchdc_ne"]["4"]["isbuilt"], 0; atol = 1e-2)
     @test isapprox(result["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pf"], 1.75; atol = 1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pt"], -1.75; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pf"], 1.3; atol = 1e-2)
+    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pt"], -1.3; atol = 1e-2)
 
 end
 

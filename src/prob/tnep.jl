@@ -12,9 +12,9 @@ end
 function solve_tnep(data::Dict, model_type::Type, solver; kwargs...)
     # Check if data in multiperiod!
     if haskey(data, "multinetwork") && data["multinetwork"] == true
-        return _PM.solve_model(data, model_type, solver, build_mp_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_mp_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_flex_load!], kwargs...)
     else
-        return _PM.solve_model(data, model_type, solver, build_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], kwargs...) 
+        return _PM.solve_model(data, model_type, solver, build_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_flex_load!], kwargs...) 
     end
 end
 
@@ -22,9 +22,9 @@ end
 function solve_tnep(data::Dict, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
     # Check if data in multiperiod!
     if haskey(data, "multinetwork") && data["multinetwork"] == true
-        return _PM.solve_model(data, model_type, solver, build_mp_tnep_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_mp_tnep_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_flex_load!], kwargs...)
     else
-        return _PM.solve_model(data, model_type, solver, build_tnep_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_tnep_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_flex_load!], kwargs...)
     end
 end
 
@@ -34,12 +34,15 @@ function build_tnep(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_gen_power(pm)
     _PM.variable_branch_power(pm)
+    _PM.variable_storage_power(pm)
 
     variable_voltage_slack(pm)
     variable_active_dcbranch_flow(pm)
     variable_dc_converter(pm)
     variable_dcbranch_current(pm)
     variable_dcgrid_voltage_magnitude(pm)
+    variable_flexible_demand(pm)
+    variable_pst(pm)
 
     # new variables for TNEP problem
     _PM.variable_ne_branch_indicator(pm)
@@ -59,9 +62,25 @@ function build_tnep(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :ref_buses)
         _PM.constraint_theta_ref(pm, i)
     end
+
     for i in _PM.ids(pm, :bus)
         constraint_power_balance_acdc_ne(pm, i)
     end
+
+    for i in _PM.ids(pm, :flex_load)
+        constraint_total_flexible_demand(pm, i)
+    end
+    
+    for i in _PM.ids(pm, :fixed_load) 
+        constraint_total_fixed_demand(pm, i)
+    end
+
+    for i in _PM.ids(pm, :pst)
+        constraint_ohms_y_from_pst(pm, i)
+        constraint_ohms_y_to_pst(pm, i)
+        constraint_limits_pst(pm, i)
+    end
+
     for i in _PM.ids(pm, :branch)
         _PM.constraint_ohms_yt_from(pm, i)
         _PM.constraint_ohms_yt_to(pm, i)
@@ -80,6 +99,7 @@ function build_tnep(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :busdc)
         constraint_power_balance_dc_dcne(pm, i)
     end
+    
     for i in _PM.ids(pm, :busdc_ne)
         constraint_power_balance_dcne_dcne(pm, i)
     end
@@ -124,12 +144,15 @@ function build_mp_tnep(pm::_PM.AbstractPowerModel)
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
         _PM.variable_branch_power(pm; nw = n)
+        _PM.variable_storage_power(pm; nw = n)
 
         variable_voltage_slack(pm; nw = n)
         variable_active_dcbranch_flow(pm; nw = n)
         variable_dc_converter(pm; nw = n)
         variable_dcbranch_current(pm; nw = n)
         variable_dcgrid_voltage_magnitude(pm; nw = n)
+        variable_flexible_demand(pm; nw = n)
+        variable_pst(pm; nw = n)
 
         # new variables for TNEP problem
         _PM.variable_ne_branch_indicator(pm; nw = n)
@@ -161,6 +184,19 @@ function build_mp_tnep(pm::_PM.AbstractPowerModel)
             _PM.constraint_voltage_angle_difference(pm, i; nw = n)
             _PM.constraint_thermal_limit_from(pm, i; nw = n)
             _PM.constraint_thermal_limit_to(pm, i; nw = n)
+        end
+        for i in _PM.ids(pm, n, :flex_load)
+            constraint_total_flexible_demand(pm, i; nw = n)
+        end
+        
+        for i in _PM.ids(pm, n, :fixed_load) 
+            constraint_total_fixed_demand(pm, i; nw = n)
+        end
+    
+        for i in _PM.ids(pm, n, :pst)
+            constraint_ohms_y_from_pst(pm, i; nw = n)
+            constraint_ohms_y_to_pst(pm, i; nw = n)
+            constraint_limits_pst(pm, i; nw = n)
         end
         for i in _PM.ids(pm, n, :ne_branch)
             _PM.constraint_ne_ohms_yt_from(pm, i; nw = n)
@@ -224,6 +260,7 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_gen_power(pm)
     _PM.variable_branch_power(pm)
+    -PM.variable_storage_power(pm)
 
     _PM.variable_branch_current(pm)
     variable_voltage_slack(pm)
@@ -233,6 +270,8 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
     variable_dc_converter(pm)
     variable_dcbranch_current(pm)
     variable_dcgrid_voltage_magnitude(pm)
+    variable_flexible_demand(pm)
+    variable_pst(pm)
 
     # new variables for TNEP problem
     _PM.variable_ne_branch_indicator(pm)
@@ -260,6 +299,19 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
         _PM.constraint_voltage_angle_difference(pm, i)
         _PM.constraint_thermal_limit_from(pm, i)
         _PM.constraint_thermal_limit_to(pm, i)
+    end
+    for i in _PM.ids(pm, :flex_load)
+        constraint_total_flexible_demand(pm, i)
+    end
+    
+    for i in _PM.ids(pm, :fixed_load) 
+        constraint_total_fixed_demand(pm, i)
+    end
+
+    for i in _PM.ids(pm, :pst)
+        constraint_ohms_y_from_pst(pm, i)
+        constraint_ohms_y_to_pst(pm, i)
+        constraint_limits_pst(pm, i)
     end
     for i in _PM.ids(pm, :ne_branch)
         _PM.constraint_ne_ohms_yt_from(pm, i)
@@ -318,11 +370,14 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         _PM.variable_branch_current(pm; nw = n)
         variable_voltage_slack(pm; nw = n)
         _PM.constraint_model_current(pm; nw = n)
+        _PM.varaiable_storage_power(pm; nw = n)
 
         variable_active_dcbranch_flow(pm; nw = n)
         variable_dc_converter(pm; nw = n)
         variable_dcbranch_current(pm; nw = n)
         variable_dcgrid_voltage_magnitude(pm; nw = n)
+        variable_flexible_demand(pm; nw = n)
+        variable_pst(pm; nw = n)
         # new variables for TNEP problem
         _PM.variable_ne_branch_indicator(pm; nw = n)
         _PM.variable_ne_branch_power(pm; nw = n)
@@ -353,6 +408,20 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
             _PM.constraint_voltage_angle_difference(pm, i; nw = n)
             _PM.constraint_thermal_limit_from(pm, i; nw = n)
             _PM.constraint_thermal_limit_to(pm, i; nw = n)
+        end
+
+        for i in _PM.ids(pm, n, :flex_load)
+            constraint_total_flexible_demand(pm, i; nw = n)
+        end
+        
+        for i in _PM.ids(pm, n, :fixed_load) 
+            constraint_total_fixed_demand(pm, i; nw = n)
+        end
+    
+        for i in _PM.ids(pm, n, :pst)
+            constraint_ohms_y_from_pst(pm, i; nw = n)
+            constraint_ohms_y_to_pst(pm, i; nw = n)
+            constraint_limits_pst(pm, i; nw = n)
         end
 
         for i in _PM.ids(pm, n, :ne_branch)

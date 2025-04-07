@@ -56,7 +56,7 @@ mpc.busdc_ne = [
 %% candidate branches
 %column_names%   fbusdc  tbusdc  r      l        c   rateA   rateB   rateC status cost
 mpc.branchdc_ne = [
-	2	 5	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.3;
+	2	 5	 0.01	 0.00	 0.00  130.0	 0.0	 0.0	 1.0	 2.3;
 	2	 6	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.4;
 	2	 6	 0.01	 0.00	 0.00  400.0	 0.0	 0.0	 1.0	 3.4;
 	3	 6	 0.01	 0.00	 0.00  200.0	 0.0	 0.0	 1.0	 2.6;

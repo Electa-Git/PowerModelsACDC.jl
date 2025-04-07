@@ -194,13 +194,16 @@ function constraint_power_balance_acdc_ne(pm::_PM.AbstractPowerModel, i::Int; nw
     bus_convs_ac_ne = PowerModels.ref(pm, nw, :bus_convs_ac_ne, i)
     bus_loads = PowerModels.ref(pm, nw, :bus_loads, i)
     bus_shunts = PowerModels.ref(pm, nw, :bus_shunts, i)
+    bus_arcs_pst = _PM.ref(pm, nw, :bus_arcs_pst, i)
+    bus_storage = _PM.ref(pm, nw, :bus_storage, i)
+
 
     pd = Dict(k => PowerModels.ref(pm, nw, :load, k, "pd") for k in bus_loads)
     qd = Dict(k => PowerModels.ref(pm, nw, :load, k, "qd") for k in bus_loads)
 
     gs = Dict(k => PowerModels.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
     bs = Dict(k => PowerModels.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
-    constraint_power_balance_acdc_ne(pm, nw, i, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
+    constraint_power_balance_acdc_ne(pm, nw, i, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_arcs_pst, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_storage, bus_shunts, gs, bs)
 end
 
 function constraint_converter_limit_on_off(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
