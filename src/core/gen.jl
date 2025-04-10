@@ -84,3 +84,245 @@ function variable_generator_state_mdt_relax(pm::_PM.AbstractPowerModel; nw::Int=
     )
     report && _PM.sol_component_value(pm, nw, :gen, :gamma_g, _PM.ids(pm, nw, :gen), gamma_g)
 end
+
+# Constraint templates:
+"Defines system-wide generator inertia limits in given market zone"
+function constraint_generator_inertia_limit(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    inertia_limit = _PM.ref(pm, nw, :inertia_limit, i)["limit"]
+
+    generator_properties = Dict()
+    for (g, gen) in _PM.ref(pm, nw, :gen)
+        if haskey(gen, "zone") && gen["zone"] == i && haskey(gen, "inertia_constants")
+            push!(generator_properties, g => Dict("inertia" => gen["inertia_constants"], "rating" => gen["pmax"]))
+        end
+    end
+
+    constraint_generator_inertia_limit(pm, nw, generator_properties, inertia_limit)
+end
+
+"On/off status csontraint for unit commitment model"
+function constraint_generator_on_off(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default, use_status = true, second_stage = false)
+    gen     = _PM.ref(pm, nw, :gen, i)
+    pmax = gen["pmax"]
+    pmin = gen["pmin"]
+    if use_status == true
+        status = gen["dispatch_status"]
+    else
+        status = 0
+    end
+
+    if second_stage == false
+        constraint_generator_on_off(pm, nw, i, pmax, pmin, status)
+    else
+        nw_ref = get_reference_network_id(pm, nw)
+        constraint_generator_on_off(pm, nw, nw_ref, i, pmax, pmin, status)
+    end
+end
+
+"Generator status indicator constraint for optimal power flow model model"
+function constraint_generator_status(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    constraint_generator_status(pm, nw, i)
+end
+"Generator status indicator constraint for unit commitment model"
+function constraint_generator_status_uc(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    previous_hour_network = get_previous_hour_network_id(pm, nw)
+
+    constraint_generator_status_uc(pm, nw, i, previous_hour_network)
+end
+"Generator status indicator constraint for unit commitment model dunring generator contingency"
+function constraint_generator_status_cont(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    reference_network_idx = get_reference_network_id(pm, nw)
+    constraint_generator_status_cont(pm, nw, i, reference_network_idx)
+end
+
+"Collect generator unit commitment constraints"
+function contstraint_unit_commitment(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    constraint_generator_decisions(pm, i, nw)
+    constraint_minimum_generator_up_time(pm, i, nw)
+    constraint_minimum_generator_down_time(pm, i, nw)
+end
+"Link generator decisions in security constrained unit commitment model"
+function constraint_generator_decisions(pm::_PM.AbstractPowerModel, i::Int, nw::Int = _PM.nw_id_default)
+    if nw == 1
+        constraint_initial_generator_decisions(pm, i, nw)
+    else
+        previous_hour_network = get_previous_hour_network_id(pm, nw)
+        constraint_generator_decisions(pm, i, nw, previous_hour_network)
+        constraint_generator_ramping(pm, i, nw, previous_hour_network)
+    end
+end
+"Genetor minimum up-time constraint"
+function constraint_minimum_generator_up_time(pm::_PM.AbstractPowerModel, i::Int, nw::Int = _PM.nw_id_default)
+    gen =_PM.ref(pm, nw, :gen, i)
+    mut = gen["mut"]
+    if pm.ref[:it][:pm][:number_of_contingencies] !== 0
+        interval = pm.ref[:it][:pm][:number_of_contingencies]
+    else
+        interval = 1
+    end
+    h_start = max(1, (nw + interval - (mut * interval))) 
+    τ = h_start : interval : nw
+
+    return constraint_minimum_generator_up_time(pm, i, nw, τ)
+end
+"Genetor minimum down-time constraint"
+function constraint_minimum_generator_down_time(pm::_PM.AbstractPowerModel, i::Int, nw::Int = _PM.nw_id_default)
+    gen =_PM.ref(pm, nw, :gen, i)
+    mdt = gen["mdt"]
+    if pm.ref[:it][:pm][:number_of_contingencies] !== 0
+        interval = pm.ref[:it][:pm][:number_of_contingencies]
+    else
+        interval = 1
+    end
+    h_start = max(1, (nw + interval - (mdt * interval))) 
+    τ = h_start : interval : nw
+
+    return constraint_minimum_generator_down_time(pm, i, nw, τ)
+end
+
+"Generator ramping constraint for unit commitment model"
+function constraint_generator_ramping(pm::_PM.AbstractPowerModel, i::Int, nw::Int, previous_hour_network)
+    gen = _PM.ref(pm, nw, :gen, i)
+    Δt = _PM.ref(pm, nw, :frequency_parameters)["uc_time_interval"]
+    pmax = gen["pmax"]
+    pmin = gen["pmin"]
+    ΔPg_up = gen["ramp_rate"] * Δt * pmax
+    ΔPg_down = gen["ramp_rate"] * Δt * pmax
+
+    return constraint_generator_ramping(pm, i, nw, previous_hour_network, ΔPg_up, ΔPg_down, pmin)
+end
+
+function constraint_unit_commitment_reserves(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    return constraint_unit_commitment_reserves(pm, i, nw)
+end
+
+#################################################
+# Generator realetd constraints form independent:
+#################################################
+"Link generator status of different hours together, to keep them on / off"
+function constraint_generator_status(pm::_PM.AbstractPowerModel, n::Int, i::Int)
+    alpha_n = _PM.var(pm, n, :alpha_g, i)
+    alpha_n_1 = _PM.var(pm, n-1, :alpha_g, i)
+
+    JuMP.@constraint(pm.model, alpha_n == alpha_n_1)
+end
+"Link generator status of different hours together, to keep them on / off"
+function constraint_generator_status_cont(pm::_PM.AbstractPowerModel, n::Int, i::Int, ref_id)
+    alpha_n = _PM.var(pm, n, :alpha_g, i)
+    alpha_n_1 = _PM.var(pm, ref_id, :alpha_g, i)
+
+    JuMP.@constraint(pm.model, alpha_n == alpha_n_1)
+end
+"Link generator status of different hours together, to keep them on / off"
+function constraint_generator_status_uc(pm::_PM.AbstractPowerModel, n::Int, i::Int, prev_hour)
+    alpha_n = _PM.var(pm, n, :alpha_g, i)
+    alpha_n_1 = _PM.var(pm, prev_hour, :alpha_g, i)
+
+    JuMP.@constraint(pm.model, alpha_n == alpha_n_1)
+end
+"Linking constraints for generator decision variables for t = T_0"
+function constraint_initial_generator_decisions(pm::_PM.AbstractPowerModel, i::Int, n::Int)
+    alpha_n = _PM.var(pm, n, :alpha_g, i)
+    beta_n = _PM.var(pm, n, :beta_g, i)
+    gamma_n = _PM.var(pm, n, :gamma_g, i)
+
+    JuMP.@constraint(pm.model, - alpha_n + beta_n - gamma_n == 0)
+end
+
+"Linking constraints for generator decision variables for t ≥ T_0"
+function constraint_generator_decisions(pm::_PM.AbstractPowerModel, i::Int, n::Int, prev_hour)
+    alpha_n = _PM.var(pm, n, :alpha_g, i)
+    alpha_n_1 = _PM.var(pm, prev_hour, :alpha_g, i)
+    beta_n = _PM.var(pm, n, :beta_g, i)
+    gamma_n = _PM.var(pm, n, :gamma_g, i)
+
+    JuMP.@constraint(pm.model, alpha_n_1 - alpha_n + beta_n - gamma_n == 0)
+end
+
+"Raamping limits for genertors"
+function constraint_generator_ramping(pm::_PM.AbstractPowerModel, i::Int, n::Int, prev_hour, ΔPg_up, ΔPg_down, pmin)
+    pg_n = _PM.var(pm, n, :pg, i)
+    pg_n_1 = _PM.var(pm, prev_hour, :pg, i)
+    alpha_n = _PM.var(pm, n, :alpha_g, i)
+    beta_n = _PM.var(pm, n, :beta_g, i)
+    gamma_n = _PM.var(pm, n, :gamma_g, i)
+
+    JuMP.@constraint(pm.model, pg_n - pg_n_1 <= ΔPg_up * alpha_n + (pmin - ΔPg_up) * beta_n)
+    JuMP.@constraint(pm.model, pg_n_1 - pg_n <= ΔPg_down * alpha_n + pmin * gamma_n)
+end
+
+"Generator minimum up-time constraint"
+function constraint_minimum_generator_up_time(pm::_PM.AbstractPowerModel, i::Int, n::Int, τ)
+    alpha_n = _PM.var(pm, n, :alpha_g, i)
+
+    JuMP.@constraint(pm.model, alpha_n >= sum([_PM.var(pm, t, :beta_g, i) for t in τ]))
+end
+
+"Generator minimum down-time constraint"
+function constraint_minimum_generator_down_time(pm::_PM.AbstractPowerModel, i::Int, n::Int, τ)
+    alpha_n = _PM.var(pm, n, :alpha_g, i)
+
+    JuMP.@constraint(pm.model, (1 - alpha_n) >= sum([_PM.var(pm, t, :gamma_g, i) for t in τ]))
+end
+######################################
+# Generator realetd constraints DCP:
+######################################
+function constraint_generator_inertia_limit(pm::_PM.AbstractDCPModel, n::Int, generator_properties, inertia_limit)
+    alpha_g = _PM.var(pm, n, :alpha_g)
+
+    JuMP.@constraint(pm.model, sum([properties["inertia"] * properties["rating"] * alpha_g[g] / 0.9 for (g, properties) in generator_properties])  >= inertia_limit)
+end
+
+
+function constraint_generator_redispatch(pm::_PM.AbstractDCPModel, n::Int, i, pg_ref)
+    pg       = _PM.var(pm, n, :pg, i)
+    dpg_up   = _PM.var(pm, n, :dpg_up, i)
+    dpg_down = _PM.var(pm, n, :dpg_down, i)
+
+    # Starting from the reference dispatch pg_ref, the new dispatch point is pg == pg_ref + dpg_up - dpg_down
+    JuMP.@constraint(pm.model, pg == pg_ref + dpg_up - dpg_down)
+end
+
+
+function constraint_generator_on_off(pm::_PM.AbstractDCPModel, n::Int, i, pmax, pmin, status)
+    pg = _PM.var(pm, n, :pg, i)
+    alpha_g = _PM.var(pm, n, :alpha_g, i)
+
+    JuMP.@constraint(pm.model,  pg <= pmax * alpha_g)
+    JuMP.@constraint(pm.model,  pg >= pmin * alpha_g)
+    JuMP.@constraint(pm.model,  alpha_g >= status)
+end
+
+function constraint_generator_on_off(pm::_PM.AbstractDCPModel, n::Int, nw_ref, i, pmax, pmin, status)
+    pg = _PM.var(pm, n, :pg, i)
+    alpha_g = _PM.var(pm, nw_ref, :alpha_g, i)
+
+    JuMP.@constraint(pm.model,  pg <= pmax * alpha_g)
+    JuMP.@constraint(pm.model,  pg >= pmin * alpha_g)
+    JuMP.@constraint(pm.model,  alpha_g >= status)
+end
+
+function constraint_storage_on_off(pm::_PM.AbstractDCPModel, n::Int, i, charge_rating, discharge_rating)
+    pc = _PM.var(pm, n, :sc, i)
+    pd = _PM.var(pm, n, :sd, i)
+    ps = _PM.var(pm, n, :ps, i)
+    alpha_s = _PM.var(pm, n, :alpha_s, i)
+
+    JuMP.@constraint(pm.model,  pc <= charge_rating * alpha_s)
+    JuMP.@constraint(pm.model,  pc >= 0)
+    JuMP.@constraint(pm.model,  pd <= discharge_rating * alpha_s)
+    JuMP.@constraint(pm.model,  pd >= 0)
+    JuMP.@constraint(pm.model,  ps <= discharge_rating * alpha_s)
+    JuMP.@constraint(pm.model,  ps >= -discharge_rating * alpha_s)
+end
+
+
+
+# Generator related constraints NF:
+
+function constraint_generator_inertia_limit(pm::_PM.AbstractNFAModel, n::Int, generator_properties, inertia_limit)
+    pg = _PM.var(pm, n, :pg)
+    if !isempty(generator_properties)
+        JuMP.@constraint(pm.model, sum([properties["inertia"] * pg[g] / 0.9 for (g, properties) in generator_properties])  >= inertia_limit)
+    end
+end

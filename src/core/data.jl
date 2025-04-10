@@ -26,8 +26,69 @@ end
 
 function process_additional_data!(data; tnep = false)
     to_pu!(data)
+    if haskey(data, "pst")
+        process_pst_data!(data)
+    end
     fix_data!(data; tnep = tnep)
     convert_matpowerdcline_to_branchdc!(data)
+end
+
+function process_pst_data!(data)
+    if !haskey(data, "multinetwork") || data["multinetwork"] == false
+        to_pu_single_network_pst!(data)
+        fix_data_single_network_pst!(data)
+    else
+        to_pu_multi_network_pst!(data)
+        fix_data_multi_network_pst!(data)
+    end
+end
+
+function to_pu_single_network_pst!(data)
+    MVAbase = data["baseMVA"]
+    for (i, pst) in data["pst"]
+        scale_pst_data!(pst, MVAbase)
+    end
+end
+
+function fix_data_single_network_pst!(data)
+    for (i, pst) in data["pst"]
+        pst["g_fr"] = 0
+        pst["b_fr"] = 0
+        pst["g_to"] = 0
+        pst["b_to"] = 0
+        pst["tap"] = 1.0
+    end
+end
+function to_pu_multi_network_pst!(data)
+    MVAbase = data["baseMVA"]
+    for (n, network) in data["nw"]
+        MVAbase = network["baseMVA"]
+        for (i, pst) in network[n]["pst"]
+            scale_pst_data!(pst, MVAbase)
+        end
+    end
+end
+
+function fix_data_multi_network_pst!(data)
+    for (n, network) in data["nw"]
+        for (i, pst) in network[n]data["pst"]
+            pst["g_fr"] = 0
+            pst["b_fr"] = 0
+            pst["g_to"] = 0
+            pst["b_to"] = 0
+            pst["tap"] = 1.0
+        end
+    end
+end
+
+function scale_pst_data!(pst, MVAbase)
+    rescale_power = x -> x/MVAbase
+    _PM._apply_func!(pst, "rate_a", rescale_power)
+    _PM._apply_func!(pst, "rate_b", rescale_power)
+    _PM._apply_func!(pst, "rate_c", rescale_power)
+    _PM._apply_func!(pst, "angle", deg2rad)
+    _PM._apply_func!(pst, "angmin", deg2rad)
+    _PM._apply_func!(pst, "angmax", deg2rad)
 end
 
 function is_single_network(data)
@@ -603,4 +664,179 @@ function converter_bounds(pmin, pmax, loss0, loss1)
         pminf = (-pmaxt + loss0) / (1-loss1)
     end
     return pminf, pmaxf, pmint, pmaxt
+end
+
+
+function prepare_uc_data!(data; borders = nothing, t_hvdc = nothing, ffr_cost = nothing, uc = false)
+    prepare_generator_data!(data; uc = uc)
+
+    if !isnothing(borders)
+        find_and_assign_xb_lines!(data, borders)
+    end
+
+    if haskey(data, "convdc")
+        for (c, conv) in data["convdc"]
+            conv_bus = conv["busac_i"]
+            conv["zone"] = data["bus"]["$conv_bus"]["zone"]
+            conv["area"] = data["bus"]["$conv_bus"]["area"]
+            conv["t_hvdc"] = t_hvdc
+            conv["ffr_cost"] = ffr_cost
+        end
+    end
+
+    # Add empth dictionary for PSTs
+    if !haskey(data, "pst")
+        data["pst"] = Dict{String, Any}()
+    end
+
+    # Add empty dictionaries for HVDC if only AC grid...
+    if !haskey(data, "convdc")
+        data["busdc"] = Dict{String, Any}()
+        data["convdc"] = Dict{String, Any}()
+        data["branchdc"] = Dict{String, Any}()
+    end
+
+    # Add empty dictionary if no AC tie lines are defined
+    if !haskey(data, "tie_lines")
+        data["tie_lines"] = Dict{String, Any}()
+    end
+
+    # Add empty dictionary if no areas are defined
+    if !haskey(data, "areas")
+        data["areas"] = Dict{String, Any}()
+    end
+
+    return data
+end
+
+
+function prepare_generator_data!(data; uc = false)
+    for (g, gen) in data["gen"]
+        bus_id = gen["gen_bus"]
+        gen["zone"] = data["bus"]["$bus_id"]["zone"]
+        gen["area"] = data["bus"]["$bus_id"]["area"]
+        gen["inertia_constants"] = data["inertia_constants"][g]["inertia_constant"]
+        if uc == true
+            gen["start_up_cost"] = gen["startup"] / (gen["pmax"])
+            gen["ramp_rate"] = data["inertia_constants"][g]["ramp_rate"]
+            if data["inertia_constants"][g]["inertia_constant"] <= 1
+                gen["mut"] = 1
+                gen["mdt"] = 1
+                gen["res"] = true
+            else
+                gen["mut"] = 3
+                gen["mdt"] = 4
+                gen["res"] = false
+            end
+        end
+    end
+end
+
+function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series, contingencies = false)
+
+    if contingencies == true
+        generator_contingencies = length(data["gen"])
+        tie_line_contingencies = length(data["tie_lines"]) 
+        converter_contingencies = length(data["convdc"]) 
+        dc_branch_contingencies = length(data["branchdc"]) 
+        number_of_contingencies = generator_contingencies + tie_line_contingencies + converter_contingencies +  dc_branch_contingencies + 1 # to also add the N case
+        replicates = number_of_hours * number_of_contingencies
+        # This for loop determines which "network" belongs to an hour, and which to a contingency, for book-keeping of the network ids
+        # Format: [h1, c1 ... cn, h2, c1 ... cn, .... , hn, c1 ... cn]
+        hour_ids = [];
+        cont_ids = [];
+        for i in 1:replicates
+            if mod(i, number_of_contingencies) == 1
+                push!(hour_ids, i)
+            else
+                push!(cont_ids, i)
+            end
+        end
+    else
+        number_of_contingencies = 0
+        replicates = number_of_hours
+        hour_ids = [];
+        cont_ids = [];
+        for i in 1:replicates
+            push!(hour_ids, i)
+        end
+    end        
+
+    ########### Using _IM.replicate networks
+
+    mn_data = _IM.replicate(data, replicates, Set{String}(["source_type", "name", "source_version", "per_unit"]))
+
+    # Add hour_ids and contingency_ids to the data dictionary 
+    mn_data["hour_ids"] = hour_ids
+    mn_data["cont_ids"] = cont_ids
+    mn_data["number_of_hours"] = number_of_hours
+    mn_data["number_of_contingencies"] = number_of_contingencies
+
+    if contingencies == true
+        create_contingencies!(mn_data, number_of_hours, number_of_contingencies)
+            # This loop writes the generation and demand time series data
+        iter = 0
+        for nw = 1:replicates
+            if mod(nw, number_of_contingencies) == 1
+                iter += 1
+                h_idx = Int(nw - number_of_contingencies + 1)
+            end
+            h_idx = iter
+            for (g, gen) in mn_data["nw"]["$nw"]["gen"]
+                if gen["res"] == true
+                    gen["pmax"] = g_series[h_idx] * gen["pmax"]
+                end
+            end
+            for (l, load) in mn_data["nw"]["$nw"]["load"]
+                load["pd"] = l_series[h_idx] * load["pd"]
+            end
+        end
+    else
+        for h_idx = 1:number_of_hours
+            for (g, gen) in mn_data["nw"]["$h_idx"]["gen"]
+                if gen["res"] == true
+                    gen["pmax"] = g_series[h_idx] * gen["pmax"]
+                end
+            end
+            for (l, load) in mn_data["nw"]["$h_idx"]["load"]
+                load["pd"] = l_series[h_idx] * load["pd"]
+            end
+        end
+    end
+
+
+
+    process_additional_data!(mn_data)
+
+    return mn_data
+end
+
+function create_contingencies!(mn_data, number_of_hours, number_of_contingencies)
+
+    gen_keys = sort(parse.(Int, collect(keys(mn_data["nw"]["1"]["gen"]))))
+    conv_keys = sort(parse.(Int, collect(keys(mn_data["nw"]["1"]["convdc"]))))
+    tie_line_keys = sort(parse.(Int, collect(keys(mn_data["nw"]["1"]["tie_lines"]))))
+    dc_branch_keys = sort(parse.(Int, collect(keys(mn_data["nw"]["1"]["branchdc"]))))
+
+    for idx in 1:number_of_hours * number_of_contingencies
+        if any(idx .== mn_data["hour_ids"])
+            mn_data["nw"]["$idx"]["contingency"] = Dict{String, Any}("gen_id" => nothing, "branch_id" => nothing, "conv_id" => nothing, "dcbranch_id" => nothing)
+        elseif mod(idx - 1, number_of_contingencies) <= length(gen_keys)
+            c_id = mod(idx - 1, number_of_contingencies)
+            mn_data["nw"]["$idx"]["contingency"] = Dict{String, Any}("gen_id" => gen_keys[c_id], "branch_id" => nothing, "conv_id" => nothing, "dcbranch_id" => nothing)
+        elseif mod(idx - 1, number_of_contingencies) <= length(gen_keys) + length(tie_line_keys)
+            c_id = mod(idx - 1, number_of_contingencies)
+            b_idx = c_id - length(gen_keys)
+            mn_data["nw"]["$idx"]["contingency"] = Dict{String, Any}("gen_id" => nothing, "branch_id" => tie_line_keys[b_idx], "conv_id" => nothing, "dcbranch_id" => nothing)
+        elseif mod(idx - 1, number_of_contingencies) <= length(gen_keys) + length(tie_line_keys) + length(conv_keys)
+            c_id = mod(idx - 1, number_of_contingencies)
+            c_idx = c_id - length(gen_keys) - length(tie_line_keys)
+            mn_data["nw"]["$idx"]["contingency"] = Dict{String, Any}("gen_id" => nothing, "branch_id" => nothing, "conv_id" => conv_keys[c_idx], "dcbranch_id" => nothing)
+        else
+            c_id = mod(idx-1, number_of_contingencies)
+            b_idx = c_id - length(gen_keys) - length(tie_line_keys) - length(conv_keys)
+            mn_data["nw"]["$idx"]["contingency"] = Dict{String, Any}("gen_id" => nothing, "branch_id" => nothing, "conv_id" => nothing, "dcbranch_id" => dc_branch_keys[b_idx])
+        end
+    end
+    return mn_data
 end

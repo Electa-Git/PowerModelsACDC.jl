@@ -1,5 +1,5 @@
 function solve_uc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_uc; ref_extensions = [_PMACDC.add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_uc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!], kwargs...)
 end
 
 ""
