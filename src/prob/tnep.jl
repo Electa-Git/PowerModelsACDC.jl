@@ -53,7 +53,8 @@ function build_tnep(pm::_PM.AbstractPowerModel)
     variable_dc_converter_ne(pm)
     variable_dcbranch_current_ne(pm)
     variable_dcgrid_voltage_magnitude_ne(pm)
-    objective_min_cost_acdc(pm)
+
+    objective_min_operational_capex_cost(pm)
 
     _PM.constraint_model_voltage(pm)
     _PM.constraint_ne_model_voltage(pm)
@@ -164,7 +165,9 @@ function build_mp_tnep(pm::_PM.AbstractPowerModel)
         variable_dcbranch_current_ne(pm; nw = n)
         variable_dcgrid_voltage_magnitude_ne(pm; nw = n)
     end
-    objective_min_cost_acdc(pm)
+
+    objective_min_operational_capex_cost(pm)
+
     for (n, networks) in pm.ref[:it][:pm][:nw]
         _PM.constraint_model_voltage(pm; nw = n)
         _PM.constraint_ne_model_voltage(pm; nw = n)
@@ -284,7 +287,8 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
     variable_dc_converter_ne(pm)
     variable_dcbranch_current_ne(pm)
     variable_dcgrid_voltage_magnitude_ne(pm)
-    objective_min_cost_acdc(pm)
+    
+    objective_min_operational_capex_cost(pm)
 
     _PM.constraint_model_voltage(pm)
     _PM.constraint_ne_model_voltage(pm)
@@ -391,7 +395,9 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         variable_dcbranch_current_ne(pm; nw = n)
         variable_dcgrid_voltage_magnitude_ne(pm; nw = n)
     end
-    objective_min_cost_acdc(pm)
+    
+    objective_min_operational_capex_cost(pm)
+
     for (n, networks) in pm.ref[:it][:pm][:nw]
         _PM.constraint_model_voltage(pm; nw = n)
         _PM.constraint_ne_model_voltage(pm; nw = n)
