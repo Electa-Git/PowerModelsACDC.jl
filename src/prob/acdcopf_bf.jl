@@ -3,7 +3,7 @@ export solve_acdcopf_bf
 ""
 function solve_acdcopf_bf(file::String, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
     data = _PM.parse_file(file)
-    PowerModelsACDC.process_additional_data!(data)
+    process_additional_data!(data)
     return solve_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
 end
 

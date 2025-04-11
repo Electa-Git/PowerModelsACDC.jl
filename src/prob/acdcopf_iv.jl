@@ -1,7 +1,7 @@
 ""
 function solve_acdcopf_iv(file::String, model_type, optimizer; kwargs...)
     data = _PM.parse_file(file)
-    PowerModelsACDC.process_additional_data!(data)
+    process_additional_data!(data)
     return solve_acdcopf_iv(data, model_type, optimizer; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
 end
 

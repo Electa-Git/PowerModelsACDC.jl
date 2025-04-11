@@ -9,17 +9,17 @@ function build_uc(pm::_PM.AbstractPowerModel)
         _PM.variable_branch_power(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
         _PM.variable_storage_power(pm; nw = n)
+        _PM.constraint_model_voltage(pm; nw = n)
+
         variable_active_dcbranch_flow(pm; nw = n)
         variable_dcbranch_current(pm; nw = n)
         variable_dc_converter(pm; nw = n)
         variable_dcgrid_voltage_magnitude(pm; nw = n)
-
-        _PM.constraint_model_voltage(pm; nw = n)
-        constraint_voltage_dc(pm; nw = n)
-
         variable_generator_states(pm; nw = n, uc = true)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
+        variable_storage_on_off(pm; nw = n)
+        constraint_voltage_dc(pm; nw = n)
     end
 
     for (n, networks) in pm.ref[:it][:pm][:nw]
@@ -79,6 +79,10 @@ function build_uc(pm::_PM.AbstractPowerModel)
             for i in borders
                 constraint_fixed_xb_flows(pm, i; nw = n)
             end
+        end
+
+        if haskey(_PM.ref(pm, n), :storage)
+            storage_constraints(pm, n; uc = true)
         end
     end
 

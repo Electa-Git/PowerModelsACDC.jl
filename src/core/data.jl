@@ -29,6 +29,9 @@ function process_additional_data!(data; tnep = false)
     if haskey(data, "pst")
         process_pst_data!(data)
     end
+    if haskey(data, "load_flex")
+        process_flexible_demand_data!(data)
+    end
     fix_data!(data; tnep = tnep)
     convert_matpowerdcline_to_branchdc!(data)
 end
@@ -89,6 +92,81 @@ function scale_pst_data!(pst, MVAbase)
     _PM._apply_func!(pst, "angle", deg2rad)
     _PM._apply_func!(pst, "angmin", deg2rad)
     _PM._apply_func!(pst, "angmax", deg2rad)
+end
+
+
+function process_flexible_demand_data!(data)
+    if !haskey(data, "multinetwork") || data["multinetwork"] == false
+        process_flexible_demand_data_single_network!(data)
+    else
+        process_flexible_demand_data_multi_network!(data)
+    end
+end
+
+function process_flexible_demand_data_single_network!(data)
+    for (le, load_flex) in data["load_flex"]
+
+        # ID of load point
+        idx = load_flex["load_id"]
+
+        # Superior bound on voluntary load reduction (not consumed power) as a fraction of the total reference demand (0 ≤ pred_rel_max ≤ 1)
+        data["load"]["$idx"]["pred_rel_max"] = load_flex["pred_rel_max"]
+
+        # Compensation for consuming less (i.e. voluntary demand reduction) (€/MWh)
+        data["load"]["$idx"]["cost_red"] = load_flex["cost_red"]
+
+        # Compensation for load curtailment (i.e. involuntary demand reduction) (€/MWh)
+        data["load"]["$idx"]["cost_curt"] = load_flex["cost_curt"]
+
+        # Whether load is flexible (boolean)
+        data["load"]["$idx"]["flex"] = load_flex["flex"]
+
+        # Power factor angle θ, giving the reactive power as Q = P ⨉ tan(θ)
+        if haskey(load_flex, "pf_angle")
+            data["load"]["$idx"]["pf_angle"] = load_flex["pf_angle"]
+        end
+
+        # Rescale cost and power input values to the p.u. values used internally in the model
+        rescale_cost = x -> x*data["baseMVA"]
+        rescale_power = x -> x/data["baseMVA"]
+        _PM._apply_func!(data["load"]["$idx"], "cost_red", rescale_cost)
+        _PM._apply_func!(data["load"]["$idx"], "cost_curt", rescale_cost)
+    end
+    delete!(data, "load_flex")
+    return data
+end
+
+function process_flexible_demand_data_multi_network!(data)
+    for (n, network) in data["nw"]
+        for (le, load_flex) in data["load_flex"]
+            # ID of load point
+            idx = load_flex["load_id"]
+            # Superior bound on voluntary load reduction (not consumed power) as a fraction of the total reference demand (0 ≤ pred_rel_max ≤ 1)
+            data["nw"][n]["load"]["$idx"]["pred_rel_max"] = load_flex["pred_rel_max"]
+
+            # Compensation for consuming less (i.e. voluntary demand reduction) (€/MWh)
+            data["nw"][n]["load"]["$idx"]["cost_red"] = load_flex["cost_red"]
+
+            # Compensation for load curtailment (i.e. involuntary demand reduction) (€/MWh)
+            data["nw"][n]["load"]["$idx"]["cost_curt"] = load_flex["cost_curt"]
+
+            # Whether load is flexible (boolean)
+            data["nw"][n]["load"]["$idx"]["flex"] = load_flex["flex"]
+
+            # Power factor angle θ, giving the reactive power as Q = P ⨉ tan(θ)
+            if haskey(load_flex, "pf_angle")
+                data["nw"][n]["load"]["$idx"]["pf_angle"] = load_flex["pf_angle"]
+            end
+
+            # Rescale cost and power input values to the p.u. values used internally in the model
+            rescale_cost = x -> x*data["baseMVA"]
+            rescale_power = x -> x/data["baseMVA"]
+            _PM._apply_func!(data["nw"][n]["load"]["$idx"], "cost_red", rescale_cost)
+            _PM._apply_func!(data["nw"][n]["load"]["$idx"], "cost_curt", rescale_cost)
+        end
+    end
+    delete!(data, "load_flex")
+    return data
 end
 
 function is_single_network(data)
@@ -840,3 +918,69 @@ function create_contingencies!(mn_data, number_of_hours, number_of_contingencies
     end
     return mn_data
 end
+
+function prepare_redispatch_opf_data(reference_solution, grid_data; contingency = nothing, rd_cost_factor = 1, inertia_limit = nothing, zonal_input = nothing, zonal_result = nothing, zone = nothing, border_slack = nothing)
+    grid_data_rd = deepcopy(grid_data)
+
+    for (g, gen) in grid_data_rd["gen"]
+        if haskey(reference_solution["gen"], g)
+            gen["pg"] = reference_solution["gen"][g]["pg"]
+            if gen["pg"] == 0.0
+                gen["dispatch_status"] = 0
+            else
+                gen["dispatch_status"] = 1
+            end 
+        else
+            gen["dispatch_status"] = 0
+        end
+        
+        gen["rdcost_up"] = gen["cost"][1] * rd_cost_factor
+        gen["rdcost_down"] = gen["cost"][1] * rd_cost_factor * 0
+    end
+
+    for (l, load) in grid_data_rd["load"]
+        if haskey(reference_solution["load"], l)
+            load["pd"] = reference_solution["load"][l]["pflex"]
+        end
+    end
+
+    for (c, conv) in grid_data_rd["convdc"]
+        conv["P_g"] = -reference_solution["convdc"][c]["ptf_to"]
+    end
+
+    if !isnothing(contingency)
+        if haskey(grid_data_rd, "borders")
+            for (b, border) in grid_data_rd["borders"]
+                for (br, branch) in  border["xb_lines"]
+                    if branch["index"] == contingency
+                        print(b, " ", br)
+                        delete!(grid_data_rd["borders"][b]["xb_lines"], br)
+                    end
+                end
+            end
+        end
+        grid_data_rd["branch"]["$contingency"]["br_status"] = 0
+    end
+
+    if !isnothing(inertia_limit)
+        grid_data_rd["inertia_limit"] = inertia_limit
+    end
+
+    if  !isnothing(zone)
+        determine_total_xb_flow!(zonal_input, grid_data_rd, grid_data_rd, zonal_result, hour, zone)
+    end
+
+    if haskey(grid_data_rd, "borders")
+        for (bo, border) in grid_data_rd["borders"]
+            if !isnothing(border_slack)
+                border["slack"] = border_slack
+            else
+                border["slack"] = 0
+            end
+        end
+    end
+    return grid_data_rd
+end
+
+
+

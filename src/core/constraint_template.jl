@@ -101,9 +101,9 @@ function constraint_converter_current(pm::_PM.AbstractPowerModel, i::Int; nw::In
     constraint_converter_current(pm, nw, i, Vmax, Imax)
 end
 
-function constraint_active_conv_setpoint(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+function constraint_active_conv_setpoint(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default, slack = nothing)
     conv = _PM.ref(pm, nw, :convdc, i)
-    constraint_active_conv_setpoint(pm, nw, conv["index"], conv["P_g"])
+    constraint_active_conv_setpoint(pm, nw, conv["index"], conv["P_g"], slack)
 end
 
 function constraint_reactive_conv_setpoint(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)

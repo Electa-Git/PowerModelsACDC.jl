@@ -19,10 +19,20 @@ function constraint_power_balance_dc(pm::_PM.AbstractPowerModel, n::Int, i::Int,
 end
 
 "`pconv[i] == pconv`"
-function constraint_active_conv_setpoint(pm::_PM.AbstractPowerModel, n::Int, i, pconv)
+function constraint_active_conv_setpoint(pm::_PM.AbstractPowerModel, n::Int, i, pconv, slack)
     pconv_var = _PM.var(pm, n, :pconv_tf_fr, i)
 
-    JuMP.@constraint(pm.model, pconv_var == -pconv)
+    if slack == nothing
+        JuMP.@constraint(pm.model, pconv_var == -pconv)
+    else
+        if pconv >= 0
+            JuMP.@constraint(pm.model, pconv_var >= pconv - (pconv * slack))
+            JuMP.@constraint(pm.model, pconv_var <= pconv + (pconv * slack))
+        else
+            JuMP.@constraint(pm.model, pconv_var >= pconv + (pconv * slack))
+            JuMP.@constraint(pm.model, pconv_var <= pconv - (pconv * slack))
+        end
+    end
 end
 
 "`qconv[i] == qconv`"

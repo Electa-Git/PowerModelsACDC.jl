@@ -184,12 +184,13 @@ end
 function constraint_ohms_y_to_pst(pm::_PM.AbstractDCPModel, n::Int, i::Int, f_bus, t_bus, f_idx, t_idx, g, b, g_to, b_to)
     alpha = _PM.var(pm, n,  :psta, i)
     p_to  = _PM.var(pm, n,  :ppst, t_idx)
+    p_f = _PM.var(pm, n,  :ppst, f_idx)
     vm = 1
     va_fr = _PM.var(pm, n, :va, f_bus)
     va_to = _PM.var(pm, n, :va, t_bus)
 
-    JuMP.@constraint(pm.model, p_to ==  -b * vm * (va_to - va_fr + alpha))
-    end
+    JuMP.@constraint(pm.model, p_to == - p_f)
+end
 
 function constraint_limits_pst(pm::_PM.AbstractDCPModel, i::Int; nw::Int=_PM.nw_id_default)
     pst = _PM.ref(pm, nw, :pst, i)
@@ -260,32 +261,6 @@ function constraint_limits_pst(pm::_PM.AbstractLPACModel, i::Int; nw::Int=_PM.nw
 
     JuMP.@constraint(pm.model, p_fr^2 + q_fr^2 <= srated^2)
     JuMP.@constraint(pm.model, p_to^2 + q_to^2 <= srated^2)
-    JuMP.@constraint(pm.model, alpha <= angmax)
-    JuMP.@constraint(pm.model, alpha >= angmin)
-end
-
-# NF
-function constraint_ohms_y_from_pst(pm::_PM.AbstractAPLossLessModels, n::Int, i::Int, f_bus, t_bus, f_idx, t_idx, g, b, g_fr, b_fr)
-end
-function constraint_ohms_y_to_pst(pm::_PM.AbstractAPLossLessModels, n::Int, i::Int, f_bus, t_bus, f_idx, t_idx, g, b, g_fr, b_fr)
-end
-function constraint_limits_pst(pm::_PM.AbstractAPLossLessModels, i::Int; nw::Int=_PM.nw_id_default)
-    pst = _PM.ref(pm, nw, :pst, i)
-    srated = pst["rate_a"]
-    angmin = pst["angmin"]
-    angmax = pst["angmax"]
-
-    f_bus = pst["f_bus"]
-    t_bus = pst["t_bus"]
-    f_idx = (i, f_bus, t_bus)
-    t_idx = (i, t_bus, f_bus)
-
-    alpha = _PM.var(pm, nw,  :psta, i)
-    p_fr  = _PM.var(pm, nw,  :ppst, f_idx)
-    p_to  = _PM.var(pm, nw,  :ppst, t_idx)
-
-    JuMP.@constraint(pm.model, -srated <= p_fr <= srated)
-    JuMP.@constraint(pm.model, -srated <= p_to <= srated)
     JuMP.@constraint(pm.model, alpha <= angmax)
     JuMP.@constraint(pm.model, alpha >= angmin)
 end

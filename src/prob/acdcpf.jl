@@ -3,7 +3,7 @@ export solve_acdcpf
 ""
 function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
-    PowerModelsACDC.process_additional_data!(data)
+    process_additional_data!(data)
     return solve_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
 end
 

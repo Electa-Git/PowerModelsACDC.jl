@@ -85,6 +85,35 @@ function variable_generator_state_mdt_relax(pm::_PM.AbstractPowerModel; nw::Int=
     report && _PM.sol_component_value(pm, nw, :gen, :gamma_g, _PM.ids(pm, nw, :gen), gamma_g)
 end
 
+"Collect generator redispatch variables"
+function variable_generator_redispatch(pm; kwargs...)
+    variable_generator_redispatch_up(pm; kwargs...)
+    variable_generator_redispatch_down(pm; kwargs...)
+end
+
+
+"Variable for upwards generator redispatch each time step"
+function variable_generator_redispatch_up(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
+    dpg_up = _PM.var(pm, nw)[:dpg_up] = JuMP.@variable(pm.model,
+        [i in _PM.ids(pm, nw, :gen)], base_name="$(nw)_dpg_up",
+        lower_bound = 0,
+        upper_bound = 2 * max(0, _PM.ref(pm, nw, :gen, i, "pmax")),
+        start = 0
+    )
+    report && _PM.sol_component_value(pm, nw, :gen, :dpg_up, _PM.ids(pm, nw, :gen), dpg_up)
+end
+
+"Variable for upwards generator redispatch each time step"
+function variable_generator_redispatch_down(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
+    dpg_down = _PM.var(pm, nw)[:dpg_down] = JuMP.@variable(pm.model,
+        [i in _PM.ids(pm, nw, :gen)], base_name="$(nw)_dpg_down",
+        lower_bound = 0,
+        upper_bound = 2 * max(0, _PM.ref(pm, nw, :gen, i, "pmax")),
+        start = 0
+    )
+    report && _PM.sol_component_value(pm, nw, :gen, :dpg_down, _PM.ids(pm, nw, :gen), dpg_down)
+end
+
 # Constraint templates:
 "Defines system-wide generator inertia limits in given market zone"
 function constraint_generator_inertia_limit(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
@@ -114,7 +143,7 @@ function constraint_generator_on_off(pm::_PM.AbstractPowerModel, i::Int; nw::Int
     if second_stage == false
         constraint_generator_on_off(pm, nw, i, pmax, pmin, status)
     else
-        nw_ref = get_reference_network_id(pm, nw)
+        nw_ref = get_reference_network_id(pm, nw; uc = true)
         constraint_generator_on_off(pm, nw, nw_ref, i, pmax, pmin, status)
     end
 end
@@ -125,13 +154,13 @@ function constraint_generator_status(pm::_PM.AbstractPowerModel, i::Int; nw::Int
 end
 "Generator status indicator constraint for unit commitment model"
 function constraint_generator_status_uc(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
-    previous_hour_network = get_previous_hour_network_id(pm, nw)
+    previous_hour_network = get_previous_hour_network_id(pm, nw; uc = true)
 
     constraint_generator_status_uc(pm, nw, i, previous_hour_network)
 end
 "Generator status indicator constraint for unit commitment model dunring generator contingency"
 function constraint_generator_status_cont(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     constraint_generator_status_cont(pm, nw, i, reference_network_idx)
 end
 
@@ -146,7 +175,7 @@ function constraint_generator_decisions(pm::_PM.AbstractPowerModel, i::Int, nw::
     if nw == 1
         constraint_initial_generator_decisions(pm, i, nw)
     else
-        previous_hour_network = get_previous_hour_network_id(pm, nw)
+        previous_hour_network = get_previous_hour_network_id(pm, nw; uc = true)
         constraint_generator_decisions(pm, i, nw, previous_hour_network)
         constraint_generator_ramping(pm, i, nw, previous_hour_network)
     end
@@ -194,6 +223,15 @@ end
 
 function constraint_unit_commitment_reserves(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
     return constraint_unit_commitment_reserves(pm, i, nw)
+end
+
+function constraint_generator_redispatch(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    gen     = _PM.ref(pm, nw, :gen, i)
+
+    if haskey(gen, "pg")
+        pg_ref  = gen["pg"]
+        constraint_generator_redispatch(pm, nw, i, pg_ref)
+    end
 end
 
 #################################################
@@ -301,22 +339,6 @@ function constraint_generator_on_off(pm::_PM.AbstractDCPModel, n::Int, nw_ref, i
     JuMP.@constraint(pm.model,  pg >= pmin * alpha_g)
     JuMP.@constraint(pm.model,  alpha_g >= status)
 end
-
-function constraint_storage_on_off(pm::_PM.AbstractDCPModel, n::Int, i, charge_rating, discharge_rating)
-    pc = _PM.var(pm, n, :sc, i)
-    pd = _PM.var(pm, n, :sd, i)
-    ps = _PM.var(pm, n, :ps, i)
-    alpha_s = _PM.var(pm, n, :alpha_s, i)
-
-    JuMP.@constraint(pm.model,  pc <= charge_rating * alpha_s)
-    JuMP.@constraint(pm.model,  pc >= 0)
-    JuMP.@constraint(pm.model,  pd <= discharge_rating * alpha_s)
-    JuMP.@constraint(pm.model,  pd >= 0)
-    JuMP.@constraint(pm.model,  ps <= discharge_rating * alpha_s)
-    JuMP.@constraint(pm.model,  ps >= -discharge_rating * alpha_s)
-end
-
-
 
 # Generator related constraints NF:
 

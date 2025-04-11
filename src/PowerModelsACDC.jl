@@ -31,21 +31,23 @@ include("prob/acdcopf_iv.jl")
 include("prob/tnep.jl")
 include("prob/sacdcpf.jl")
 include("prob/uc.jl")
-
-
+include("prob/rdopf.jl")
 
 include("core/solution.jl")
 include("core/data.jl")
-include("core/variabledcgrid.jl")
-include("core/variableconv.jl")
 include("core/base.jl")
 include("core/constraint.jl")
+include("core/constraint_template.jl")
 include("core/objective.jl")
 include("core/relaxation_scheme.jl")
-include("core/demand.jl")
-include("core/gen.jl")
-include("core/pst.jl")
 include("core/util.jl")
+
+include("components/demand.jl")
+include("components/gen.jl")
+include("components/pst.jl")
+include("components/dcbranch.jl")
+include("components/dcconverter.jl")
+include("components/storage.jl")
 
 include("formdcgrid/acp.jl")
 include("formdcgrid/acr.jl")
@@ -67,7 +69,6 @@ include("formconv/lpac.jl")
 include("formconv/shared.jl")
 include("formconv/iv.jl")
 
-include("core/constraint_template.jl")
 include("io/multinetwork.jl")
 include("io/results.jl")
 end

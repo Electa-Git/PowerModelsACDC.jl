@@ -251,6 +251,9 @@ function build_mp_tnep(pm::_PM.AbstractPowerModel)
                 constraint_conv_firing_angle_ne(pm, i; nw = n)
             end
         end
+        if haskey(_PM.ref(pm, n), :storage)
+            storage_constraints(pm, n; uc = false)
+        end
     end
 end
 
@@ -476,6 +479,10 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
             if pm.ref[:it][:pm][:nw][n][:convdc_ne][i]["islcc"] == 1
                 constraint_conv_firing_angle_ne(pm, i; nw = n)
             end
+        end
+
+        if haskey(_PM.ref(pm, n), :storage)
+            storage_constraints(pm, n; uc = false)
         end
     end
 end

@@ -3,7 +3,7 @@ export solve_acdcopf
 ""
 function solve_acdcopf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
-    PowerModelsACDC.process_additional_data!(data)
+    process_additional_data!(data)
     return solve_acdcopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
 end
 
@@ -26,7 +26,7 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
     variable_flexible_demand(pm)
     variable_pst(pm)
 
-    _PM.objective_min_fuel_cost(pm)
+    objective_min_operational_cost(pm)
 
     _PM.constraint_model_voltage(pm)
     constraint_voltage_dc(pm)

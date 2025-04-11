@@ -38,6 +38,8 @@ include("pf.jl")
 
 include("opf.jl")
 
+include("cbaopf.jl")
+
 include("tnep.jl")
 
 include("spf.jl")

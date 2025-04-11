@@ -81,6 +81,7 @@ function constraint_total_flexible_demand(pm::_PM.AbstractPowerModel, i::Int; nw
     load     = _PM.ref(pm, nw, :load, i)
     pd       = load["pd"]
     pf_angle = atan(load["qd"] / load["pd"]) # Power factor angle, in radians
+
     constraint_total_flexible_demand(pm, nw, i, pd, pf_angle)
 end
 
@@ -184,7 +185,7 @@ end
 
 function constraint_total_fixed_demand(pm::_PM.AbstractDCPModel, n::Int, i, pd, qd, pf_angle)
     pflex  = _PM.var(pm, n, :pflex, i)
-    pcurt       = _PM.var(pm, n, :pcurt, i)
+    pcurt  = _PM.var(pm, n, :pcurt, i)
 
     # Active power demand is the reference demand `pd` plus the contributions from all the demand flexibility decision variables
     JuMP.@constraint(pm.model, pflex == pd)
@@ -196,7 +197,6 @@ function constraint_total_flexible_demand(pm::_PM.AbstractLPACModel, n::Int, i, 
     qflex       = _PM.var(pm, n, :qflex, i)
     pcurt       = _PM.var(pm, n, :pcurt, i)
     pred        = _PM.var(pm, n, :pred, i)
-
     # Active power demand is the reference demand `pd` plus the contributions from all the demand flexibility decision variables
     JuMP.@constraint(pm.model, pflex == pd - pcurt - pred)
 
@@ -221,7 +221,6 @@ function constraint_total_flexible_demand(pm::_PM.AbstractAPLossLessModels, n::I
     pflex       = _PM.var(pm, n, :pflex, i)
     pcurt       = _PM.var(pm, n, :pcurt, i)
     pred        = _PM.var(pm, n, :pred, i)
-
     # Active power demand is the reference demand `pd` plus the contributions from all the demand flexibility decision variables
     JuMP.@constraint(pm.model, pflex == pd - pcurt - pred)
 end
@@ -240,7 +239,6 @@ function constraint_total_flexible_demand(pm::_PM.AbstractWModels, n::Int, i, pd
     qflex       = _PM.var(pm, n, :qflex, i)
     pcurt       = _PM.var(pm, n, :pcurt, i)
     pred        = _PM.var(pm, n, :pred, i)
-
     # Active power demand is the reference demand `pd` plus the contributions from all the demand flexibility decision variables
     JuMP.@constraint(pm.model, pflex == pd - pcurt - pred)
 
