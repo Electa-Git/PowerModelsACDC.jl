@@ -212,7 +212,7 @@ end
 "Generator ramping constraint for unit commitment model"
 function constraint_generator_ramping(pm::_PM.AbstractPowerModel, i::Int, nw::Int, previous_hour_network)
     gen = _PM.ref(pm, nw, :gen, i)
-    Δt = _PM.ref(pm, nw, :frequency_parameters)["uc_time_interval"]
+    Δt = _PM.ref(pm, nw, :uc_parameters)["time_interval"]
     pmax = gen["pmax"]
     pmin = gen["pmin"]
     ΔPg_up = gen["ramp_rate"] * Δt * pmax
@@ -234,6 +234,28 @@ function constraint_generator_redispatch(pm::_PM.AbstractPowerModel, i::Int; nw:
     end
 end
 
+"Modelling generator power balance when providing FCR"
+function constraint_generator_fcr_power_balance(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    reference_network_idx = get_reference_network_id(pm, nw)
+
+    constraint_generator_fcr_power_balance(pm, i, nw, reference_network_idx)
+end
+
+"Modelling generator FCR contribution"
+function constraint_generator_fcr_contribution(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    gen = _PM.ref(pm, nw, :gen, i)
+    ramp_rate = gen["ramp_rate_per_s"]
+
+    ΔTin = _PM.ref(pm, nw, :frequency_parameters)["t_fcr"]
+    ΔTdroop = _PM.ref(pm, nw, :frequency_parameters)["t_fcrd"]
+
+    return constraint_generator_fcr_contribution(pm, i, nw, ramp_rate, ΔTin, ΔTdroop)
+end
+
+"Absolute value of generator FCR contribution for post processing"
+function constraint_generator_fcr_contribution_abs(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    constraint_generator_fcr_contribution_abs(pm, i, nw)
+end
 #################################################
 # Generator realetd constraints form independent:
 #################################################
@@ -302,6 +324,34 @@ function constraint_minimum_generator_down_time(pm::_PM.AbstractPowerModel, i::I
 
     JuMP.@constraint(pm.model, (1 - alpha_n) >= sum([_PM.var(pm, t, :gamma_g, i) for t in τ]))
 end
+
+"Modelling generator power balance when providing FCR"
+function constraint_generator_fcr_power_balance(pm::_PM.AbstractPowerModel, i::Int, n::Int, reference_network_idx)
+    pg = _PM.var(pm, n, :pg, i)
+    pg_ref = _PM.var(pm, reference_network_idx, :pg, i)
+    pg_droop = _PM.var(pm, n, :pg_droop, i)
+
+    JuMP.@constraint(pm.model, pg == pg_ref + pg_droop)
+end
+
+"Modelling generator FCR contribution"
+function constraint_generator_fcr_contribution(pm::_PM.AbstractPowerModel, i::Int, n::Int, ramp_rate, ΔTin, ΔTdroop)
+    pg_droop = _PM.var(pm, n, :pg_droop, i)
+
+    JuMP.@constraint(pm.model, pg_droop >= - ramp_rate * (ΔTdroop - ΔTin))
+    JuMP.@constraint(pm.model, pg_droop <=   ramp_rate * (ΔTdroop - ΔTin))
+end
+
+"Absolute value of generatoe FCR contribution for post processing"
+function  constraint_generator_fcr_contribution_abs(pm::_PM.AbstractPowerModel, i::Int, n::Int)
+    pg_droop = _PM.var(pm, n, :pg_droop, i)
+    pg_droop_abs = _PM.var(pm, n, :pg_droop_abs, i)
+
+    JuMP.@constraint(pm.model, pg_droop_abs >=  pg_droop)
+    JuMP.@constraint(pm.model, pg_droop_abs >= -pg_droop)
+end
+
+
 ######################################
 # Generator realetd constraints DCP:
 ######################################

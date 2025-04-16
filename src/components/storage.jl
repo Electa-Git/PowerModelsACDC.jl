@@ -58,3 +58,34 @@ function constraint_storage_on_off(pm::_PM.AbstractDCPModel, n::Int, i, charge_r
     JuMP.@constraint(pm.model,  ps <= discharge_rating * alpha_s)
     JuMP.@constraint(pm.model,  ps >= -discharge_rating * alpha_s)
 end
+
+## Reserve raletd constraints
+function constraint_storage_fcr_contribution(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    storage = _PM.ref(pm, nw, :storage, i)
+    ramp_rate = storage["ramp_rate_per_s"]
+
+    ΔTin = _PM.ref(pm, nw, :frequency_parameters)["t_fcr"]
+    ΔTdroop = _PM.ref(pm, nw, :frequency_parameters)["t_fcrd"]
+
+    return constraint_storage_fcr_contribution(pm, i, nw, ramp_rate, ΔTin, ΔTdroop)
+end
+
+function constraint_storage_fcr_contribution_abs(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    constraint_storage_fcr_contribution_abs(pm, i, nw)
+end
+
+function constraint_storage_fcr_contribution(pm::_PM.AbstractPowerModel, i::Int, n::Int, ramp_rate, ΔTin, ΔTdroop)
+    ps_droop = _PM.var(pm, n, :ps_droop, i)
+
+    JuMP.@constraint(pm.model, ps_droop >= - ramp_rate * (ΔTdroop - ΔTin))
+    JuMP.@constraint(pm.model, ps_droop <=   ramp_rate * (ΔTdroop - ΔTin))
+end
+
+
+function  constraint_storage_fcr_contribution_abs(pm::_PM.AbstractPowerModel, i::Int, n::Int)
+    ps_droop = _PM.var(pm, n, :ps_droop, i)
+    ps_droop_abs = _PM.var(pm, n, :ps_droop_abs, i)
+
+    JuMP.@constraint(pm.model, ps_droop_abs >=  ps_droop)
+    JuMP.@constraint(pm.model, ps_droop_abs >= -ps_droop)
+end

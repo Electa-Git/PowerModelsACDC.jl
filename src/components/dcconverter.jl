@@ -1000,3 +1000,33 @@ end
 function variable_cos_voltage_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     #only for lpac
 end
+
+
+########### Frequency related constraints ############
+function constraint_converter_reserve_contribution_absolute(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    constraint_converter_reserve_contribution_absolute(pm, i, nw)
+end
+
+function  constraint_converter_reserve_contribution_absolute(pm::_PM.AbstractPowerModel, i::Int, n::Int)
+    pconv_in = _PM.var(pm, n, :pconv_in, i)
+    pconv_in_abs = _PM.var(pm, n, :pconv_in_abs, i)
+
+    JuMP.@constraint(pm.model, pconv_in_abs >=  pconv_in)
+    JuMP.@constraint(pm.model, pconv_in_abs >= -pconv_in)
+end
+
+"Making sure that the converter power balance between the reference hours and corresponding contingencies is kept"
+function constraint_converter_power_balance(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
+
+    constraint_converter_power_balance(pm, i, nw, reference_network_idx)
+end
+
+"Making sure that the converter power balance between the reference hours and corresponding contingencies is kept"
+function constraint_converter_power_balance(pm::_PM.AbstractPowerModel, i::Int, n::Int, reference_network_idx)
+    pconv = _PM.var(pm, n, :pconv_ac, i)
+    pconv_ref = _PM.var(pm, reference_network_idx, :pconv_ac, i)
+    pconv_in = _PM.var(pm, n, :pconv_in, i)
+
+    JuMP.@constraint(pm.model, pconv == pconv_ref - pconv_in)
+end

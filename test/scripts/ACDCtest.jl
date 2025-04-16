@@ -29,11 +29,12 @@ ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_le
 
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
-result = _PMACDC.run_acdcpf(file, _PM.ACRPowerModel, ipopt; setting = s)
-result_droop = _PMACDC.run_acdcpf(file_pf_droop, _PM.ACRPowerModel, ipopt; setting = s)
-result = _PMACDC.run_acdcpf(file_case3120, _PM.ACRPowerModel, ipopt; setting = s)
-# resultAC = _PMACDC.run_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
+result = _PMACDC.solve_acdcpf(file, _PM.ACRPowerModel, ipopt; setting = s)
+result_droop = _PMACDC.solve_acdcpf(file_pf_droop, _PM.ACRPowerModel, ipopt; setting = s)
+result = _PMACDC.solve_acdcpf(file_case3120, _PM.ACRPowerModel, ipopt; setting = s)
 
+resultAC = _PMACDC.solve_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
+resultACSOCBIM = _PM.solve_acdcopf(file, _PM.SOCWRPowerModel, ipopt; setting = s)
 # resultLPAC = _PMACDC.run_acdcopf(file, _PM.LPACCPowerModel, ipopt; setting = s)
 
 # resultQC = _PMACDC.run_acdcopf(file, _PM.QCRMPowerModel, ipopt; setting = s)

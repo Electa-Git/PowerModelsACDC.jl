@@ -31,6 +31,7 @@ include("prob/acdcopf_iv.jl")
 include("prob/tnep.jl")
 include("prob/sacdcpf.jl")
 include("prob/uc.jl")
+include("prob/fcuc.jl")
 include("prob/rdopf.jl")
 
 include("core/solution.jl")
@@ -41,6 +42,9 @@ include("core/constraint_template.jl")
 include("core/objective.jl")
 include("core/relaxation_scheme.jl")
 include("core/util.jl")
+
+include("security/contingency.jl")
+include("security/frequency.jl")
 
 include("components/demand.jl")
 include("components/gen.jl")

@@ -64,12 +64,18 @@ function calc_gen_cost(pm::_PM.AbstractPowerModel; report::Bool=true, components
     return gen_cost
 end
 
-function calc_load_operational_cost(pm::_PM.AbstractPowerModel; components = [])
+function calc_load_operational_cost(pm::_PM.AbstractPowerModel; components = [], network_ids = "all")
     load_cost_red = Dict()
     load_cost_curt = Dict()
+    if network_ids == "all"
+        n_ids  = _PM.nw_ids(pm)
+    else
+        n_ids =  pm.ref[:it][:pm][:hour_ids]
+    end
     if any(components .== "demand")
-        for (n, nw_ref) in _PM.nws(pm)
-            for (i,load) in nw_ref[:load]
+        println(n_ids)
+        for n in n_ids
+            for (i,load) in _PM.nws(pm)[n][:load]
                 p_red = _PM.var(pm, n, :pred, i)
                 p_curt = _PM.var(pm, n, :pcurt, i)
                 load_cost_red[(n,i)] = load["cost_red"]  * p_red
@@ -87,7 +93,6 @@ function calc_load_operational_cost(pm::_PM.AbstractPowerModel; components = [])
 
     return load_cost_red, load_cost_curt
 end
-
 
 function objective_min_rd_cost(pm::_PM.AbstractPowerModel; report::Bool=true)
     if haskey(pm.setting, "objective_components")
@@ -183,4 +188,45 @@ function calculate_capex_cost(pm::_PM.AbstractPowerModel; components = [])
         end
     end
     return ac_branch_cost, dc_branch_cost, dc_converter_cost
+end
+
+function objective_min_cost_fcuc(pm::_PM.AbstractPowerModel; report::Bool=true, droop = false)
+    gen_cost = calc_gen_cost(pm)
+    ffr_cost, fcr_cost = calc_reserve_cost(pm; droop = droop) #; components = ["fcr", "ffr"]) 
+    load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = ["demand"], network_ids = "hours")
+
+    return JuMP.@objective(pm.model, Min,
+        sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gen]) for n in pm.ref[:it][:pm][:hour_ids]) 
+        + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in pm.ref[:it][:pm][:hour_ids])
+        + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in pm.ref[:it][:pm][:hour_ids])
+        + sum( sum( ffr_cost[(n,i)] for (i,conv) in _PM.nws(pm)[n][:convdc]) for n in pm.ref[:it][:pm][:hour_ids])
+        + sum( sum( fcr_cost[(n,i)] for (i,gen) in nw_ref[:gen]) for (n, nw_ref) in _PM.nws(pm))
+    )
+end
+
+
+function calc_reserve_cost(pm; droop = false)
+    ffr_cost = Dict()
+    fcr_cost = Dict()
+
+    for (n, network) in pm.ref[:it][:pm][:nw]
+        for (i,gen) in _PM.nws(pm)[n][:gen]
+            if n == 1 || droop == false
+                fcr_cost[(n,i)] = 0.0
+            else
+                pgd =  _PM.var(pm, n, :pg_droop_abs, i)
+                fcr_cost[(n,i)] = (pgd * network[:frequency_parameters]["fcr_cost"])
+            end
+        end
+
+        for (c, conv) in _PM.nws(pm)[n][:convdc]
+            if n == 1
+                ffr_cost[(n,c)] = 0.0
+            else
+                pconv =  _PM.var(pm, n, :pconv_in_abs, c)
+                ffr_cost[(n,c)] = (pconv * network[:frequency_parameters]["ffr_cost"]) * 1/2  # as it is summed-up
+            end
+        end
+    end
+    return ffr_cost, fcr_cost
 end
