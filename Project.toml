@@ -13,7 +13,7 @@ PowerModels = "c36e90e8-916a-50a6-bd94-075b64ef4655"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-HiGHS = "~0.3, ~1.4, ~1.7, ~1.9"
+HiGHS = "~1.4, ~1.7, ~1.9, ~1.15"
 InfrastructureModels = "~0.6, ~0.7"
 Ipopt = "~0.8, ~0.9, 1"
 JuMP = "~0.22.0, ~0.23, ~1"
