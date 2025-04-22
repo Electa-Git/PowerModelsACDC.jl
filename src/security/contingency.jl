@@ -176,9 +176,7 @@ function constraint_generator_contingencies(pm::_PM.AbstractPowerModel; nw::Int 
 end
 
 function constraint_generator_contingency(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
-
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     if haskey(_PM.ref(pm, nw), :excluded_zones)
         excluded_zones = _PM.ref(pm, nw, :excluded_zones)
     else
@@ -195,7 +193,7 @@ function constraint_generator_contingency(pm::_PM.AbstractPowerModel; nw::Int = 
 end
 
 function constraint_generator_contingency_indicator(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
 
     bigM = 2 * maximum([gen["pmax"] for (g, gen) in _PM.ref(pm, nw, :gen)])
     gen = _PM.ref(pm, nw, :gen, i)
@@ -215,7 +213,7 @@ function constraint_generator_contingency_indicator(pm::_PM.AbstractPowerModel, 
 end
 
 function constraint_select_generator_contingency(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     if haskey(_PM.ref(pm, nw), :excluded_zones)
         excluded_zones = _PM.ref(pm, nw, :excluded_zones)
     else
@@ -269,7 +267,7 @@ function constraint_converter_contingencies(pm::_PM.AbstractPowerModel; nw::Int 
 end
 
 function constraint_converter_contingency(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     if haskey(_PM.ref(pm, nw), :excluded_zones)
         excluded_zones = _PM.ref(pm, nw, :excluded_zones)
     else
@@ -286,7 +284,7 @@ function constraint_converter_contingency(pm::_PM.AbstractPowerModel; nw::Int = 
 end
 
 function constraint_converter_contingency_indicator(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     bigM = 2 * maximum([conv["Pacrated"] for (c, conv) in _PM.ref(pm, nw, :convdc)])
 
     conv = _PM.ref(pm, nw, :convdc, i)
@@ -306,7 +304,7 @@ function constraint_converter_contingency_indicator(pm::_PM.AbstractPowerModel, 
 end
 
 function constraint_select_converter_contingency(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     if haskey(_PM.ref(pm, nw), :excluded_zones)
         excluded_zones = _PM.ref(pm, nw, :excluded_zones)
     else
@@ -356,8 +354,8 @@ function constraint_contingent_converter(pm::_PM.AbstractPowerModel, n::Int, ref
     δc = _PM.var(pm, ref_id, :delta_c_plus)
     pconv_in = _PM.var(pm, n, :pconv_in)
     for (c, conv) in zone_convs
-        JuMP.@constraint(pm.model, -2 * _PM.ref(pm, ref_id, :convdc, c)["Pacrated"] * δc[c] <= pconv_in[c]) 
-        JuMP.@constraint(pm.model,  2 * _PM.ref(pm, ref_id, :convdc, c)["Pacrated"] * δc[c] >= pconv_in[c])
+        JuMP.@constraint(pm.model, -2 * _PM.ref(pm, ref_id, :convdc, c)["Pacrated"] * (1 - δc[c]) <= pconv_in[c]) 
+        JuMP.@constraint(pm.model,  2 * _PM.ref(pm, ref_id, :convdc, c)["Pacrated"] * (1 - δc[c]) >= pconv_in[c])
     end
 end
 
@@ -375,7 +373,7 @@ end
 
 
 function constraint_tieline_contingency(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     areas = [i for i in _PM.ids(pm, nw, :areas)]
     for area in areas
         for (t, tieline) in _PM.ref(pm, nw, :tie_lines)
@@ -390,7 +388,7 @@ function constraint_tieline_contingency(pm::_PM.AbstractPowerModel; nw::Int = _P
 end
 
 function constraint_tieline_contingency_indicator(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     bigM = 2 * maximum([branch["rate_a"] for (b, branch) in _PM.ref(pm, nw, :branch)])
 
     tieline = _PM.ref(pm, nw, :tie_lines, i)
@@ -407,7 +405,7 @@ function constraint_tieline_contingency_indicator(pm::_PM.AbstractPowerModel, i:
 end
 
 function constraint_select_tieline_contingency(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     areas = [i for i in _PM.ids(pm, nw, :areas)]
     for area in areas
         tielines = []
@@ -463,9 +461,9 @@ end
 
 
 function constraint_storage_contingency(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
 
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     if haskey(_PM.ref(pm, nw), :excluded_zones)
         excluded_zones = _PM.ref(pm, nw, :excluded_zones)
     else
@@ -482,7 +480,7 @@ function constraint_storage_contingency(pm::_PM.AbstractPowerModel; nw::Int = _P
 end
 
 function constraint_storage_contingency_indicator(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
 
     bigM = 2 * maximum([storage["thermal_rating"] for (s, storage) in _PM.ref(pm, nw, :storage)])
     storage = _PM.ref(pm, nw, :storage, i)
@@ -502,7 +500,7 @@ function constraint_storage_contingency_indicator(pm::_PM.AbstractPowerModel, i:
 end
 
 function constraint_select_storage_contingency(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
-    reference_network_idx = get_reference_network_id(pm, nw)
+    reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     if haskey(_PM.ref(pm, nw), :excluded_zones)
         excluded_zones = _PM.ref(pm, nw, :excluded_zones)
     else

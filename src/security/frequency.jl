@@ -332,12 +332,11 @@ function constraint_frequency_generator_contingency(pm::_PM.AbstractPowerModel, 
 
 
     if isempty(zone_convs) || hvdc_contribution == false
-        dc_contribution_in = 0
-        dc_contribution_droop = 0
-    else
-        dc_contribution_in = calculate_hvdc_ffr_contribution(pconv_in, ΔTin, zone_convs)
-        dc_contribution_droop = calculate_hvdc_fcr_contribution(pconv_in, ΔTin, ΔTdroop, zone_convs)
+        JuMP.@constraint(pm.model, [(c, conv) in zone_convs], pconv_in[c] == 0)
     end
+  
+    dc_contribution_in = calculate_hvdc_ffr_contribution(pconv_in, ΔTin, zone_convs)
+    dc_contribution_droop = calculate_hvdc_fcr_contribution(pconv_in, ΔTin, ΔTdroop, zone_convs)
 
     gen_contribution_droop = calculate_generator_fcr_contribution(pg_droop, ΔTin, ΔTdroop, generator_properties)
     storage_contribution_droop = calculate_storage_fcr_contribution(ps_droop, ΔTin, ΔTdroop, storage_properties)
@@ -491,14 +490,11 @@ function constraint_frequency_converter_contingency(pm::_PM.AbstractPowerModel, 
     dc_contr = _PM.var(pm, n, :dc_contr, zone)
 
     if isempty(zone_convs) || hvdc_contribution == false
-        dc_contribution_in = 0
-        dc_contribution_droop = 0
-        constraint_contingent_converter(pm, n, ref_id, zone_convs, direction)
-    else
-        dc_contribution_in = calculate_hvdc_ffr_contribution(pconv_in, ΔTin, zone_convs)
-        dc_contribution_droop = calculate_hvdc_fcr_contribution(pconv_in, ΔTin, ΔTdroop, zone_convs)
-        constraint_contingent_converter(pm, n, ref_id, zone_convs, direction)
+        JuMP.@constraint(pm.model, [(c, conv) in zone_convs], pconv_in[c] == 0)
     end
+  
+    dc_contribution_in = calculate_hvdc_ffr_contribution(pconv_in, ΔTin, zone_convs)
+    dc_contribution_droop = calculate_hvdc_fcr_contribution(pconv_in, ΔTin, ΔTdroop, zone_convs)
 
     gen_contribution_droop = calculate_generator_fcr_contribution(pg_droop, ΔTin, ΔTdroop, generator_properties)
     storage_contribution_droop = calculate_storage_fcr_contribution(ps_droop, ΔTin, ΔTdroop, storage_properties)
@@ -657,12 +653,11 @@ function constraint_frequency_storage_contingency(pm::_PM.AbstractPowerModel, n:
     dc_contr = _PM.var(pm, n, :dc_contr, zone)
 
     if isempty(zone_convs) || hvdc_contribution == false
-        dc_contribution_in = 0
-        dc_contribution_droop = 0
-    else
-        dc_contribution_in = calculate_hvdc_ffr_contribution(pconv_in, ΔTin, zone_convs)
-        dc_contribution_droop = calculate_hvdc_fcr_contribution(pconv_in, ΔTin, ΔTdroop, zone_convs)
+        JuMP.@constraint(pm.model, [(c, conv) in zone_convs], pconv_in[c] == 0)
     end
+  
+    dc_contribution_in = calculate_hvdc_ffr_contribution(pconv_in, ΔTin, zone_convs)
+    dc_contribution_droop = calculate_hvdc_fcr_contribution(pconv_in, ΔTin, ΔTdroop, zone_convs)
 
     gen_contribution_droop = calculate_generator_fcr_contribution(pg_droop, ΔTin, ΔTdroop, generator_properties)
     storage_contribution_droop = calculate_storage_fcr_contribution(ps_droop, ΔTin, ΔTdroop, storage_properties)
@@ -817,13 +812,12 @@ function constraint_frequency_tieline_contingency(pm::_PM.AbstractPowerModel, n:
     htot = _PM.var(pm, n, :htot_area, area)
     dc_contr = _PM.var(pm, n, :dc_contr_area, area)
 
-    if isempty(area_convs) || hvdc_contribution == false
-        dc_contribution_in = 0
-        dc_contribution_droop = 0
-    else
-        dc_contribution_in = calculate_hvdc_ffr_contribution(pconv_in, ΔTin, area_convs)
-        dc_contribution_droop = calculate_hvdc_fcr_contribution(pconv_in, ΔTin, ΔTdroop, area_convs)
+    if isempty(zone_convs) || hvdc_contribution == false
+        JuMP.@constraint(pm.model, [(c, conv) in zone_convs], pconv_in[c] == 0)
     end
+  
+    dc_contribution_in = calculate_hvdc_ffr_contribution(pconv_in, ΔTin, zone_convs)
+    dc_contribution_droop = calculate_hvdc_fcr_contribution(pconv_in, ΔTin, ΔTdroop, zone_convs)
 
     gen_contribution_droop = calculate_generator_fcr_contribution(pg_droop, ΔTin, ΔTdroop, generator_properties)
     storage_contribution_droop = calculate_storage_fcr_contribution(ps_droop, ΔTin, ΔTdroop, storage_properties)
