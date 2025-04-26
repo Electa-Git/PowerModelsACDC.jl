@@ -1,5 +1,5 @@
 function solve_uc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_uc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_uc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!], kwargs...)
 end
 
 ""
@@ -18,6 +18,7 @@ function build_uc(pm::_PM.AbstractPowerModel)
         variable_generator_states(pm; nw = n, uc = true)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
+        variable_sssc(pm; nw = n)
         variable_storage_on_off(pm; nw = n)
         constraint_voltage_dc(pm; nw = n)
     end
@@ -68,6 +69,13 @@ function build_uc(pm::_PM.AbstractPowerModel)
             constraint_ohms_y_from_pst(pm, i; nw = n)
             constraint_ohms_y_to_pst(pm, i; nw = n)
             constraint_limits_pst(pm, i; nw = n)
+        end
+
+
+        for i in _PM.ids(pm, n, :sssc)
+            constraint_ohms_y_from_sssc(pm, i; nw = n)
+            constraint_ohms_y_to_sssc(pm, i; nw = n)
+            constraint_limits_sssc(pm, i; nw = n)
         end
 
         if haskey(pm.setting, "fix_cross_border_flows") && pm.setting["fix_cross_border_flows"] == true

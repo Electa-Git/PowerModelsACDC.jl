@@ -360,3 +360,29 @@ function ref_add_storage!(ref::Dict{Symbol,Any}, data::Dict{String,<:Any})
         nw_ref[:bus_storage] = bus_storage
     end
 end
+
+"Add refernce for SSSC"
+function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
+    for (nw, nw_ref) in ref[:it][:pm][:nw]
+        if !haskey(nw_ref, :sssc)
+            nw_ref[:sssc] = Dict()
+            Memento.warn(_LOGGER, "required pst data not found")
+        end
+
+        nw_ref[:sssc] = Dict(x for x in nw_ref[:sssc] if (x.second["br_status"] == 1 && x.second["f_bus"] in keys(nw_ref[:bus]) && x.second["t_bus"] in keys(nw_ref[:bus])))
+
+        nw_ref[:arcs_from_sssc] = [(i,sssc["f_bus"],sssc["t_bus"]) for (i,sssc) in nw_ref[:sssc]]
+        nw_ref[:arcs_to_sssc]   = [(i,sssc["t_bus"],sssc["f_bus"]) for (i,sssc) in nw_ref[:sssc]]
+        nw_ref[:arcs_sssc] = [nw_ref[:arcs_from_sssc]; nw_ref[:arcs_to_sssc]]
+
+        bus_arcs_sssc = Dict((i, []) for (i,bus) in nw_ref[:bus])
+        for (l,i,j) in nw_ref[:arcs_sssc]
+            push!(bus_arcs_sssc[i], (l,i,j))
+        end
+        nw_ref[:bus_arcs_sssc] = bus_arcs_sssc
+
+        # if !haskey(nw_ref, :buspairs_sssc)
+        #     nw_ref[:buspairs_sssc] = _PM.calc_buspair_parameters(nw_ref[:bus], nw_ref[:sssc])
+        # end
+    end
+end

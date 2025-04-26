@@ -29,6 +29,9 @@ function process_additional_data!(data; tnep = false)
     if haskey(data, "pst")
         process_pst_data!(data)
     end
+    if haskey(data, "sssc")
+        process_sssc_data!(data)
+    end
     if haskey(data, "load_flex")
         process_flexible_demand_data!(data)
     end
@@ -92,6 +95,61 @@ function scale_pst_data!(pst, MVAbase)
     _PM._apply_func!(pst, "angle", deg2rad)
     _PM._apply_func!(pst, "angmin", deg2rad)
     _PM._apply_func!(pst, "angmax", deg2rad)
+end
+
+function process_sssc_data!(data)
+    if !haskey(data, "multinetwork") || data["multinetwork"] == false
+        to_pu_single_network_sssc!(data)
+        fix_data_single_network_sssc!(data)
+    else
+        to_pu_multi_network_sssc!(data)
+        fix_data_multi_network_sssc!(data)
+    end
+end
+
+function to_pu_single_network_sssc!(data)
+    MVAbase = data["baseMVA"]
+    for (i, sssc) in data["sssc"]
+        scale_sssc_data!(sssc, MVAbase)
+    end
+end
+
+function fix_data_single_network_sssc!(data)
+    for (i, sssc) in data["sssc"]
+        sssc["g_fr"] = 0
+        sssc["b_fr"] = 0
+        sssc["g_to"] = 0
+        sssc["b_to"] = 0
+        sssc["tap"] = 1.0
+    end
+end
+function to_pu_multi_network_sssc!(data)
+    MVAbase = data["baseMVA"]
+    for (n, network) in data["nw"]
+        MVAbase = network["baseMVA"]
+        for (i, sssc) in network[n]["sssc"]
+            scale_sssc_data!(sssc, MVAbase)
+        end
+    end
+end
+
+function fix_data_multi_network_sssc!(data)
+    for (n, network) in data["nw"]
+        for (i, sssc) in network[n]data["sssc"]
+            sssc["g_fr"] = 0
+            sssc["b_fr"] = 0
+            sssc["g_to"] = 0
+            sssc["b_to"] = 0
+            sssc["tap"] = 1.0
+        end
+    end
+end
+
+function scale_sssc_data!(sssc, MVAbase)
+    rescale_power = x -> x/MVAbase
+    _PM._apply_func!(sssc, "rate_a", rescale_power)
+    _PM._apply_func!(sssc, "rate_b", rescale_power)
+    _PM._apply_func!(sssc, "rate_c", rescale_power)
 end
 
 

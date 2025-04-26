@@ -2,11 +2,11 @@
 function solve_acdcopf_iv(file::String, model_type, optimizer; kwargs...)
     data = _PM.parse_file(file)
     process_additional_data!(data)
-    return solve_acdcopf_iv(data, model_type, optimizer; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
+    return solve_acdcopf_iv(data, model_type, optimizer; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
 end
 
 function solve_acdcopf_iv(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
 end
 
 ""
@@ -26,6 +26,7 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     variable_flexible_demand(pm)
     variable_load_current(pm)
     variable_pst(pm)
+    variable_sssc(pm)
 
     for i in _PM.ids(pm, :ref_buses)
         _PM.constraint_theta_ref(pm, i)
@@ -56,6 +57,10 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
 
     for i in _PM.ids(pm, :pst)
         Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for PSTs")
+    end
+
+    for i in _PM.ids(pm, :sssc)
+        Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for SSSCs")
     end
 
     for i in _PM.ids(pm, :busdc)

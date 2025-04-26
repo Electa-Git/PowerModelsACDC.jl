@@ -58,7 +58,7 @@ end
 
 
 ############# TNEP Constraints #################
-function constraint_power_balance_acdc_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_arcs_pst, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_storage, bus_shunts, gs, bs)
+function constraint_power_balance_acdc_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_arcs_pst, bus_arcs_sssc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_storage, bus_shunts, gs, bs)
     phi = _PM.var(pm, n, :phi, i)
     p = _PM.var(pm, n, :p)
     p_ne = _PM.var(pm,n, :p_ne)
@@ -76,10 +76,13 @@ function constraint_power_balance_acdc_ne(pm::_PM.AbstractLPACModel, n::Int, i::
     qs    = _PM.var(pm, n, :qs)
     ppst    = _PM.var(pm, n,    :ppst)
     qpst    = _PM.var(pm, n,    :qpst)
+    psssc    = _PM.var(pm, n,    :psssc)
+    qsssc    = _PM.var(pm, n,    :qsssc)
     
     cstr_p = JuMP.@constraint(pm.model, 
     sum(p[a] for a in bus_arcs)
     + sum(ppst[a] for a in bus_arcs_pst) 
+    + sum(psssc[a] for a in bus_arcs_sssc) 
     + sum(p_ne[a] for a in bus_arcs_ne) 
     + sum(pconv_grid_ac[c] for c in bus_convs_ac) 
     + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  
@@ -92,6 +95,7 @@ function constraint_power_balance_acdc_ne(pm::_PM.AbstractLPACModel, n::Int, i::
     cstr_q = JuMP.@constraint(pm.model, 
     sum(q[a] for a in bus_arcs)
     + sum(qpst[a] for a in bus_arcs_pst)
+    + sum(qsssc[a] for a in bus_arcs_sssc)
     + sum(q_ne[a] for a in bus_arcs_ne) 
     + sum(qconv_grid_ac[c] for c in bus_convs_ac) 
     + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  

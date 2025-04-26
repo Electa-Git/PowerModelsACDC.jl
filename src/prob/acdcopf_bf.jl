@@ -4,12 +4,12 @@ export solve_acdcopf_bf
 function solve_acdcopf_bf(file::String, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
     data = _PM.parse_file(file)
     process_additional_data!(data)
-    return solve_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
+    return solve_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
 end
 
 ""
 function solve_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
-    return _PM.solve_model(data, model_type, solver, build_acdcopf_bf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_acdcopf_bf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
 end
 
 function build_acdcopf_bf(pm::_PM.AbstractPowerModel)
@@ -25,6 +25,7 @@ function build_acdcopf_bf(pm::_PM.AbstractPowerModel)
     variable_dcgrid_voltage_magnitude(pm)
     variable_flexible_demand(pm)
     variable_pst(pm)
+    variable_sssc(pm)
 
     _PM.objective_min_fuel_cost(pm)
 
@@ -62,6 +63,12 @@ function build_acdcopf_bf(pm::_PM.AbstractPowerModel)
         constraint_ohms_y_from_pst(pm, i)
         constraint_ohms_y_to_pst(pm, i)
         constraint_limits_pst(pm, i)
+    end
+
+    for i in _PM.ids(pm, :sssc)
+        constraint_ohms_y_from_sssc(pm, i)
+        constraint_ohms_y_to_sssc(pm, i)
+        constraint_limits_sssc(pm, i)
     end
 
     for i in _PM.ids(pm, :busdc)

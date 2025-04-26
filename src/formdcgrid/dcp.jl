@@ -4,17 +4,19 @@ sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[
 sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*1^2
 ```
 """
-function constraint_power_balance_ac(pm::_PM.AbstractDCPModel, n::Int, i::Int, bus_arcs, bus_arcs_pst, bus_convs_ac, bus_arcs_sw, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
+function constraint_power_balance_ac(pm::_PM.AbstractDCPModel, n::Int, i::Int, bus_arcs, bus_arcs_pst, bus_arcs_sssc, bus_convs_ac, bus_arcs_sw, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
     p    = _PM.var(pm, n, :p)
     ppst    = _PM.var(pm, n,    :ppst)
     pg   = _PM.var(pm, n,   :pg)
     pconv_grid_ac = _PM.var(pm, n,  :pconv_tf_fr)
     pflex = _PM.var(pm, n, :pflex)
     ps    = _PM.var(pm, n, :ps)
+    psssc    = _PM.var(pm, n,    :psssc)
 
     cstr_p = JuMP.@constraint(pm.model,
         sum(p[a] for a in bus_arcs)
         + sum(ppst[a] for a in bus_arcs_pst)
+        + sum(psssc[a] for a in bus_arcs_sssc)
         + sum(pconv_grid_ac[c] for c in bus_convs_ac)
         ==
         sum(pg[g] for g in bus_gens)
@@ -61,7 +63,7 @@ end
 sum(p[a] for a in bus_arcs) sum(p_ne[a] for a in bus_arcs_ne) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[g] for g in bus_gens) + sum(pconvac[c] for c in bus_convs) - pd - gs*1^2
 ```
 """
-function constraint_power_balance_acdc_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_arcs_pst, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_storage, bus_shunts, gs, bs)
+function constraint_power_balance_acdc_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_arcs_pst, bus_arcs_sssc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_storage, bus_shunts, gs, bs)
     vm = 1
     p = _PM.var(pm, n, :p)
     p_ne = _PM.var(pm,n, :p_ne)
@@ -71,10 +73,12 @@ function constraint_power_balance_acdc_ne(pm::_PM.AbstractDCPModel, n::Int, i::I
     pflex = _PM.var(pm, n, :pflex)
     ps    = _PM.var(pm, n, :ps)
     ppst    = _PM.var(pm, n, :ppst)
+    psssc    = _PM.var(pm, n,    :psssc)
     
     cstr_p = JuMP.@constraint(pm.model, 
     sum(p[a] for a in bus_arcs)
     + sum(ppst[a] for a in bus_arcs_pst) 
+    + sum(psssc[a] for a in bus_arcs_sssc)
     + sum(p_ne[a] for a in bus_arcs_ne) 
     + sum(pconv_grid_ac[c] for c in bus_convs_ac) 
     + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  

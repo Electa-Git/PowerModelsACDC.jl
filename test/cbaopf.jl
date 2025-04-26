@@ -31,4 +31,26 @@
             @test isapprox(resultRD_with_control["objective"], 19844.6, atol = 1)
         end
     end
+
+    @testset "SSSC model" begin
+        data_sssc = PowerModels.parse_file("../test/data/case5_sssc.m")
+        _PMACDC.process_additional_data!(data_sssc) 
+            data = PowerModels.parse_file("../test/data/case5.m")
+        s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "objective_components" => ["gen"])
+        @testset "ACR model" begin
+            resultOPF = _PMACDC.solve_acdcopf(data_sssc, ACRPowerModel, ipopt_solver; setting = s)
+            @test isapprox(resultOPF["objective"], 16702.0, atol = 1)
+            @test isapprox(resultOPF["solution"]["sssc"]["1"]["pf"], -1.50085, atol = 1e-2)
+        end
+        @testset "ACP model" begin
+            resultOPF = _PMACDC.solve_acdcopf(data_sssc, ACPPowerModel, ipopt_solver; setting = s)
+            @test isapprox(resultOPF["objective"], 16702.0, atol = 1)
+            @test isapprox(resultOPF["solution"]["sssc"]["1"]["pf"], -1.50085, atol = 1e-2)
+        end
+    end
 end
+
+
+# _PMACDC.process_additional_data!(data) 
+# s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "objective_components" => ["gen"])
+# resultOPF = _PMACDC.solve_acdcopf(data, ACRPowerModel, ipopt_solver; setting = s)

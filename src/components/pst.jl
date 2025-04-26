@@ -137,7 +137,7 @@ end
 function constraint_ohms_y_to_pst(pm::_PM.AbstractACPModel, n::Int, i::Int, f_bus, t_bus, f_idx, t_idx, g, b, g_to, b_to)
     alpha = _PM.var(pm, n,  :psta, i)
     p_to  = _PM.var(pm, n,  :ppst, t_idx)
-    q_to  = _PM.var(pm, n,  :qpst    , t_idx)
+    q_to  = _PM.var(pm, n,  :qpst, t_idx)
     vm_fr = _PM.var(pm, n, :vm, f_bus)
     vm_to = _PM.var(pm, n, :vm, t_bus)
     va_fr = _PM.var(pm, n, :va, f_bus)
@@ -145,7 +145,7 @@ function constraint_ohms_y_to_pst(pm::_PM.AbstractACPModel, n::Int, i::Int, f_bu
 
     JuMP.@constraint(pm.model, p_to ==  (g+g_to)*vm_to^2 - g*vm_to*vm_fr*cos(va_to-va_fr+alpha) + -b*vm_to*vm_fr*sin(va_to-va_fr+alpha) )
     JuMP.@constraint(pm.model, q_to == -(b+b_to)*vm_to^2 + b*vm_to*vm_fr*cos(va_to-va_fr+alpha) + -g*vm_to*vm_fr*sin(va_to-va_fr+alpha) )
-    end
+end
 
 function constraint_limits_pst(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     pst = _PM.ref(pm, nw, :pst, i)

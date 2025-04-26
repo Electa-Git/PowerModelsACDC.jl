@@ -4,12 +4,12 @@ export solve_acdcpf
 function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
     process_additional_data!(data)
-    return solve_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
+    return solve_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
 end
 
 ""
 function solve_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_flex_load!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
 end
 
 ""
@@ -30,6 +30,7 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     variable_dcgrid_voltage_magnitude(pm, bounded = false)
     variable_flexible_demand(pm, bounded = false)
     variable_pst(pm, bounded = false)
+    variable_sssc(pm, bounded = false)
 
     _PM.constraint_model_voltage(pm)
     constraint_voltage_dc(pm)
