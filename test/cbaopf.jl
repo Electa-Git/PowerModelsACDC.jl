@@ -47,10 +47,10 @@
             @test isapprox(resultOPF["objective"], 16702.0, atol = 1)
             @test isapprox(resultOPF["solution"]["sssc"]["1"]["pf"], -1.50085, atol = 1e-2)
         end
+        @testset "DCP model" begin
+            resultOPF = _PMACDC.solve_acdcopf(data_sssc, DCPPowerModel, highs; setting = s)
+            @test isapprox(resultOPF["objective"], 16565.1, atol = 1)
+            @test isapprox(resultOPF["solution"]["sssc"]["1"]["pf"], -1.57465, atol = 1e-2)
+        end
     end
 end
-
-
-# _PMACDC.process_additional_data!(data) 
-# s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "objective_components" => ["gen"])
-# resultOPF = _PMACDC.solve_acdcopf(data, ACRPowerModel, ipopt_solver; setting = s)
