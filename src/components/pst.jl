@@ -98,7 +98,7 @@ function constraint_ohms_y_from_pst(pm::_PM.AbstractPowerModel, i::Int; nw::Int=
     f_idx = (i, f_bus, t_bus)
     t_idx = (i, t_bus, f_bus)
 
-    g, b = _PM.calc_branch_y(pst)
+    g, b = calc_branch_admittance(pst, "pst")
     g_fr = pst["g_fr"]
     b_fr = pst["b_fr"]
 
@@ -112,7 +112,7 @@ function constraint_ohms_y_to_pst(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_P
     f_idx = (i, f_bus, t_bus)
     t_idx = (i, t_bus, f_bus)
 
-    g, b = _PM.calc_branch_y(pst)
+    g, b = calc_branch_admittance(pst, "pst")
     g_to = pst["g_to"]
     b_to = pst["b_to"]
 

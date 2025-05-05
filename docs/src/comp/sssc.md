@@ -16,7 +16,7 @@ Set of parameters used to model static series synchronous compenstion devices as
 | rate_a        | $\overline{S_{sssc}}$     | MVA   | Real      | -        | long term rating of series compensator |
 | rate_b        | $\overline{S^{st}_{sssc}}$| MVA   | Real      | -        | short term term rating of series compensator |
 | rate_c        | $\overline{S^{em}_{sssc}}$| MVA   | Real      | -        | emergency rating of series compensator |
-| sssc_status   | $\alpha_{sssc}$           | -     | Int       | -        | status indicator of series compensator |
+| sssc_status   | $\delta_{sssc}$           | -     | Int       | -        | status indicator of series compensator |
 | vqmin         | $\underline{v_{q}}$       | p.u.  | Real      | -        | minimum quadrature voltage |
 | vqmax         | $\overline{v_{q}}$        | p.u.  | Real      | -        | maximum quadrature voltage |
 
@@ -88,7 +88,6 @@ p_{j,i,sc} &= g_{sssc} \cdot (v_{j})^{2} - g_{sssc} \cdot v^{*}_{i} \cdot v_{j} 
 q_{j,i,sc} &= -b_{sssc} \cdot (v_{j})^{2} + b_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot cos(\theta_{j} - \theta_{i}^{*}) - g_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot sin(\theta_{j} - \theta_{i}^{*}) \\
 \end{align}
 ```
-
 
 ACR model:
 
