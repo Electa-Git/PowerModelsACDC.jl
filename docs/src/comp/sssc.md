@@ -40,7 +40,7 @@ Active, reactive, and apparent power limits:
 \begin{align}
 - \underline{S_{sssc}} \leq p_{i,j,sc} \leq \overline{S_{sssc}} \\
 - \underline{S_{sssc}} \leq q_{i,j,sc} \leq \overline{S_{sssc}} \\
-p_{i,j,sc}^{2} + q_{i,j,sc}^{2} \leq \overline{S^{st}_{sssc})^{2}
+p_{i,j,sc}^{2} + q_{i,j,sc}^{2} \leq \overline{S^{st}_{sssc}}^{2}
 \end{align}
 ```
 
