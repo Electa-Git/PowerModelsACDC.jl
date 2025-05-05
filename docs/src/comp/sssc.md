@@ -76,14 +76,17 @@ ACR model:
 ```math
 \begin{align}
 \underline{v_{i}^{*}} &= \underline{v_{i}} + j \cdot v_{q} \\
-p_{i,j,sc} &= g_{sssc} \cdot (v_{i}^{*})^{2}- g_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - b_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})
+p_{i,j,sc} &= g_{sssc} \cdot (v_{i}^{*})^{2}- g_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - b_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
+q_{i,j,sc} &= -b_{sssc} \cdot (v_{i}^{*})^{2} + b_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - g_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
+p_{j,i,sc} &= g_{sssc} \cdot (v_{j})^{2}- g_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - b_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
+q_{i,j,sc} &= -b_{sssc} \cdot (v_{j})^{2} + b_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - g_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})
 \end{align}
 ```
 
 DCP model:
 ```math
 \begin{align}
-p_{i,j,sc} = - b_{sssc} \cdot (\theta_{i} - \theta_{j} - \alpha_{q}) \\
-p_{i,j,sc} + p_{j,i,sc} = 0
+p_{i,j,sc} &= - b_{sssc} \cdot (\theta_{i} - \theta_{j} - \alpha_{q}) \\
+p_{i,j,sc} + p_{j,i,sc} &= 0
 \end{align}
 ```
