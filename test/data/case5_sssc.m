@@ -64,10 +64,10 @@ mpc.branch = [
 4	 5	 0.00297	 0.0297	 0.00674	 240.0	 240.0	 240.0	 0.0	  0.0	 1	 -30.0	 30.0;
 ];
 
-%% pst data
-%column_names%	f_bus	t_bus	br_r	br_x	br_b	rate_a	rate_b	rate_c	angle	br_status	vqmin	vqmax
+%% sssc data
+%column_names%	f_bus	t_bus	sssc_r	sssc_x	sssc_b	rate_a	rate_b	rate_c	sssc_status	vqmin	vqmax
 mpc.sssc = [
-	3	 14	 0.0	 0.005		 0.000	 426.0	 426.0	 426.0	  0.0	 1	 -0.02	 0.02;
+	3	 14	 0.0	 0.005		 0.000	 426.0	 426.0	 426.0	 1	 -0.02	 0.02;
 ];
 
 

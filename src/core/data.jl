@@ -1040,5 +1040,9 @@ function prepare_redispatch_opf_data(reference_solution, grid_data; contingency 
     return grid_data_rd
 end
 
-
+function calc_branch_admittance(branch::Dict{String,<:Any}, element::String)
+    y = LinearAlgebra.pinv(branch[element*"_r"] + im * element*"_x")
+    g, b = real(y), imag(y)
+    return g, b
+end
 

@@ -82,7 +82,7 @@ function constraint_ohms_y_from_sssc(pm::_PM.AbstractPowerModel, i::Int; nw::Int
     f_idx = (i, f_bus, t_bus)
     t_idx = (i, t_bus, f_bus)
 
-    g, b = _PM.calc_branch_y(sssc)
+    g, b = calc_branch_admittance(sssc, "sssc")
     g_fr = sssc["g_fr"]
     b_fr = sssc["b_fr"]
 
@@ -96,7 +96,7 @@ function constraint_ohms_y_to_sssc(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_
     f_idx = (i, f_bus, t_bus)
     t_idx = (i, t_bus, f_bus)
 
-    g, b = _PM.calc_branch_y(sssc)
+    g, b = calc_branch_admittance(sssc, "sssc")
     g_to = sssc["g_fr"]
     b_to = sssc["b_fr"]
 
