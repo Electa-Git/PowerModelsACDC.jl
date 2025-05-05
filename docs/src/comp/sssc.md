@@ -76,6 +76,19 @@ v_{i}^{*} &= \sqrt{v_{i}^{2} + 2 \cdot v_{i} \cdot v_{q} + v_{q}^{2}} \\
 \theta_{i}^{*} &= atan(\frac{v_{i} \cdot sin(\theta_{i}) + v_{q}}{v_{i} \cdot cos(\theta_{i})})  
 \end{align}
 ```
+```math
+\begin{align}
+p_{i,j,sc} &= g_{sssc} \cdot (v^{*}_{i})^{2} - g_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot cos(\theta_{i}^{*} - \theta_{j}) - b_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot sin(\theta_{i}^{*} - \theta_{j}) \\
+q_{i,j,sc} &= -b_{sssc} \cdot (v^{*}_{i})^{2} + b_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot cos(\theta_{i}^{*} - \theta_{j}) - g_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot sin(\theta_{i}^{*} - \theta_{j}) \\
+\end{align}
+```
+```math
+\begin{align}
+p_{j,i,sc} &= g_{sssc} \cdot (v_{j})^{2} - g_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot cos(\theta_{j} - \theta_{i}^{*}) - b_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot sin(\theta_{j} - \theta_{i}^{*}) \\
+q_{j,i,sc} &= -b_{sssc} \cdot (v_{j})^{2} + b_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot cos(\theta_{j} - \theta_{i}^{*}) - g_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot sin(\theta_{j} - \theta_{i}^{*}) \\
+\end{align}
+```
+
 
 ACR model:
 
