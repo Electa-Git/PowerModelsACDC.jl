@@ -5,6 +5,7 @@ module PowerModelsACDC
 # import Compat
 import JuMP
 import Memento
+import LinearAlgebra
 import PowerModels
 const _PM = PowerModels
 import InfrastructureModels
