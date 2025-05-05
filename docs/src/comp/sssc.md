@@ -70,6 +70,12 @@ b_{sssc} = \Im{\frac{1} {r_{sssc} + j \cdot x_sssc}} \\
 
 ### Ohm's law
 ACP model:
+```math
+\begin{align}
+v_{i}^{*} &= \sqrt{v_{i}^{2} + 2 \cdot v_{i} \cdot v_{q} + v_{q}^{2}} \\
+\theta_{i}^{*} &= atan(\frac{v_{i} \cdot sin(\theta_{i}) + v_{q}}{v_{i} \cdot cos(\theta_{i})})  
+\end{align}
+```
 
 ACR model:
 
