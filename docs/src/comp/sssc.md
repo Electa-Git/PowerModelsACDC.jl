@@ -40,7 +40,7 @@ Active, reactive, and apparent power limits:
 \begin{align}
 - \underline{S_{sssc}) \leq p_{i,j,sc} \leq \overline{S_{sssc}) \\
 - \underline{S_{sssc}) \leq q_{i,j,sc} \leq \overline{S_{sssc}) \\
-p_{i,j,sc}^{2] + q_{i,j,sc}^{2} \leq \overline{S^{st}_{sssc})^{2}
+p_{i,j,sc}^{2} + q_{i,j,sc}^{2} \leq \overline{S^{st}_{sssc})^{2}
 \end{align}
 ```
 
@@ -58,3 +58,16 @@ Range for equivalent phase angle shift:
 \end{align}
 ```
 
+## Constraints
+
+### Ohm's law:
+ACP model:
+ACR model:
+
+DCP model:
+```math
+\begin{align}
+b_{sssc} = \Im{1 / (r_sssc + j \cdot x_sssc)} \\
+p_{i,j,sc} = - b_{sssc} \cdot (\theta_{i} - \theta_{j} - alpha_{q})
+\end{align}
+```
