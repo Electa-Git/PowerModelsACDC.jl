@@ -60,15 +60,30 @@ Range for equivalent phase angle shift:
 
 ## Constraints
 
-### Ohm's law:
+### SSSC admittance
+```math
+\begin{align}
+g_{sssc} = \Re{\frac{1} {r_{sssc} + j \cdot x_sssc}} \\
+b_{sssc} = \Im{\frac{1} {r_{sssc} + j \cdot x_sssc}} \\
+\end{align}
+```
+
+### Ohm's law
 ACP model:
 
 ACR model:
 
+```math
+\begin{align}
+\underline{v_{i}^{*}} = \underline{v_{i}} + j \cdot v_{q}
+p_{i,j,sc} = g_{sssc} \cdot ((v_{i}^{*})^{2}) - g_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \ cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \ cdot \Im{\underline{v_{j}}})  - b_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \ cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \ cdot \Im{\underline{v_{j}}})
+\end{align}
+```
+
 DCP model:
 ```math
 \begin{align}
-b_{sssc} = \Im{\frac{1} {r_{sssc} + j \cdot x_sssc}} \\
-p_{i,j,sc} = - b_{sssc} \cdot (\theta_{i} - \theta_{j} - \alpha_{q})
+p_{i,j,sc} = - b_{sssc} \cdot (\theta_{i} - \theta_{j} - \alpha_{q}) \\
+p_{i,j,sc} + p_{j,i,sc} = 0
 \end{align}
 ```
