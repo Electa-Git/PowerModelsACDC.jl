@@ -24,11 +24,11 @@ Set of parameters used to model static series synchronous compenstion devices as
 
 Optimisation variables representing SSSC behaviour
 | name          | symb.                 | unit  | formulation      definition                                                                  |
-|---------------|-----------------------|-------|-----------------|---------------------------------------------------------------------------------------------------|
-| vqsssc        |$v_{q}$                | p.u.  | ACP \& ACR      | Voltage injected in quadrature
-| alphaqsssc    |$\alpha_{q}$        | rad   | DCP             | Equivalent phase angle shift induced by SSSC
-| psssc         |$p_{i,j,sc}$           | p.u.  | ACP, ACR \& DCP | Active power flow through SSSC
-| qsssc         |$q_{i,j,sc}$           | p.u.  | ACP \& ACR      | Reactive power flow through SSSC
+|---------------|-----------------------|-------|-----------------|----------------------------------------------------------------------------|
+| vqsssc        |$v_{q}$                | p.u.  | ACP,  ACR      | Voltage injected in quadrature                      |
+| alphaqsssc    |$\alpha_{q}$           | rad   | DCP             | Equivalent phase angle shift induced by SSSC |
+| psssc         |$p_{i,j,sc}$           | p.u.  | ACP, ACR,  DCP | Active power flow through SSSC |
+| qsssc         |$q_{i,j,sc}$           | p.u.  | ACP, ACR      | Reactive power flow through SSSC |
 
 ## Constraints
 
@@ -37,9 +37,9 @@ Optimisation variables representing SSSC behaviour
 Active, reactive, and apparent power limits:
 ```math
 \begin{align}
-- \underline{S^{st}_{sssc}) \leq p_{i,j,sc} \leq \overline{S^{st}_{sssc}) \\
-- \underline{S^{st}_{sssc}) \leq q_{i,j,sc} \leq \overline{S^{st}_{sssc}) \\
-p_{i,j,sc}^{2]} + q_{i,j,sc}^{2} \leq \overline{S^{st}_{sssc})^{2} \\
+- \underline{S_{sssc}) \leq p_{i,j,sc} \leq \overline{S_{sssc}) \\
+- \underline{S_{sssc}) \leq q_{i,j,sc} \leq \overline{S_{sssc}) \\
+p_{i,j,sc}^{2] + q_{i,j,sc}^{2} \leq \overline{S^{st}_{sssc})^{2}
 \end{align}
 ```
 
