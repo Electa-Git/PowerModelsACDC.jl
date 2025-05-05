@@ -78,7 +78,10 @@ ACR model:
 \underline{v_{i}^{*}} &= \underline{v_{i}} + j \cdot v_{q} \\
 p_{i,j,sc} &= g_{sssc} \cdot (v_{i}^{*})^{2}- g_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - b_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
 q_{i,j,sc} &= -b_{sssc} \cdot (v_{i}^{*})^{2} + b_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - g_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
+\end{align}
+\begin{align}
 p_{i,j,sc} &= g_{sssc} \cdot (v_{i}^{*})^{2}- g_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - b_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
+q_{i,j,sc} &= -b_{sssc} \cdot (v_{i}^{*})^{2} + b_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - g_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
 \end{align}
 ```
 
