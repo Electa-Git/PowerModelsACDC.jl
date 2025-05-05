@@ -38,9 +38,9 @@ Optimisation variables representing SSSC behaviour
 Active, reactive, and apparent power limits:
 ```math
 \begin{align}
-- \underline{S_{sssc}} \leq p_{i,j,sc} \leq \overline{S_{sssc}} \\
-- \underline{S_{sssc}} \leq q_{i,j,sc} \leq \overline{S_{sssc}} \\
-p_{i,j,sc}^{2} + q_{i,j,sc}^{2} \leq \overline{S^{st}_{sssc}}^{2}
+- \overline{S_{sssc}} \leq p_{i,j,sc} \leq \overline{S_{sssc}} \\
+- \overline{S_{sssc}} \leq q_{i,j,sc} \leq \overline{S_{sssc}} \\
+p_{i,j,sc}^{2} + q_{i,j,sc}^{2} \leq \overline{S_{sssc}}^{2}
 \end{align}
 ```
 
