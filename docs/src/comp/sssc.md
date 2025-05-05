@@ -23,7 +23,8 @@ Set of parameters used to model static series synchronous compenstion devices as
 ## Variables
 
 Optimisation variables representing SSSC behaviour
-| name          | symb.                 | unit  | formulation      definition                                                                  |
+
+| name          | symb.                 | unit  | formulation     | definition                                                                  |
 |---------------|-----------------------|-------|-----------------|----------------------------------------------------------------------------|
 | vqsssc        |$v_{q}$                | p.u.  | ACP,  ACR      | Voltage injected in quadrature                      |
 | alphaqsssc    |$\alpha_{q}$           | rad   | DCP             | Equivalent phase angle shift induced by SSSC |
