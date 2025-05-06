@@ -17,6 +17,7 @@ makedocs(
             "Component models" => [
                 "Phase shifting transformers" => "pst.md"
                 "Static synchronous series compensation" => "sssc.md"
+                "DC branches" => "dcbranch.md"
             ]
             "File IO" => "parser.md"
         ]

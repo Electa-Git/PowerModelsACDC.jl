@@ -28,8 +28,8 @@ Optimisation variables representing SSSC behaviour
 |---------------|-----------------------|-------|-----------------|----------------------------------------------------------------------------|
 | vqsssc        |$v_{q}$                | p.u.  | ACP,  ACR      | Voltage injected in quadrature                      |
 | alphaqsssc    |$\alpha_{q}$           | rad   | DCP             | Equivalent phase angle shift induced by SSSC |
-| psssc         |$p_{i,j,sc}$           | p.u.  | ACP, ACR,  DCP | Active power flow through SSSC |
-| qsssc         |$q_{i,j,sc}$           | p.u.  | ACP, ACR      | Reactive power flow through SSSC |
+| psssc         |$p_{sc,i,j}$           | p.u.  | ACP, ACR,  DCP | Active power flow through SSSC |
+| qsssc         |$q_{sc,i,j}$           | p.u.  | ACP, ACR      | Reactive power flow through SSSC |
 
 ## Constraints
 
@@ -38,9 +38,9 @@ Optimisation variables representing SSSC behaviour
 Active, reactive, and apparent power limits:
 ```math
 \begin{align}
-- \overline{S_{sssc}} \leq p_{i,j,sc} \leq \overline{S_{sssc}} \\
-- \overline{S_{sssc}} \leq q_{i,j,sc} \leq \overline{S_{sssc}} \\
-p_{i,j,sc}^{2} + q_{i,j,sc}^{2} \leq \overline{S_{sssc}}^{2}
+- \overline{S_{sssc}} \leq p_{sc,i,j} \leq \overline{S_{sssc}} \\
+- \overline{S_{sssc}} \leq q_{sc,i,j} \leq \overline{S_{sssc}} \\
+p_{sc,i,j}^{2} + q_{sc,i,j}^{2} \leq \overline{S_{sssc}}^{2}
 \end{align}
 ```
 
@@ -78,8 +78,8 @@ v_{i}^{*} &= \sqrt{v_{i}^{2} + 2 \cdot v_{i} \cdot v_{q} + v_{q}^{2}} \\
 ```
 ```math
 \begin{align}
-p_{i,j,sc} &= g_{sssc} \cdot (v^{*}_{i})^{2} - g_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot cos(\theta_{i}^{*} - \theta_{j}) - b_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot sin(\theta_{i}^{*} - \theta_{j}) \\
-q_{i,j,sc} &= -b_{sssc} \cdot (v^{*}_{i})^{2} + b_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot cos(\theta_{i}^{*} - \theta_{j}) - g_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot sin(\theta_{i}^{*} - \theta_{j}) \\
+p_{sc,i,j} &= g_{sssc} \cdot (v^{*}_{i})^{2} - g_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot cos(\theta_{i}^{*} - \theta_{j}) - b_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot sin(\theta_{i}^{*} - \theta_{j}) \\
+q_{sc,i,j} &= -b_{sssc} \cdot (v^{*}_{i})^{2} + b_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot cos(\theta_{i}^{*} - \theta_{j}) - g_{sssc} \cdot v^{*}_{i} \cdot v_{j} \cdot sin(\theta_{i}^{*} - \theta_{j}) \\
 \end{align}
 ```
 ```math
@@ -94,8 +94,8 @@ ACR model:
 ```math
 \begin{align}
 \underline{v_{i}^{*}} &= \underline{v_{i}} + j \cdot v_{q} \\
-p_{i,j,sc} &= g_{sssc} \cdot (v_{i}^{*})^{2}- g_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - b_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
-q_{i,j,sc} &= -b_{sssc} \cdot (v_{i}^{*})^{2} + b_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - g_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
+p_{sc,i,j} &= g_{sssc} \cdot (v_{i}^{*})^{2}- g_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - b_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
+q_{sc,i,j} &= -b_{sssc} \cdot (v_{i}^{*})^{2} + b_{sssc} \cdot (\Re{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Im{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}})  - g_{sssc} \cdot (\Im{\underline{v_{i}^{*}}} \cdot \Re{\underline{v_{j}}} + \Re{\underline{v_{i}^{*}}} \cdot \Im{\underline{v_{j}}}) \\
 \end{align}
 ```
 ```math
@@ -108,7 +108,7 @@ q_{j,i,sc} &= -b_{sssc} \cdot (v_{j})^{2} + b_{sssc} \cdot (\Re{\underline{v_{i}
 DCP model:
 ```math
 \begin{align}
-p_{i,j,sc} &= - b_{sssc} \cdot (\theta_{i} - \theta_{j} - \alpha_{q}) \\
-p_{i,j,sc} + p_{j,i,sc} &= 0
+p_{sc,i,j} &= - b_{sssc} \cdot (\theta_{i} - \theta_{j} - \alpha_{q}) \\
+p_{sc,i,j} + p_{j,i,sc} &= 0
 \end{align}
 ```
