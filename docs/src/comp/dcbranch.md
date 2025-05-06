@@ -43,7 +43,7 @@ Active power, current, and voltage product limits
 \begin{align}
 - \overline{P_{dc}} &\leq P_{d,i,j} \leq \overline{P_{dc}} \\
 - \overline{I_{dc}} &\leq P_{d,i,j} \leq \overline{I_{dc}} \\
-- \overline{I_{dc}^{2}} &\leq J_{d,i,j} \leq \overline{I_{dc}^{2}  \\
+- \overline{I_{dc}^{2}} &\leq J_{d,i,j} \leq \overline{I_{dc}^{2}}  \\
 0 &\leq W_{d,i,j} \leq max(V_{i}^{2}, V_{j}^{2})
 \end{align}
 ```
@@ -51,30 +51,30 @@ Active power, current, and voltage product limits
 ### DC branch admittance
 
 ```math
-g_{dc} = \frac{1}{_dc}
+g_{dc} = \frac{1}{r_dc}
 ```
 ### Ohm's law
 ACP, ACR model:
 
 ```math
 \begin{align}
-P_{d,i,j} &= n_{p} \cdot g_dc \cdot V_{i} \cdot (V_{i} - V_{j}) \\
-P_{d,j,i} &= n_{p} \cdot g_dc \cdot V_{j} \cdot (V_{j} - V_{i}) 
+P_{d,i,j} &= n_{p} \cdot g_{dc} \cdot V_{i} \cdot (V_{i} - V_{j}) \\
+P_{d,j,i} &= n_{p} \cdot g_{dc} \cdot V_{j} \cdot (V_{j} - V_{i}) 
 \end{align}
 ```
 
 SOC, QC bus injection model (BIM):
 ```math
 \begin{align}
-P_{d,i,j} &= n_{p} \cdot g_dc \cdot (W_{i} - W_{d,i,j}) \\
-P_{d,j,i} &= n_{p} \cdot g_dc \cdot (W_{j} - W_{d,i,j})
+P_{d,i,j} &= n_{p} \cdot g_{dc} \cdot (W_{i} - W_{d,i,j}) \\
+P_{d,j,i} &= n_{p} \cdot g_{dc} \cdot (W_{j} - W_{d,i,j})
 \end{align}
 ```
 
 SOC, QC branch flow model (BFM):
 ```math
 \begin{align}
-W_{j} &= W_{i} - \frac{2 \cdot r_dc \cdot P_{d,i,j}} {n_{p}} + r_{dc}^{2} \cdot J_{d,i,j}  \\
+W_{j} &= W_{i} - \frac{2 \cdot r_{dc} \cdot P_{d,i,j}} {n_{p}} + r_{dc}^{2} \cdot J_{d,i,j}  \\
 P_{d,i,j} + P_{d,j,i} &= r_{dc} \cdot n_{p} \cdot J_{d,i,j} \\
 P_{d,i,j}^{2} &\leq  n_{p}^{2} \cdot W_{i} \cdot   J_{d,i,j} 
 \end{align}
