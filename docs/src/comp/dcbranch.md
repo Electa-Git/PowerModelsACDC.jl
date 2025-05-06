@@ -51,7 +51,7 @@ Active power, current, and voltage product limits
 ### DC branch admittance
 
 ```math
-g_{dc} = \frac{1}{r_dc}
+g_{dc} = \frac{1}{r_{dc}}
 ```
 ### Ohm's law
 ACP, ACR model:
