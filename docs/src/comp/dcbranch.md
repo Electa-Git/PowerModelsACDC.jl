@@ -42,8 +42,8 @@ Active power, current, and voltage product limits
 ```math
 \begin{align}
 - \overline{P_{dc}} &\leq P_{d,i,j} \leq \overline{P_{dc}} \\
-- \overline{I_{dc}} &\leq P_{d,i,j} \leq \overline{I_{dc}} \\
-- \overline{I_{dc}^{2}} &\leq J_{d,i,j} \leq \overline{I_{dc}^{2}}  \\
+- \overline{I_{dc}} &\leq I_{d,i,j} \leq \overline{I_{dc}} \\
+0 &\leq J_{d,i,j} \leq \overline{I_{dc}^{2}}  \\
 0 &\leq W_{d,i,j} \leq max(V_{i}^{2}, V_{j}^{2})
 \end{align}
 ```
