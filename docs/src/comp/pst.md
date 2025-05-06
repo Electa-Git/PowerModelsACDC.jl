@@ -25,11 +25,11 @@ Set of parameters used to model static series synchronous compenstion devices as
 
 Optimisation variables representing PST behaviour
 
-| name          | symb.                 | unit  | formulation     | definition                                                                  |
-|---------------|-----------------------|-------|-----------------|----------------------------------------------------------------------------|                     |
+| name          | symb.                 | unit  | formulation     | definition                                                                 |
+|---------------|-----------------------|-------|-----------------|----------------------------------------------------------------------------|  
 | psta          |$\alpha_{pst}$         | rad   | ACP, DCP        | Equivalent phase angle shift induced by PST |
-| ppst         |$p_{i,j,sc}$           | p.u.  | ACP, DCP        | Active power flow through pst |
-| qpst         |$q_{i,j,sc}$           | p.u.  | ACP             | Reactive power flow through pst |
+| ppst          |$p_{i,j,sc}$           | p.u.  | ACP, DCP        | Active power flow through pst |
+| qpst          |$q_{i,j,sc}$           | p.u.  | ACP             | Reactive power flow through pst |
 
 ## Constraints
 
@@ -53,7 +53,7 @@ Range for equivalent phase angle shift:
 
 ## Constraints
 
-### pst admittance
+### PST admittance
 ```math
 \begin{align}
 g_{pst} = \Re{\frac{1} {r_{pst} + j \cdot x_pst}} \\
