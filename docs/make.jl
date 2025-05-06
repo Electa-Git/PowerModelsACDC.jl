@@ -14,10 +14,9 @@ makedocs(
             "Network Formulations" => "formulations.md"
             "Problem Specifications" => "specifications.md"
             "Problem Types" => "problems.md"
-            "Modeling Components" => [
-                "Objective" => "objective.md"
-                "Variables" => "variables.md"
-                "Constraints" => "constraints.md"
+            "Component models" => [
+                "Phase shifting transformers" => "pst.md"
+                "Static synchronous series compensation" => "sssc.md"
             ]
             "File IO" => "parser.md"
         ]

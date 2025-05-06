@@ -1,4 +1,4 @@
-# Static series synchronous compenstion devices, e.g. smart wires$
+# Static series synchronous compenstion devices, e.g. smart wires
 
 The series compensation devices inject a voltage in quadrature of the line voltage in order to control active and reactive power flows.
 

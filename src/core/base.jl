@@ -333,7 +333,7 @@ function ref_add_pst!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
         nw_ref[:bus_arcs_pst] = bus_arcs_pst
 
         if !haskey(nw_ref, :buspairs_pst)
-            nw_ref[:buspairs_pst] = _PM.calc_buspair_parameters(nw_ref[:bus], nw_ref[:pst])
+            nw_ref[:buspairs_pst] = calc_buspair_parameters(nw_ref[:bus], nw_ref[:pst], "pst")
         end
     end
 end
@@ -380,9 +380,55 @@ function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
             push!(bus_arcs_sssc[i], (l,i,j))
         end
         nw_ref[:bus_arcs_sssc] = bus_arcs_sssc
-
-        # if !haskey(nw_ref, :buspairs_sssc)
-        #     nw_ref[:buspairs_sssc] = _PM.calc_buspair_parameters(nw_ref[:bus], nw_ref[:sssc])
-        # end
     end
+end
+
+# Adapted version from PowerModels to accomodate more branch types
+"compute bus pair level data, can be run on data or ref data structures"
+function calc_buspair_parameters(buses, branches, element::String)
+    bus_lookup = Dict(bus["index"] => bus for (i,bus) in buses if bus["bus_type"] != 4)
+
+    branch_lookup = Dict(branch["index"] => branch for (i,branch) in branches if branch[element*"_status"] == 1 && haskey(bus_lookup, branch["f_bus"]) && haskey(bus_lookup, branch["t_bus"]))
+
+    buspair_indexes = Set((branch["f_bus"], branch["t_bus"]) for (i,branch) in branch_lookup)
+
+    bp_branch = Dict((bp, typemax(Int)) for bp in buspair_indexes)
+
+    bp_angmin = Dict((bp, -Inf) for bp in buspair_indexes)
+    bp_angmax = Dict((bp,  Inf) for bp in buspair_indexes)
+
+    for (l,branch) in branch_lookup
+        i = branch["f_bus"]
+        j = branch["t_bus"]
+
+        bp_angmin[(i,j)] = max(bp_angmin[(i,j)], branch["angmin"])
+        bp_angmax[(i,j)] = min(bp_angmax[(i,j)], branch["angmax"])
+
+        bp_branch[(i,j)] = min(bp_branch[(i,j)], l)
+    end
+
+    buspairs = Dict((i,j) => Dict(
+        "branch"=>bp_branch[(i,j)],
+        "angmin"=>bp_angmin[(i,j)],
+        "angmax"=>bp_angmax[(i,j)],
+        "tap"=>branch_lookup[bp_branch[(i,j)]]["tap"],
+        "vm_fr_min"=>bus_lookup[i]["vmin"],
+        "vm_fr_max"=>bus_lookup[i]["vmax"],
+        "vm_to_min"=>bus_lookup[j]["vmin"],
+        "vm_to_max"=>bus_lookup[j]["vmax"]
+        ) for (i,j) in buspair_indexes
+    )
+
+    # add optional parameters
+    for bp in buspair_indexes
+        branch = branch_lookup[bp_branch[bp]]
+        if haskey(branch, "rate_a")
+            buspairs[bp]["rate_a"] = branch["rate_a"]
+        end
+        if haskey(branch, "c_rating_a")
+            buspairs[bp]["c_rating_a"] = branch["c_rating_a"]
+        end
+    end
+
+    return buspairs
 end
