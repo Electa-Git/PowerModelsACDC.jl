@@ -75,7 +75,7 @@ Optimisation variables representing PST behaviour
 \end{align}
 ```
 
-### Upwards and downwards redispatch limits
+### FCR provision limits
 
 ```math
 \begin{align}
