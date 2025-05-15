@@ -24,13 +24,13 @@ Set of parameters used to model DC branches as defined in the input data
 | ramp_rate         | $\Lambda_{g}$              | p.u. / time step | Real      | -        | ramp rate of the generator used in UC problem |
 | ramp_rate_per_s   | $\Lambda_{g}^{s}$          | p.u. / s  | Real      | -    | ramp rate of the generator used in frequency constrained UC problem  |
 | inertia_constant  | $H_{g}$                   | s     | Real      | -        | inertia constant of the generator used in frequency constrained UC problem  |
-| fcr_contribution  | $\delta_{g}^{fcr}$                   | -     | Int       | -        | Indicator if generator g participates in providing frequency containtment reserves |
+| fcr_contribution  | $\delta_{g}^{fcr}$        | -     | Int       | -        | Indicator if generator g participates in providing frequency containtment reserves |
 | area              | $a_{g}$                   | -     | Int      | -        |  Area in which the generator is located, used for tie line contingencies in frequency constrained UC problem  |
 | zone              | $z_{g}$                   | -     | Int      | -        | Zone in which the generator is located, used for loss of infeed contingencies in frequency constrained UC problem  |
 | model             | $m_{g}$                   | -     | Int      | -        | Generator cost model, 1 = piecewise linear, 2 = polynomial (matpower style) |
 | ncost             | $n_{g}$                   | -     | Int      | -        | Number of polynomial coefficients for generator costs |
-| startup           | $c_{g}^{suc}$  | MW       | Currency   | Real       | - | Start-up cost in the currency of your choice|
-| shutdown          | $c_{c}^{sdc}$             | Currency   | Real       | -        | Shut-down cost in the currency of your choice |
+| startup           | $c_{g}^{suc}$             | Currency   | Real | -       | Start-up cost in the currency of your choice|
+| shutdown          | $c_{c}^{sdc}$             | Currency   | Real | -        | Shut-down cost in the currency of your choice |
 | cost              | $c_{g}$                   | Currency / p.u.   | Real  | -        | Vector with coeffcients of the polynomial cost function|
 | res               | $res_{g}$                 | -     | Int       | -     |  True / false indicator for RES generators |
 
@@ -89,10 +89,10 @@ Optimisation variables representing PST behaviour
 ```math
 \begin{align}
  \underline{P_{g}} \cdot \alpha_{g,t} &\leq P_{g,t} \leq \overline{P_{g}} \cdot \alpha_{g,t} \\
- P_{g,t} - P_{g,t-1} &\eq \Lamba_{g} \alpha_{g,t} + (\underline{P_{g}} - \Lamba_{g}) \\
- P_{g,t-1} - P_{g,t} &\eq \Lamba_{g} \alpha_{g,t} + \underline{P_{g}} \cdot \gamma_{g,t} \\
- \aphaa_{g,t} &\geq \sum_{t'=t+1-mut_{g}}^{t} \beta_{g,t'} \\
-1-\aphaa_{g,t} &\geq \sum_{t'=t+1-mdt_{g}}^{t} \gamma_{g,t'} \\
+ P_{g,t} - P_{g,t-1} &\leq \Lambda_{g} \alpha_{g,t} + (\underline{P_{g}} - \Lambda_{g}) \\
+ P_{g,t-1} - P_{g,t} &\leq \Lambda_{g} \alpha_{g,t} + \underline{P_{g}} \cdot \gamma_{g,t} \\
+ \alpha_{g,t} &\geq \sum_{t'=t+1-mut_{g}}^{t} \beta_{g,t'} \\
+1-\alpha_{g,t} &\geq \sum_{t'=t+1-mdt_{g}}^{t} \gamma_{g,t'} \\
 0 &=\alpha_{g,t-1} - \alpha_{g,t} + \beta_{g,t} - \gamma_{g,t} \\
 \end{align}
 ```
