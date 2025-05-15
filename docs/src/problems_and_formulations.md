@@ -1,9 +1,16 @@
 # Type Hierarchy
-The original type hierarchy of PowerModels is used.
+The original type hierarchy of PowerModels is used in general. 
 
 For details on `GenericPowerModel`, see _PM.jl [documentation](https://lanl-ansi.github.io/_PM.jl/stable/).
 
 #  Formulations overview
+
+Note that not all problem types are (yet) implemented for all power flow formulations. The below table provides a mapping of all problem types implemented and for which formulations they have been implemented so far.
+
+
+
+
+
 
 Extending PowerModels,  formulations for balanced  OPF in DC grids have been implemented and mapped to the following AC grid formulations:
 - ACPPowerModel
