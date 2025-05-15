@@ -80,7 +80,7 @@ Optimisation variables representing PST behaviour
 ```math
 \begin{align}
  -(\overline{P_{g}} - \underline{P_{g}}) \cdot \delta_{g}^{fcr}  &\leq \Delta P_{g}^{fcr} \leq (\overline{P_{g}} - \underline{P_{g}}) \cdot \delta_{g}^{fcr} \\
-0 &\leq $\Delta P_{g}^{fcr,abs}$ \leq (\overline{P_{g}} - \underline{P_{g}}) \cdot \delta_{g}^{fcr} \\
+0 &\leq \Delta P_{g}^{fcr,abs} \leq (\overline{P_{g}} - \underline{P_{g}}) \cdot \delta_{g}^{fcr} \\
 \end{align}
 ```
 
