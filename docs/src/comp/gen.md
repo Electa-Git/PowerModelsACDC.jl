@@ -21,8 +21,8 @@ Set of parameters used to model DC branches as defined in the input data
 | vg                | $V_{g}^{set}$             | p.u.  | Real      | -        | target voltage of generator - used in power flow calculations for PV nodes|
 | mut               | $mut_{g}$                 | -     | Int       | -        | minimum up time for generator used in unit commitment problems, expressed as a multiple of the UC time step |
 | mdt               | $mdt_{g}$                 | -     | Int       | -        | minimum down time for generator used in unit commitment problems, expressed as a multiple of the UC time step  |
-| ramp_rate         | $\Lambda_{g}$              | p.u. / time step | Real      | -        | ramp rate of the generator used in UC problem |
-| ramp_rate_per_s   | $\Lambda_{g}^{s}$          | p.u. / s  | Real      | -    | ramp rate of the generator used in frequency constrained UC problem  |
+| ramp_rate         | $\Lambda_{g}$             | p.u. / time step | Real      | -        | ramp rate of the generator used in UC problem |
+| ramp_rate_per_s   | $\Lambda_{g}^{s}$         | p.u. / s  | Real      | -    | ramp rate of the generator used in frequency constrained UC problem  |
 | inertia_constant  | $H_{g}$                   | s     | Real      | -        | inertia constant of the generator used in frequency constrained UC problem  |
 | fcr_contribution  | $\delta_{g}^{fcr}$        | -     | Int       | -        | Indicator if generator g participates in providing frequency containtment reserves |
 | area              | $a_{g}$                   | -     | Int      | -        |  Area in which the generator is located, used for tie line contingencies in frequency constrained UC problem  |
@@ -31,8 +31,8 @@ Set of parameters used to model DC branches as defined in the input data
 | ncost             | $n_{g}$                   | -     | Int      | -        | Number of polynomial coefficients for generator costs |
 | startup           | $c_{g}^{suc}$             | Currency   | Real | -       | Start-up cost in the currency of your choice|
 | shutdown          | $c_{c}^{sdc}$             | Currency   | Real | -        | Shut-down cost in the currency of your choice |
-| cost              | $c_{g}$                   | Currency / p.u.   | Real  | -        | Vector with coeffcients of the polynomial cost function|
-| res               | $res_{g}$                 | -     | Int       | -     |  True / false indicator for RES generators |
+| cost              | $c_{g}$                   | Currency / p.u.   | Real  | -     | Vector with coeffcients of the polynomial cost function|
+| res               | $res_{g}$                 | -                 | Int   | -     |  True / false indicator for RES generators |
 
 
 
