@@ -8,7 +8,7 @@ Set of parameters used to model DC branches as defined in the input data
 
 | name              | symb.                     | unit  | type      | default  | definition                                                           |
 |-------------------|---------------------------|-------|-----------|----------|----------------------------------------------------------------------|
-| index             | $pst$                     | -     | Int       | -        | unique index of the generator                                  |
+| index             | $g$                       | -     | Int       | -        | unique index of the generator                                  |
 | gen_bus           | $i$                       | -     | Int       | -        | unique index of the bus to which the generator is connected to |
 | pg                | $P_{g}$                   | p.u.  | Real      | -        | active power generation - used as input in power flow calculations |
 | qg                | $Q_{g}$                   | p.u.  | Real      | -        | reactive power generation - used as input in power flow calculations, positive sign is an injection |
@@ -33,7 +33,6 @@ Set of parameters used to model DC branches as defined in the input data
 | shutdown          | $c_{c}^{sdc}$             | Currency   | Real | -        | Shut-down cost in the currency of your choice |
 | cost              | $c_{g}$                   | Currency / p.u.   | Real  | -     | Vector with coeffcients of the polynomial cost function|
 | res               | $res_{g}$                 | -                 | Int   | -     |  True / false indicator for RES generators |
-
 
 
 ## Variables
