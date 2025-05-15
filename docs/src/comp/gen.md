@@ -21,8 +21,8 @@ Set of parameters used to model DC branches as defined in the input data
 | vg                | $V_{g}^{set}$             | p.u.  | Real      | -        | target voltage of generator - used in power flow calculations for PV nodes|
 | mut               | $mut_{g}$                 | -     | Int       | -        | minimum up time for generator used in unit commitment problems, expressed as a multiple of the UC time step |
 | mdt               | $mdt_{g}$                 | -     | Int       | -        | minimum down time for generator used in unit commitment problems, expressed as a multiple of the UC time step  |
-| ramp_rate         | $\Lamba_{g}$              | p.u. / time step | Real      | -        | ramp rate of the generator used in UC problem |
-| ramp_rate_per_s   | $\Lamba_{g}^{s}$          | p.u. / s  | Real      | -    | ramp rate of the generator used in frequency constrained UC problem  |
+| ramp_rate         | $\Lambda_{g}$              | p.u. / time step | Real      | -        | ramp rate of the generator used in UC problem |
+| ramp_rate_per_s   | $\Lambda_{g}^{s}$          | p.u. / s  | Real      | -    | ramp rate of the generator used in frequency constrained UC problem  |
 | inertia_constant  | $H_{g}$                   | s     | Real      | -        | inertia constant of the generator used in frequency constrained UC problem  |
 | fcr_contribution  | $\delta_{g}^{fcr}$                   | -     | Int       | -        | Indicator if generator g participates in providing frequency containtment reserves |
 | area              | $a_{g}$                   | -     | Int      | -        |  Area in which the generator is located, used for tie line contingencies in frequency constrained UC problem  |
@@ -44,13 +44,13 @@ Optimisation variables representing PST behaviour
 |---------------|-----------------------|-------|-----------------------------------|----------------------------------------------------------------------------|  
 | pg            |$P_{g}$                | p.u.  | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Active power set point of generator g |
 | qg            |$Q_{g}$                | p.u.  | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Active power set point of generator g |
-| alpha_g       |$alpha_{g}$            | -     | ACP, ACR, LPAC, IVR, SOC, DCP, NF | On / off status of generator g, binary |
-| beta_g        |$beta_{g}$             | -     | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Start-up decision for generator g, binary or continous -> setting "relax_uc_binaries" |
-| gamma_g       |$beta_{g}$             | -     | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Shut-down decision for generator g, binary or continous -> setting "relax_uc_binaries"|
+| alpha_g       |$\alpha_{g}$            | -     | ACP, ACR, LPAC, IVR, SOC, DCP, NF | On / off status of generator g, binary |
+| beta_g        |$\beta_{g}$             | -     | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Start-up decision for generator g, binary or continous -> setting "relax_uc_binaries" |
+| gamma_g       |$\gamma_{g}$             | -     | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Shut-down decision for generator g, binary or continous -> setting "relax_uc_binaries"|
 | dpg_up        |$\Delta P_{g}^{\uparrow}$ | p.u.  | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Upwards re-dispatch of generator g|
 | dpg_down      |$\Delta P_{g}^{\downarrow}$ | p.u.  | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Downwards re-dispatch of generator g|
 | pg_droop      |$\Delta P_{g}^{fcr}$ | p.u.  | ACP, ACR, LPAC, IVR, SOC, DCP, NF | FCR contribution of generator g|
-| pg_droop_abs  |$|\Delta P_{g}^{fcr}|$ | p.u.  | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Absolute value of FCR contribution of generator g|
+| pg_droop_abs  |$\Delta P_{g}^{fcr,abs}$ | p.u.  | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Absolute value of FCR contribution of generator g|
 
 
 
@@ -80,7 +80,7 @@ Optimisation variables representing PST behaviour
 ```math
 \begin{align}
  -(\overline{P_{g}} - \underline{P_{g}}) \cdot \delta_{g}^{fcr}  &\leq \Delta P_{g}^{fcr} \leq (\overline{P_{g}} - \underline{P_{g}}) \cdot \delta_{g}^{fcr} \\
-0 &\leq $|\Delta P_{g}^{fcr}|$ \leq (\overline{P_{g}} - \underline{P_{g}}) \cdot \delta_{g}^{fcr} \\
+0 &\leq $\Delta P_{g}^{fcr,abs}$ \leq (\overline{P_{g}} - \underline{P_{g}}) \cdot \delta_{g}^{fcr} \\
 \end{align}
 ```
 
@@ -88,7 +88,7 @@ Optimisation variables representing PST behaviour
 
 ```math
 \begin{align}
- \underline{P_{g} \cdot \alpha_{g,t} &\leq P_{g,t} \leq \overline{P_{g}} \cdot \alpha_{g,t} \\
+ \underline{P_{g}} \cdot \alpha_{g,t} &\leq P_{g,t} \leq \overline{P_{g}} \cdot \alpha_{g,t} \\
  P_{g,t} - P_{g,t-1} &\eq \Lamba_{g} \alpha_{g,t} + (\underline{P_{g}} - \Lamba_{g}) \\
  P_{g,t-1} - P_{g,t} &\eq \Lamba_{g} \alpha_{g,t} + \underline{P_{g}} \cdot \gamma_{g,t} \\
  \aphaa_{g,t} &\geq \sum_{t'=t+1-mut_{g}}^{t} \beta_{g,t'} \\
