@@ -544,7 +544,7 @@ function _compute_dc_pf(dcpf_data::DCPowerFlowData; finite_differencing=false, f
 
 
     # dc power flow, sparse jacobian computation
-    function jsp!(J::_PM.SparseMatrixCSC{Float64,Int}, x::Vector{Float64})
+    function jsp!(J::_PM.SparseArrays.SparseMatrixCSC{Float64,Int}, x::Vector{Float64})
         for i in eachindex(amdc.idx_to_bus)
 
             for j in neighbors[i]
