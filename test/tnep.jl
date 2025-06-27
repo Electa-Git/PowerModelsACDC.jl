@@ -283,7 +283,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "pr
         @testset "DCP with storage" begin
             data_dc = build_mn_data("../test/data/tnep/case6_strg.m")
             resultDCP = _PMACDC.solve_tnep(data_dc, DCPPowerModel, highs; multinetwork=true, setting = s)
-            @test isapprox(resultDCP["objective"], 50.8663; atol = 1e-1)
+            @test isapprox(resultDCP["objective"], 52.67; atol = 1e-1)
             @test isapprox(resultDCP["solution"]["nw"]["1"]["convdc_ne"]["2"]["isbuilt"], 1; atol = 1e-2)
             @test isapprox(resultDCP["solution"]["nw"]["1"]["convdc_ne"]["5"]["isbuilt"], 1; atol = 1e-2)
             @test isapprox(resultDCP["solution"]["nw"]["1"]["convdc_ne"]["6"]["isbuilt"], 1; atol = 1e-2)

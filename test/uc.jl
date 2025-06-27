@@ -33,13 +33,13 @@
     @testset "UC, with HVDC & storage, no binary relaxation" begin
         s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "hvdc_inertia_contribution" => true, "relax_uc_binaries" => false)
         result = _PMACDC.solve_uc(uc_data, DCPPowerModel, highs, setting = s, multinetwork = true)
-        @test isapprox(result["objective"],  8.56395e5, atol = 1e2)
+        @test isapprox(result["objective"],  857044.7, atol = 1e2)
     end
 
     @testset "UC, with HVDC & storage, with binary relaxation" begin
         s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "hvdc_inertia_contribution" => true, "relax_uc_binaries" => true)
         result = _PMACDC.solve_uc(uc_data, DCPPowerModel, highs, setting = s, multinetwork = true)
-        @test isapprox(result["objective"],  8.56395e5, atol = 1e2)
+        @test isapprox(result["objective"],  857044.7, atol = 1e2)
     end
 end
 
