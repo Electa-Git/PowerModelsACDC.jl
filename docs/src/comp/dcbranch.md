@@ -8,7 +8,7 @@ Set of parameters used to model DC branches as defined in the input data
 
 | name          | symb.                     | unit  | type      | default  | definition                                                           |
 |---------------|---------------------------|-------|-----------|----------|----------------------------------------------------------------------|
-| index         | $pst$                     | -     | Int       | -        | unique index of the DC branch                                  |
+| index         | $d$                       | -     | Int       | -        | unique index of the DC branch                                  |
 | f_bus         | $i$                       | -     | Int       | -        | unique index of the bus to which the DC branch is originating from |
 | t_bus         | $j$                       | -     | Int       | -        | unique index of the bus to which the DC branch is terminating at |
 | r             | $r_{dc}$                  | p.u.  | Real      | -        | resistance of the DC branch |
@@ -19,7 +19,7 @@ Set of parameters used to model DC branches as defined in the input data
 | rateC         | $\overline{P^{em}_{dc}}$  | MW    | Real      | -        | emergency rating of the DC branch |
 | status        | $\delta_{dc}$             | -     | Int       | -        | status indicator of the DC branch |
 | p             | $n_{p}$                   | -     | Int       | -        | number of DC poles, specified at test case level |
-| cost          | $C_{dc}$                  | -     | Int       | -        | investment cost for DC branch used in TNEP problems  |
+| cost          | $C_{dc}$                  | -     | Real      | -        | investment cost for DC branch used in TNEP problems  |
 
 
 

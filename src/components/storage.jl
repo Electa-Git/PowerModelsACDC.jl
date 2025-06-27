@@ -30,6 +30,14 @@ function storage_constraints(pm, n; uc = false)
             _PM.constraint_storage_state(pm, i, prev_nw_id, ref_nw_id)
         end
     end
+
+    final_network_id = sort(collect(_PM.nw_ids(pm)))[end]
+
+    if final_network_id == n
+        for i in _PM.ids(pm, n, :storage)
+            constraint_storage_state_final(pm, i; nw = n)
+        end
+    end
 end
 
 # Constraint template for storage on/off constraints
@@ -88,4 +96,19 @@ function  constraint_storage_fcr_contribution_abs(pm::_PM.AbstractPowerModel, i:
 
     JuMP.@constraint(pm.model, ps_droop_abs >=  ps_droop)
     JuMP.@constraint(pm.model, ps_droop_abs >= -ps_droop)
+end
+
+
+
+function constraint_storage_state_final(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    initial_energy = _PM.ref(pm, nw, :storage, i)["energy"]
+
+    constraint_storage_state_final(pm, nw, initial_energy, i)
+end
+
+
+function constraint_storage_state_final(pm::_PM.AbstractPowerModel, n, initial_energy, i)
+    se_final = _PM.var(pm, n, :se, i)
+
+    JuMP.@constraint(pm.model, se_final >= initial_energy)
 end
