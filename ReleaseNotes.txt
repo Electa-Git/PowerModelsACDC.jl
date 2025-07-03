@@ -1,3 +1,10 @@
 v0.9.0 Release Notes
 
--
+- Add redispatch optimisation
+- Adds unit-commitment model
+- Adds frequency-constrained unit-commitment model
+- Adds flexible demand, storage, PST model, SSSC model
+- Adds multi-period OPF model
+- Cleans-up TNEP problem types
+- Improves documentation - work in progress
+
