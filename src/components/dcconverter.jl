@@ -205,9 +205,12 @@ function variable_acside_current(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_d
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iconv_ac",
     start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
     )
+
+    for (c, convdc) in _PM.ref(pm, nw, :convdc)
+            JuMP.set_lower_bound(ic[c],  0) # current is always positive, regardless of PF or OPF
+    end
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ic[c],  0)
             JuMP.set_upper_bound(ic[c],  convdc["Imax"])
         end
     end
