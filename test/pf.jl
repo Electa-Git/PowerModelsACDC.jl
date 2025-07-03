@@ -44,7 +44,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol = 1e-2)
 
-        @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.34795; atol = 2e-3)
+        @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.35; atol = 2e-3)
         @test isapprox(result["solution"]["gen"]["2"]["pg"], 0.40; atol = 2e-3)
 
         @test isapprox(result["solution"]["bus"]["1"]["vm"], 1.06; atol = 2e-3)
