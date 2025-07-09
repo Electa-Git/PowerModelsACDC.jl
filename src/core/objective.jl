@@ -1,3 +1,4 @@
+"Sum of generation, demand reduction and demand shedding costs"
 function objective_min_operational_cost(pm::_PM.AbstractPowerModel)
     if haskey(pm.setting, "objective_components")
         components = pm.setting["objective_components"]
@@ -15,6 +16,7 @@ function objective_min_operational_cost(pm::_PM.AbstractPowerModel)
     )
 end
 
+"Sum of generation, demand reduction, demand shedding and AC/DC equipment investment costs"
 function objective_min_operational_capex_cost(pm::_PM.AbstractPowerModel)
     if haskey(pm.setting, "objective_components")
         components = pm.setting["objective_components"]
@@ -94,6 +96,7 @@ function calc_load_operational_cost(pm::_PM.AbstractPowerModel; components = [],
     return load_cost_red, load_cost_curt
 end
 
+"Sum of generation redisptach costs"
 function objective_min_rd_cost(pm::_PM.AbstractPowerModel; report::Bool=true)
     if haskey(pm.setting, "objective_components")
         components = pm.setting["objective_components"]
@@ -119,7 +122,7 @@ function objective_min_rd_cost(pm::_PM.AbstractPowerModel; report::Bool=true)
     )
 end
 
-
+"Sum of generation redisptach and generaor start-up costs costs to ensure minimum inertia level"
 function objective_min_rd_cost_inertia(pm::_PM.AbstractPowerModel; report::Bool=true)
     if haskey(pm.setting, "objective_components")
         components = pm.setting["objective_components"]
@@ -190,6 +193,7 @@ function calculate_capex_cost(pm::_PM.AbstractPowerModel; components = [])
     return ac_branch_cost, dc_branch_cost, dc_converter_cost
 end
 
+"Sum of generator operational and start-up costs, FCR and FFR costs, demand reduction and demand shedding costs"
 function objective_min_cost_fcuc(pm::_PM.AbstractPowerModel; report::Bool=true, droop = false)
     gen_cost = calc_gen_cost(pm)
     ffr_cost, fcr_cost = calc_reserve_cost(pm; droop = droop) #; components = ["fcr", "ffr"]) 
