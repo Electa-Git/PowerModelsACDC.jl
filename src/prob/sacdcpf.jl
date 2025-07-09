@@ -476,7 +476,7 @@ function instantiate_dcpf_data(data::Dict{String,<:Any}, conv_qnts::Dict{String,
 
 
     neighbors = [Set{Int}([i]) for i in eachindex(amdc.idx_to_bus)]
-    I, J, V = _PM.findnz(amdc.matrix)
+    I, J, V = _PM.SparseArrays.findnz(amdc.matrix)
     for nz in eachindex(V)
         push!(neighbors[I[nz]], J[nz])
         push!(neighbors[J[nz]], I[nz])
@@ -495,7 +495,7 @@ function instantiate_dcpf_data(data::Dict{String,<:Any}, conv_qnts::Dict{String,
             push!(J0_I, i); push!(J0_J, j); push!(J0_V, 0.0)
         end
     end
-    J0 = _PM.sparse(J0_I, J0_J, J0_V)
+    J0 = _PM.SparseArrays.sparse(J0_I, J0_J, J0_V)
 
     return DCPowerFlowData(data, busdc_gens, amdc, busdc_type_idx, pdc_delta_base_idx, pdc_inject_idx, vmdc_idx, neighbors, x0, F0, J0)
 end
@@ -757,7 +757,7 @@ function calc_admittance_matrix(data::Dict{String,<:Any})
         end
     end
 
-    m = _PM.sparse(I,J,V)
+    m = _PM.SparseArrays.sparse(I,J,V)
 
     amdc =  _PM.AdmittanceMatrix(idx_to_busdc, busdc_to_idx, m)
     return amdc
