@@ -63,8 +63,8 @@ Range for equivalent phase angle shift:
 ### SSSC admittance
 ```math
 \begin{align}
-g_{sssc} = \Re{\frac{1} {r_{sssc} + j \cdot x_sssc}} \\
-b_{sssc} = \Im{\frac{1} {r_{sssc} + j \cdot x_sssc}} \\
+g_{sssc} = \Re{\frac{1} {r_{sssc} + j \cdot x_{sssc}}} \\
+b_{sssc} = \Im{\frac{1} {r_{sssc} + j \cdot x_{sssc}}} \\
 \end{align}
 ```
 
