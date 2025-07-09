@@ -15,10 +15,10 @@ makedocs(
             "Problem Specifications" => "specifications.md"
             "Problem Types" => "problems.md"
             "Component models" => [
-                "Phase shifting transformers" => "pst.md"
-                "Static synchronous series compensation" => "sssc.md"
-                "DC branches" => "dcbranch.md"
-                "Generators" => "gen.md"
+                "Phase shifting transformers" => "comp/pst.md"
+                "Static synchronous series compensation" => "comp/sssc.md"
+                "DC branches" => "comp/dcbranch.md"
+                "Generators" => "comp/gen.md"
             ]
             "File IO" => "parser.md"
         ]
