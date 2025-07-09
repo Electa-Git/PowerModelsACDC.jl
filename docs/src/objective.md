@@ -14,13 +14,25 @@ CurrentModule = PowerModelsACDC
 ```
 
 ```@docs
-objective_min_fuel_cost
+objective_min_operational_cost
 ```
 
 ```@docs
-objective_min_cost
+objective_min_operational_capex_cost
 ```
 
 ```@docs
-objective_min_cost_acdc
+objective_min_rd_cost
+```
+
+```@docs
+objective_min_rd_cost_inertia
+```
+
+```@docs
+objective_min_cost_uc
+```
+
+```@docs
+objective_min_cost_fcuc
 ```
