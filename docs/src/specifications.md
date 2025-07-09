@@ -10,7 +10,7 @@ PF with support for AC and DC grids at the same time, including AC/DC converters
 The general purpose ac dc power flow solver in PowerModelsACDC is,
 
 ```@docs
-run_acdcpf
+solve_acdcpf
 ```
 
 This function builds a JuMP model for a wide variety of the power flow formulations
@@ -23,7 +23,7 @@ The sequential ac dc power flow solver in PowerModelsACDC uses the package
 DC power flow problem in `ACPPowerModel` formulation sequentially.
 
 ```@docs
-run_sacdcpf
+solve_sacdcpf
 ```
 
 !!! tip
@@ -43,7 +43,7 @@ variable_branch_flow(pm)
 
 #### Objective
 ```julia
-objective_min_fuel_cost(pm)
+objective_min_operational_cost(pm)
 ```
 
 #### Constraints
