@@ -54,8 +54,8 @@ Range for equivalent phase angle shift:
 ### PST admittance
 ```math
 \begin{align}
-g_{pst} = \Re{\frac{1} {r_{pst} + j \cdot x_pst}} \\
-b_{pst} = \Im{\frac{1} {r_{pst} + j \cdot x_pst}} \\
+g_{pst} = \Re{\frac{1} {r_{pst} + j \cdot x_{pst}}} \\
+b_{pst} = \Im{\frac{1} {r_{pst} + j \cdot x_{pst}}} \\
 \end{align}
 ```
 
