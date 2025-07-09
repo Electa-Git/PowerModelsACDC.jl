@@ -97,7 +97,7 @@ function build_uc(pm::_PM.AbstractPowerModel)
     objective_min_cost_uc(pm)
 end
 
-
+"Sum of generator operational and start-up costs, demand reduction and demand shedding costs"
 function objective_min_cost_uc(pm::_PM.AbstractPowerModel; report::Bool=true, droop = false)
     gen_cost = Dict()
 
