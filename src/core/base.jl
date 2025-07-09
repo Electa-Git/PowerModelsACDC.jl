@@ -311,3 +311,124 @@ function assign_bus_converters!(convs, dict, key)
     end
     return dict
 end
+
+# ADD REF MODEL
+function ref_add_pst!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
+    for (nw, nw_ref) in ref[:it][:pm][:nw]
+        if !haskey(nw_ref, :pst)
+            nw_ref[:pst] = Dict()
+            Memento.warn(_LOGGER, "required pst data not found")
+        end
+
+        nw_ref[:pst] = Dict(x for x in nw_ref[:pst] if (x.second["pst_status"] == 1 && x.second["f_bus"] in keys(nw_ref[:bus]) && x.second["t_bus"] in keys(nw_ref[:bus])))
+
+        nw_ref[:arcs_from_pst] = [(i,pst["f_bus"],pst["t_bus"]) for (i,pst) in nw_ref[:pst]]
+        nw_ref[:arcs_to_pst]   = [(i,pst["t_bus"],pst["f_bus"]) for (i,pst) in nw_ref[:pst]]
+        nw_ref[:arcs_pst] = [nw_ref[:arcs_from_pst]; nw_ref[:arcs_to_pst]]
+
+        bus_arcs_pst = Dict((i, []) for (i,bus) in nw_ref[:bus])
+        for (l,i,j) in nw_ref[:arcs_pst]
+            push!(bus_arcs_pst[i], (l,i,j))
+        end
+        nw_ref[:bus_arcs_pst] = bus_arcs_pst
+
+        if !haskey(nw_ref, :buspairs_pst)
+            nw_ref[:buspairs_pst] = calc_buspair_parameters(nw_ref[:bus], nw_ref[:pst], "pst")
+        end
+    end
+end
+
+"Add to `ref` the keys for handling flexible demand"
+function ref_add_flex_load!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
+    for (n, nw_ref) in ref[:it][_PM.pm_it_sym][:nw]
+        # Loads that can be made flexible, depending on investment decision
+        nw_ref[:flex_load] = Dict(x for x in nw_ref[:load] if x.second["flex"] == 1)
+        # Loads that are not flexible and do not have an associated investment decision
+        nw_ref[:fixed_load] = Dict(x for x in nw_ref[:load] if x.second["flex"] == 0)
+    end
+end
+
+"Add simplified storage model to reference"
+function ref_add_storage!(ref::Dict{Symbol,Any}, data::Dict{String,<:Any})
+    for (nw, nw_ref) in ref[:it][:pm][:nw]
+        nw_ref[:storage_simple] = Dict(x for x in nw_ref[:storage_simple] if (x.second["status"] == 1 && x.second["storage_bus"] in keys(nw_ref[:bus])))
+
+        bus_storage = Dict((i, Int[]) for (i,bus) in nw_ref[:bus])
+        for (i, strg) in nw_ref[:storage_simple]
+            push!(bus_storage[strg["storage_bus"]], i)
+        end
+        nw_ref[:bus_storage] = bus_storage
+    end
+end
+
+"Add refernce for SSSC"
+function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
+    for (nw, nw_ref) in ref[:it][:pm][:nw]
+        if !haskey(nw_ref, :sssc)
+            nw_ref[:sssc] = Dict()
+            Memento.warn(_LOGGER, "required pst data not found")
+        end
+
+        nw_ref[:sssc] = Dict(x for x in nw_ref[:sssc] if (x.second["sssc_status"] == 1 && x.second["f_bus"] in keys(nw_ref[:bus]) && x.second["t_bus"] in keys(nw_ref[:bus])))
+
+        nw_ref[:arcs_from_sssc] = [(i,sssc["f_bus"],sssc["t_bus"]) for (i,sssc) in nw_ref[:sssc]]
+        nw_ref[:arcs_to_sssc]   = [(i,sssc["t_bus"],sssc["f_bus"]) for (i,sssc) in nw_ref[:sssc]]
+        nw_ref[:arcs_sssc] = [nw_ref[:arcs_from_sssc]; nw_ref[:arcs_to_sssc]]
+
+        bus_arcs_sssc = Dict((i, []) for (i,bus) in nw_ref[:bus])
+        for (l,i,j) in nw_ref[:arcs_sssc]
+            push!(bus_arcs_sssc[i], (l,i,j))
+        end
+        nw_ref[:bus_arcs_sssc] = bus_arcs_sssc
+    end
+end
+
+# Adapted version from PowerModels to accomodate more branch types
+"compute bus pair level data, can be run on data or ref data structures"
+function calc_buspair_parameters(buses, branches, element::String)
+    bus_lookup = Dict(bus["index"] => bus for (i,bus) in buses if bus["bus_type"] != 4)
+
+    branch_lookup = Dict(branch["index"] => branch for (i,branch) in branches if branch[element*"_status"] == 1 && haskey(bus_lookup, branch["f_bus"]) && haskey(bus_lookup, branch["t_bus"]))
+
+    buspair_indexes = Set((branch["f_bus"], branch["t_bus"]) for (i,branch) in branch_lookup)
+
+    bp_branch = Dict((bp, typemax(Int)) for bp in buspair_indexes)
+
+    bp_angmin = Dict((bp, -Inf) for bp in buspair_indexes)
+    bp_angmax = Dict((bp,  Inf) for bp in buspair_indexes)
+
+    for (l,branch) in branch_lookup
+        i = branch["f_bus"]
+        j = branch["t_bus"]
+
+        bp_angmin[(i,j)] = max(bp_angmin[(i,j)], branch["angmin"])
+        bp_angmax[(i,j)] = min(bp_angmax[(i,j)], branch["angmax"])
+
+        bp_branch[(i,j)] = min(bp_branch[(i,j)], l)
+    end
+
+    buspairs = Dict((i,j) => Dict(
+        "branch"=>bp_branch[(i,j)],
+        "angmin"=>bp_angmin[(i,j)],
+        "angmax"=>bp_angmax[(i,j)],
+        "tap"=>branch_lookup[bp_branch[(i,j)]]["tap"],
+        "vm_fr_min"=>bus_lookup[i]["vmin"],
+        "vm_fr_max"=>bus_lookup[i]["vmax"],
+        "vm_to_min"=>bus_lookup[j]["vmin"],
+        "vm_to_max"=>bus_lookup[j]["vmax"]
+        ) for (i,j) in buspair_indexes
+    )
+
+    # add optional parameters
+    for bp in buspair_indexes
+        branch = branch_lookup[bp_branch[bp]]
+        if haskey(branch, "rate_a")
+            buspairs[bp]["rate_a"] = branch["rate_a"]
+        end
+        if haskey(branch, "c_rating_a")
+            buspairs[bp]["c_rating_a"] = branch["c_rating_a"]
+        end
+    end
+
+    return buspairs
+end

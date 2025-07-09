@@ -1,6 +1,6 @@
 @testset "test sacdc pf" begin
     @testset "5-bus ac dc case" begin
-        result = run_sacdcpf("../test/data/case5_acdc.m")
+        result = solve_sacdcpf("../test/data/case5_acdc.m")
 
         @test result["termination_status"] == "Converged"
         @test isapprox(result["objective"], 0.0; atol = 1e-2)
@@ -12,7 +12,7 @@
         @test isapprox(result["solution"]["convdc"]["3"]["pdc"], 0.36422; atol = 2e-3)
     end
     @testset "39-bus ac dc case" begin
-        result = run_sacdcpf("../test/data/case39_acdc.m")
+        result = solve_sacdcpf("../test/data/case39_acdc.m")
 
         @test result["termination_status"] == "Converged"
         @test isapprox(result["objective"], 0.0; atol = 1e-2)

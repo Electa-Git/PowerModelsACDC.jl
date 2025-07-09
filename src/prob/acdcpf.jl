@@ -1,15 +1,15 @@
-export run_acdcpf
+export solve_acdcpf
 
 ""
-function run_acdcpf(file::String, model_type::Type, solver; kwargs...)
+function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
-    PowerModelsACDC.process_additional_data!(data)
-    return run_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    process_additional_data!(data)
+    return solve_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
 end
 
 ""
-function run_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!], kwargs...)
+function solve_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
 end
 
 ""
@@ -17,6 +17,7 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm, bounded = false)
     _PM.variable_gen_power(pm, bounded = false)
     _PM.variable_branch_power(pm, bounded = false)
+    _PM.variable_storage_power(pm, bounded = false)
 
     # dirty, should be improved in the future TODO
     if typeof(pm) <: _PM.SOCBFPowerModel
@@ -27,6 +28,9 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     variable_dcbranch_current(pm, bounded = false)
     variable_dc_converter(pm, bounded = false)
     variable_dcgrid_voltage_magnitude(pm, bounded = false)
+    variable_flexible_demand(pm, bounded = false)
+    variable_pst(pm, bounded = false)
+    variable_sssc(pm, bounded = false)
 
     _PM.constraint_model_voltage(pm)
     constraint_voltage_dc(pm)
@@ -62,6 +66,14 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
             _PM.constraint_ohms_yt_to(pm, i)
         end
     end
+    for i in _PM.ids(pm, :flex_load)
+        constraint_total_flexible_demand(pm, i)
+    end
+    
+    for i in _PM.ids(pm, :fixed_load) 
+        constraint_total_fixed_demand(pm, i)
+    end
+
     for i in _PM.ids(pm, :busdc)
         constraint_power_balance_dc(pm, i)
     end

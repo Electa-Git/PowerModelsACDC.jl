@@ -1,4 +1,5 @@
 using PowerModelsACDC
+const _PMACDC = PowerModelsACDC
 using PowerModels
 using Memento
 using InfrastructureModels
@@ -15,7 +16,7 @@ using Juniper
 using HiGHS
 using Test
 
-local_test = false   # as some tests require Mosek, only limited set sent to CI.
+local_test = false  # as some tests require Mosek, only limited set sent to CI.
 
 ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
 highs = JuMP.optimizer_with_attributes(HiGHS.Optimizer)
@@ -25,12 +26,7 @@ juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt
 if local_test == true
     ### ONLY for local testing, not supported intravis due to licensces ##############
     import Gurobi
-    import Mosek
-    import MosekTools
-    # import CPLEX
     gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer)
-    # cplex = JuMP.optimizer_with_attributes(CPLEX.Optimizer)
-    mosek = JuMP.optimizer_with_attributes(Mosek.Optimizer)
     ##############################
 end
 include("common.jl")
@@ -42,8 +38,12 @@ include("pf.jl")
 
 include("opf.jl")
 
+include("cbaopf.jl")
+
 include("tnep.jl")
 
 include("spf.jl")
+
+include("uc.jl")
 
 end

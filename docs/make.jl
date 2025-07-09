@@ -11,13 +11,14 @@ makedocs(
             "Results" => "result-data.md"
         ]
         "Library" => [
-            "Network Formulations" => "formulations.md"
+            "Problem and Network Formulations" => "problems_and_formulations.md"
             "Problem Specifications" => "specifications.md"
             "Problem Types" => "problems.md"
-            "Modeling Components" => [
-                "Objective" => "objective.md"
-                "Variables" => "variables.md"
-                "Constraints" => "constraints.md"
+            "Component models" => [
+                "Phase shifting transformers" => "pst.md"
+                "Static synchronous series compensation" => "sssc.md"
+                "DC branches" => "dcbranch.md"
+                "Generators" => "gen.md"
             ]
             "File IO" => "parser.md"
         ]

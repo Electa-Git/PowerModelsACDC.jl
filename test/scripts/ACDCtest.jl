@@ -19,7 +19,7 @@ file_case5dcgrid = "./test/data/case5_dcgrid.m"
 file_case5_b2bdc = "./test/data/case5_b2bdc.m"
 file_lcc = "./test/data/lcc_test.m"
 file_588sdet_acdc = "./test/data/pglib_opf_case588_sdet_acdc.m"
-file = file_case5acdc
+file = file_case3120
 
 data = _PM.parse_file(file)
 
@@ -29,11 +29,13 @@ ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_le
 
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
-result = _PMACDC.run_acdcpf(file, _PM.ACRPowerModel, ipopt; setting = s)
-result_droop = _PMACDC.run_acdcpf(file_pf_droop, _PM.ACRPowerModel, ipopt; setting = s)
-result = _PMACDC.run_acdcpf(file_case3120, _PM.ACRPowerModel, ipopt; setting = s)
-# resultAC = _PMACDC.run_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
+result = _PMACDC.solve_acdcpf(file, _PM.ACRPowerModel, ipopt; setting = s)
+result_droop = _PMACDC.solve_acdcpf(file_pf_droop, _PM.ACRPowerModel, ipopt; setting = s)
+result = _PMACDC.solve_acdcpf(file_case3120, _PM.ACRPowerModel, ipopt; setting = s)
+result = _PMACDC.solve_sacdcpf(file_case3120)
 
+resultAC = _PMACDC.solve_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
+resultACSOCBIM = _PM.solve_acdcopf(file, _PM.SOCWRPowerModel, ipopt; setting = s)
 # resultLPAC = _PMACDC.run_acdcopf(file, _PM.LPACCPowerModel, ipopt; setting = s)
 
 # resultQC = _PMACDC.run_acdcopf(file, _PM.QCRMPowerModel, ipopt; setting = s)

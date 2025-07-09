@@ -1,4 +1,4 @@
-export run_sacdcpf
+export solve_sacdcpf
 
 """
 internal data required used solving a dc power flow
@@ -38,14 +38,14 @@ end
 """
 This function solves sequential ac-dc power flow
 """
-function run_sacdcpf(file::String; kwargs...)
+function solve_sacdcpf(file::String; kwargs...)
     data = _PM.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_sacdcpf(data::Dict{String,Any}, kwargs...)
+    return solve_sacdcpf(data::Dict{String,Any}, kwargs...)
 end
 
 
-function run_sacdcpf(data)
+function solve_sacdcpf(data)
 
     data["load_ref"] = Dict{String, Any}()
     data["load_ref"] = deepcopy(data["load"])

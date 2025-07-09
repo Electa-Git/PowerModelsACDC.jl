@@ -5,6 +5,7 @@ module PowerModelsACDC
 # import Compat
 import JuMP
 import Memento
+import LinearAlgebra
 import PowerModels
 const _PM = PowerModels
 import InfrastructureModels
@@ -28,22 +29,32 @@ include("prob/acdcopf.jl")
 include("prob/acdcpf.jl")
 include("prob/acdcopf_bf.jl")
 include("prob/acdcopf_iv.jl")
-include("prob/tnepopf.jl")
-include("prob/tnepopf_bf.jl")
-include("prob/mp_tnepopf.jl")
-include("prob/mp_tnepopf_bf.jl")
+include("prob/tnep.jl")
 include("prob/sacdcpf.jl")
-
-
+include("prob/uc.jl")
+include("prob/fcuc.jl")
+include("prob/rdopf.jl")
 
 include("core/solution.jl")
 include("core/data.jl")
-include("core/variabledcgrid.jl")
-include("core/variableconv.jl")
 include("core/base.jl")
 include("core/constraint.jl")
+include("core/constraint_template.jl")
 include("core/objective.jl")
 include("core/relaxation_scheme.jl")
+include("core/util.jl")
+
+include("security/contingency.jl")
+include("security/frequency.jl")
+
+include("components/demand.jl")
+include("components/gen.jl")
+include("components/pst.jl")
+include("components/sssc.jl")
+include("components/dcbranch.jl")
+include("components/dcconverter.jl")
+include("components/storage.jl")
+include("components/xb_connections.jl")
 
 include("formdcgrid/acp.jl")
 include("formdcgrid/acr.jl")
@@ -65,7 +76,6 @@ include("formconv/lpac.jl")
 include("formconv/shared.jl")
 include("formconv/iv.jl")
 
-include("core/constraint_template.jl")
 include("io/multinetwork.jl")
 include("io/results.jl")
 end
