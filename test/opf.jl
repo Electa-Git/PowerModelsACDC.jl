@@ -12,6 +12,13 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 194.14; atol = 1e0)
     end
+
+    @testset "5-bus ac dc case with DC generator" begin
+        result = solve_acdcopf("../test/data/case5_acdc_gendc.m", ACPPowerModel, ipopt_solver; setting = s)
+
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 165.7; atol = 1e0)
+    end
     @testset "5-bus ac dc case with 2 seperate ac grids" begin
         result = solve_acdcopf("../test/data/case5_2grids.m", ACPPowerModel, ipopt_solver; setting = s)
 

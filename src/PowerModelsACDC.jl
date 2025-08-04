@@ -49,6 +49,7 @@ include("security/frequency.jl")
 
 include("components/demand.jl")
 include("components/gen.jl")
+include("components/dcgen.jl")
 include("components/pst.jl")
 include("components/sssc.jl")
 include("components/dcbranch.jl")

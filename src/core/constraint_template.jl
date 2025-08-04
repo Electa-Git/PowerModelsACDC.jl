@@ -45,8 +45,9 @@ end
 function constraint_power_balance_dc(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     bus_arcs_dcgrid = _PM.ref(pm, nw, :bus_arcs_dcgrid, i)
     bus_convs_dc = _PM.ref(pm, nw, :bus_convs_dc, i)
+    bus_gens_dc = _PM.ref(pm, nw, :bus_gens_dc, i)
     pd = _PM.ref(pm, nw, :busdc, i)["Pdc"]
-    constraint_power_balance_dc(pm, nw, i, bus_arcs_dcgrid, bus_convs_dc, pd)
+    constraint_power_balance_dc(pm, nw, i, bus_arcs_dcgrid, bus_convs_dc, bus_gens_dc, pd)
 end
 
 function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, i::Int; nw::Int=_PM.nw_id_default)
@@ -214,8 +215,9 @@ function constraint_power_balance_dc_dcne(pm::_PM.AbstractPowerModel, i::Int; nw
     end
     bus_convs_dc = PowerModels.ref(pm, nw, :bus_convs_dc, i)
     bus_convs_dc_ne = PowerModels.ref(pm, nw, :bus_convs_dc_ne, i)
+    bus_gens_dc = _PM.ref(pm, nw, :bus_gens_dc, i)
     pd = PowerModels.ref(pm, nw, :busdc, i)["Pdc"]
-    constraint_power_balance_dc_dcne(pm, nw, i, bus_arcs_dcgrid, bus_arcs_dcgrid_ne, bus_convs_dc, bus_convs_dc_ne, pd)
+    constraint_power_balance_dc_dcne(pm, nw, i, bus_arcs_dcgrid, bus_arcs_dcgrid_ne, bus_convs_dc, bus_convs_dc_ne, bus_gens_dc, pd)
 end
 
 function constraint_power_balance_dcne_dcne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)

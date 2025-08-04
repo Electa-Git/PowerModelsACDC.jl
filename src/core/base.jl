@@ -312,6 +312,15 @@ function assign_bus_converters!(convs, dict, key)
     return dict
 end
 
+function assign_bus_generators!(gens, dict, key)
+    for (i,gen) in gens
+        if haskey(dict, gen[key])
+            push!(dict[gen[key]], i)
+        end
+    end
+    return dict
+end
+
 # ADD REF MODEL
 function ref_add_pst!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (nw, nw_ref) in ref[:it][:pm][:nw]
@@ -380,6 +389,23 @@ function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
             push!(bus_arcs_sssc[i], (l,i,j))
         end
         nw_ref[:bus_arcs_sssc] = bus_arcs_sssc
+    end
+end
+
+"Add refernce for DC generators"
+function ref_add_gendc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
+    for (nw, nw_ref) in ref[:it][:pm][:nw]
+        if !haskey(nw_ref, :gendc)
+            nw_ref[:gendc] = Dict()
+            Memento.warn(_LOGGER, "required dc generator data not found")
+        end
+
+        nw_ref[:gendc] = Dict(x for x in nw_ref[:gendc] if (x.second["gen_status"] == 1 && x.second["gen_bus"] in keys(nw_ref[:busdc])))
+
+        # Bus converters for existing ac buses
+
+        bus_gens_dc = Dict((i, Int[]) for (i,bus) in nw_ref[:busdc])
+        nw_ref[:bus_gens_dc]= assign_bus_generators!(nw_ref[:gendc], bus_gens_dc, "gen_bus") 
     end
 end
 

@@ -12,9 +12,9 @@ end
 function solve_tnep(data::Dict, model_type::Type, solver; kwargs...)
     # Check if data in multiperiod!
     if haskey(data, "multinetwork") && data["multinetwork"] == true
-        return _PM.solve_model(data, model_type, solver, build_mp_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_mp_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     else
-        return _PM.solve_model(data, model_type, solver, build_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...) 
+        return _PM.solve_model(data, model_type, solver, build_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...) 
     end
 end
 
@@ -22,9 +22,9 @@ end
 function solve_tnep(data::Dict, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
     # Check if data in multiperiod!
     if haskey(data, "multinetwork") && data["multinetwork"] == true
-        return _PM.solve_model(data, model_type, solver, build_mp_tnep_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!,ref_add_sssc!, ref_add_flex_load!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_mp_tnep_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!,ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     else
-        return _PM.solve_model(data, model_type, solver, build_tnep_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_tnep_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     end
 end
 
@@ -41,6 +41,7 @@ function build_tnep(pm::_PM.AbstractPowerModel)
     variable_dc_converter(pm)
     variable_dcbranch_current(pm)
     variable_dcgrid_voltage_magnitude(pm)
+    variable_dcgenerator_power(pm)
     variable_flexible_demand(pm)
     variable_pst(pm)
     variable_sssc(pm)
@@ -159,6 +160,7 @@ function build_mp_tnep(pm::_PM.AbstractPowerModel)
         variable_dc_converter(pm; nw = n)
         variable_dcbranch_current(pm; nw = n)
         variable_dcgrid_voltage_magnitude(pm; nw = n)
+        variable_dcgenerator_power(pm; nw = n)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
@@ -291,6 +293,7 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
     variable_dc_converter(pm)
     variable_dcbranch_current(pm)
     variable_dcgrid_voltage_magnitude(pm)
+    variable_dcgenerator_power(pm)
     variable_flexible_demand(pm)
     variable_pst(pm)
     variable_sssc(pm)
@@ -406,6 +409,7 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         variable_dc_converter(pm; nw = n)
         variable_dcbranch_current(pm; nw = n)
         variable_dcgrid_voltage_magnitude(pm; nw = n)
+        variable_dcgenerator_power(pm; nw = n)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)

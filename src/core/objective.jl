@@ -6,11 +6,12 @@ function objective_min_operational_cost(pm::_PM.AbstractPowerModel)
         components = ["gen"]
     end   
 
-    gen_cost = calc_gen_cost(pm; components = components)
+    gen_cost, gendc_cost = calc_gen_cost(pm; components = components)
     load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = components)
 
     return JuMP.@objective(pm.model, Min,
         sum( sum( gen_cost[(n,i)] for (i,gen) in nw_ref[:gen]) for (n, nw_ref) in _PM.nws(pm))
+        + sum( sum( gendc_cost[(n,i)] for (i,gen) in nw_ref[:gendc]) for (n, nw_ref) in _PM.nws(pm))
         + sum( sum( load_cost_curt[(n,i)] for (i,load) in nw_ref[:load]) for (n, nw_ref) in _PM.nws(pm))
         + sum( sum( load_cost_red[(n,i)] for (i,load) in nw_ref[:load]) for (n, nw_ref) in _PM.nws(pm))
     )
@@ -24,12 +25,14 @@ function objective_min_operational_capex_cost(pm::_PM.AbstractPowerModel)
         components = ["gen", "dc_converter", "dc_branch", "ac_branch"]
     end   
 
-    gen_cost = calc_gen_cost(pm; components = components)
+    gen_cost, gendc_cost = calc_gen_cost(pm; components = components)
     load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = components)
     ac_branch_cost, dc_branch_cost, dc_converter_cost = calculate_capex_cost(pm; components = components)
 
+
     return JuMP.@objective(pm.model, Min,
-        sum( sum( gen_cost[(n,i)] for (i,gen) in nw_ref[:gen]) for (n, nw_ref) in _PM.nws(pm))
+          sum( sum( gen_cost[(n,i)] for (i,gen) in nw_ref[:gen]) for (n, nw_ref) in _PM.nws(pm))
+        + sum( sum( gendc_cost[(n,i)] for (i,gen) in nw_ref[:gendc]) for (n, nw_ref) in _PM.nws(pm))
         + sum( sum( load_cost_curt[(n,i)] for (i,load) in nw_ref[:load]) for (n, nw_ref) in _PM.nws(pm))
         + sum( sum( load_cost_red[(n,i)] for (i,load) in nw_ref[:load]) for (n, nw_ref) in _PM.nws(pm))
         + sum( sum( ac_branch_cost[(n,i)] for (i,branch) in nw_ref[:ne_branch]) for (n, nw_ref) in _PM.nws(pm))
@@ -40,6 +43,7 @@ end
 
 function calc_gen_cost(pm::_PM.AbstractPowerModel; report::Bool=true, components = ["gen"])
     gen_cost = Dict()
+    gendc_cost = Dict()
     if any(components .== "gen")
         for (n, nw_ref) in _PM.nws(pm)
             for (i,gen) in nw_ref[:gen]
@@ -55,15 +59,34 @@ function calc_gen_cost(pm::_PM.AbstractPowerModel; report::Bool=true, components
                     gen_cost[(n,i)] = 0.0
                 end
             end
+
+            if !isempty(nw_ref[:gendc])
+                for (i,gen) in nw_ref[:gendc]
+                    pgdc = _PM.var(pm, n, :pgdc, i)
+
+                    if length(gen["cost"]) == 1
+                        gendc_cost[(n,i)] = gen["cost"][1]
+                    elseif length(gen["cost"]) == 2
+                        gendc_cost[(n,i)] = gen["cost"][1]*pgdc + gen["cost"][2]
+                    elseif length(gen["cost"]) == 3
+                        gendc_cost[(n,i)] = gen["cost"][1]*pgdc^2 + gen["cost"][2]*pgdc + gen["cost"][3]
+                    else
+                        gendccost[(n,i)] = 0.0
+                    end
+                end
+            end
         end
     else
         for (n, nw_ref) in _PM.nws(pm)
             for (i,gen) in nw_ref[:gen]
                 gen_cost[(n,i)] = 0.0
             end
+            for (i,gen) in nw_ref[:gendc]
+                gendc_cost[(n,i)] = 0.0
+            end
         end
     end
-    return gen_cost
+    return gen_cost, gendc_cost
 end
 
 function calc_load_operational_cost(pm::_PM.AbstractPowerModel; components = [], network_ids = "all")
@@ -195,12 +218,13 @@ end
 
 "Sum of generator operational and start-up costs, FCR and FFR costs, demand reduction and demand shedding costs"
 function objective_min_cost_fcuc(pm::_PM.AbstractPowerModel; report::Bool=true, droop = false)
-    gen_cost = calc_gen_cost(pm)
+    gen_cost, gendc_cost = calc_gen_cost(pm)
     ffr_cost, fcr_cost = calc_reserve_cost(pm; droop = droop) #; components = ["fcr", "ffr"]) 
     load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = ["demand"], network_ids = "hours")
 
     return JuMP.@objective(pm.model, Min,
-        sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gen]) for n in pm.ref[:it][:pm][:hour_ids]) 
+          sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gen]) for n in pm.ref[:it][:pm][:hour_ids]) 
+        + sum( sum( gendc_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gendc]) for n in pm.ref[:it][:pm][:hour_ids])
         + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in pm.ref[:it][:pm][:hour_ids])
         + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in pm.ref[:it][:pm][:hour_ids])
         + sum( sum( ffr_cost[(n,i)] for (i,conv) in _PM.nws(pm)[n][:convdc]) for n in pm.ref[:it][:pm][:hour_ids])

@@ -1,5 +1,5 @@
 function solve_uc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_uc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_uc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!, ref_add_gendc!], kwargs...)
 end
 
 ""
@@ -15,6 +15,7 @@ function build_uc(pm::_PM.AbstractPowerModel)
         variable_dcbranch_current(pm; nw = n)
         variable_dc_converter(pm; nw = n)
         variable_dcgrid_voltage_magnitude(pm; nw = n)
+        variable_dcgenerator_power(pm; nw = n)
         variable_generator_states(pm; nw = n, uc = true)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)

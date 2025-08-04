@@ -7,11 +7,12 @@ end
 sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == pd
 ```
 """
-function constraint_power_balance_dc(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_convs_dc, pd)
+function constraint_power_balance_dc(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_convs_dc, bus_gens_dc, pd)
     p_dcgrid = _PM.var(pm, n, :p_dcgrid)
     pconv_dc = _PM.var(pm, n, :pconv_dc)
+    pgdc = _PM.var(pm, n, :pgdc)
 
-    cstr_p = JuMP.@constraint(pm.model, sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == (-pd))
+    cstr_p = JuMP.@constraint(pm.model, sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == (-pd) + sum(pgdc[g] for g in bus_gens_dc))
 
     if _IM.report_duals(pm)
         _PM.sol(pm, n, :busdc, i)[:lam_kcl_r] = cstr_p
@@ -481,13 +482,14 @@ end
 sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(p_dcgrid_ne[a] for a in bus_arcs_dcgrid_ne) + sum(pconv_dc[c] for c in bus_convs_dc) + sum(pconv_dc_ne[c] for c in bus_convs_dc_ne)  == (-pd)
 ```
 """
-function constraint_power_balance_dc_dcne(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_arcs_dcgrid_ne, bus_convs_dc, bus_convs_dc_ne, pd)
+function constraint_power_balance_dc_dcne(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_arcs_dcgrid_ne, bus_convs_dc, bus_convs_dc_ne, bus_gens_dc, pd)
     p_dcgrid = _PM.var(pm, n, :p_dcgrid)
     p_dcgrid_ne = _PM.var(pm, n, :p_dcgrid_ne)
     pconv_dc = _PM.var(pm, n, :pconv_dc)
     pconv_dc_ne = _PM.var(pm, n, :pconv_dc_ne)
+    pgdc = _PM.var(pm, n, :pgdc)
 
-    cstr_p = JuMP.@constraint(pm.model, sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(p_dcgrid_ne[a] for a in bus_arcs_dcgrid_ne) + sum(pconv_dc[c] for c in bus_convs_dc) + sum(pconv_dc_ne[c] for c in bus_convs_dc_ne)  == (-pd))
+    cstr_p = JuMP.@constraint(pm.model, sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(p_dcgrid_ne[a] for a in bus_arcs_dcgrid_ne) + sum(pconv_dc[c] for c in bus_convs_dc) + sum(pconv_dc_ne[c] for c in bus_convs_dc_ne)  == (-pd) + sum(pgdc[g] for g in bus_gens_dc))
 
     if _IM.report_duals(pm)
         _PM.sol(pm, n, :busdc, i)[:lam_kcl_r] = cstr_p

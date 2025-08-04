@@ -35,6 +35,9 @@ function process_additional_data!(data; tnep = false)
     if haskey(data, "load_flex")
         process_flexible_demand_data!(data)
     end
+    if haskey(data, "gendc")
+        process_gendc_data!(data)
+    end
     fix_data!(data; tnep = tnep)
     convert_matpowerdcline_to_branchdc!(data)
 end
@@ -227,6 +230,48 @@ function process_flexible_demand_data_multi_network!(data)
     return data
 end
 
+
+function process_gendc_data!(data)
+    if !haskey(data, "multinetwork") || data["multinetwork"] == false
+        to_pu_single_network_gendc!(data)
+    else
+        to_pu_multi_network_gendc!(data)
+    end
+end
+
+function to_pu_single_network_gendc!(data)
+    MVAbase = data["baseMVA"]
+    for (g, gen) in data["gendc"]
+        scale_gendc_data!(gen, MVAbase)
+    end
+end
+
+function to_pu_multi_network_gendc!(data)
+    MVAbase = data["baseMVA"]
+    for (n, network) in data["nw"]
+        MVAbase = network["baseMVA"]
+        for (g, gen) in network[n]["gendc"]
+            scale_gendc_data!(gen, MVAbase)
+        end
+    end
+end
+
+function scale_gendc_data!(gen, MVAbase)
+    rescale_power = x -> x/MVAbase
+    _PM._apply_func!(gen, "pgdcset", rescale_power)
+    _PM._apply_func!(gen, "pmin", rescale_power)
+    _PM._apply_func!(gen, "pmax", rescale_power)
+    rescale_dcgen_cost_model!(gen, MVAbase)
+
+end
+
+
+function rescale_dcgen_cost_model!(gendc, MVAbase)
+    gendc["cost"] = [gendc["quadratic_cost"] * MVAbase^2 gendc["linear_cost"] * MVAbase gendc["idle_cost"]]
+end
+
+### Auxiliary functions 
+
 function is_single_network(data)
     return !haskey(data, "multinetwork") || data["multinetwork"] == false
 end
@@ -270,7 +315,7 @@ function to_pu_single_network!(data)
             Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
             Ibase = get_pu_bases(MVAbase, kVbase)["I"]
 
-            set_conv_pu_power(conv, MVAbase)
+            set_conv_pu_power(conv, MVAbase) 
             set_conv_pu_volt(conv, kVbase*sqrt(3))
             set_conv_pu_ohm(conv, Zbase)
         end
