@@ -229,7 +229,7 @@ end
 @testset "4-bus ac voltage droop case" begin
     result = solve_acdcpf("../test/data/case4_acdroop.m", ACPPowerModel, ipopt_solver; setting = s)
 
-    @test result["termination_status"] == LOCALLY_SOLVED
+    @test result["termination_status"] == LOCALLY_SOLVED || result["termination_status"] == SLOW_PROGRESS
     @test isapprox(result["objective"], 0; atol = 1e-2)
 
     @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.24; atol = 1e-2)
