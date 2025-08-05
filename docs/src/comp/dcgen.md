@@ -15,7 +15,7 @@ Set of parameters used to model DC branches as defined in the input data
 | pmax              | $\overline{P^{dc}_{g}}$        | p.u.  | Real      | -        | maximum power rating of the generator |
 | gen_status        | $\delta_{dc}$             | -     | Int       | -        | status indicator of the generator |
 | mbase             | $P_{base}$                | p.u.  | Real      | -        | MW base of the generator|
-| vdcg              | $V^{dc}_{g}^{set}$             | p.u.  | Real      | -        | target voltage of generator - used in power flow calculations for constant and droop control modes |
+| vdcg              | $V_{g}^{dc,set}$             | p.u.  | Real      | -        | target voltage of generator - used in power flow calculations for constant and droop control modes |
 | idle cost         | $c_{g,1}$                   | Currency / p.u.   | Real  | -     | Generator cost when idle in currency of your choice|
 | linear cost       | $c_{g,2}$                   | Currency / p.u.   | Real  | -     | Generator cost in currency / MW(h)|
 | quadratic cost    | $c_{g,3}$                   | Currency / p.u.   | Real  | -     | Generator cost in currency / (MW(h))^2|
@@ -68,17 +68,17 @@ Not yet defined for IVR!
 ```math
 \begin{align}
 
-if $\kappa^{dc}_{g}$ = 1:& \\
+if \kappa^{dc}_{g} = 1:& \\
 
 P^{dc}_{g} &= P^{dc}_{g,set} \\
 
-if $\kappa^{dc}_{g}$ = 2:& \\
+if \kappa^{dc}_{g} = 2:& \\
 
 vdc_{e} &= $V^{dc}_{g}^{set}$ \\
 
-if $\kappa^{dc}_{g}$ = 3:& \\
+if \kappa^{dc}_{g} = 3:& \\
 
-P^{dc}_{g} = P^{dc}_{g,set} - 1 / k^{dc}_{g} * (vdc_{e} - $V^{dc}_{g}^{set}$)
+P^{dc}_{g} = P^{dc}_{g,set} - 1 / k^{dc}_{g} * (vdc_{e} - V^{dc}_{g}^{set})
 
 \end{align}
 ```
