@@ -1,5 +1,5 @@
 function solve_fcuc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_fcuc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_fcuc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!, ref_add_gendc!], kwargs...)
 end
 
 ""
@@ -12,6 +12,7 @@ function build_fcuc(pm::_PM.AbstractPowerModel)
         variable_dcbranch_current(pm; nw = n)
         variable_dc_converter(pm; nw = n)
         variable_dcgrid_voltage_magnitude(pm; nw = n)
+        variable_dcgenerator_power(pm; nw = n)
 
         _PM.constraint_model_voltage(pm; nw = n)
         constraint_voltage_dc(pm; nw = n)

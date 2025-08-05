@@ -25,7 +25,7 @@ Set of parameters used to model DC branches as defined in the input data
 
 ## Variables
 
-Optimisation variables representing PST behaviour
+Optimisation variables representing DC branch behaviour
 
 | name          | symb.                 | unit  | formulation                       | definition                                                                 |
 |---------------|-----------------------|-------|-----------------------------------|----------------------------------------------------------------------------|  
@@ -90,7 +90,7 @@ P_{d,j,i} = I_{d,j,i} \cdot V_{j}
 \end{align}
 ```
 
-DCP, NF, model:
+DCP and NF model:
 
 In this model there are no losses, as such only the active power limits are binding.
 

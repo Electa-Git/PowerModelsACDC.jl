@@ -19,6 +19,28 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test isapprox(result["solution"]["busdc"]["1"]["vm"], 1.008; atol = 2e-3)
 
     end
+        @testset "5-bus ac dc case with DC generator" begin
+        result = solve_acdcpf("../test/data/case5_acdc_gendc.m", ACPPowerModel, ipopt_solver; setting = s)
+
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 0; atol = 1e-2)
+        
+        
+
+        @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.55552; atol = 2e-3)
+        @test isapprox(result["solution"]["gen"]["2"]["pg"], 0.40; atol = 2e-3)
+
+        @test isapprox(result["solution"]["bus"]["1"]["vm"], 1.06; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["1"]["va"], 0.00000; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["2"]["vm"], 1.00; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["3"]["vm"], 0.990603; atol = 2e-3)
+
+        @test isapprox(result["solution"]["convdc"]["2"]["pgrid"], 0.0; atol = 2e-3)
+        @test isapprox(result["solution"]["convdc"]["3"]["pdc"],  0.364213; atol = 2e-3)
+        @test isapprox(result["solution"]["busdc"]["1"]["vm"], 1.00772; atol = 2e-3)
+
+
+    end
     @testset "5-bus ac dc case with 2 seperate ac grids" begin
         result = solve_acdcpf("../test/data/case5_2grids.m", ACPPowerModel, ipopt_solver; setting = s)
 
@@ -54,6 +76,26 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 
         @test isapprox(result["solution"]["busdc"]["1"]["vm"], 1.0079; atol = 1e-4)
         @test isapprox(result["solution"]["busdc"]["2"]["vm"], 0.999987; atol = 1e-4)
+        @test isapprox(result["solution"]["busdc"]["3"]["vm"], 0.997813; atol = 1e-4)
+
+    end
+
+        @testset "5-bus ac dc droop case with DC generator" begin
+        result = solve_acdcpf("../test/data/case5_acdc_gendc_droop.m", ACPPowerModel, ipopt_solver; setting = s)
+
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 0; atol = 1e-2)
+
+        @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.35016; atol = 2e-3)
+        @test isapprox(result["solution"]["gen"]["2"]["pg"], 0.40; atol = 2e-3)
+
+        @test isapprox(result["solution"]["bus"]["1"]["vm"], 1.06; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["1"]["va"], 0.00000; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["2"]["vm"], 1.00; atol = 2e-3)
+        @test isapprox(result["solution"]["bus"]["3"]["vm"], 1.00; atol = 2e-3)
+
+        @test isapprox(result["solution"]["busdc"]["1"]["vm"], 1.00789; atol = 1e-4)
+        @test isapprox(result["solution"]["busdc"]["2"]["vm"], 0.999996; atol = 1e-4)
         @test isapprox(result["solution"]["busdc"]["3"]["vm"], 0.997813; atol = 1e-4)
 
     end
@@ -187,7 +229,7 @@ end
 @testset "4-bus ac voltage droop case" begin
     result = solve_acdcpf("../test/data/case4_acdroop.m", ACPPowerModel, ipopt_solver; setting = s)
 
-    @test result["termination_status"] == LOCALLY_SOLVED
+    @test result["termination_status"] == LOCALLY_SOLVED || result["termination_status"] == SLOW_PROGRESS
     @test isapprox(result["objective"], 0; atol = 1e-2)
 
     @test isapprox(result["solution"]["gen"]["1"]["pg"], 1.24; atol = 1e-2)

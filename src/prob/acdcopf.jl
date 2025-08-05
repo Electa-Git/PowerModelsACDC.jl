@@ -4,15 +4,15 @@ export solve_acdcopf
 function solve_acdcopf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
     process_additional_data!(data)
-    return solve_acdcopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+    return solve_acdcopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 
 ""
 function solve_acdcopf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
     if haskey(data, "multinetwork") && data["multinetwork"] == true
-        return _PM.solve_model(data, model_type, solver, mp_build_acdcopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, mp_build_acdcopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     else
-        return _PM.solve_model(data, model_type, solver, build_acdcopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_acdcopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     end
 end
 
@@ -27,9 +27,11 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
     variable_dcbranch_current(pm)
     variable_dc_converter(pm)
     variable_dcgrid_voltage_magnitude(pm)
+    variable_dcgenerator_power(pm)
     variable_flexible_demand(pm)
     variable_pst(pm)
     variable_sssc(pm)
+    
 
     objective_min_operational_cost(pm)
 
@@ -104,6 +106,7 @@ function mp_build_acdcopf(pm::_PM.AbstractPowerModel)
         variable_dcbranch_current(pm; nw = n)
         variable_dc_converter(pm; nw = n)
         variable_dcgrid_voltage_magnitude(pm; nw = n)
+        variable_dcgenerator_power(pm; nw = n)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)

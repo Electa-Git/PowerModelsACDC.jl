@@ -37,7 +37,7 @@ Set of parameters used to model DC branches as defined in the input data
 
 ## Variables
 
-Optimisation variables representing PST behaviour
+Optimisation variables representing generator behaviour
 
 | name          | symb.                 | unit  | formulation                       | definition                                                                 |
 |---------------|-----------------------|-------|-----------------------------------|----------------------------------------------------------------------------|  

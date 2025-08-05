@@ -1,11 +1,11 @@
 function solve_rdopf(file::String, model_type::Type, optimizer; kwargs...)
     data = PowerModels.parse_file(file)
     process_additional_data!(data)
-    return _PM.solve_model(data, model_type, optimizer, build_rdopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_rdopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 
 function solve_rdopf(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_rdopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_rdopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 
 ""
@@ -20,6 +20,7 @@ function build_rdopf(pm::_PM.AbstractPowerModel)
     variable_dcbranch_current(pm)
     variable_dc_converter(pm)
     variable_dcgrid_voltage_magnitude(pm)
+    variable_dcgenerator_power(pm)
     constraint_voltage_dc(pm)
     variable_pst(pm)
     variable_sssc(pm)

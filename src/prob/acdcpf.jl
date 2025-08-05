@@ -4,12 +4,12 @@ export solve_acdcpf
 function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
     process_additional_data!(data)
-    return solve_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+    return solve_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 
 ""
 function solve_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 
 ""
@@ -28,6 +28,7 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     variable_dcbranch_current(pm, bounded = false)
     variable_dc_converter(pm, bounded = false)
     variable_dcgrid_voltage_magnitude(pm, bounded = false)
+    variable_dcgenerator_power(pm; bounded = false)
     variable_flexible_demand(pm, bounded = false)
     variable_pst(pm, bounded = false)
     variable_sssc(pm, bounded = false)
@@ -46,11 +47,13 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         constraint_power_balance_ac(pm, i)
         # PV Bus Constraints
         if length(_PM.ref(pm, :bus_gens, i)) > 0 && !(i in _PM.ids(pm,:ref_buses))
-            # this assumes inactive generators are filtered out of bus_gens
-            @assert bus["bus_type"] == 2
-            _PM.constraint_voltage_magnitude_setpoint(pm, i)
             for j in _PM.ref(pm, :bus_gens, i)
                 _PM.constraint_gen_setpoint_active(pm, j)
+                if  bus["bus_type"] == 2
+                    _PM.constraint_voltage_magnitude_setpoint(pm, i)
+                elseif bus["bus_type"] == 1
+                    _PM.constraint_gen_setpoint_active(pm, j)
+                end
             end
         end
     end
@@ -80,6 +83,13 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :branchdc)
         constraint_ohms_dc_branch(pm, i)
     end
+
+    if !isempty(_PM.ids(pm, :gendc)) 
+        for i in _PM.ids(pm, :gendc)
+            contstraint_dcgenerator_volteage_and_power(pm, i)
+        end
+    end
+
     for (c, conv) in _PM.ref(pm, :convdc)
         constraint_conv_transformer(pm, c)
         constraint_conv_reactor(pm, c)

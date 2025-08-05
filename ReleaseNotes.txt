@@ -1,3 +1,9 @@
+v0.9.1 Release Notes
+
+- Add Dc generators to represent ideal DC voltage sources
+- Bug fixes in documentation
+- Bug fix w.r.t. all generator buses being PV buses
+
 v0.9.0 Release Notes
 
 - Add redispatch optimisation
