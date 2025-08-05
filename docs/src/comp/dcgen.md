@@ -10,7 +10,7 @@ Set of parameters used to model DC branches as defined in the input data
 |---------------|---------------------------|-------|-----------|----------|----------------------------------------------------------------------|
 | index             | $dg$                       | -     | Int       | -        | unique index of the generator                                  |
 | gen_bus           | $e$                       | -     | Int       | -        | unique index of the bus to which the generator is connected to |
-| pgdcset           | $P^{dc}_{g,set}$                   | p.u.  | Real      | -        | reference active power generation set point - used as input in power flow calculations |
+| pgdcset           | $P^{dc,set}_{g}$                   | p.u.  | Real      | -        | reference active power generation set point - used as input in power flow calculations |
 | pmin              | $\underline{P^{dc}_{g}}$       | p.u.  | Real      | -        | minimum stable operating power of the generator |
 | pmax              | $\overline{P^{dc}_{g}}$        | p.u.  | Real      | -        | maximum power rating of the generator |
 | gen_status        | $\delta_{dc}$             | -     | Int       | -        | status indicator of the generator |
@@ -70,15 +70,15 @@ Not yet defined for IVR!
 
 if \kappa^{dc}_{g} = 1:& \\
 
-P^{dc}_{g} &= P^{dc}_{g,set} \\
+P^{dc}_{g} &= P^{dc,set}_{g} \\
 
 if \kappa^{dc}_{g} = 2:& \\
 
-vdc_{e} &= $V^{dc}_{g}^{set}$ \\
+vdc_{e} &= V_{g}^{dc,set} \\
 
 if \kappa^{dc}_{g} = 3:& \\
 
-P^{dc}_{g} = P^{dc}_{g,set} - 1 / k^{dc}_{g} * (vdc_{e} - V^{dc}_{g}^{set})
+P^{dc}_{g} = P^{dc,set}_{g} - 1 / k^{dc}_{g} * (vdc_{e} - V_{g}^{dc,set})
 
 \end{align}
 ```
