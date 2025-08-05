@@ -47,11 +47,13 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         constraint_power_balance_ac(pm, i)
         # PV Bus Constraints
         if length(_PM.ref(pm, :bus_gens, i)) > 0 && !(i in _PM.ids(pm,:ref_buses))
-            # this assumes inactive generators are filtered out of bus_gens
-            @assert bus["bus_type"] == 2
-            _PM.constraint_voltage_magnitude_setpoint(pm, i)
             for j in _PM.ref(pm, :bus_gens, i)
                 _PM.constraint_gen_setpoint_active(pm, j)
+                if  bus["bus_type"] == 2
+                    _PM.constraint_voltage_magnitude_setpoint(pm, i)
+                elseif bus["bus_type"] == 1
+                    _PM.constraint_gen_setpoint_active(pm, j)
+                end
             end
         end
     end
