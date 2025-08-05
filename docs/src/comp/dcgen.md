@@ -78,7 +78,7 @@ vdc_{e} &= V_{g}^{dc,set} \\
 
 if~~~~\kappa^{dc}_{g} = 3:& \\
 
-&P^{dc}_{g} = P^{dc,set}_{g} - 1 / k^{dc}_{g} * (vdc_{e} - V_{g}^{dc,set})
+P^{dc}_{g} &= P^{dc,set}_{g} - 1 / k^{dc}_{g} * (vdc_{e} - V_{g}^{dc,set})
 
 \end{align}
 ```
