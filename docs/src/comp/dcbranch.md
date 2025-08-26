@@ -36,9 +36,8 @@ Optimisation variables representing DC branch behaviour
 
 ## Constraints
 
-### Flow and angle limits
+### Flow, current and voltage product limits
 
-Active power, current, and voltage product limits
 ```math
 \begin{align}
 - \overline{P_{dc}} &\leq P_{d,i,j} \leq \overline{P_{dc}} \\

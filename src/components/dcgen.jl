@@ -17,7 +17,7 @@ end
 
 #### CONSTRAINT TEMPLATES AND CONSTRAINTS
 
-function contstraint_dcgenerator_volteage_and_power(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+function constraint_dcgenerator_voltage_and_power(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
     
     gen =_PM.ref(pm, nw, :gendc, i)
 
@@ -27,11 +27,11 @@ function contstraint_dcgenerator_volteage_and_power(pm::_PM.AbstractPowerModel, 
     v_set = gen["vgdc"]
     p_set = gen["pgdcset"]
 
-    return contstraint_dcgenerator_volteage_and_power(pm, nw, i, gen_bus, k_droop, control_type, v_set, p_set)
+    return constraint_dcgenerator_voltage_and_power(pm, nw, i, gen_bus, k_droop, control_type, v_set, p_set)
 end
 
 
-function contstraint_dcgenerator_volteage_and_power(pm::_PM.AbstractPowerModel, nw::Int, i::Int, gen_bus::Int, k_droop, control_type::Int, v_set, p_set)
+function constraint_dcgenerator_voltage_and_power(pm::_PM.AbstractPowerModel, nw::Int, i::Int, gen_bus::Int, k_droop, control_type::Int, v_set, p_set)
     pgdc = _PM.var(pm, nw)[:pgdc][i]
     vdcg = _PM.var(pm, nw)[:vdcm][gen_bus]
 

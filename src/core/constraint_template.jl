@@ -143,18 +143,27 @@ function constraint_dc_branch_current(pm::_PM.AbstractPowerModel, i::Int; nw::In
     constraint_dc_branch_current(pm, nw, f_bus, f_idx, ccm_max, p)
 end
 
-function constraint_dc_droop_control(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
-    conv = _PM.ref(pm, nw, :convdc, i)
-    bus = _PM.ref(pm, nw, :busdc, conv["busdc_i"])
-    type = conv["type_dc"]
+function constraint_dc_droop_control(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default, scopf = false)
 
-    if type == 3
-        constraint_dc_droop_control(pm, nw, i, conv["busdc_i"], conv["Vdcset"], conv["Pdcset"], conv["droop"]; dc_power = true)
-    elseif type == 4
-        constraint_dc_droop_control(pm, nw, i, conv["busdc_i"], conv["Vdcset"], conv["Pacset"], conv["droop"]; dc_power = false)
+    if scopf
+        conv = _PM.ref(pm, nw, :convdc, i)
+        bus = _PM.ref(pm, nw, :busdc, conv["busdc_i"], "busdc_i")
+        hour_id = get_reference_network_id(pm::_PM.AbstractPowerModel, nw::Int; uc = true)
+
+        constraint_dc_droop_control(pm, nw, i, bus, hour_id)
     else
-        Memento.warn(_PM._LOGGER, "Invalid setting for DC converter control type, droop constraint will be ignored")
-    end
+        conv = _PM.ref(pm, nw, :convdc, i)
+        bus = _PM.ref(pm, nw, :busdc, conv["busdc_i"])
+        type = conv["type_dc"]
+
+        if type == 3
+            constraint_dc_droop_control(pm, nw, i, conv["busdc_i"], conv["Vdcset"], conv["Pdcset"], conv["droop"]; dc_power = true)
+        elseif type == 4
+            constraint_dc_droop_control(pm, nw, i, conv["busdc_i"], conv["Vdcset"], conv["Pacset"], conv["droop"]; dc_power = false)
+        else
+            Memento.warn(_PM._LOGGER, "Invalid setting for DC converter control type, droop constraint will be ignored")
+        end
+    end 
 end
 
 function constraint_ac_voltage_droop_control(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)

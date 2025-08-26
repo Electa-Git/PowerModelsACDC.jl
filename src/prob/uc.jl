@@ -60,7 +60,7 @@ function build_uc(pm::_PM.AbstractPowerModel)
     
         for i in _PM.ids(pm, n, :gen)
             constraint_generator_on_off(pm, i; nw = n, use_status = false)
-            contstraint_unit_commitment(pm, i; nw = n)
+            constraint_unit_commitment(pm, i; nw = n)
             if haskey(pm.setting, "uc_reserves") && pm.setting["uc_reserves"] == true
                 constraint_unit_commitment_reserves(pm, i; nw = n)
             end

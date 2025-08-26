@@ -259,14 +259,18 @@ end
 ########################################
 
 function constraint_converter_contingencies(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
-    constraint_converter_contingency(pm; nw = nw)
-    constraint_select_converter_contingency(pm; nw = nw)
-    for i in _PM.ids(pm, nw, :convdc)
-        constraint_converter_contingency_indicator(pm, i; nw = nw)
-    end
+        constraint_converter_contingency_severity(pm; nw = nw)
+        constraint_select_converter_contingency(pm; nw = nw)
+        for i in _PM.ids(pm, nw, :convdc)
+            constraint_converter_contingency_indicator(pm, i; nw = nw)
+        end
 end
 
-function constraint_converter_contingency(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
+function constraint_converter_contingencies(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)``
+        constraint_converter_outage(pm, i; nw = nw)
+end
+
+function constraint_converter_contingency_severity(pm::_PM.AbstractPowerModel; nw::Int = _PM.nw_id_default)
     reference_network_idx = get_reference_network_id(pm, nw; uc = true)
     if haskey(_PM.ref(pm, nw), :excluded_zones)
         excluded_zones = _PM.ref(pm, nw, :excluded_zones)
@@ -277,7 +281,7 @@ function constraint_converter_contingency(pm::_PM.AbstractPowerModel; nw::Int = 
     for zone in zones
         for (c, conv) in _PM.ref(pm, nw, :convdc)
             if haskey(conv, "zone") && _PM.ref(pm, nw, :zones, zone)["zone"] == conv["zone"]
-                constraint_converter_contingency(pm, c, reference_network_idx, zone)
+                constraint_converter_contingency_severity(pm, c, reference_network_idx, zone)
             end
         end
     end
@@ -322,7 +326,7 @@ function constraint_select_converter_contingency(pm::_PM.AbstractPowerModel; nw:
     end 
 end
 
-function constraint_converter_contingency(pm::_PM.AbstractPowerModel, i::Int, n::Int, zone)
+function constraint_converter_contingency_severity(pm::_PM.AbstractPowerModel, i::Int, n::Int, zone)
     pc = _PM.var(pm, n, :pconv_ac, i)
     δPc_plus = _PM.var(pm, n, :conv_cont_plus, zone)
     δPc_minus = _PM.var(pm, n, :conv_cont_minus, zone)
@@ -357,6 +361,63 @@ function constraint_contingent_converter(pm::_PM.AbstractPowerModel, n::Int, ref
         JuMP.@constraint(pm.model, -2 * _PM.ref(pm, ref_id, :convdc, c)["Pacrated"] * (1 - δc[c]) <= pconv_in[c]) 
         JuMP.@constraint(pm.model,  2 * _PM.ref(pm, ref_id, :convdc, c)["Pacrated"] * (1 - δc[c]) >= pconv_in[c])
     end
+end
+
+
+function constraint_converter_outage(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    constraint_active_power_converter_outage(pm::_PM.AbstractPowerModel, nw::Int, i::Int)
+    constraint_reactive_power_converter_outage(pm::_PM.AbstractPowerModel, nw::Int, i::Int)
+    constraint_voltage_converter_outage(pm::_PM.AbstractPowerModel, nw::Int, i::Int)
+end
+
+
+function constraint_active_power_converter_outage(pm::_PM.AbstractPowerModel, n::Int, i::Int)
+    pconv_ac = _PM.var(pm, n, :pconv_ac, i)
+    pconv_tf_to = _PM.var(pm, n, :pconv_tf_to, i)
+    pconv_pr_fr = _PM.var(pm, n, :pconv_pr_fr, i)
+    pconv_tf_fr = _PM.var(pm, n, :pconv_tf_fr, i)
+    pconv_dc = _PM.var(pm, n, :pconv_dc, i)
+
+    JuMP.@constraint(pm.model, pconv_ac == 0)
+    JuMP.@constraint(pm.model, pconv_tf_to == 0)
+    JuMP.@constraint(pm.model, pconv_tf_fr == 0)
+    JuMP.@constraint(pm.model, pconv_pr_fr == 0)
+    JuMP.@constraint(pm.model, pconv_dc == 0)
+end
+
+function constraint_reactive_power_converter_outage(pm::_PM.AbstractPowerModel, n::Int, i::Int)
+    qconv_ac = _PM.var(pm, n, :qconv_ac, i)
+    qconv_tf_to = _PM.var(pm, n, :qconv_tf_to, i)
+    qconv_pr_fr = _PM.var(pm, n, :qconv_pr_fr, i)
+    qconv_tf_fr = _PM.var(pm, n, :qconv_tf_fr, i)
+
+    JuMP.@constraint(pm.model, qconv_ac == 0)
+    JuMP.@constraint(pm.model, qconv_tf_to == 0)
+    JuMP.@constraint(pm.model, qconv_tf_fr == 0)
+    JuMP.@constraint(pm.model, qconv_pr_fr == 0)
+end
+
+function constraint_voltage_converter_outage(pm::_PM.AbstractPowerModel, nw::Int, i::Int)
+    conv = _PM.ref(pm, nw, :convdc, i)
+    acbus = conv["busac_i"]
+
+    constraint_voltage_converter_outage(pm::_PM.AbstractPowerModel, nw::Int, i::Int, acbus)
+end
+
+function constraint_voltage_converter_outage(pm::_PM.AbstractACPModel, n::Int,  i::Int, acbus)
+    vmc = _PM.var(pm, n,  :vmc, i)
+    vac = _PM.var(pm, n,  :vac, i)
+
+    vmf = _PM.var(pm, n,  :vmf, i)
+    vaf = _PM.var(pm, n,  :vaf, i)
+
+    vm = _PM.var(pm, n,  :vm, acbus)
+    va = _PM.var(pm, n,  :va, acbus)
+
+    JuMP.@constraint(pm.model, vmc == vmf)
+    JuMP.@constraint(pm.model, vmf == vm)
+    JuMP.@constraint(pm.model, vac == vaf)
+    JuMP.@constraint(pm.model, vaf == va)
 end
 
 ########################################
@@ -539,4 +600,85 @@ function constraint_storage_contingency_indicator(pm::_PM.AbstractPowerModel, i:
 
     JuMP.@constraint(pm.model, (δs- 1) * bigM <= δPs - ps)
     JuMP.@constraint(pm.model, δPs - ps <= (1-δs) * bigM)
+end
+
+
+############################################
+### DC Branch Contingencies ################
+############################################
+
+
+
+"variable: `vdcm_star[i]` for `i` in `dcbus`es"
+function variable_dcgrid_auxiliary_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+    vdcm = _PM.var(pm, nw)[:vdcm_star] = JuMP.JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :busdc)], base_name="$(nw)_vdcm_star",
+    start = _PM.comp_start_value(_PM.ref(pm, nw, :busdc, i), "Vdc", 1.0)
+    )
+
+    if bounded
+        for (i, busdc) in _PM.ref(pm, nw, :busdc)
+            JuMP.set_lower_bound(vdcm[i],  -2*busdc["Vdcmin"])
+            JuMP.set_upper_bound(vdcm[i],   2*busdc["Vdcmax"])
+        end
+    end
+
+    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :busdc, :vm_star, _PM.ids(pm, nw, :busdc), vdcm)
+end
+
+function constraint_dc_branch_contingencies(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    constraint_dc_branch_outage(pm::_PM.AbstractPowerModel, i; nw = nw)  
+end
+
+
+function constraint_dc_branch_outage(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    branch = PowerModels.ref(pm, nw, :branchdc, i)
+    f_bus = branch["fbusdc"]
+    t_bus = branch["tbusdc"]
+    f_idx = (i, f_bus, t_bus)
+    t_idx = (i, t_bus, f_bus)
+
+    constraint_dc_branch_outage(pm, nw, f_idx, t_idx)
+end
+
+function constraint_dc_branch_outage(pm::_PM.AbstractPowerModel, n::Int, f_idx, t_idx)
+    p_fr = PowerModels.var(pm, n, :p_dcgrid, f_idx)
+    p_to = PowerModels.var(pm, n, :p_dcgrid, t_idx)
+
+    JuMP.@constraint(pm.model, p_fr == 0)
+    JuMP.@constraint(pm.model, p_to == 0)
+end
+
+
+
+function constraint_ohms_dc_branch_contingency(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_defaul, online = 1)
+    branch = _PM.ref(pm, nw, :branchdc, i)
+    f_bus = branch["fbusdc"]
+    t_bus = branch["tbusdc"]
+    r = branch["r"]
+    p = _PM.ref(pm, nw, :dcpol)
+    bigM = 2 *  _PM.ref(pm, nw, :busdc, f_bus)["Vdcmax"]
+
+    f_idx = (i, f_bus, t_bus)
+    t_idx = (i, t_bus, f_bus)
+
+    constraint_ohms_dc_branch_outage(pm::_PM.AbstractPowerModel, nw, f_idx, t_idx, f_bus, t_bus, online, r, p, bigM)  
+end
+
+function constraint_ohms_dc_branch_outage(pm::_PM.AbstractPowerModel, n, f_idx, t_idx, f_bus, t_bus, online, r, p, bigM)
+    p_fr = _PM.var(pm, n, :p_dcgrid, f_idx)
+    p_to = _PM.var(pm, n, :p_dcgrid, t_idx)
+
+    vm_fr = _PM.var(pm, n, :vdcm, f_bus)
+    vm_to = _PM.var(pm, n, :vdcm, t_bus)   
+    vm_fr_star = _PM.var(pm, n, :vdcm_star, f_bus)
+    vm_to_star = _PM.var(pm, n, :vdcm_star, t_bus) 
+
+    g = 1 / r
+    JuMP.@constraint(pm.model, p_fr == p * g * vm_fr_star * (vm_fr_star - vm_to_star))
+    JuMP.@constraint(pm.model, p_to == p * g * vm_to_star * (vm_to_star - vm_fr_star))
+
+
+    JuMP.@constraint(pm.model, (online-1) * bigM <= vm_fr_star - vm_fr <= (1-online) * bigM)
+    JuMP.@constraint(pm.model, (online-1) * bigM <= vm_to_star - vm_to <= (1-online) * bigM)
 end

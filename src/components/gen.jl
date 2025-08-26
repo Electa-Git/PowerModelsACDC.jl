@@ -114,6 +114,24 @@ function variable_generator_redispatch_down(pm::_PM.AbstractPowerModel; nw::Int=
     report && _PM.sol_component_value(pm, nw, :gen, :dpg_down, _PM.ids(pm, nw, :gen), dpg_down)
 end
 
+
+"Variable for representing generator actions in the scopf model"
+function variable_generator_actions(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+    ΔPg  = _PM.var(pm, nw)[:delta_pg] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :gen)], base_name="$(nw)_delta_pg",
+    start = _PM.comp_start_value(_PM.ref(pm, nw, :gen, i), "pg", 0.0)
+    )
+
+    if bounded
+        for (g, gen) in _PM.ref(pm, nw, :gen)
+            JuMP.set_lower_bound(ΔPg[g],  -2 * gen["pmax"])
+            JuMP.set_upper_bound(ΔPg[g],   2 * gen["pmax"])
+        end
+    end
+
+    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :gen, :delta_pg, _PM.ids(pm, nw, :gen), ΔPg)
+end
+
 # Constraint templates:
 "Defines system-wide generator inertia limits in given market zone"
 function constraint_generator_inertia_limit(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
@@ -165,7 +183,7 @@ function constraint_generator_status_cont(pm::_PM.AbstractPowerModel, i::Int; nw
 end
 
 "Collect generator unit commitment constraints"
-function contstraint_unit_commitment(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+function constraint_unit_commitment(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
     constraint_generator_decisions(pm, i, nw)
     constraint_minimum_generator_up_time(pm, i, nw)
     constraint_minimum_generator_down_time(pm, i, nw)
@@ -349,6 +367,34 @@ function  constraint_generator_fcr_contribution_abs(pm::_PM.AbstractPowerModel, 
 
     JuMP.@constraint(pm.model, pg_droop_abs >=  pg_droop)
     JuMP.@constraint(pm.model, pg_droop_abs >= -pg_droop)
+end
+
+
+"Generator active power behaviour as corrective actions in scopf model"
+function constraint_gen_actions(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    hour_id = get_reference_network_id(pm::_PM.AbstractPowerModel, nw::Int, uc = true)
+    if haskey(pm.setting, "fix_gen") &&  pm.setting["fix_gen"] == false
+        constraint_gen_actions(pm, nw, i, hour_id)
+    else
+        gen_slack = _PM.ref(pm, nw, :gen, i)["gen_slack"]
+        constraint_gen_actions(pm, nw, i, hour_id, gen_slack)
+    end
+end
+
+function constraint_gen_actions(pm::_PM.AbstractPowerModel, n::Int, i::Int, hour_id, gen_slack)
+    pg_ref = _PM.var(pm, hour_id, :pg, i) # first stage dispatch
+    pg = _PM.var(pm, n, :pg, i)
+
+    JuMP.@constraint(pm.model, pg <= (1 + gen_slack) * pg_ref)
+    JuMP.@constraint(pm.model, pg >= (1 - gen_slack) * pg_ref)
+end
+
+function constraint_gen_actions(pm::_PM.AbstractPowerModel, n::Int, i::Int, hour_id)
+    pg_ref = _PM.var(pm, hour_id, :pg, i) # first stage dispatch
+    pg = _PM.var(pm, n, :pg, i)
+    delta_pg = _PM.var(pm, n, :delta_pg, i)
+
+    JuMP.@constraint(pm.model, delta_pg == pg - pg_ref)
 end
 
 

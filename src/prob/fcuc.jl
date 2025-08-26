@@ -93,7 +93,7 @@ function uc_model!(pm, n)
     gen_status = haskey(pm.setting, "use_gen_status") && pm.setting["use_gen_status"] == true
     for i in _PM.ids(pm, n, :gen)
         constraint_generator_on_off(pm, i; nw = n, use_status = gen_status)
-        contstraint_unit_commitment(pm, i; nw = n)
+        constraint_unit_commitment(pm, i; nw = n)
     end
 
     for i in _PM.ids(pm, n, :pst)

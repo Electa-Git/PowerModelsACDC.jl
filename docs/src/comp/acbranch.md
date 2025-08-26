@@ -36,3 +36,60 @@ Optimisation variables representing AC Branch behaviour
 | q             |$Q_{b,i,j}$            | p.u.  | IVR                               | Current flow through DC branch d, connecting DC nodes i and j |
 
 
+## Constraints
+
+### Flow and angle limits
+
+## Constraints
+
+### Flow and voltage angle limits
+
+```math
+\begin{align}
+- \overline{P_{dc}} &\leq P_{d,i,j} \leq \overline{P_{dc}} \\
+- \overline{I_{dc}} &\leq I_{d,i,j} \leq \overline{I_{dc}} \\
+0 &\leq J_{d,i,j} \leq \overline{I_{dc}^{2}}  \\
+0 &\leq W_{d,i,j} \leq max(V_{i}^{2}, V_{j}^{2})
+\end{align}
+```
+
+### Ohm's law
+ACP model - consult power models for full implementation:
+
+```math
+\begin{align}
+p_{b,i,j} &= g_{pst} \cdot (v_{i})^{2} - g_{b} \cdot v_{i} \cdot v_{j} \cdot cos(\theta_{i} - \theta_{j} ) - b_{pst} \cdot v_{i} \cdot v_{j} \cdot sin(\theta_{i} - \theta_{j} - \alpha_{pst}) \\
+q_{b,i,j} &= -b_{pst} \cdot (v_{i})^{2} + b_{b} \cdot v_{i} \cdot v_{j} \cdot cos(\theta_{i} - \theta_{j} ) - g_{pst} \cdot v_{i} \cdot v_{j} \cdot sin(\theta_{i} - \theta_{j} - \alpha_{pst}) \\
+\end{align}
+```
+
+
+ACR model:
+
+SOC, QC bus injection model (BIM):
+```math
+\begin{align}
+
+\end{align}
+```
+
+SOC, QC branch flow model (BFM):
+```math
+\begin{align}
+
+\end{align}
+```
+IVR model:
+
+```math
+\begin{align}
+
+\end{align}
+```
+
+DCP model 
+
+NF model:
+
+In this model there are no losses, as such only the active power limits are binding.
+

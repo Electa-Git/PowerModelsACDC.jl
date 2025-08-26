@@ -15,7 +15,7 @@ Set of parameters used to model DC branches as defined in the input data
 | pmax              | $\overline{P^{dc}_{g}}$        | p.u.  | Real      | -        | maximum power rating of the generator |
 | gen_status        | $\delta_{dc}$             | -     | Int       | -        | status indicator of the generator |
 | mbase             | $P_{base}$                | p.u.  | Real      | -        | MW base of the generator|
-| vdcg              | $V_{g}^{dc,set}$             | p.u.  | Real      | -        | target voltage of generator - used in power flow calculations for constant and droop control modes |
+| vgdc              | $V_{g}^{dc,set}$             | p.u.  | Real      | -        | target voltage of generator - used in power flow calculations for constant and droop control modes |
 | idle cost         | $c_{g,1}$                   | Currency / p.u.   | Real  | -     | Generator cost when idle in currency of your choice|
 | linear cost       | $c_{g,2}$                   | Currency / p.u.   | Real  | -     | Generator cost in currency / MW(h)|
 | quadratic cost    | $c_{g,3}$                   | Currency / p.u.   | Real  | -     | Generator cost in currency / (MW(h))^2|

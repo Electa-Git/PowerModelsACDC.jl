@@ -86,7 +86,7 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
 
     if !isempty(_PM.ids(pm, :gendc)) 
         for i in _PM.ids(pm, :gendc)
-            contstraint_dcgenerator_volteage_and_power(pm, i)
+            constraint_dcgenerator_voltage_and_power(pm, i)
         end
     end
 

@@ -538,6 +538,23 @@ function variable_cos_voltage(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_defa
 end
 
 
+"Variable for optimizing the converter droop coeffcient"
+function variable_converter_droop_coefficient(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+    k_droop = _PM.var(pm, nw)[:k_droop] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_k_droop",
+    start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "k_droop", 0.0)
+    )
+
+    if bounded
+        for (c, convdc) in _PM.ref(pm, nw, :convdc)
+            JuMP.set_lower_bound(k_droop[c],  0.0)
+            JuMP.set_upper_bound(k_droop[c],  convdc["kmax"])
+        end
+    end
+
+    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :k_droop, _PM.ids(pm, nw, :convdc), k_droop)
+end
+
 
 ##################################### TNEP variables ##################################
 "All converter variables"
@@ -1032,4 +1049,54 @@ function constraint_converter_power_balance(pm::_PM.AbstractPowerModel, i::Int, 
     pconv_in = _PM.var(pm, n, :pconv_in, i)
 
     JuMP.@constraint(pm.model, pconv == pconv_ref - pconv_in)
+end
+
+
+### Droop optimisation realted constraints and constraint templates
+# Set all droop coefficients to be equal in the current hour and the previous hour
+function constraint_droop_coefficient(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+
+    hour_id = get_reference_network_id(pm, nw, uc = true)
+    prev_hour_id = get_previous_hour_network_id(pm, nw; uc = true)
+
+    constraint_droop_coefficient(pm, hour_id, prev_hour_id, i)
+end
+
+function constraint_droop_coefficient(pm::_PM.AbstractPowerModel, hour, prev_hour, i::Int)
+    k_droop = _PM.var(pm, hour, :k_droop, i)
+    k_droop_ = _PM.var(pm, prev_hour, :k_droop, i)
+
+    JuMP.@constraint(pm.model, k_droop == k_droop_)
+end
+
+"Passivity constraints for HVDC droop control"
+function constraint_dc_converter_passivity(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    conv = _PM.ref(pm, nw, :convdc, i)
+    bus = _PM.ref(pm, nw, :busdc, conv["busdc_i"], "busdc_i")
+    hour_id = get_reference_network_id(pm::_PM.AbstractPowerModel, nw::Int)
+
+    constraint_dc_converter_passivity(pm, i, bus, hour_id)
+end
+
+"""
+Passivity condition: -Pref / (Vref)^2 + k / Vref > 0
+"""
+
+function constraint_dc_converter_passivity(pm::_PM.AbstractACPModel, i::Int, busdc_i, hour_id)
+    pref_dc = _PM.var(pm, hour_id, :pconv_dc, i) # first stage dispatch
+    vref_dc = _PM.var(pm, hour_id, :vdcm, busdc_i) # first stage nodal voltage
+    k_droop = _PM.var(pm, hour_id, :k_droop, i)
+
+    JuMP.@NLconstraint(pm.model, -pref_dc / (vref_dc)^2 + k_droop / (vref_dc) >= 0)
+end
+
+
+function constraint_dc_droop_control(pm::_PM.AbstractACPModel, n::Int, i::Int, busdc_i, hour_id)
+    pref_dc = _PM.var(pm, hour_id, :pconv_dc, i) # first stage dispatch
+    vref_dc = _PM.var(pm, hour_id, :vdcm, busdc_i) # first stage nodal voltage
+    pconv_dc = _PM.var(pm, n, :pconv_dc, i)
+    vdc = _PM.var(pm, n, :vdcm, busdc_i)
+    k_droop = _PM.var(pm, hour_id, :k_droop, i)
+
+    JuMP.@constraint(pm.model, pconv_dc == pref_dc + (k_droop * (vdc - vref_dc)))
 end

@@ -1091,3 +1091,56 @@ function calc_branch_admittance(branch::Dict{String,<:Any}, element::String)
     return g, b
 end
 
+
+function create_scopf_data(data_in, number_of_hours, g_series, l_series; number_of_contingencies = length(data_in["contingencies"]))
+    data = deepcopy(data_in)
+    # Contruct extra_data dictionary
+    extra_data = Dict{String, Any}()
+    extra_data["dim"] = number_of_hours * number_of_contingencies
+    extra_data["gen"] = Dict{String, Any}(g => Dict("pmax" => []) for (g, gen) in data["gen"])
+    extra_data["load"] = Dict{String, Any}(g => Dict("pd" => []) for (g, gen) in data["load"])
+
+
+    # This for loop determines which "network" belongs to an hour, and which to a contingency, for book-keeping of the network ids
+    # Format: [h1, c1 ... cn, h2, c1 ... cn, .... , hn, c1 ... cn]
+    hour_ids = [];
+    cont_ids = [];
+    for i in 1:number_of_hours * number_of_contingencies
+        if mod(i, number_of_contingencies) == 1
+            push!(hour_ids, i)
+        else
+            push!(cont_ids, i)
+        end
+    end
+
+    ########### Using _IM.replicate networks
+
+    data = _IM.replicate(data, number_of_hours * number_of_contingencies, Set{String}(["source_type", "name", "source_version", "per_unit"]))
+
+    # This loop writes the generation and demand time series data
+    iter = 0
+    for nw = 1:number_of_hours * number_of_contingencies
+        if mod(nw, number_of_contingencies) == 1
+            iter += 1
+            h_idx = Int(nw - number_of_contingencies + 1)
+        end
+        h_idx = iter
+        for (g, gen) in data["nw"]["$nw"]["gen"]
+            gen["pmax"] = g_series[h_idx] * gen["pmax"]
+        end
+        for (l, load) in data["nw"]["$nw"]["load"]
+            load["pd"] = l_series[h_idx] * load["pd"]
+        end
+    end
+
+    process_additional_data!(data)
+
+    # Add hour_ids and contingency_ids to the data dictionary 
+    data["hour_ids"] = hour_ids
+    data["cont_ids"] = cont_ids
+    data["number_of_hours"] = number_of_hours
+    data["number_of_contingencies"] = number_of_contingencies
+
+    return data
+end
+
