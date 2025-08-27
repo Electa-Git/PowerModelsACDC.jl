@@ -266,7 +266,7 @@ function constraint_converter_contingencies(pm::_PM.AbstractPowerModel; nw::Int 
         end
 end
 
-function constraint_converter_contingencies(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)``
+function constraint_converter_contingencies(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
         constraint_converter_outage(pm, i; nw = nw)
 end
 
@@ -618,7 +618,7 @@ function variable_dcgrid_auxiliary_voltage_magnitude(pm::_PM.AbstractPowerModel;
 
     if bounded
         for (i, busdc) in _PM.ref(pm, nw, :busdc)
-            JuMP.set_lower_bound(vdcm[i],  -2*busdc["Vdcmin"])
+            JuMP.set_lower_bound(vdcm[i],  -2*busdc["Vdcmax"])
             JuMP.set_upper_bound(vdcm[i],   2*busdc["Vdcmax"])
         end
     end

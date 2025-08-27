@@ -190,7 +190,7 @@ function contingency_contraints!(pm, n)
 
     if haskey(_PM.ref(pm, n), :tie_lines) && cont_type == "tie_line" && !isempty(_PM.ref(pm, n, :areas))
         if haskey(pm.setting, "hvdc_inertia_contribution") 
-            constraint_frequency_tieline_contingency(pm, area; nw = n, hvdc_contribution = pm.setting["hvdc_inertia_contribution"] == true)
+            constraint_frequency_tieline_contingency(pm, area; nw = n, hvdc_contribution = pm.setting["hvdc_inertia_contribution"])
         else
             constraint_frequency_tieline_contingency(pm, area; nw = n, hvdc_contribution = false)
         end

@@ -28,7 +28,7 @@ function build_scopf(pm::_PM.AbstractPowerModel)
     for n in pm.ref[:it][:pm][:cont_ids]
         second_stage_model!(pm, n)
     end
-    objective_min_operational_cost(pm; network_ids = pm.ref[:it][:pm][:hour_ids])
+    objective_min_scopf_cost(pm; network_ids = pm.ref[:it][:pm][:hour_ids])
 end
 
 function first_stage_model!(pm, n)
@@ -132,7 +132,7 @@ function second_stage_model!(pm, n)
             constraint_dc_branch_contingencies(pm, i; nw = n)
             constraint_ohms_dc_branch_contingency(pm, i; nw = n, online = 0)
         else
-            constraint_ohms_dc_branch_contingency(pm, i; nw = n, online = 1)
+            constraint_ohms_dc_branch(pm, i; nw = n)
         end
     end
     

@@ -17,16 +17,16 @@ ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer)
 
 
 ###### Load your test file
-case_name = "case67"
+case_name = "case39"
 kmax = 100
 #######################
 
 if case_name == "case5"
-    file = joinpath(path, "test", "data", "case5acdc_droop.m")
+    file = joinpath(path, "test", "data", "case5acdc_scopf.m")
 elseif case_name == "case39"
-    file = joinpath(path, "test", "data", "case39acdc_droop.m")
+    file = joinpath(path, "test", "data", "case39acdc_scopf.m")
 elseif case_name == "case67"
-    file = joinpath(path, "test", "data", "case67acdc_droop.m")
+    file = joinpath(path, "test", "data", "case67acdc_scopf.m")
 end
 
 data = _PM.parse_file(file)
@@ -38,6 +38,14 @@ end
 for (g, gen) in data["gen"]
     gen["gen_slack"] = 0.0
 end
+
+    # Process demand reduction and curtailment data
+    for (l, load) in data["load"]
+        data["load"][l]["pred_rel_max"] = 0.3
+        data["load"][l]["cost_red"] = 100.0 * data["baseMVA"]
+        data["load"][l]["cost_curt"] = 10000.0 * data["baseMVA"]
+        data["load"][l]["flex"] = 1
+    end
 
 
 # OPF settings
@@ -102,9 +110,12 @@ Plots.ylabel!("Pdc in MW")
 
 
 for (n, network) in result["solution"]["nw"]
-    if parse(Int, n) < 10
-        pd = result["solution"]["nw"]["1"]["convdc"]["1"]["pdc"] + (result["solution"]["nw"]["1"]["convdc"]["1"]["k_droop"] * (network["busdc"]["1"]["vm"]- result["solution"]["nw"]["1"]["busdc"]["1"]["vm"]))
-        println("Contingency ID: ", n, " Pdc calc: ", pd, " Pdc: ", network["convdc"]["1"]["pdc"])
+    if parse(Int, n) < data_all["number_of_contingencies"]
+        for (c, conv) in network["convdc"]
+            bus_id = data_all["nw"]["1"]["convdc"][c]["busdc_i"]
+            pd = result["solution"]["nw"][n]["convdc"][c]["pdc"] + (result["solution"]["nw"]["1"]["convdc"][c]["k_droop"] * (network["busdc"]["$bus_id"]["vm"]- result["solution"]["nw"][n]["busdc"]["$bus_id"]["vm"]))
+            println("Contingency ID: ", n, " Conv ID: ", c," Pdc calc: ", pd, " Pdc: ", network["convdc"][c]["pdc"])
+        end
     end
 end
 
