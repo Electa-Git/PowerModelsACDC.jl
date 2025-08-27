@@ -17,8 +17,9 @@ ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer)
 
 
 ###### Load your test file
-case_name = "case39"
+case_name = "case67"
 kmax = 100
+dc_converter_passivity = true
 #######################
 
 if case_name == "case5"
@@ -49,7 +50,7 @@ end
 
 
 # OPF settings
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "optimize_converter_droop" => true, "objective_components" => ["gen"])
+s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "optimize_converter_droop" => true, "objective_components" => ["gen"],  "dc_converter_passivity" => dc_converter_passivity)
 # Reference droop
 kref = 1/100
 

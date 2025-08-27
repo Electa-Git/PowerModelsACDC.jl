@@ -1073,7 +1073,7 @@ end
 function constraint_dc_converter_passivity(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     conv = _PM.ref(pm, nw, :convdc, i)
     bus = _PM.ref(pm, nw, :busdc, conv["busdc_i"], "busdc_i")
-    hour_id = get_reference_network_id(pm::_PM.AbstractPowerModel, nw::Int)
+    hour_id = get_reference_network_id(pm::_PM.AbstractPowerModel, nw::Int; uc = true)
 
     constraint_dc_converter_passivity(pm, i, bus, hour_id)
 end
@@ -1087,7 +1087,7 @@ function constraint_dc_converter_passivity(pm::_PM.AbstractACPModel, i::Int, bus
     vref_dc = _PM.var(pm, hour_id, :vdcm, busdc_i) # first stage nodal voltage
     k_droop = _PM.var(pm, hour_id, :k_droop, i)
 
-    JuMP.@NLconstraint(pm.model, -pref_dc / (vref_dc)^2 + k_droop / (vref_dc) >= 0)
+    JuMP.@constraint(pm.model, -pref_dc / (vref_dc)^2 + k_droop / (vref_dc) >= 0)
 end
 
 
