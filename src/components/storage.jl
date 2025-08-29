@@ -20,22 +20,28 @@ function storage_constraints(pm, n; uc = false)
     end
 
     ref_nw_id = get_reference_network_id(pm, n; uc = uc)
+    final_network_id = sort(collect(_PM.nw_ids(pm)))[end]
     if ref_nw_id == 1
         for i in _PM.ids(pm, n, :storage)
+            println(_PM.ref(pm, n, :storage, i)["energy"])
             _PM.constraint_storage_state(pm, i, nw = n)
+        end
+    elseif ref_nw_id < final_network_id
+        prev_nw_id = get_previous_hour_network_id(pm, n; uc = uc)
+        for i in _PM.ids(pm, n, :storage)
+            storage = _PM.ref(pm, n, :storage, i)
+            if haskey(storage, "fixed_energy") && any(storage["fixed_energy"][:,1] .== n)
+                constraint_fixed_storage_state(pm, i; nw = n)
+                _PM.constraint_storage_state(pm, i, prev_nw_id, ref_nw_id)
+            else
+                _PM.constraint_storage_state(pm, i, prev_nw_id, ref_nw_id)
+            end
         end
     else
         prev_nw_id = get_previous_hour_network_id(pm, n; uc = uc)
         for i in _PM.ids(pm, n, :storage)
-            _PM.constraint_storage_state(pm, i, prev_nw_id, ref_nw_id)
-        end
-    end
-
-    final_network_id = sort(collect(_PM.nw_ids(pm)))[end]
-
-    if final_network_id == n
-        for i in _PM.ids(pm, n, :storage)
             constraint_storage_state_final(pm, i; nw = n)
+            _PM.constraint_storage_state(pm, i, prev_nw_id, ref_nw_id)
         end
     end
 end
@@ -111,4 +117,18 @@ function constraint_storage_state_final(pm::_PM.AbstractPowerModel, n, initial_e
     se_final = _PM.var(pm, n, :se, i)
 
     JuMP.@constraint(pm.model, se_final >= initial_energy)
+end
+
+
+function constraint_fixed_storage_state(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
+    fixed_energy_vector = _PM.ref(pm, nw, :storage, i)["fixed_energy"]
+    nw_id = findall(fixed_energy_vector[:,1] .== nw)
+    fixed_energy = fixed_energy_vector[nw_id, 2][1]
+    constraint_fixed_storage_state(pm, nw, i, fixed_energy)
+end
+
+function constraint_fixed_storage_state(pm::_PM.AbstractPowerModel, n::Int, i::Int, fixed_energy)
+    se = _PM.var(pm, n, :se, i)
+
+    JuMP.@constraint(pm.model, se == fixed_energy)
 end

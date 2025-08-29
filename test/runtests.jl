@@ -46,4 +46,6 @@ include("spf.jl")
 
 include("uc.jl")
 
+include("strgopf.jl")
+
 end
