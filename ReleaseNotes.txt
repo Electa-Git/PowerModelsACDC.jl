@@ -1,3 +1,9 @@
+v0.9.2 Release Notes
+
+- Adds SCOPF model for DC grids
+- Bug fixes in storage OPF model
+- Small fixes on contraint names etc.
+
 v0.9.1 Release Notes
 
 - Add Dc generators to represent ideal DC voltage sources
