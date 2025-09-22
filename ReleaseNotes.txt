@@ -1,3 +1,7 @@
+v0.9.3 Release Notes
+
+- Adding cross-border flow contraints into the OPF problem (to match zonal markets and nodal OPF)
+
 v0.9.2 Release Notes
 
 - Adds SCOPF model for DC grids

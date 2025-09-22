@@ -90,6 +90,17 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
             constraint_conv_firing_angle(pm, i)
         end
     end
+
+    if haskey(pm.setting, "fix_cross_border_flows") && pm.setting["fix_cross_border_flows"] == true
+        if !haskey(pm.setting, "borders")
+            borders = [i for i in _PM.ids(pm, :borders)]
+        else
+            borders = [i for i in pm.setting["borders"]]
+        end
+        for i in borders
+            constraint_fixed_xb_flows(pm, i)
+        end
+    end
 end
 
 
@@ -172,6 +183,16 @@ function mp_build_acdcopf(pm::_PM.AbstractPowerModel)
 
         if haskey(_PM.ref(pm, n), :storage)
             storage_constraints(pm, n)
+        end
+        if haskey(pm.setting, "fix_cross_border_flows") && pm.setting["fix_cross_border_flows"] == true
+            if !haskey(pm.setting, "borders")
+                borders = [i for i in _PM.ids(pm, n, :borders)]
+            else
+                borders = [i for i in pm.setting["borders"]]
+            end
+            for i in borders
+                constraint_fixed_xb_flows(pm, i; nw = n)
+            end
         end
     end
     objective_min_operational_cost(pm)
