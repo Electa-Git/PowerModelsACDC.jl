@@ -1,18 +1,86 @@
+# ...existing code...
 export solve_acdcpf
 
-""
+"""
+    solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
+
+Parse an input file and solve an AC/DC power flow (ACDCPF) problem using the
+specified PowerModels formulation and solver.
+
+# Arguments
+- `file::String` : Path to the input data file (e.g., MATPOWER `.m` file).
+- `model_type::Type` : PowerModels model type (e.g., `ACPPowerModel`, `SOCBFPowerModel`).
+- `solver` : JuMP solver object or solver factory (e.g., Ipopt).
+- `kwargs...` : Optional keyword arguments forwarded to the underlying solver
+  entry point (settings, reference extensions, etc.).
+
+# Returns
+- A solution dictionary (as returned by PowerModels) containing results such as
+  objective value, variable values and solver termination status.
+
+# Behavior
+This function parses the provided file into a data dictionary, performs any
+additional data processing (via `process_additional_data!`) and delegates to
+`solve_acdcpf(data::Dict, ...)`. By default, reference extensions for DC grid,
+PST, SSSC, flexible loads and DC generators are applied.
+"""
 function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
     process_additional_data!(data)
-    return solve_acdcpf(data::Dict{String,Any}, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+    return solve_acdcpf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 
-""
+"""
+    solve_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
+
+Solve an AC/DC power flow problem from an already-parsed data dictionary.
+
+# Arguments
+- `data::Dict{String,Any}` : Parsed network data dictionary (PowerModels format).
+- `model_type::Type` : PowerModels model type to build the JuMP model.
+- `solver` : JuMP solver object or factory.
+- `kwargs...` : Forwarded keyword arguments (settings, ref_extensions override, etc.).
+
+# Returns
+- A solution dictionary produced by the PowerModels solve pipeline.
+
+# Behavior
+Builds and solves the problem using the power model solve entry point (`_PM.solve_model`).
+This wrapper applies the same set of default reference extensions as the file-based
+entrypoint. Use `ref_extensions` in `kwargs` to override or add additional references.
+"""
 function solve_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
     return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 
-""
+"""
+    build_acdcpf(pm::_PM.AbstractPowerModel)
+
+Builds the JuMP model for an AC/DC power flow (ACDCPF) formulation.
+
+# Arguments
+- `pm::_PM.AbstractPowerModel` : PowerModels internal model holder (pm).
+
+# Details
+Creates variables and constraints appropriate for non-optimization power flow
+(bounded = false variants are used). The builder:
+- Adds bus voltage, generator active power, branch power and storage power variables.
+- For SOCBF formulations, also adds branch current variables.
+- Adds DC-specific variables (active DC branch flows, DC branch current, converters,
+  DC grid voltage magnitudes, DC generators).
+- Adds flexible and fixed load handling, PST and SSSC variables when present.
+- Adds model constraints including:
+  - voltage model constraints
+  - DC voltage constraints
+  - reference bus constraints (theta reference and voltage setpoints)
+  - AC power balance and PV bus handling (generator setpoints / voltage setpoints)
+  - branch equations (Ohm's law or SOCBF-specific constraints)
+  - DC power balance and DC branch Ohm's law
+  - converter-specific constraints (transformer, reactor, filter, setpoints,
+    losses and current limits)
+- For converters with droop or DC voltage setpoint control, appropriate constraints
+  are created depending on converter `type_dc` and `type_ac`.
+"""
 function build_acdcpf(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm, bounded = false)
     _PM.variable_gen_power(pm, bounded = false)
@@ -119,3 +187,4 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         constraint_converter_current(pm, c)
     end
 end
+# ...existing code...

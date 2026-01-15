@@ -38,6 +38,7 @@ include("prob/uc.jl")
 include("prob/fcuc.jl")
 include("prob/rdopf.jl")
 include("prob/scopf.jl")
+include("prob/spcuc.jl")
 
 include("core/solution.jl")
 include("core/data.jl")

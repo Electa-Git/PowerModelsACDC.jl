@@ -916,11 +916,12 @@ end
 function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series; contingencies = false)
 
     if contingencies == true
-        generator_contingencies = length(data["gen"])
-        tie_line_contingencies = length(data["tie_lines"]) 
-        converter_contingencies = length(data["convdc"]) 
-        dc_branch_contingencies = length(data["branchdc"]) 
-        number_of_contingencies = generator_contingencies #+ tie_line_contingencies + converter_contingencies +  dc_branch_contingencies + 1 # to also add the N case
+        # generator_contingencies = length(data["gen"])
+        # tie_line_contingencies = length(data["tie_lines"]) 
+        # converter_contingencies = length(data["convdc"]) 
+        # dc_branch_contingencies = length(data["branchdc"]) 
+        # number_of_contingencies = generator_contingencies #+ tie_line_contingencies + converter_contingencies +  dc_branch_contingencies + 1 # to also add the N case
+        number_of_contingencies = 1 + 3 * length(data["zones"])
         replicates = number_of_hours * number_of_contingencies
         # This for loop determines which "network" belongs to an hour, and which to a contingency, for book-keeping of the network ids
         # Format: [h1, c1 ... cn, h2, c1 ... cn, .... , hn, c1 ... cn]
@@ -954,7 +955,7 @@ function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series
     mn_data["number_of_contingencies"] = number_of_contingencies
 
     if contingencies == true
-        create_contingencies!(mn_data, number_of_hours, number_of_contingencies)
+       # create_contingencies!(mn_data, number_of_hours, number_of_contingencies)
             # This loop writes the generation and demand time series data
         iter = 0
         for nw = 1:replicates

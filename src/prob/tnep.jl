@@ -1,6 +1,27 @@
 export solve_tnep
+"""
+    solve_tnep(file::String, model_type::Type, solver; kwargs...)
 
-""
+File-based entrypoint to solve a Transmission Network Expansion Planning (TNEP)
+problem. Parses the input file, applies package-specific preprocessing
+(including candidate addition when `tnep = true`), and delegates to the data-
+based entrypoint.
+
+# Inputs
+- `file::String` : Path to a PowerModels / MATPOWER style input file.
+- `model_type::Type` : PowerModels model type used to build the JuMP model.
+- `solver` : JuMP optimizer/solver (e.g., Ipopt, Gurobi).
+- `kwargs...` : Forwarded keyword arguments to the PowerModels solve entrypoint
+  (settings, `ref_extensions`, etc.).
+
+# Returns
+- PowerModels-style solution dictionary (variable values, objective, solver status).
+
+# Behavior
+- Calls `process_additional_data!(data; tnep = true)` to ensure TNEP candidate
+  structures are present.
+- Delegates to `solve_tnep(data::Dict, ...)`.
+"""
 function solve_tnep(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
     # If there are no AC candicates defined, add empty dictionary
@@ -8,7 +29,27 @@ function solve_tnep(file::String, model_type::Type, solver; kwargs...)
 
     return solve_tnep(data, model_type, solver; kwargs...)
 end
+"""
+    solve_tnep(data::Dict, model_type::Type, solver; kwargs...)
 
+Data-based entrypoint that selects the appropriate TNEP builder for single-
+period or multi-period problems and calls the PowerModels solve pipeline.
+
+# Inputs
+- `data::Dict` : Parsed PowerModels data dictionary (may include `multinetwork` flag).
+- `model_type::Type` : PowerModels model type used to build the JuMP model.
+- `solver` : JuMP optimizer/solver.
+- `kwargs...` : Forwarded keyword arguments.
+
+# Returns
+- Solution dictionary from `_PM.solve_model`.
+
+# Behavior
+- If `data["multinetwork"] == true` uses the multi-period builder `build_mp_tnep`,
+  otherwise uses the single-period builder `build_tnep`.
+- Adds default reference extensions required for TNEP (AC/DC references, candidate
+  handling, NE branch primitives, PST/SSSC, flexible loads, DC generators).
+"""
 function solve_tnep(data::Dict, model_type::Type, solver; kwargs...)
     # Check if data in multiperiod!
     if haskey(data, "multinetwork") && data["multinetwork"] == true
@@ -17,8 +58,23 @@ function solve_tnep(data::Dict, model_type::Type, solver; kwargs...)
         return _PM.solve_model(data, model_type, solver, build_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...) 
     end
 end
+"""
+    solve_tnep(data::Dict, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
 
+BF-specialized data entrypoint for TNEP when the chosen model is a Branch-Flow
+variant. Selects BF-specific builders that include branch-current variables and
+BF constraints.
 
+# Inputs
+- `data::Dict` : Parsed data dictionary.
+- `model_type::Type{T}` : BF-compatible PowerModels model type.
+- `solver` : JuMP optimizer/solver.
+- `kwargs...` : Forwarded keyword arguments.
+
+# Returns
+- Solution dictionary from `_PM.solve_model` using BF builders (`build_tnep_bf`
+  or `build_mp_tnep_bf`).
+"""
 function solve_tnep(data::Dict, model_type::Type{T}, solver; kwargs...) where T <: _PM.AbstractBFModel
     # Check if data in multiperiod!
     if haskey(data, "multinetwork") && data["multinetwork"] == true
@@ -27,9 +83,30 @@ function solve_tnep(data::Dict, model_type::Type{T}, solver; kwargs...) where T 
         return _PM.solve_model(data, model_type, solver, build_tnep_bf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     end
 end
+"""
+    build_tnep(pm::_PM.AbstractPowerModel)
 
-## TNEP problem with AC & DC candidates
+Build a single-period Transmission Network Expansion Planning (TNEP) JuMP model.
 
+# Inputs
+- `pm::_PM.AbstractPowerModel` : PowerModels internal model holder (parsed data, settings, JuMP model).
+
+# Details
+- Adds AC and DC operational variables (bus voltages, generator powers, branch
+  powers, DC flows/currents, converters, DC grid voltages, flexible demand).
+- Adds TNEP candidate variables (NE branch indicators, candidate branch power,
+  voltage variables, DC candidate variables) and related NE primitives.
+- Applies model constraints:
+  - normal AC/DC power balance and device constraints,
+  - NE-specific Ohm/limit constraints for candidate elements,
+  - PST/SSSC device constraints and limits,
+  - converter losses, current limits and special-device constraints.
+- Sets the combined operational + CAPEX objective via `objective_min_operational_capex_cost(pm)`.
+
+# Notes
+- Candidate-device on/off and cost linking is handled by NE primitives added via
+  `_PM.variable_ne_branch_indicator` and related functions.
+"""
 function build_tnep(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_gen_power(pm)
@@ -144,10 +221,25 @@ function build_tnep(pm::_PM.AbstractPowerModel)
         end
     end
 end
+"""
+    build_mp_tnep(pm::_PM.AbstractPowerModel)
 
-## Multi-period TNEP problem with AC & DC candidates
+Build a multi-period / multi-network TNEP JuMP model.
 
-""
+# Inputs
+- `pm::_PM.AbstractPowerModel` : PowerModels internal model holder containing `pm.ref[:it][:pm][:nw]`.
+
+# Details
+- For each network/time index `n` creates network-scoped operational variables
+  and TNEP candidate variables (same primitives as single-period builder but
+  with `nw = n` scope).
+- Adds per-network constraints (AC/DC power balance, branch/NE constraints,
+  PST/SSSC/device limits).
+- Optionally enforces multi-period candidate linking (candidate availability /
+  construction timing) via NE primitives and additional constraints where
+  implemented.
+- Assembles the combined operational + CAPEX objective via `objective_min_operational_capex_cost(pm)`.
+"""
 function build_mp_tnep(pm::_PM.AbstractPowerModel)
     for (n, networks) in pm.ref[:it][:pm][:nw]
         _PM.variable_bus_voltage(pm; nw = n)
@@ -277,8 +369,16 @@ function build_mp_tnep(pm::_PM.AbstractPowerModel)
     end
 end
 
+"""
+    build_tnep_bf(pm::_PM.AbstractPowerModel)
 
-# BRANCHFLOW TNEP problem with AC & DC candidates
+Branch-Flow variant of the single-period TNEP builder. Adds BF-specific
+variables (branch currents) and BF constraint primitives in place of standard
+Ohm/admittance constraints.
+
+# Notes
+- Mirrors `build_tnep` but uses `_PM.constraint_model_current` and BF primitives.
+"""
 function build_tnep_bf(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_gen_power(pm)
@@ -393,8 +493,17 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
     end
 end
 
-# BRANCHFLOW Multi-period TNEP problem with AC & DC candidates
-""
+"""
+    build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
+
+Branch-Flow variant of the multi-period TNEP builder. Adds BF-specific
+variables and constraints for each network/time `nw` and mirrors the logic of
+`build_mp_tnep` with BF primitives and candidate handling per period.
+
+# Notes
+- Mirrors `build_mp_tnep` but adds `_PM.constraint_model_current(pm; nw = n)` and
+  other BF-specific variable/constraint primitives per network.
+"""
 function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
     for (n, networks) in pm.ref[:it][:pm][:nw]
         _PM.variable_bus_voltage(pm; nw = n)

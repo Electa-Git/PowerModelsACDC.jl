@@ -40,8 +40,12 @@ function storage_constraints(pm, n; uc = false)
     else
         prev_nw_id = get_previous_hour_network_id(pm, n; uc = uc)
         for i in _PM.ids(pm, n, :storage)
-            constraint_storage_state_final(pm, i; nw = n)
-            _PM.constraint_storage_state(pm, i, prev_nw_id, ref_nw_id)
+            if haskey(pm.setting, "relax_final_storage_state") && pm.setting["relax_final_storage_state"] == true
+                _PM.constraint_storage_state(pm, i, prev_nw_id, ref_nw_id)
+            else
+                constraint_storage_state_final(pm, i; nw = n)
+                _PM.constraint_storage_state(pm, i, prev_nw_id, ref_nw_id)
+            end
         end
     end
 end

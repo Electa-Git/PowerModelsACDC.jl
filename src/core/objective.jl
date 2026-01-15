@@ -214,9 +214,9 @@ function calculate_capex_cost(pm::_PM.AbstractPowerModel; components = [])
 end
 
 "Sum of generator operational and start-up costs, FCR and FFR costs, demand reduction and demand shedding costs"
-function objective_min_cost_fcuc(pm::_PM.AbstractPowerModel; report::Bool=true, droop = false)
+function objective_min_cost_fcuc(pm::_PM.AbstractPowerModel; report::Bool=true, droop = false, storage = true)
     gen_cost, gendc_cost = calc_gen_cost(pm)
-    ffr_cost, fcr_cost = calc_reserve_cost(pm; droop = droop) #; components = ["fcr", "ffr"]) 
+    ffr_cost, fcr_cost_gen, fcr_cost_strg = calc_reserve_cost(pm; droop = droop, storage = storage) #; components = ["fcr", "ffr"]) 
     load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = ["demand"], network_ids = pm.ref[:it][:pm][:hour_ids])
 
     return JuMP.@objective(pm.model, Min,
@@ -225,22 +225,35 @@ function objective_min_cost_fcuc(pm::_PM.AbstractPowerModel; report::Bool=true, 
         + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in pm.ref[:it][:pm][:hour_ids])
         + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in pm.ref[:it][:pm][:hour_ids])
         + sum( sum( ffr_cost[(n,i)] for (i,conv) in _PM.nws(pm)[n][:convdc]) for n in pm.ref[:it][:pm][:hour_ids])
-        + sum( sum( fcr_cost[(n,i)] for (i,gen) in nw_ref[:gen]) for (n, nw_ref) in _PM.nws(pm))
+        + sum( sum( fcr_cost_gen[(n,i)] for (i,gen) in nw_ref[:gen]) for (n, nw_ref) in _PM.nws(pm))
+        + sum( sum( fcr_cost_strg[(n,i)] for (i,gen) in nw_ref[:storage]) for (n, nw_ref) in _PM.nws(pm))
     )
 end
 
 
-function calc_reserve_cost(pm; droop = false)
+function calc_reserve_cost(pm; droop = false, storage = true)
     ffr_cost = Dict()
-    fcr_cost = Dict()
+    fcr_cost_gen = Dict()
+    fcr_cost_strg = Dict()
 
     for (n, network) in pm.ref[:it][:pm][:nw]
         for (i,gen) in _PM.nws(pm)[n][:gen]
             if n == 1 || droop == false
-                fcr_cost[(n,i)] = 0.0
+                fcr_cost_gen[(n,i)] = 0.0
             else
                 pgd =  _PM.var(pm, n, :pg_droop_abs, i)
-                fcr_cost[(n,i)] = (pgd * network[:frequency_parameters]["fcr_cost"])
+                fcr_cost_gen[(n,i)] = (pgd * network[:frequency_parameters]["fcr_cost"])
+            end
+        end
+
+        if storage == true
+            for (s,strg) in _PM.nws(pm)[n][:storage]
+                if n == 1 || droop == false
+                    fcr_cost_strg[(n,s)] = 0.0
+                else
+                    pgs =  _PM.var(pm, n, :ps_droop_abs, s)
+                    fcr_cost_strg[(n,s)] = (pgs * network[:frequency_parameters]["fcr_cost"])
+                end
             end
         end
 
@@ -253,7 +266,7 @@ function calc_reserve_cost(pm; droop = false)
             end
         end
     end
-    return ffr_cost, fcr_cost
+    return ffr_cost, fcr_cost_gen, fcr_cost_strg
 end
 
 

@@ -1,14 +1,95 @@
+"""
+    solve_rdopf(file::String, model_type::Type, optimizer; kwargs...)
+
+File-based entrypoint to solve a redispatch (RD) Optimal Power Flow problem.
+
+# Inputs
+- `file::String` : Path to the input data file (PowerModels / MATPOWER style).
+- `model_type::Type` : PowerModels model type used to build the JuMP model.
+- `optimizer` : JuMP optimizer/solver (e.g., Ipopt, Gurobi).
+- `kwargs...` : Forwarded keyword arguments to the PowerModels solve entrypoint
+  (`_PM.solve_model`). Common keys include `setting` and `ref_extensions`. By
+  default reference extensions for DC grids, PST, SSSC, flexible loads and DC
+  generators are applied.
+
+# Returns
+- A PowerModels-style solution dictionary containing variable values, objective
+  (when applicable) and solver termination information.
+
+# Behavior
+- Parses the input file into a PowerModels data dictionary, applies package-
+  specific preprocessing via `process_additional_data!` and delegates to the
+  data-based entrypoint that builds and solves the redispatch model.
+"""
 function solve_rdopf(file::String, model_type::Type, optimizer; kwargs...)
     data = PowerModels.parse_file(file)
     process_additional_data!(data)
     return _PM.solve_model(data, model_type, optimizer, build_rdopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
+"""
+    solve_rdopf(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
 
+Data-based entrypoint to solve a redispatch OPF given an already-parsed data dictionary.
+
+# Inputs
+- `data::Dict{String,Any}` : Parsed PowerModels data dictionary.
+- `model_type::Type` : PowerModels model type used to build the JuMP model.
+- `optimizer` : JuMP optimizer/solver.
+- `kwargs...` : Forwarded keyword arguments to `_PM.solve_model`.
+
+# Returns
+- A PowerModels-style solution dictionary.
+
+# Behavior
+- Calls `_PM.solve_model` with `build_rdopf` as the builder and the default set
+  of reference extensions (override via `kwargs[:ref_extensions]`).
+"""
 function solve_rdopf(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
     return _PM.solve_model(data, model_type, optimizer, build_rdopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
+"""
+    build_rdopf(pm::_PM.AbstractPowerModel)
 
-""
+Build the JuMP model for a Redispatch Optimal Power Flow (RD-OPF) problem.
+
+# Inputs
+- `pm::_PM.AbstractPowerModel` : PowerModels internal model holder containing parsed
+  data, settings, and the JuMP model to be populated.
+
+# Details
+This builder constructs a redispatch model (single-period) by:
+- creating AC variables: bus voltages, generator active power, branch power,
+  storage power;
+- adding DC variables and components: active DC branch flows, DC branch currents,
+  DC converters, DC grid voltage magnitudes and DC generator power variables;
+- adding flexible demand, PST, SSSC, and redispatch-specific variables;
+- optionally adding generator state variables and inertia-related modeling when
+  `pm.setting["inertia_limit"] == true`;
+- assembling an objective appropriate for redispatch:
+  - if `inertia_limit` setting is enabled, uses inertia-aware redispatch objective,
+  - otherwise uses standard redispatch objective;
+- adding constraints:
+  - reference bus angle constraints,
+  - AC power-balance at buses,
+  - branch Ohm and thermal/angle constraints,
+  - DC power-balance and DC branch Ohm constraints,
+  - converter losses, current limits and device-specific constraints,
+  - PST/SSSC device equations and limits,
+  - flexible demand aggregation and generator redispatch constraints,
+  - generator on/off or redispatch constraints depending on settings;
+- applying fixed cross-border flow constraints when requested (`pm.setting["fix_cross_border_flows"]`);
+- applying inertia limits per configured zones if `pm.setting["inertia_limit"] == true`.
+
+# Notes
+- The builder prefers existing PowerModels primitives for constraints and
+  variables; it also calls ACDC-specific primitives (e.g., converter firing-angle
+  constraint) when required by device configuration (e.g., LCC converters).
+- `pm.setting` keys used by this builder include:
+  - `"fix_cross_border_flows"` : Boolean, apply fixed cross-border flow constraints.
+  - `"borders"` : Optional list of border ids for fixed flows.
+  - `"inertia_limit"` : Boolean, enable inertia-limit modeling and inertia-aware objective.
+  - `"use_gen_status"` : (indirectly used) influence generator on/off modeling.
+"""
 function build_rdopf(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_gen_power(pm)

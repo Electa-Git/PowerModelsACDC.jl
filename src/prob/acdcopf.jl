@@ -1,13 +1,44 @@
 export solve_acdcopf
 
-""
+"""
+    solve_acdcopf(file::String, model_type::Type, solver; kwargs...)
+
+Solves an AC/DC Optimal Power Flow (OPF) problem using the specified model type and solver.
+
+# Arguments
+- `file::String`: Path to the input data file (e.g., MATPOWER `.m` file).
+- `model_type::Type`: PowerModels model type (e.g., `ACPPowerModel`, `DCPPowerModel`).
+- `solver`: JuMP solver object (e.g., Ipopt).
+- `kwargs...`: Additional keyword arguments, including settings and reference extensions.
+
+# Returns
+- Solution dictionary containing results, including objective value and solver status.
+
+# Details
+Parses the input file, processes additional data, and calls the main OPF solver with reference extensions for DC grid, phase-shifting transformers, SSSC, flexible loads, and DC generators.
+"""
 function solve_acdcopf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
     process_additional_data!(data)
     return solve_acdcopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
+"""
+    solve_acdcopf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
 
-""
+Solves an AC/DC OPF problem using parsed data, model type, and solver.
+
+# Arguments
+- `data::Dict{String,Any}`: Parsed network data dictionary.
+- `model_type::Type`: PowerModels model type.
+- `solver`: JuMP solver object.
+- `kwargs...`: Additional keyword arguments.
+
+# Returns
+- Solution dictionary with results.
+
+# Details
+Chooses between single-network and multinetwork OPF build functions based on the data.
+"""
 function solve_acdcopf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
     if haskey(data, "multinetwork") && data["multinetwork"] == true
         return _PM.solve_model(data, model_type, solver, mp_build_acdcopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
@@ -15,8 +46,17 @@ function solve_acdcopf(data::Dict{String,Any}, model_type::Type, solver; kwargs.
         return _PM.solve_model(data, model_type, solver, build_acdcopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     end
 end
+"""
+    build_acdcopf(pm::_PM.AbstractPowerModel)
 
-""
+Constructs the JuMP model for a single-network AC/DC OPF problem.
+
+# Arguments
+- `pm::_PM.AbstractPowerModel`: PowerModels model object.
+
+# Details
+Adds variables and constraints for AC and DC network components, including voltage, power, branches, converters, flexible/fixed loads, PST, SSSC, and cross-border flows. Sets the objective to minimize operational cost.
+"""
 function build_acdcopf(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_gen_power(pm)
@@ -102,10 +142,17 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
         end
     end
 end
+"""
+    mp_build_acdcopf(pm::_PM.AbstractPowerModel)
 
+Constructs the JuMP model for a multinetwork AC/DC OPF problem.
 
+# Arguments
+- `pm::_PM.AbstractPowerModel`: PowerModels model object.
 
-### Multinetwork version
+# Details
+Adds variables and constraints for each network in a multinetwork scenario, including AC/DC components, storage, and cross-border flows. Sets the objective to minimize operational cost.
+"""
 function mp_build_acdcopf(pm::_PM.AbstractPowerModel)
     for (n, networks) in pm.ref[:it][:pm][:nw]
         _PM.variable_bus_voltage(pm; nw = n)
@@ -184,6 +231,7 @@ function mp_build_acdcopf(pm::_PM.AbstractPowerModel)
         if haskey(_PM.ref(pm, n), :storage)
             storage_constraints(pm, n)
         end
+        # Cross-border fixed flows (global handling)
         if haskey(pm.setting, "fix_cross_border_flows") && pm.setting["fix_cross_border_flows"] == true
             if !haskey(pm.setting, "borders")
                 borders = [i for i in _PM.ids(pm, n, :borders)]
