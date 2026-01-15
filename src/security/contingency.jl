@@ -844,55 +844,6 @@ function constraint_ohms_dc_branch_outage(pm::_PM.AbstractPowerModel, n, f_idx, 
     JuMP.@constraint(pm.model, (online-1) * bigM <= vm_to_star - vm_to <= (1-online) * bigM)
 end
 
-
-#### Extra constraints for the system split constrained model
-
-# function constraint_generator_inertial_response_to_contingency(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
-#     # first calculate total inertia in the system
-#     htot = sum([gen["inertia_constants"] * gen["pmax"] for (g, gen) in _PM.ref(pm, nw, :gen)])
-
-#     # then calculate individual generator inertia of the particular generator i
-#     gen = _PM.ref(pm, nw, :gen, i)
-#     hg = gen["inertia_constants"] * gen["pmax"]
-#     pmin = gen["pmin"]
-#     pmax = gen["pmax"]
-
-#     constraint_generator_inertial_response_to_contingency(pm, i, nw, htot, hg, pmin, pmax)
-# end
-
-
-
-# function constraint_generator_inertial_response_to_contingency(pm, i, nw, htot, hg, pmin, pmax)
-#     ref_id = get_reference_network_id(pm, nw; uc = true)
-#     M = 2 * pmax  # big M value
-#     δPg = _PM.var(pm, ref_id, :gen_cont, 1)  # assuming only one zone for now
-#     αg = _PM.var(pm, ref_id, :alpha_g, i)
-#     δg = _PM.var(pm, ref_id, :delta_g, i)
-#     pgref = _PM.var(pm, ref_id, :pg, i)
-    
-#     pg = _PM.var(pm, nw, :pg, i)
-#     dpg_in = _PM.var(pm, nw, :dpg_in, i)
-
-#     α = _PM.var(pm, ref_id, :alpha_g)
-#     δ = _PM.var(pm, ref_id, :delta_g)
-#     gens = _PM.ref(pm, nw, :gen)
-
-#     htot = JuMP.@expression(pm.model, sum([gens[g]["inertia_constants"] * gens[g]["pmax"] * (α[g] - δ[g]) for (g, gen) in gens]))
-
-
-
-#     # JuMP.@constraint(pm.model, pg == pgref + dpg_in)
-#     JuMP.@constraint(pm.model, dpg_in - (hg * (αg - δg) / htot) * δPg  <=  M * (1 - (αg - δg)))
-#     JuMP.@constraint(pm.model, dpg_in - (hg * (αg - δg) / htot) * δPg  >= -M * (1 - (αg - δg)))
-
-
-#     JuMP.@constraint(pm.model, pg <= pmax * (αg - δg) * 3)
-#     JuMP.@constraint(pm.model, pg >= pmin * (αg - δg) * 3)
-
-#     JuMP.@constraint(pm.model, pg - (pgref + dpg_in) <=  M * δg)
-#     JuMP.@constraint(pm.model, pg - (pgref + dpg_in) >= -M * δg)
-# end
-
 function constraint_fixed_converter_response(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
     ref_id = get_reference_network_id(pm, nw; uc = true)
     

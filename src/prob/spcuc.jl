@@ -1,47 +1,13 @@
-"""
-    solve_fcuc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
 
-Entry point to solve a System Split-Constrained Unit Commitment (SPCUC) problem.
-
-# Inputs
-- `data::Dict{String,Any}` : Parsed PowerModels data dictionary (multi-network expected).
-- `model_type::Type` : PowerModels model type to use when building JuMP models.
-- `optimizer` : JuMP optimizer/solver (e.g., Ipopt, Gurobi).
-- `kwargs...` : Forwarded keyword arguments to `_PM.solve_model` (settings, `ref_extensions`, etc.).
-  Default reference extensions applied: `add_ref_dcgrid!`, `ref_add_flex_load!`, `ref_add_pst!`, `ref_add_sssc!`, `ref_add_gendc!`.
-
-# Returns
-- A PowerModels-style solution dictionary produced by `_PM.solve_model`.
-
-# Behavior
-Delegates solve to `_PM.solve_model` with `build_spcuc` as the builder. The builder implements
-a multi-network FCUC formulation with per-hour UC submodels, contingency constraints and a
-global objective that includes frequency-related cost terms.
-"""
 function solve_spcuc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
     return _PM.solve_model(data, model_type, optimizer, build_spcuc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!, ref_add_gendc!], kwargs...)
 end
 
-"""
-    build_fcuc(pm::_PM.AbstractPowerModel)
 
-Construct the multi-network FCUC JuMP model.
-
-# Inputs
-- `pm::_PM.AbstractPowerModel` : PowerModels internal model holder with multi-network and time-series references.
-
-# Details
-- Iterates networks declared in `pm.ref[:it][:pm][:nw]` and adds network-scoped variables
-  for AC voltages, DC grid variables, converters and inertia/reserve contributions.
-- Calls `uc_model!` for each scheduling hour (from `pm.ref[:it][:pm][:hour_ids]`) to build
-  the per-hour UC submodel (branch power, storage, unit commitment variables, contingencies).
-- Calls `contingency_contraints!` for contingency stages (from `pm.ref[:it][:pm][:cont_ids]`).
-- Assembles the global objective via `objective_min_cost_fcuc(pm; droop = true)`.
-"""
 function build_spcuc(pm::_PM.AbstractPowerModel)
 
     for n in pm.ref[:it][:pm][:hour_ids]
-        base_uc_model!(pm, n; cont = ["gen"])
+        base_uc_model!(pm, n)
     end
 
     for n in pm.ref[:it][:pm][:cont_ids]
@@ -51,8 +17,7 @@ function build_spcuc(pm::_PM.AbstractPowerModel)
     objective_min_cost_uc(pm)   
 end
 
-function base_uc_model!(pm, n; cont = ["gen", "conv"])
-
+function base_uc_model!(pm, n)
 
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_branch_power(pm; nw = n)
@@ -144,13 +109,6 @@ function base_uc_model!(pm, n; cont = ["gen", "conv"])
             storage_constraints(pm, n; uc = true)
         end
 
-        # if any(cont .== "gen")
-        #     constraint_generator_contingencies(pm; nw = n)
-        # end
-
-        # if any(cont .== "conv")
-        #     constraint_converter_contingencies(pm; nw = n)
-        # end
     end
 
 
@@ -159,69 +117,68 @@ function base_uc_model!(pm, n; cont = ["gen", "conv"])
 
 function spcuc_contingency_model!(pm, n)
 
-        gen_id = (n - get_reference_network_id(pm, n; uc = true))
+    gen_id = (n - get_reference_network_id(pm, n; uc = true))
 
-        _PM.variable_bus_voltage_magnitude(pm; nw = n, bounded = false)
-        _PM.variable_bus_voltage_angle(pm; nw = n, bounded = false)
-        _PM.variable_branch_power(pm; nw = n, bounded = false)
-        _PM.variable_gen_power(pm; nw = n, bounded = false)
-        _PM.variable_storage_power(pm; nw = n, bounded = false)
-        _PM.constraint_model_voltage(pm; nw = n)
+    _PM.variable_bus_voltage_magnitude(pm; nw = n, bounded = false)
+    _PM.variable_bus_voltage_angle(pm; nw = n, bounded = false)
+    _PM.variable_branch_power(pm; nw = n, bounded = false)
+    _PM.variable_gen_power(pm; nw = n, bounded = false)
+    _PM.variable_storage_power(pm; nw = n, bounded = false)
+    _PM.constraint_model_voltage(pm; nw = n)
 
-        variable_inertia(pm; nw = n)
-        variable_active_dcbranch_flow(pm; nw = n, bounded = false)
-        variable_dcbranch_current(pm; nw = n, bounded = false)
-        variable_dc_converter(pm; nw = n, bounded = true)
-        variable_dcgrid_voltage_magnitude(pm; nw = n, bounded = false)
-        variable_dcgenerator_power(pm; nw = n, bounded = false)
-        variable_flexible_demand(pm; nw = n, bounded = true)
-        variable_pst(pm; nw = n, bounded = false)
-        variable_sssc(pm; nw = n, bounded = false)
-        variable_storage_on_off(pm; nw = n)
-        constraint_voltage_dc(pm; nw = n)
+    variable_inertia(pm; nw = n)
+    variable_active_dcbranch_flow(pm; nw = n, bounded = false)
+    variable_dcbranch_current(pm; nw = n, bounded = false)
+    variable_dc_converter(pm; nw = n, bounded = true)
+    variable_dcgrid_voltage_magnitude(pm; nw = n, bounded = false)
+    variable_dcgenerator_power(pm; nw = n, bounded = false)
+    variable_flexible_demand(pm; nw = n, bounded = true)
+    variable_pst(pm; nw = n, bounded = false)
+    variable_sssc(pm; nw = n, bounded = false)
+    variable_storage_on_off(pm; nw = n)
+    constraint_voltage_dc(pm; nw = n)
 
 
-        variable_generator_inertia_response(pm; nw = n)
-        for i in _PM.ids(pm, n, :gen)
-            constraint_generator_inertial_response_to_contingency(pm, i, gen_id; nw = n)
+    variable_generator_inertia_response(pm; nw = n)
+    for i in _PM.ids(pm, n, :gen)
+        constraint_generator_inertial_response_to_contingency(pm, i, gen_id; nw = n)
+    end
+
+    for i in _PM.ids(pm, n, :busdc)
+        constraint_power_balance_dc(pm, i; nw = n)
+    end
+
+    for i in _PM.ids(pm, n, :ref_buses)
+        _PM.constraint_theta_ref(pm, i; nw = n)
+    end
+
+    for i in _PM.ids(pm, n, :bus)
+        constraint_power_balance_ac(pm, i; nw = n)
+    end
+
+
+    for i in _PM.ids(pm, n, :branchdc)
+        constraint_ohms_dc_branch(pm, i; nw = n)
+    end
+
+    for i in _PM.ids(pm, n, :flex_load)
+        constraint_fixed_demand_response(pm, i; nw = n)
+    end
+
+    for i in _PM.ids(pm, n, :branch)
+        _PM.constraint_ohms_yt_from(pm, i; nw = n)
+        _PM.constraint_ohms_yt_to(pm, i; nw = n)
+        if haskey(pm.setting, "add_split_constraints") && pm.setting["add_split_constraints"] == true &&  any(i .== pm.ref[:it][:pm][:nw][n][:tie_lines]) 
+            _PM.constraint_voltage_angle_difference(pm, i; nw = n)
         end
+    end
 
-        for i in _PM.ids(pm, n, :busdc)
-            constraint_power_balance_dc(pm, i; nw = n)
-        end
-
-        for i in _PM.ids(pm, n, :ref_buses)
-            _PM.constraint_theta_ref(pm, i; nw = n)
-        end
-
-        for i in _PM.ids(pm, n, :bus)
-            constraint_power_balance_ac(pm, i; nw = n)
-        end
-
-
-        for i in _PM.ids(pm, n, :branchdc)
-            constraint_ohms_dc_branch(pm, i; nw = n)
-        end
-
-        for i in _PM.ids(pm, n, :flex_load)
-            constraint_fixed_demand_response(pm, i; nw = n)
-        end
-
-        for i in _PM.ids(pm, n, :branch)
-            _PM.constraint_ohms_yt_from(pm, i; nw = n)
-            _PM.constraint_ohms_yt_to(pm, i; nw = n)
-            if haskey(pm.setting, "add_split_constraints") && pm.setting["add_split_constraints"] == true &&  any(i .== pm.ref[:it][:pm][:nw][n][:tie_lines]) 
-                _PM.constraint_voltage_angle_difference(pm, i; nw = n)
-            end
-        end
-
-        for i in _PM.ids(pm, n, :convdc)
-            constraint_converter_losses(pm, i; nw = n)
-            constraint_converter_current(pm, i; nw = n)
-            constraint_conv_transformer(pm, i; nw = n)
-            constraint_conv_reactor(pm, i; nw = n)
-            constraint_conv_filter(pm, i; nw = n)
-            constraint_fixed_converter_response(pm, i; nw = n)
-        end
-    # end
+    for i in _PM.ids(pm, n, :convdc)
+        constraint_converter_losses(pm, i; nw = n)
+        constraint_converter_current(pm, i; nw = n)
+        constraint_conv_transformer(pm, i; nw = n)
+        constraint_conv_reactor(pm, i; nw = n)
+        constraint_conv_filter(pm, i; nw = n)
+        constraint_fixed_converter_response(pm, i; nw = n)
+    end
 end
