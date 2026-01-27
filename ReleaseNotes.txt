@@ -1,3 +1,7 @@
+v0.9.4 Release Notes
+
+- Adding a system split constrained UC model spc_uc (MINLP)
+
 v0.9.3 Release Notes
 
 - Adding cross-border flow contraints into the OPF problem (to match zonal markets and nodal OPF)
