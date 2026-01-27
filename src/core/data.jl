@@ -848,7 +848,7 @@ function converter_bounds(pmin, pmax, loss0, loss1)
 end
 
 
-function prepare_uc_data!(data; borders = nothing, t_hvdc = nothing, ffr_cost = nothing, uc = false, time_interval = 1, frequency_parameters::Dict{String, Any})
+function prepare_uc_data!(data; borders = nothing, uc = false, time_interval = 1, frequency_parameters = Dict())
     prepare_generator_data!(data; uc = uc)
     data["uc_parameters"] = Dict{String, Any}("time_interval" => time_interval)
     data["frequency_parameters"] = frequency_parameters
@@ -913,15 +913,17 @@ function prepare_generator_data!(data; uc = false)
     end
 end
 
-function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series; contingencies = false)
-
-    if contingencies == true
-        # generator_contingencies = length(data["gen"])
-        # tie_line_contingencies = length(data["tie_lines"]) 
-        # converter_contingencies = length(data["convdc"]) 
-        # dc_branch_contingencies = length(data["branchdc"]) 
-        # number_of_contingencies = generator_contingencies #+ tie_line_contingencies + converter_contingencies +  dc_branch_contingencies + 1 # to also add the N case
-        number_of_contingencies = 1 + 3 * length(data["zones"])
+function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series; contingencies = nothing)
+    if !isnothing(contingencies)
+        if contingencies["type"] == "N-1"
+            number_of_contingencies = 1
+            for element_type in contingencies["elements"]
+                number_of_contingencies = number_of_contingencies + length(data[element_type]) 
+            end
+        elseif contingencies["type"] == "largest"
+            number_of_contingencies = 1 + length(contingencies["elements"]) * length(data["zones"])
+        end
+        
         replicates = number_of_hours * number_of_contingencies
         # This for loop determines which "network" belongs to an hour, and which to a contingency, for book-keeping of the network ids
         # Format: [h1, c1 ... cn, h2, c1 ... cn, .... , hn, c1 ... cn]
@@ -954,7 +956,7 @@ function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series
     mn_data["number_of_hours"] = number_of_hours
     mn_data["number_of_contingencies"] = number_of_contingencies
 
-    if contingencies == true
+    if !isnothing(contingencies)
        # create_contingencies!(mn_data, number_of_hours, number_of_contingencies)
             # This loop writes the generation and demand time series data
         iter = 0

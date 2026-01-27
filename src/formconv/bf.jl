@@ -1,8 +1,14 @@
+"""
+Variable constructor for converter filter voltage in BF models.
+"""
 function variable_converter_filter_voltage(pm::_PM.AbstractBFModel; kwargs...)
     variable_converter_filter_voltage_magnitude_sqr(pm; kwargs...)
     variable_conv_transformer_current_sqr(pm; kwargs...)
 end
 
+"""
+Variable constructor for converter internal voltage in BF models.
+"""
 function variable_converter_internal_voltage(pm::_PM.AbstractBFModel; kwargs...)
     variable_converter_internal_voltage_magnitude_sqr(pm; kwargs...)
     variable_conv_reactor_current_sqr(pm; kwargs...)
@@ -40,6 +46,16 @@ function constraint_conv_transformer(pm::_PM.AbstractBFQPModel, n::Int,  i::Int,
     end
 end
 
+"""
+Converter transformer constraints using conic relaxation.
+
+```
+p_tf_fr + ptf_to ==  rtf*itf
+q_tf_fr + qtf_to ==  xtf*itf
+[p_tf_fr, q_tf_fr] in RotatedSecondOrderCone with w/tm^2, itf
+wf == w/tm^2 -2*(rtf*ptf_fr + xtf*qtf_fr) + (rtf^2 + xtf^2)*itf
+```
+"""
 function constraint_conv_transformer(pm::_PM.AbstractBFConicModel, n::Int,  i::Int, rtf, xtf, acbus, tm, transformer)
     w = _PM.var(pm, n,  :w, acbus)
     itf = _PM.var(pm, n,  :itf_sq, i)
@@ -98,6 +114,16 @@ function constraint_conv_reactor(pm::_PM.AbstractBFQPModel, n::Int,  i::Int, rc,
     end
 end
 
+"""
+Converter reactor constraints using conic relaxation.
+
+```
+p_pr_fr + ppr_to == rc*ipr
+q_pr_fr + qpr_to == xc*ipr
+[p_pr_fr, q_pr_fr] in RotatedSecondOrderCone with wf, ipr
+wc == wf -2*(rc*ppr_fr + xc*qpr_fr) + (rc^2 + xc^2)*ipr
+```
+"""
 function constraint_conv_reactor(pm::_PM.AbstractBFConicModel, n::Int,  i::Int, rc, xc, reactor)
     pconv_ac = _PM.var(pm, n,  :pconv_ac, i)
     qconv_ac = _PM.var(pm, n,  :qconv_ac, i)
@@ -142,6 +168,15 @@ function constraint_converter_current(pm::_PM.AbstractBFQPModel, n::Int,  i::Int
     JuMP.@constraint(pm.model, iconv_sq <= iconv*Imax)
 end
 
+"""
+Links converter power & current using conic relaxation.
+
+```
+[pconv_ac, qconv_ac] in RotatedSecondOrderCone with wc, iconv_sq
+[pconv_ac, qconv_ac] in RotatedSecondOrderCone with Umax*iconv, Umax*iconv
+[iconv_sq, iconv] in RotatedSecondOrderCone
+```
+"""
 function constraint_converter_current(pm::_PM.AbstractBFConicModel, n::Int,  i::Int, Umax, Imax)
     wc = _PM.var(pm, n,  :wc_ac, i)
     pconv_ac = _PM.var(pm, n,  :pconv_ac, i)
@@ -157,11 +192,17 @@ end
 
 
 ############### TNEP Constraints #######################################
+"""
+Variable constructor for converter filter voltage in network expansion for BF models.
+"""
 function variable_converter_filter_voltage_ne(pm::_PM.AbstractBFModel; kwargs...)
     variable_converter_filter_voltage_magnitude_sqr_ne(pm; kwargs...)
     variable_conv_transformer_current_sqr_ne(pm; kwargs...)
 end
 
+"""
+Variable constructor for converter internal voltage in network expansion for BF models.
+"""
 function variable_converter_internal_voltage_ne(pm::_PM.AbstractBFModel; kwargs...)
     variable_converter_internal_voltage_magnitude_sqr_ne(pm; kwargs...)
     variable_conv_reactor_current_sqr_ne(pm; kwargs...)
@@ -206,6 +247,11 @@ function constraint_conv_transformer_ne(pm::_PM.AbstractBFQPModel, n::Int, i::In
     end
 end
 
+"""
+Converter transformer constraints for network expansion using conic relaxation.
+
+Similar to constraint_conv_transformer but with on/off logic for expansion.
+"""
 function constraint_conv_transformer_ne(pm::_PM.AbstractBFConicModel, n::Int, i::Int, rtf, xtf, acbus, tm, transformer)
     w = _PM.var(pm, n, :w, acbus)
     itf = _PM.var(pm, n, :itf_sq_ne, i)
@@ -269,6 +315,11 @@ function constraint_conv_reactor_ne(pm::_PM.AbstractBFQPModel, n::Int, i::Int, r
     end
 end
 
+"""
+Converter reactor constraints for network expansion using conic relaxation.
+
+Similar to constraint_conv_reactor but for expansion variables.
+"""
 function constraint_conv_reactor_ne(pm::_PM.AbstractBFConicModel, n::Int, i::Int, rc, xc, reactor)
     pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)
     qconv_ac = _PM.var(pm, n, :qconv_ac_ne, i)
@@ -314,6 +365,12 @@ function constraint_converter_current_ne(pm::_PM.AbstractBFQPModel, n::Int, i::I
 
     JuMP.@constraint(pm.model, iconv_sq <= iconv*Imax)
 end
+
+"""
+Links converter power & current for network expansion using conic relaxation.
+
+Similar to constraint_converter_current but for expansion variables.
+"""
 function constraint_converter_current_ne(pm::_PM.AbstractBFConicModel, n::Int, i::Int, Umax, Imax)
     wc = _PM.var(pm, n, :wc_ac_ne, i)
     pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)

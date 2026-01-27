@@ -43,15 +43,23 @@ function constraint_ohms_dc_branch(pm::_PM.AbstractDCPModel, n::Int,  f_bus, t_b
 
     JuMP.@constraint(pm.model, p_dc_fr + p_dc_to == 0)
 end
-"`vdc[i] == vdcm`"
+"""
+DC voltage magnitude setpoint constraint (placeholder for DCP models).
+"""
 function constraint_dc_voltage_magnitude_setpoint(pm::_PM.AbstractDCPModel, n::Int,  i, vdcm)
     # not used
 end
 
+"""
+DC grid voltage magnitude variable constructor (placeholder for DCP models).
+"""
 function variable_dcgrid_voltage_magnitude(pm::_PM.AbstractDCPModel; kwrags...)
     # not used nw::Int=_PM.nw_id_default
 end
 
+"""
+DC branch current constraint (placeholder for DCP models).
+"""
 function constraint_dc_branch_current(pm::_PM.AbstractDCPModel, n::Int,  f_bus, f_idx, ccm_max, p)
 # do nothing
 end
@@ -106,11 +114,16 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractDCPModel, n::Int, f_bus, t
     JuMP.@constraint(pm.model, p_dc_fr_ne + p_dc_to_ne == 0)
 end
 
+"""
+DC grid voltage magnitude variable constructor for network expansion (placeholder for DCP models).
+"""
 function variable_dcgrid_voltage_magnitude_ne(pm::_PM.AbstractDCPModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     # not used
 end
 
-
+"""
+Adds DC bus voltage setpoints to the solution for network expansion buses in DCP models.
+"""
 function add_dc_bus_voltage_setpoint_ne(sol, pm::_PM.AbstractDCPModel)
     _PM.add_setpoint!(sol, pm, "busdc_ne", "vm", :vdcm_ne, status_name="Vdc", inactive_status_value = 4)
     for (i, bus) in sol["busdc_ne"]

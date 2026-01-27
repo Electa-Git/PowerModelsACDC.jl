@@ -5,7 +5,7 @@ function build_mn_data(file_name)
     return mp_data1
 end
 
-function prepare_uc_test_data(file; contingencies = false)
+function prepare_uc_test_data(file; contingencies = nothing, tielines = nothing)
     # Parse file using PowerModels
     data = PowerModels.parse_file(file)
     # Process demand reduction and curtailment data
@@ -14,6 +14,10 @@ function prepare_uc_test_data(file; contingencies = false)
         data["load"][l]["cost_red"] = 100.0 * data["baseMVA"]
         data["load"][l]["cost_curt"] = 10000.0 * data["baseMVA"]
         data["load"][l]["flex"] = 1
+    end
+
+    if !isnothing(tielines)
+        data["tie_lines"] = tielines
     end
 
     data, frequency_parameters = add_fcuc_data!(data)

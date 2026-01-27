@@ -1,4 +1,6 @@
 """
+AC power balance constraint for buses in AC/DC grids.
+
 ```
 sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[g] for g in bus_gens) + sum(pconvac[c] for c in bus_convs) - pd - gs*v^2
 sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*v^2
@@ -71,18 +73,29 @@ function constraint_ohms_dc_branch(pm::_PM.AbstractACPModel, n::Int,  f_bus, t_b
         JuMP.@constraint(pm.model, p_dc_to == p * g * vmdc_to * (vmdc_to - vmdc_fr))
     end
 end
-"`vdc[i] == vdcm`"
+"""
+DC voltage magnitude setpoint constraint.
+
+```
+vdc[i] == vdcm
+```
+"""
 function constraint_dc_voltage_magnitude_setpoint(pm::_PM.AbstractACPModel, n::Int,  i, vdcm)
     v = _PM.var(pm, n,  :vdcm, i)
     JuMP.@constraint(pm.model, v == vdcm)
 end
 
+"""
+DC branch current constraint (placeholder, does nothing).
+"""
 function constraint_dc_branch_current(pm::_PM.AbstractACPModel, n::Int,  f_bus, f_idx, ccm_max, p)
 # do nothing
 end
 
 ############## TNEP constraints ###############
 """
+AC power balance constraint for buses in AC/DC grids with network expansion (TNEP).
+
 ```
 sum(p[a] for a in bus_arcs) + sum(p_ne[a] for a in bus_arcs_ne) + sum(pconv_grid_ac[c] for c in bus_convs_ac) + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne) == sum(pg[g] for g in bus_gens)  - pd - gs*v^2
 sum(q[a] for a in bus_arcs) + sum(q_ne[a] for a in bus_arcs_ne) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne) == sum(qg[g] for g in bus_gens)  - qd + bs*v^2
@@ -165,6 +178,9 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractACPModel, n::Int,  f_bus, 
 end
 
 # V or W as input, the function returns V or W with existing dc bus and dc_ne bus voltages
+"""
+Determines the DC bus voltage variables for from and to buses in network expansion constraints.
+"""
 function contraint_ohms_dc_branch_busvoltage_structure(pm::_PM.AbstractACPModel, n::Int, f_bus, t_bus, vmdc_to, vmdc_fr)
     for i in _PM.ids(pm, n, :busdc_ne)
         if t_bus == i

@@ -14,6 +14,13 @@ function constraint_voltage_dc(pm::_PM.AbstractWRModel; nw::Int = _PM.nw_id_defa
     end
 end
 
+"""
+Model to approximate cross products of node voltages using conic relaxation.
+
+```
+wdcr[(i,j)] <= wdc[i]*wdc[j]
+```
+"""
 function constraint_voltage_dc(pm::_PM.AbstractWRConicModel; nw::Int = _PM.nw_id_default)
     wdc = _PM.var(pm, nw, :wdc)
     wdcr = _PM.var(pm, nw, :wdcr)
@@ -61,6 +68,13 @@ function constraint_voltage_dc_ne(pm::_PM.AbstractWRModel, n::Int)
 end
 
 
+"""
+Model to approximate cross products of node voltages for network expansion using conic relaxation.
+
+```
+wdcr[(i,j)] <= wdc[i]*wdc[j]
+```
+"""
 function constraint_voltage_dc_ne(pm::_PM.AbstractWRConicModel, n::Int)
     wdc = _PM.var(pm, n, :wdc_ne)
     wdc_frto = _PM.var(pm, n, :wdcr_ne)

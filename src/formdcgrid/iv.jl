@@ -1,4 +1,7 @@
 # Explicit DC branch current variable
+"""
+Creates DC branch current variables for IVR models.
+"""
 function variable_dcbranch_current(pm::_PM.AbstractIVRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     vpu = 1;
     igrid_dc = _PM.var(pm, nw)[:igrid_dc] = JuMP.@variable(pm.model,
@@ -16,6 +19,9 @@ function variable_dcbranch_current(pm::_PM.AbstractIVRModel; nw::Int=_PM.nw_id_d
 end
 
 # Kirchhoff's current law for DC nodes
+"""
+Kirchhoff's current law constraint for DC buses in IVR models.
+"""
 function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, n::Int, bus_arcs_dcgrid, bus_convs_dc, pd)
     igrid_dc = _PM.var(pm, n, :igrid_dc)
     iconv_dc = _PM.var(pm, n, :iconv_dc)
@@ -24,6 +30,9 @@ function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, n::Int, bus_arc
 end
 
 # Ohm's law for DC branches
+"""
+Ohm's law constraints for DC branches in IVR models, relating voltages, currents, and powers.
+"""
 function constraint_ohms_dc_branch(pm::_PM.AbstractIVRModel, n::Int,  f_bus, t_bus, f_idx, t_idx, r, p)
     i_dc_fr = _PM.var(pm, n,  :igrid_dc, f_idx)
     i_dc_to = _PM.var(pm, n,  :igrid_dc, t_idx)

@@ -22,6 +22,15 @@ function constraint_ohms_dc_branch(pm::_PM.AbstractBFQPModel, n::Int, f_bus, t_b
     JuMP.@constraint(pm.model, wdc_to == wdc_fr - 2 * r * (p_dc_fr/p) + (r)^2 * ccm_dcgrid)
 end
 
+"""
+Creates Ohms constraints for DC branches using conic relaxation.
+
+```
+p[f_idx] + p[t_idx] == p * g[l] * (wdc[f_bus] - wdcr[f_bus,t_bus])
+```
+
+Uses rotated second-order cone for the quadratic term.
+"""
 function constraint_ohms_dc_branch(pm::_PM.AbstractBFConicModel, n::Int, f_bus, t_bus, f_idx, t_idx, r, p)
     l = f_idx[1];
     p_dc_fr = _PM.var(pm, n,  :p_dcgrid, f_idx)
@@ -120,6 +129,11 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractBFQPModel, n::Int, f_bus, 
 
 end
 
+"""
+Creates Ohms constraints for DC branches in network expansion using conic relaxation.
+
+Analogous to `constraint_ohms_dc_branch_ne` but with conic constraints for the quadratic terms.
+"""
 function constraint_ohms_dc_branch_ne(pm::_PM.AbstractBFConicModel, n::Int, f_bus, t_bus, f_idx, t_idx, r, p)
     l = f_idx[1];
     p_dc_fr = _PM.var(pm, n, :p_dcgrid_ne, f_idx)

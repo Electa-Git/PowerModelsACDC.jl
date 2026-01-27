@@ -1,3 +1,4 @@
+"Add DC grid references to the reference data structure."
 function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (n, nw_ref) in ref[:it][:pm][:nw]
         if haskey(nw_ref, :branchdc)
@@ -121,6 +122,7 @@ function buspair_parameters_dc(arcs_dcgrid_from, branches, buses)
     return buspairs
 end
 
+"Find all connected AC grids in the network."
 function find_all_ac_grids(branches_ac, buses_ac)
     ACgrids = Dict{String, Any}()
 
@@ -187,6 +189,7 @@ function find_all_ac_grids(branches_ac, buses_ac)
     return ACgrids
 end
 
+"Add candidate DC grid references to the reference data structure."
 function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (n, nw_ref) in ref[:it][:pm][:nw]
         if !haskey(nw_ref, :busdc_ne)

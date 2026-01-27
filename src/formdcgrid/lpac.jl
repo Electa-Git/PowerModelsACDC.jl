@@ -52,12 +52,18 @@ function constraint_dc_branch_current(pm::_PM.AbstractLPACModel, n::Int,  f_bus,
 
 end
 
+"""
+Adds DC bus voltage setpoints to the solution for LPAC models.
+"""
 function add_dc_bus_voltage_setpoint(sol, pm::_PM.AbstractLPACModel)
     _PM.add_setpoint!(sol, pm, "busdc", "vm", :phi_vdcm, status_name="Vdc", inactive_status_value = 4, scale = (x,item,cnd) -> 1.0+x)
 end
 
 
 ############# TNEP Constraints #################
+"""
+AC power balance constraint for buses in AC/DC grids with network expansion (TNEP) in LPAC models.
+"""
 function constraint_power_balance_acdc_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_arcs_pst, bus_arcs_sssc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_storage, bus_shunts, gs, bs)
     phi = _PM.var(pm, n, :phi, i)
     p = _PM.var(pm, n, :p)
@@ -111,6 +117,9 @@ function constraint_power_balance_acdc_ne(pm::_PM.AbstractLPACModel, n::Int, i::
     end
 end
 
+"""
+DC branch power flow using linearized voltage magnitude difference phi for network expansion.
+"""
 function constraint_ohms_dc_branch_ne(pm::_PM.AbstractLPACModel, n::Int, f_bus, t_bus, f_idx, t_idx, r, p)
     l = f_idx[1];
     p_dc_fr = _PM.var(pm, n, :p_dcgrid_ne, f_idx)
@@ -139,14 +148,23 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractLPACModel, n::Int, f_bus, 
     end
 end
 
+"""
+DC branch current constraint (placeholder for LPAC models).
+"""
 function constraint_dc_branch_current_ne(pm::_PM.AbstractLPACModel, n::Int, f_bus, f_idx, ccm_max, p)
 
 end
 
+"""
+Adds DC bus voltage setpoints to the solution for network expansion buses in LPAC models.
+"""
 function add_dc_bus_voltage_setpoint_ne(sol, pm::_PM.AbstractLPACModel)
     _PM.add_setpoint!(sol, pm, "busdc_ne", "vm", :phi_vdcm_ne, status_name="Vdc", inactive_status_value = 4, scale = (x,item,cnd) -> 1.0+x)
 end
 
+"""
+Helper that maps the from/to bus indices to the corresponding DC-voltage phi variables used by the NE branch Ohm constraints.
+"""
 function contraint_ohms_dc_branch_busvoltage_structure_phi(pm::_PM.AbstractPowerModel, n::Int, f_bus, t_bus, phi_to, phi_fr)
     for i in _PM.ids(pm, n, :busdc_ne)
         if t_bus == i

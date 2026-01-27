@@ -1,4 +1,5 @@
 #################### COLLECT ALL CONVERTER VARIABLES ######################
+"Variable constructor for DC converter in IVR models. Calls all converter-related variable functions."
 function variable_dc_converter(pm::_PM.AbstractIVRModel; kwargs...)
     variable_filter_voltage_real(pm; kwargs...) #
     variable_filter_voltage_imaginary(pm; kwargs...) #
@@ -90,6 +91,7 @@ function variable_converter_voltage_imaginary(pm::_PM.AbstractPowerModel; nw::In
     report && _PM.sol_component_value(pm, nw, :convdc, :vc_i, _PM.ids(pm, nw, :convdc), vc_i)
 end
 ###################  CONVERTER AC SIDE CURRENT VARIABLES #########################################
+"Real part of the transformer current from the filter to the converter"
 function variable_transformer_current_real_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -107,6 +109,7 @@ function variable_transformer_current_real_from(pm::_PM.AbstractPowerModel; nw::
     report && _PM.sol_component_value(pm, nw, :convdc, :iik_r, _PM.ids(pm, nw, :convdc), iik_r)
 end
 
+"Imaginary part of the transformer current from the filter to the converter"
 function variable_transformer_current_imaginary_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -124,6 +127,7 @@ function variable_transformer_current_imaginary_from(pm::_PM.AbstractPowerModel;
     report && _PM.sol_component_value(pm, nw, :convdc, :iik_i, _PM.ids(pm, nw, :convdc), iik_i)
 end
 
+"Real part of the transformer current from the converter to the filter"
 function variable_transformer_current_real_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -141,6 +145,7 @@ function variable_transformer_current_real_to(pm::_PM.AbstractPowerModel; nw::In
     report && _PM.sol_component_value(pm, nw, :convdc, :iki_r, _PM.ids(pm, nw, :convdc), iki_r)
 end
 
+"Imaginary part of the transformer current from the converter to the filter"
 function variable_transformer_current_imaginary_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -158,6 +163,7 @@ function variable_transformer_current_imaginary_to(pm::_PM.AbstractPowerModel; n
     report && _PM.sol_component_value(pm, nw, :convdc, :iki_i, _PM.ids(pm, nw, :convdc), iki_i)
 end
 
+"Real part of the reactor current from the filter to the converter"
 function variable_reactor_current_real_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -175,6 +181,7 @@ function variable_reactor_current_real_from(pm::_PM.AbstractPowerModel; nw::Int=
     report && _PM.sol_component_value(pm, nw, :convdc, :ikc_r, _PM.ids(pm, nw, :convdc), ikc_r)
 end
 
+"Imaginary part of the reactor current from the filter to the converter"
 function variable_reactor_current_imaginary_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -192,6 +199,7 @@ function variable_reactor_current_imaginary_from(pm::_PM.AbstractPowerModel; nw:
     report && _PM.sol_component_value(pm, nw, :convdc, :ikc_i, _PM.ids(pm, nw, :convdc), ikc_i)
 end
 
+"Real part of the reactor current from the converter to the filter"
 function variable_reactor_current_real_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -209,6 +217,7 @@ function variable_reactor_current_real_to(pm::_PM.AbstractPowerModel; nw::Int=_P
     report && _PM.sol_component_value(pm, nw, :convdc, :ick_r, _PM.ids(pm, nw, :convdc), ick_r)
 end
 
+"Imaginary part of the reactor current from the converter to the filter"
 function variable_reactor_current_imaginary_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -226,6 +235,7 @@ function variable_reactor_current_imaginary_to(pm::_PM.AbstractPowerModel; nw::I
     report && _PM.sol_component_value(pm, nw, :convdc, :ick_i, _PM.ids(pm, nw, :convdc), ick_i)
 end
 
+"Real part of the converter current"
 function variable_converter_current_real(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -243,6 +253,7 @@ function variable_converter_current_real(pm::_PM.AbstractPowerModel; nw::Int=_PM
     report && _PM.sol_component_value(pm, nw, :convdc, :ic_r, _PM.ids(pm, nw, :convdc), ic_r)
 end
 
+"Imaginary part of the converter current"
 function variable_converter_current_imaginary(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -260,6 +271,7 @@ function variable_converter_current_imaginary(pm::_PM.AbstractPowerModel; nw::In
     report && _PM.sol_component_value(pm, nw, :convdc, :ic_i, _PM.ids(pm, nw, :convdc), ic_i)
 end
 
+"DC side current of the converter"
 function variable_converter_current_dc(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1.2;
     vpu = 1;
@@ -277,6 +289,7 @@ function variable_converter_current_dc(pm::_PM.AbstractPowerModel; nw::Int=_PM.n
     report && _PM.sol_component_value(pm, nw, :convdc, :iconv_dc, _PM.ids(pm, nw, :convdc), iconv_dc)
 end
 
+"Linearized converter current magnitude"
 function variable_converter_current_lin(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
     vpu = 1;
@@ -296,6 +309,7 @@ end
 
 #################### CONVERTER CURRENT LIMITS #########################
 
+"Converter current and voltage limits in IVR models. Enforces `iik^2 + iik_i^2 <= imax^2`, etc., and voltage bounds."
 function constraint_converter_limits(pm::_PM.AbstractIVRModel, n::Int, i, imax, vmax, vmin, b_idx, pdcmin, pdcmax)
     iik_r = _PM.var(pm, n, :iik_r)[i]
     iik_i = _PM.var(pm, n, :iik_i)[i]
@@ -340,6 +354,7 @@ end
 
 
 ######## Constraint converter losses ######
+"Converter losses in IVR models. Enforces `pconv_ac + pconv_dc = a + b*iconv_lin + c*iconv_lin^2`."
 function constraint_converter_losses(pm::_PM.AbstractIVRModel, n::Int, i::Int, a, b, c, plmax)
     iconv_lin = _PM.var(pm, n, :iconv_lin, i)
     pconv_ac = _PM.var(pm, n, :pconv_ac, i)
@@ -348,6 +363,7 @@ function constraint_converter_losses(pm::_PM.AbstractIVRModel, n::Int, i::Int, a
     JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv_lin + c*(iconv_lin)^2)
 end
 
+"Converter current relations in IVR models. Enforces active and reactive power definitions."
 function constraint_converter_current(pm::_PM.AbstractIVRModel, n::Int, i::Int, Umax, Imax)
     vc_r = _PM.var(pm, n, :vc_r, i)
     vc_i = _PM.var(pm, n, :vc_i, i)
@@ -362,6 +378,7 @@ function constraint_converter_current(pm::_PM.AbstractIVRModel, n::Int, i::Int, 
     JuMP.@constraint(pm.model, qconv_ac == vc_i * ic_r - vc_r * ic_i)
 end
 
+"Transformer constraints in IVR models. Enforces voltage drops across transformer if present."
 function constraint_conv_transformer(pm::_PM.AbstractIVRModel, n::Int, i::Int, rtf, xtf, acbus, tm, transformer)
     vi_r = _PM.var(pm, n, :vr, acbus)
     vi_i = _PM.var(pm, n, :vi, acbus)
@@ -387,6 +404,7 @@ function constraint_conv_transformer(pm::_PM.AbstractIVRModel, n::Int, i::Int, r
     end
 end
 
+"Reactor constraints in IVR models. Enforces voltage drops across reactor if present."
 function constraint_conv_reactor(pm::_PM.AbstractIVRModel, n::Int, i::Int, rc, xc, reactor)
     vk_r = _PM.var(pm, n, :vk_r, i)
     vk_i = _PM.var(pm, n, :vk_i, i)
@@ -416,6 +434,7 @@ function constraint_conv_reactor(pm::_PM.AbstractIVRModel, n::Int, i::Int, rc, x
     end
 end
 
+"Filter constraints in IVR models. Enforces current balance at filter bus."
 function constraint_conv_filter(pm::_PM.AbstractIVRModel, n::Int, i::Int, bv, filter)
     iki_r = _PM.var(pm, n, :iki_r, i)
     iki_i = _PM.var(pm, n, :iki_i, i)
@@ -431,6 +450,7 @@ end
 
 ################# Kicrchhoff's current law ############################################
 
+"Kirchhoff's current law for AC buses in IVR models with converters."
 function constraint_current_balance_ac(pm::_PM.AbstractIVRModel, n::Int, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, bus_gs, bus_bs)
     vr = _PM.var(pm, n, :vr, i)
     vi = _PM.var(pm, n, :vi, i)

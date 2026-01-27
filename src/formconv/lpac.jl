@@ -1,3 +1,4 @@
+"Converter losses in LPAC models. Enforces `pconv_ac + pconv_dc = a + b*iconv`."
 function constraint_converter_losses(pm::_PM.AbstractLPACModel, n::Int, i::Int, a, b, c, plmax)
     pconv_ac = _PM.var(pm, n, :pconv_ac, i)
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
@@ -6,6 +7,7 @@ function constraint_converter_losses(pm::_PM.AbstractLPACModel, n::Int, i::Int, 
     JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a + b*iconv)
 end
 
+"Transformer constraints in LPAC models. Enforces power flow equations across transformer if present."
 function constraint_conv_transformer(pm::_PM.AbstractLPACModel, n::Int, i::Int, rtf, xtf, acbus, tm, transformer)
     ptf_fr = _PM.var(pm, n, :pconv_tf_fr, i)
     qtf_fr = _PM.var(pm, n, :qconv_tf_fr, i)
@@ -80,6 +82,7 @@ function constraint_conv_reactor(pm::_PM.AbstractLPACModel, n::Int, i::Int, rc, 
     end
 end
 
+"Filter constraints in LPAC models. Enforces current balance at filter bus."
 function constraint_conv_filter(pm::_PM.AbstractLPACModel, n::Int, i::Int, bv, filter)
     ppr_fr = _PM.var(pm, n, :pconv_pr_fr, i)
     qpr_fr = _PM.var(pm, n, :qconv_pr_fr, i)
@@ -92,6 +95,7 @@ function constraint_conv_filter(pm::_PM.AbstractLPACModel, n::Int, i::Int, bv, f
 end
 
 
+"Converter current relations in LPAC models. Enforces current limits."
 function constraint_converter_current(pm::_PM.AbstractLPACModel, n::Int, i::Int, Umax, Imax)
     phi_vmc = _PM.var(pm, n, :phi_vmc, i)
     pconv_ac = _PM.var(pm, n, :pconv_ac, i)
@@ -102,18 +106,21 @@ function constraint_converter_current(pm::_PM.AbstractLPACModel, n::Int, i::Int,
 end
 
 
+"Variable constructor for converter filter voltage in LPAC models. Calls magnitude, angle, and cosine variables."
 function variable_converter_filter_voltage(pm::_PM.AbstractLPACModel; kwargs...)
     variable_converter_filter_voltage_magnitude(pm; kwargs...)
     variable_converter_filter_voltage_angle_cs(pm; kwargs...)
     variable_converter_filter_voltage_angle(pm; kwargs...)
 end
 
+"Variable constructor for converter internal voltage in LPAC models. Calls magnitude, angle, and cosine variables."
 function variable_converter_internal_voltage(pm::_PM.AbstractLPACModel; kwargs...)
     variable_converter_internal_voltage_magnitude(pm; kwargs...)
     variable_converter_internal_voltage_angle_cs(pm; kwargs...)
     variable_converter_internal_voltage_angle(pm; kwargs...)
 end
 
+"Cosine of the angle difference for filter voltage in LPAC models."
 function variable_converter_filter_voltage_angle_cs(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true, report = true)
     csvaf = _PM.var(pm, nw)[:cs_vaf] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_cs_vaf",
@@ -129,6 +136,7 @@ function variable_converter_filter_voltage_angle_cs(pm::_PM.AbstractLPACModel; n
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :cs_vaf, _PM.ids(pm, nw, :convdc), csvaf)
 end
 
+"Cosine of the angle difference for internal voltage in LPAC models."
 function variable_converter_internal_voltage_angle_cs(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true, report = true)
     csvac = _PM.var(pm, nw)[:cs_vac] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_cs_vac",
@@ -145,6 +153,7 @@ function variable_converter_internal_voltage_angle_cs(pm::_PM.AbstractLPACModel;
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :cs_vac, _PM.ids(pm, nw, :convdc), csvac)
 end
 
+"Voltage magnitude variable for filter bus in LPAC models, defined as phi_vmf = vmf - 1."
 function variable_converter_filter_voltage_magnitude(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true, report = true)
     phivmf = _PM.var(pm, nw)[:phi_vmf] = JuMP.@variable(pm.model,
             [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_phi_vmf",
@@ -161,6 +170,7 @@ function variable_converter_filter_voltage_magnitude(pm::_PM.AbstractLPACModel; 
         report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :phi_vmf, _PM.ids(pm, nw, :convdc), phivmf)
 end
 
+"Voltage magnitude variable for internal converter bus in LPAC models, defined as phi_vmc = vmc - 1."
 function variable_converter_internal_voltage_magnitude(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true, report = true)
     phivmc = _PM.var(pm, nw)[:phi_vmc] = JuMP.@variable(pm.model,
         [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_phi_vmc",
@@ -177,6 +187,7 @@ function variable_converter_internal_voltage_magnitude(pm::_PM.AbstractLPACModel
         report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :phi_vmc, _PM.ids(pm, nw, :convdc), phivmc)
 end
 
+"Piecewise linear approximation of converter capacity in LPAC models."
 function constraint_conv_capacity_PWL(pm::_PM.AbstractLPACModel, n::Int, ppr_to, qpr_to, Umax, Imax, Smax)
     np = 20 #no. of segments, can be passed as an argument later
     l = 0
@@ -188,6 +199,7 @@ function constraint_conv_capacity_PWL(pm::_PM.AbstractLPACModel, n::Int, ppr_to,
     end
 end
 
+"Piecewise linear approximation of cosine of angle difference in LPAC models."
 function constraint_cos_angle_diff_PWL(pm::_PM.AbstractLPACModel, n::Int, cs, va_fr, va_to)
     nb = 20 #no. of segments, can be passed as an argument later
     l = -pi/6
@@ -201,6 +213,7 @@ function constraint_cos_angle_diff_PWL(pm::_PM.AbstractLPACModel, n::Int, cs, va
     end
 end
 
+"Adds voltage setpoints to solution for LPAC models."
 function add_dcconverter_voltage_setpoint(sol, pm::_PM.AbstractLPACModel)
     _PM.add_setpoint!(sol, pm, "convdc", "vmconv", :phi_vmc, status_name="islcc", inactive_status_value = 4, scale = (x,item,cnd) -> 1.0+x)
     _PM.add_setpoint!(sol, pm, "convdc", "vmfilt", :phi_vmf, status_name="islcc", inactive_status_value = 4, scale = (x,item,cnd) -> 1.0+x)
@@ -211,6 +224,7 @@ end
 
 
 ############ TNEP constraints ###############
+"Converter losses for network expansion in LPAC models. Includes on/off logic."
 function constraint_converter_losses_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, a, b, c, plmax)
     pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)
     pconv_dc = _PM.var(pm, n, :pconv_dc_ne, i)
@@ -220,6 +234,7 @@ function constraint_converter_losses_ne(pm::_PM.AbstractLPACModel, n::Int, i::In
     JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a*z + b*iconv)
 end
 
+"Transformer constraints for network expansion in LPAC models. Includes on/off logic."
 function constraint_conv_transformer_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, rtf, xtf, acbus, tm, transformer)
     ptf_fr = _PM.var(pm, n, :pconv_tf_fr_ne, i)
     qtf_fr = _PM.var(pm, n, :qconv_tf_fr_ne, i)
@@ -311,7 +326,7 @@ function constraint_conv_reactor_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, r
     relaxation_semicont_variable_on_off(pm.model, phi_vmc, z)
     relaxation_semicont_variable_on_off(pm.model, vac, z)
 end
-
+"Reactor constraints for network expansion in LPAC models. Includes on/off logic."
 function constraint_conv_filter_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bv, filter)
     ppr_fr = _PM.var(pm, n, :pconv_pr_fr_ne, i)
     qpr_fr = _PM.var(pm, n, :qconv_pr_fr_ne, i)
@@ -325,6 +340,7 @@ function constraint_conv_filter_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bv
 end
 
 
+"Converter current relations for network expansion in LPAC models. Enforces current limits."
 function constraint_converter_current_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, Umax, Imax)
     phi_vmc = _PM.var(pm, n, :phi_vmc_ne, i)
     pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)
@@ -335,18 +351,21 @@ function constraint_converter_current_ne(pm::_PM.AbstractLPACModel, n::Int, i::I
 end
 
 
+"Variable constructor for converter filter voltage in network expansion LPAC models."
 function variable_converter_filter_voltage_ne(pm::_PM.AbstractLPACModel; kwargs...)
     variable_converter_filter_voltage_magnitude_ne(pm; kwargs...)
     variable_converter_filter_voltage_angle_cs_ne(pm; kwargs...)
     variable_converter_filter_voltage_angle_ne(pm; kwargs...)
 end
 
+"Variable constructor for converter internal voltage in network expansion LPAC models."
 function variable_converter_internal_voltage_ne(pm::_PM.AbstractLPACModel; kwargs...)
     variable_converter_internal_voltage_magnitude_ne(pm; kwargs...)
     variable_converter_internal_voltage_angle_cs_ne(pm; kwargs...)
     variable_converter_internal_voltage_angle_ne(pm; kwargs...)
 end
 
+"Cosine of the angle difference for filter voltage in network expansion LPAC models."
 function variable_converter_filter_voltage_angle_cs_ne(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true)
     _PM.var(pm, nw)[:cs_vaf_ne] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_cs_vaf_ne",
@@ -356,6 +375,7 @@ function variable_converter_filter_voltage_angle_cs_ne(pm::_PM.AbstractLPACModel
     )
 end
 
+"Cosine of the angle difference for internal voltage in network expansion LPAC models."
 function variable_converter_internal_voltage_angle_cs_ne(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true)
     _PM.var(pm, nw)[:cs_vac_ne] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_cs_vac_ne",
@@ -365,6 +385,7 @@ function variable_converter_internal_voltage_angle_cs_ne(pm::_PM.AbstractLPACMod
     )
 end
 
+"Voltage magnitude variable for filter bus in network expansion LPAC models."
 function variable_converter_filter_voltage_magnitude_ne(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true)
     _PM.var(pm, nw)[:phi_vmf_ne] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_phi_vmf_ne",
@@ -374,6 +395,7 @@ function variable_converter_filter_voltage_magnitude_ne(pm::_PM.AbstractLPACMode
     )
 end
 
+"Voltage magnitude variable for internal converter bus in network expansion LPAC models."
 function variable_converter_internal_voltage_magnitude_ne(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded = true)
     _PM.var(pm, nw)[:phi_vmc_ne] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_phi_vmc_ne",
@@ -384,6 +406,7 @@ function variable_converter_internal_voltage_magnitude_ne(pm::_PM.AbstractLPACMo
 end
 
 
+"Slack variables for voltage in network expansion LPAC models."
 function variable_voltage_slack(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_default, bounded::Bool = true)
     _PM.var(pm, nw)[:phi_du] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_phi_du",
@@ -400,6 +423,7 @@ function variable_voltage_slack(pm::_PM.AbstractLPACModel; nw::Int=_PM.nw_id_def
 end
 
 
+"Adds voltage setpoints to solution for network expansion LPAC models."
 function add_dcconverter_voltage_setpoint_ne(sol, pm::_PM.AbstractLPACModel)
     _PM.add_setpoint!(sol, pm, "convdc_ne", "vmconv", :phi_vmc_ne, status_name="islcc", inactive_status_value = 4, scale = (x,item,cnd) -> 1.0+x)
     _PM.add_setpoint!(sol, pm, "convdc_ne", "vmfilt", :phi_vmf_ne, status_name="islcc", inactive_status_value = 4, scale = (x,item,cnd) -> 1.0+x)

@@ -514,6 +514,8 @@ function constraint_frequency_generator_contingency(pm::_PM.AbstractPowerModel, 
      - f0 * (ΔPg_ * ΔTdroop - dc_contribution_in - dc_contribution_droop - gen_contribution_droop - storage_contribution_droop)
     )
 
+    #JuMP.@constraint(pm.model,  sum([pg_droop[g]  for (g, gen) in generator_properties]) + sum([ps_droop[s]  for (s, storage) in storage_properties]) >= ΔPg_) # make sure that there is neough reserve......
+
     JuMP.@constraint(pm.model, htot == sum([properties["inertia"] * properties["rating"] * (αg[g] - δg[g]) for (g, properties) in generator_properties]) + str_cont)
     JuMP.@constraint(pm.model, dc_contr == dc_contribution_in + dc_contribution_droop)
 end
@@ -687,6 +689,8 @@ function constraint_frequency_converter_contingency(pm::_PM.AbstractPowerModel, 
      - f0 * (ΔPc_ * ΔTdroop - dc_contribution_in - dc_contribution_droop - gen_contribution_droop - storage_contribution_droop)
     )
 
+    #JuMP.@constraint(pm.model,  sum([pg_droop[g]  for (g, gen) in generator_properties]) + sum([ps_droop[s]  for (s, storage) in storage_properties]) >= ΔPc_) # make sure that there is neough reserve......
+
     JuMP.@constraint(pm.model, htot == sum([properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties]) + str_cont)
     JuMP.@constraint(pm.model, dc_contr == dc_contribution_in + dc_contribution_droop)
 end
@@ -854,6 +858,8 @@ function constraint_frequency_storage_contingency(pm::_PM.AbstractPowerModel, n:
     (sum([properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties]) + str_cont) *  (2 * (fmax - (f0+fdb))) >= 
      - f0 * (ΔPs_ * ΔTdroop - dc_contribution_in - dc_contribution_droop - gen_contribution_droop - storage_contribution_droop)
     )
+
+    #JuMP.@constraint(pm.model,  sum([pg_droop[g]  for (g, gen) in generator_properties]) + sum([ps_droop[s]  for (s, storage) in storage_properties]) >= ΔPs_) # make sure that there is neough reserve......
 
     JuMP.@constraint(pm.model, htot == sum([properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties]) + str_cont)
     JuMP.@constraint(pm.model, dc_contr == dc_contribution_in + dc_contribution_droop)
@@ -1023,6 +1029,8 @@ function constraint_frequency_tieline_contingency(pm::_PM.AbstractPowerModel, n:
     (sum([properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties]) + str_cont) *  (2 * (fmax - (f0+fdb))) >= 
      - f0 * (ΔPl_ * ΔTdroop - dc_contribution_in - dc_contribution_droop - gen_contribution_droop - storage_contribution_droop)
     )
+
+    #JuMP.@constraint(pm.model,  sum([pg_droop[g]  for (g, gen) in generator_properties]) + sum([ps_droop[s]  for (s, storage) in storage_properties]) >= ΔPl_) # make sure that there is neough reserve......
 
     JuMP.@constraint(pm.model, htot == sum([properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties]) + str_cont)
     JuMP.@constraint(pm.model, dc_contr == dc_contribution_in + dc_contribution_droop)

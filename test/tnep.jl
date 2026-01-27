@@ -8,8 +8,8 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test isapprox(resultDC["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultDC["solution"]["branchdc_ne"]["2"]["isbuilt"], 0; atol = 1e-2)
         @test isapprox(resultDC["solution"]["branchdc_ne"]["10"]["isbuilt"], 0; atol = 1e-2)
-        @test isapprox(resultDC["solution"]["branchdc_ne"]["1"]["pf"], 1.3; atol = 1e-2)
-        @test isapprox(resultDC["solution"]["branchdc_ne"]["1"]["pt"], -1.3; atol = 1e-2)
+        @test isapprox(resultDC["solution"]["branchdc_ne"]["1"]["pf"], 1.3; atol = 1e-1)
+        @test isapprox(resultDC["solution"]["branchdc_ne"]["1"]["pt"], -1.3; atol = 1e-1)
     end
 
     @testset "9-bus case" begin

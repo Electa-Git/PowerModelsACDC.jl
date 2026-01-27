@@ -1,4 +1,7 @@
 
+"""
+DC grid voltage magnitude variable constructor for W-models.
+"""
 function variable_dcgrid_voltage_magnitude(pm::_PM.AbstractWModels; kwargs...)
     variable_dcgrid_voltage_magnitude_sqr(pm; kwargs...)
 end
@@ -76,7 +79,13 @@ function constraint_ohms_dc_branch(pm::_PM.AbstractWRModels, n::Int,  f_bus, t_b
         JuMP.@constraint(pm.model, p_dc_to == p * g *  (wdc_to - wdc_frto))
     end
 end
-"`wdc[i] == vdcm^2`"
+"""
+DC voltage magnitude setpoint constraint for W-models.
+
+```
+wdc[i] == vdcm^2
+```
+"""
 function constraint_dc_voltage_magnitude_setpoint(pm::_PM.AbstractWModels, n::Int,  i, vdcm)
     wdc = _PM.var(pm, n, :wdc, i)
 
@@ -84,6 +93,9 @@ function constraint_dc_voltage_magnitude_setpoint(pm::_PM.AbstractWModels, n::In
     JuMP.@constraint(pm.model, wdc == vdcm^2)
 end
 
+"""
+Adds DC bus voltage setpoints to the solution for W-models.
+"""
 function add_dc_bus_voltage_setpoint(sol, pm::_PM.AbstractWModels)
     _PM.add_setpoint!(sol, pm, "busdc", "vm", :wdc, status_name="Vdc", inactive_status_value = 4; scale = (x,item,cnd) -> sqrt(x))
 end
@@ -104,6 +116,9 @@ end
 
 ####### TNEP constraints ###############
 
+"""
+DC grid voltage magnitude variable constructor for network expansion in W-models.
+"""
 function variable_dcgrid_voltage_magnitude_ne(pm::_PM.AbstractWModels; kwargs...)
     variable_dcgrid_voltage_magnitude_sqr_ne(pm; kwargs...)
     variable_dcgrid_voltage_magnitude_sqr_du(pm; kwargs...) # duplicated to cancel out existing dc voltages(W) from ohms constraint when z = 0
@@ -211,6 +226,9 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractWRModels, n::Int, f_bus, t
     end
 end
 
+"""
+Adds DC bus voltage setpoints to the solution for network expansion buses in W-models.
+"""
 function add_dc_bus_voltage_setpoint_ne(sol, pm::_PM.AbstractWModels)
     _PM.add_setpoint!(sol, pm, "busdc_ne", "vm", :wdc_ne, status_name="Vdc", inactive_status_value = 4; scale = (x,item,cnd) -> sqrt(x))
 end

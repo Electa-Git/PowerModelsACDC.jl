@@ -1,9 +1,44 @@
+ 
+"""
+    solve_spcuc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
+
+Entry point to solve a Security-Constrained Unit Commitment (SPCUC) problem.
+
+# Inputs
+- `data::Dict{String,Any}` : Parsed PowerModels data dictionary (multi-network expected).
+- `model_type::Type` : PowerModels model type to use when building JuMP models.
+- `optimizer` : JuMP optimizer/solver (e.g., Ipopt, Gurobi).
+- `kwargs...` : Forwarded keyword arguments to `_PM.solve_model` (settings, `ref_extensions`, etc.).
+  Default reference extensions applied: `add_ref_dcgrid!`, `ref_add_flex_load!`, `ref_add_pst!`, `ref_add_sssc!`, `ref_add_gendc!`.
+
+# Returns
+- A PowerModels-style solution dictionary produced by `_PM.solve_model`.
+
+# Behavior
+Delegates solve to `_PM.solve_model` with `build_spcuc` as the builder. The builder implements
+a multi-network SPCUC formulation with per-hour UC submodels and contingency constraints.
+"""
 
 function solve_spcuc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
     return _PM.solve_model(data, model_type, optimizer, build_spcuc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!, ref_add_gendc!], kwargs...)
 end
 
 
+"""
+    build_spcuc(pm::_PM.AbstractPowerModel)
+
+Construct the multi-network SPCUC JuMP model.
+
+# Inputs
+- `pm::_PM.AbstractPowerModel` : PowerModels internal model holder with multi-network and time-series references.
+
+# Details
+- Iterates networks declared in `pm.ref[:it][:pm][:hour_ids]` and adds network-scoped variables
+  and constraints for AC voltages, DC grid variables, converters, generators, storage, and contingencies.
+- Calls `base_uc_model!` for each scheduling hour to build the per-hour UC submodel.
+- Calls `spcuc_contingency_model!` for each contingency stage (from `pm.ref[:it][:pm][:cont_ids]`).
+- Assembles the global objective via `objective_min_cost_uc(pm)`.
+"""
 function build_spcuc(pm::_PM.AbstractPowerModel)
 
     for n in pm.ref[:it][:pm][:hour_ids]
@@ -17,6 +52,24 @@ function build_spcuc(pm::_PM.AbstractPowerModel)
     objective_min_cost_uc(pm)   
 end
 
+"""
+    base_uc_model!(pm, n)
+
+Build the per-hour Unit Commitment (UC) submodel for network/time-index `n`.
+
+# Inputs
+- `pm` : PowerModels internal model holder.
+- `n` : Network/time identifier corresponding to an entry in `pm.ref[:it][:pm][:hour_ids]`.
+
+# Details
+- Adds per-hour variables: bus voltages, branch power, generator power, storage power, inertia,
+  DC branch flows, converter variables, generator states, flexible demand, PST/SSSC, storage on/off, contingencies.
+- Adds per-hour constraints: voltage constraints, reference bus angles, AC power balances,
+  branch Ohm/voltage/thermal constraints, DC power balances, converter constraints, flexible demand constraints.
+- Adds unit-commitment specific constraints: generator on/off, unit commitment linking/ramping.
+- Integrates storage constraints when storage is present.
+- Applies fixed cross-border flow constraints if enabled in `pm.setting`.
+"""
 function base_uc_model!(pm, n)
 
         _PM.variable_bus_voltage(pm; nw = n)
@@ -111,10 +164,22 @@ function base_uc_model!(pm, n)
 
     end
 
+"""
+    spcuc_contingency_model!(pm, n)
 
+Build constraints for a contingency scenario identified by `n` in the SPCUC formulation.
 
+# Inputs
+- `pm` : PowerModels internal model holder.
+- `n` : Contingency model identifier (from `pm.ref[:it][:pm][:cont_ids]`).
 
-
+# Details
+- Adds contingency-specific variables: bus voltages, branch power, generator power, storage power,
+  inertia, DC variables, flexible demand, PST/SSSC, storage on/off, generator inertia response.
+- Adds constraints: DC power balances, reference bus angles, AC power balances, DC branch constraints,
+  flexible demand response, branch constraints, converter constraints with fixed response.
+- Applies generator inertial response constraints to the contingency.
+"""
 function spcuc_contingency_model!(pm, n)
 
     gen_id = (n - get_reference_network_id(pm, n; uc = true))

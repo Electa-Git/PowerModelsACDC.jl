@@ -88,6 +88,9 @@ Converter current constraint (not applicable)
 function constraint_converter_current(pm::_PM.AbstractDCPModel, n::Int,  i::Int, Umax, Imax)
     # not used
 end
+"""
+Variable constructor for DC converter in DCP models.
+"""
 function variable_dc_converter(pm::_PM.AbstractDCPModel; kwargs...)
     variable_converter_active_power(pm; kwargs...)
     variable_dcside_power(pm; kwargs...)
@@ -99,11 +102,16 @@ function variable_dc_converter(pm::_PM.AbstractDCPModel; kwargs...)
     variable_conv_reactor_active_power_from(pm; kwargs...)
 end
 
+"""
+Variable constructor for converter filter voltage in DCP models.
+"""
 function variable_converter_filter_voltage(pm::_PM.AbstractDCPModel; kwargs...)
     variable_converter_filter_voltage_angle(pm; kwargs...)
 end
 
-
+"""
+Variable constructor for converter internal voltage in DCP models.
+"""
 function variable_converter_internal_voltage(pm::_PM.AbstractDCPModel; kwargs...)
     variable_converter_internal_voltage_angle(pm; kwargs...)
 end
@@ -152,6 +160,9 @@ function constraint_converter_losses_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int
     end
 end
 
+"""
+Converter transformer constraints for network expansion in DCP models.
+"""
 function constraint_conv_transformer_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int, rtf, xtf, acbus, tm, transformer)
     ptf_fr = _PM.var(pm, n, :pconv_tf_fr_ne, i)
     ptf_to = _PM.var(pm, n, :pconv_tf_to_ne, i)
@@ -177,6 +188,9 @@ function constraint_conv_transformer_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int
     _IM.relaxation_equality_on_off(pm.model, va, va_du, z)
 end
 #
+"""
+Converter reactor constraints for network expansion in DCP models.
+"""
 function constraint_conv_reactor_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int, rc, xc, reactor)
     pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)
     ppr_to = - pconv_ac
@@ -202,6 +216,9 @@ function constraint_conv_reactor_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int, rc
     _IM.relaxation_equality_on_off(pm.model, vac, vac_du, z)
 end
 #
+"""
+Converter filter constraints for network expansion in DCP models.
+"""
 function constraint_conv_filter_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int, bv, filter)
     ppr_fr = _PM.var(pm, n, :pconv_pr_fr_ne, i)
     ptf_to = _PM.var(pm, n, :pconv_tf_to_ne, i)
@@ -209,11 +226,17 @@ function constraint_conv_filter_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int, bv,
 end
 #
 #
+"""
+Converter current constraint for network expansion in DCP models (placeholder).
+"""
 function constraint_converter_current_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int, Umax, Imax)
      # not used
  end
 #
 #
+"""
+Variable constructor for DC converter in network expansion for DCP models.
+"""
 function variable_dc_converter_ne(pm::_PM.AbstractDCPModel; kwargs...)
     variable_converter_ne(pm; kwargs...)
     variable_converter_active_power_ne(pm; kwargs...)
@@ -226,15 +249,24 @@ function variable_dc_converter_ne(pm::_PM.AbstractDCPModel; kwargs...)
     variable_conv_reactor_active_power_from_ne(pm; kwargs...)
 end
 
+"""
+Variable constructor for converter filter voltage in network expansion for DCP models.
+"""
 function variable_converter_filter_voltage_ne(pm::_PM.AbstractDCPModel; kwargs...)
     variable_converter_filter_voltage_angle_ne(pm; kwargs...)
 end
 #
 #
+"""
+Variable constructor for converter internal voltage in network expansion for DCP models.
+"""
 function variable_converter_internal_voltage_ne(pm::_PM.AbstractDCPModel; kwargs...)
     variable_converter_internal_voltage_angle_ne(pm; kwargs...)
 end
 
+"""
+Variable constructor for voltage slack variables in network expansion for DCP models.
+"""
 function variable_voltage_slack(pm::_PM.AbstractDCPModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     va_ne = _PM.var(pm, nw)[:va_du] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_va_du",
