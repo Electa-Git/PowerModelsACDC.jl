@@ -26,7 +26,7 @@ PST, SSSC, flexible loads and DC generators are applied.
 function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
     process_additional_data!(data)
-    return solve_acdcpf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+    return solve_acdcpf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
 """
@@ -49,7 +49,7 @@ This wrapper applies the same set of default reference extensions as the file-ba
 entrypoint. Use `ref_extensions` in `kwargs` to override or add additional references.
 """
 function solve_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
 """
@@ -99,8 +99,10 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     variable_flexible_demand(pm, bounded = false)
     variable_pst(pm, bounded = false)
     variable_sssc(pm, bounded = false)
+    variable_im(pm, bounded=false)
 
     _PM.constraint_model_voltage(pm)
+    
     constraint_voltage_dc(pm)
 
 
@@ -143,6 +145,26 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
+
+    for i in _PM.ids(pm, :pst)
+        constraint_ohms_y_from_pst(pm, i)
+        constraint_ohms_y_to_pst(pm, i)
+        constraint_limits_pst(pm, i)
+    end
+    for i in _PM.ids(pm, :im)
+        constraint_im_stator(pm, i)
+        constraint_im_rotor_inductance(pm, i)
+        constraint_im_magnetisation(pm, i)
+        constraint_im_slip(pm, i)
+    end
+
+
+    for i in _PM.ids(pm, :sssc)
+        constraint_ohms_y_from_sssc(pm, i)
+        constraint_ohms_y_to_sssc(pm, i)
+        constraint_limits_sssc(pm, i)
+    end
+
 
     for i in _PM.ids(pm, :busdc)
         constraint_power_balance_dc(pm, i)
