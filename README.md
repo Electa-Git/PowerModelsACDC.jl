@@ -1,6 +1,6 @@
 # PowerModelsACDC.jl
 
-<img src="https://raw.githubusercontent.com/Electa-Git/PowerModelsACDC.jl/master/docs/PMACDClogo.pdf" align="left" width="200" alt="PowerModelsACDC logo">
+<img src="https://raw.githubusercontent.com/Electa-Git/PowerModelsACDC.jl/master/docs/PMACDC_logo.pdf" align="left" width="200" alt="PowerModelsACDC logo">
 
 Status:
 [![CI](https://github.com/Electa-Git/PowerModelsACDC.jl/workflows/CI/badge.svg)](https://github.com/Electa-Git/PowerModelsACDC.jl/actions?query=workflow%3ACI)
