@@ -1,5 +1,7 @@
 # PowerModelsACDC.jl
 
+<img src="https://raw.githubusercontent.com/Electa-Git/PowerModelsACDC.jl/master/docs/PMACDClogo.pdf" align="left" width="200" alt="PowerModelsACDC logo">
+
 Status:
 [![CI](https://github.com/Electa-Git/PowerModelsACDC.jl/workflows/CI/badge.svg)](https://github.com/Electa-Git/PowerModelsACDC.jl/actions?query=workflow%3ACI)
 <a href="https://codecov.io/gh/Electa-Git/PowerModelsACDC.jl"><img src="https://img.shields.io/codecov/c/github/Electa-Git/PowerModelsACDC.jl?logo=Codecov"></img></a>
