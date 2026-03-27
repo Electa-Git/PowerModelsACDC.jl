@@ -1,46 +1,52 @@
 name: CI
 on:
   push:
-  pull_request:
   schedule:
-    - cron:  '0 0 * * 3' # on every Wednesday
+    - cron:  '0 6 * * 5' # on every Friday at 6:00
+# needed to allow julia-actions/cache to delete old caches that it has created
+permissions:
+  actions: write
+  contents: read
 jobs:
   test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    name: Julia ${{ matrix.version }}${{ matrix.downgrade-compat && ' downgrade-compat' || ''}} - ${{ matrix.os }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        version: # Julia version
-          - '1.10' # LTS release, automatically expands to the latest stable 1.10.x release
-          - '1'    # current stable release, automatically expands to the latest stable 1.x release
-        os:
-          - ubuntu-latest
-          - macOS-latest
-          - windows-latest
-        arch:
-          - x64
+        include:
+          - version: '1' # latest Julia v1
+            downgrade-compat: false
+            os: ubuntu-latest
+          - version: '1' # latest Julia v1
+            downgrade-compat: false
+            os: macos-latest
+          - version: '1' # latest Julia v1
+            downgrade-compat: false
+            os: windows-latest
+          - version: 'lts' # latest Julia LTS
+            downgrade-compat: false
+            os: ubuntu-latest
+          - version: 'lts' # latest Julia LTS
+            downgrade-compat: true
+            os: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v1
+      - uses: actions/checkout@v6
+      - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
-      - uses: actions/cache@v3
-        env:
-          cache-name: cache-artifacts
+      - uses: julia-actions/cache@v3
+      - uses: julia-actions/julia-downgrade-compat@v2
+        if: ${{ matrix.downgrade-compat }}
         with:
-          path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
+          mode: 'alldeps'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
         with:
           annotate: true
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v3
+        if: ${{ matrix.version == '1' && matrix.os == 'ubuntu-latest' }}
+      - uses: codecov/codecov-action@v6
+        if: ${{ matrix.version == '1' && matrix.os == 'ubuntu-latest' }}
         with:
-          file: lcov.info
+          files: lcov.info
