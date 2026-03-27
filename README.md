@@ -2,10 +2,10 @@
 
 <img src="https://raw.githubusercontent.com/Electa-Git/PowerModelsACDC.jl/master/docs/PMACDC_logo.png" align="left" width="200" alt="PowerModelsACDC logo">
 
-Status:
-[![CI](https://github.com/Electa-Git/PowerModelsACDC.jl/workflows/CI/badge.svg)](https://github.com/Electa-Git/PowerModelsACDC.jl/actions?query=workflow%3ACI)
-<a href="https://codecov.io/gh/Electa-Git/PowerModelsACDC.jl"><img src="https://img.shields.io/codecov/c/github/Electa-Git/PowerModelsACDC.jl?logo=Codecov"></img></a>
-<a href="https://electa-git.github.io/PowerModelsACDC.jl/dev/"><img src="https://github.com/Electa-Git/PowerModelsACDC.jl/workflows/Documentation/badge.svg"></img></a>
+[![](https://img.shields.io/github/actions/workflow/status/Electa-Git/PowerModelsACDC.jl/ci.yml?branch=master&label=CI)](https://github.com/Electa-Git/PowerModelsACDC.jl/actions?query=workflow:CI)
+[![](https://img.shields.io/codecov/c/github/Electa-Git/PowerModelsACDC.jl)](https://app.codecov.io/gh/Electa-Git/PowerModelsACDC.jl)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://electa-git.github.io/PowerModelsACDC.jl/stable/)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://electa-git.github.io/PowerModelsACDC.jl/dev/)
 
 
 PowerModelsACDC.jl is a Julia/JuMP/PowerModels package with models for DC lines, meshed DC networks, and AC DC converters.
