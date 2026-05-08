@@ -1,20 +1,26 @@
 module PowerModelsACDC
 
-# import Compat
-import JuMP
-import Memento
-import LinearAlgebra
-import PowerModels as _PM
 import InfrastructureModels as _IM
-import SparseArrays
+import JuMP
+import LinearAlgebra
+import Logging
 import NLsolve
+import PowerModels as _PM
+import SparseArrays
 
-# Create our module level logger (this will get precompiled)
-const _LOGGER = Memento.getlogger(@__MODULE__)
+function __init__()
+    logger_config!("info")
+    return
+end
 
-# Register the module level logger at runtime so that folks can access the logger via `getlogger(PowerModelsACDC)`
-# NOTE: If this line is not included then the precompiled `PowerModelsACDC._LOGGER` won't be registered at runtime.
-__init__() = Memento.register(_LOGGER)
+include("core/logging.jl")
+include("core/data.jl")
+include("core/base.jl")
+include("core/constraint.jl")
+include("core/constraint_template.jl")
+include("core/objective.jl")
+include("core/relaxation_scheme.jl")
+include("core/util.jl")
 
 include("prob/acdcopf.jl")
 include("prob/acdcpf.jl")
@@ -27,14 +33,6 @@ include("prob/fcuc.jl")
 include("prob/rdopf.jl")
 include("prob/scopf.jl")
 include("prob/spcuc.jl")
-
-include("core/data.jl")
-include("core/base.jl")
-include("core/constraint.jl")
-include("core/constraint_template.jl")
-include("core/objective.jl")
-include("core/relaxation_scheme.jl")
-include("core/util.jl")
 
 include("security/contingency.jl")
 include("security/frequency.jl")

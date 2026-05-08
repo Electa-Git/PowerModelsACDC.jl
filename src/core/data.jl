@@ -672,14 +672,14 @@ function _check_conv_parameters(conv)
     conv["Pacrated"] = max(abs(conv["Pacmax"]),abs(conv["Pacmin"]))
     conv["Qacrated"] = max(abs(conv["Qacmax"]),abs(conv["Qacmin"]))
     if conv["Imax"] < sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
-        Memento.warn(_LOGGER, "Inconsistent current limit for converter $conv_id, it will be updated.")
+        @_warn("Inconsistent current limit for converter $conv_id, it will be updated.")
         conv["Imax"] = sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
     end
     if conv["LossCrec"] != conv["LossCinv"]
-        Memento.warn(_LOGGER, "The losses of converter $conv_id are different in inverter and rectifier mode, inverter losses are used.")
+        @_warn("The losses of converter $conv_id are different in inverter and rectifier mode, inverter losses are used.")
     end
     if conv["islcc"] == 1
-        Memento.warn(_LOGGER, "Converter $conv_id is an LCC, reactive power limits might be updated.")
+        @_warn("Converter $conv_id is an LCC, reactive power limits might be updated.")
         if abs(conv["Pacmax"]) >= abs(conv["Pacmin"])
             conv["phimin"] = 0
             conv["phimax"] = acos(conv["Pacmin"] / conv["Pacmax"])
