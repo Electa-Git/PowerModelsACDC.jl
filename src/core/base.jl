@@ -35,11 +35,11 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
 
             # Bus converters for existing ac buses
             bus_convs_ac = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
-            nw_ref[:bus_convs_ac] = assign_bus_converters!(nw_ref[:convdc], bus_convs_ac, "busac_i")    
+            nw_ref[:bus_convs_ac] = assign_bus_converters!(nw_ref[:convdc], bus_convs_ac, "busac_i")
 
             # Bus converters for existing ac buses
             bus_convs_dc = Dict([(bus["busdc_i"], []) for (i,bus) in nw_ref[:busdc]])
-            nw_ref[:bus_convs_dc]= assign_bus_converters!(nw_ref[:convdc], bus_convs_dc, "busdc_i") 
+            nw_ref[:bus_convs_dc]= assign_bus_converters!(nw_ref[:convdc], bus_convs_dc, "busdc_i")
 
 
             # Add DC reference buses
@@ -56,22 +56,22 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
                         ref_buses_dc["$k"] = v
                     end
                 end
-                Memento.warn(_PM._LOGGER, "no reference DC bus found, setting reference bus based on AC bus type")
+                Memento.warn(_LOGGER, "no reference DC bus found, setting reference bus based on AC bus type")
             end
 
             for (k,conv) in nw_ref[:convdc]
                 conv_id = conv["index"]
                 if conv["type_ac"] == 2 && conv["type_dc"] == 1
-                    Memento.warn(_PM._LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+                    Memento.warn(_LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
                 elseif conv["type_ac"] == 1 && conv["type_dc"] == 1
-                    Memento.warn(_PM._LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+                    Memento.warn(_LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
                 end
                 convbus_ac = conv["busac_i"]
                 if conv["Vmmax"] < nw_ref[:bus][convbus_ac]["vmin"]
-                    Memento.warn(_PM._LOGGER, "The maximum AC side voltage of converter $conv_id is smaller than the minimum AC bus voltage")
+                    Memento.warn(_LOGGER, "The maximum AC side voltage of converter $conv_id is smaller than the minimum AC bus voltage")
                 end
                 if conv["Vmmin"] > nw_ref[:bus][convbus_ac]["vmax"]
-                    Memento.warn(_PM._LOGGER, "The miximum AC side voltage of converter $conv_id is larger than the maximum AC bus voltage")
+                    Memento.warn(_LOGGER, "The miximum AC side voltage of converter $conv_id is larger than the maximum AC bus voltage")
                 end
             end
 
@@ -80,7 +80,7 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
                 for (rb) in keys(ref_buses_dc)
                     ref_buses_warn = ref_buses_warn*rb*", "
                 end
-                Memento.warn(_PM._LOGGER, "multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
+                Memento.warn(_LOGGER, "multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
             end
             nw_ref[:ref_buses_dc] = ref_buses_dc
             nw_ref[:buspairsdc] = buspair_parameters_dc(nw_ref[:arcs_dcgrid_from], nw_ref[:branchdc], nw_ref[:busdc])
@@ -92,7 +92,7 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
             nw_ref[:buspairsdc] = Dict{String, Any}()
             # Bus converters for existing ac buses
             bus_convs_ac = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
-            nw_ref[:bus_convs_ac] = assign_bus_converters!(nw_ref[:convdc], bus_convs_ac, "busac_i")    
+            nw_ref[:bus_convs_ac] = assign_bus_converters!(nw_ref[:convdc], bus_convs_ac, "busac_i")
         end
     end
 end
@@ -231,7 +231,7 @@ function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
         if haskey(nw_ref, :convdc_ne)
             nw_ref[:arcs_conv_acdc_ne] = [(i,conv["busac_i"],conv["busdc_i"]) for (i,conv) in nw_ref[:convdc_ne]]
             nw_ref[:arcs_conv_acdc_acbus_ne] = [(i,conv["busac_i"]) for (i,conv) in nw_ref[:convdc_ne]]
-            
+
             # Bus converters for existing ac buses
             bus_convs_ac_ne = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
             nw_ref[:bus_convs_ac_ne] = assign_bus_converters!(nw_ref[:convdc_ne], bus_convs_ac_ne, "busac_i")
@@ -408,7 +408,7 @@ function ref_add_gendc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
         # Bus converters for existing ac buses
 
         bus_gens_dc = Dict((i, Int[]) for (i,bus) in nw_ref[:busdc])
-        nw_ref[:bus_gens_dc]= assign_bus_generators!(nw_ref[:gendc], bus_gens_dc, "gen_bus") 
+        nw_ref[:bus_gens_dc]= assign_bus_generators!(nw_ref[:gendc], bus_gens_dc, "gen_bus")
     end
 end
 

@@ -140,8 +140,8 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :flex_load)
         constraint_total_flexible_demand(pm, i)
     end
-    
-    for i in _PM.ids(pm, :fixed_load) 
+
+    for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
 
@@ -152,7 +152,7 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         constraint_ohms_dc_branch(pm, i)
     end
 
-    if !isempty(_PM.ids(pm, :gendc)) 
+    if !isempty(_PM.ids(pm, :gendc))
         for i in _PM.ids(pm, :gendc)
             constraint_dcgenerator_voltage_and_power(pm, i)
         end
@@ -168,7 +168,7 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
             if typeof(pm) <: _PM.AbstractACPModel || typeof(pm) <: _PM.AbstractACRModel
                 constraint_dc_droop_control(pm, c)
             else
-                Memento.warn(_PM._LOGGER, join(["Droop only defined for ACP and ACR formulations, converter ", c, " will be treated as type 2"]))
+                Memento.warn(_LOGGER, join(["Droop only defined for ACP and ACR formulations, converter ", c, " will be treated as type 2"]))
                 constraint_dc_voltage_magnitude_setpoint(pm, c)
             end
         else
