@@ -270,7 +270,7 @@ function rescale_dcgen_cost_model!(gendc, MVAbase)
     gendc["cost"] = [gendc["quadratic_cost"] * MVAbase^2 gendc["linear_cost"] * MVAbase gendc["idle_cost"]]
 end
 
-### Auxiliary functions 
+### Auxiliary functions
 
 function is_single_network(data)
     return !haskey(data, "multinetwork") || data["multinetwork"] == false
@@ -315,7 +315,7 @@ function to_pu_single_network!(data)
             Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
             Ibase = get_pu_bases(MVAbase, kVbase)["I"]
 
-            set_conv_pu_power(conv, MVAbase) 
+            set_conv_pu_power(conv, MVAbase)
             set_conv_pu_volt(conv, kVbase*sqrt(3))
             set_conv_pu_ohm(conv, Zbase)
         end
@@ -678,14 +678,14 @@ function check_conv_parameters(conv)
     conv["Pacrated"] = max(abs(conv["Pacmax"]),abs(conv["Pacmin"]))
     conv["Qacrated"] = max(abs(conv["Qacmax"]),abs(conv["Qacmin"]))
     if conv["Imax"] < sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
-        Memento.warn(_PM._LOGGER, "Inconsistent current limit for converter $conv_id, it will be updated.")
+        Memento.warn(_LOGGER, "Inconsistent current limit for converter $conv_id, it will be updated.")
         conv["Imax"] = sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
     end
     if conv["LossCrec"] != conv["LossCinv"]
-        Memento.warn(_PM._LOGGER, "The losses of converter $conv_id are different in inverter and rectifier mode, inverter losses are used.")
+        Memento.warn(_LOGGER, "The losses of converter $conv_id are different in inverter and rectifier mode, inverter losses are used.")
     end
     if conv["islcc"] == 1
-        Memento.warn(_PM._LOGGER, "Converter $conv_id is an LCC, reactive power limits might be updated.")
+        Memento.warn(_LOGGER, "Converter $conv_id is an LCC, reactive power limits might be updated.")
         if abs(conv["Pacmax"]) >= abs(conv["Pacmin"])
             conv["phimin"] = 0
             conv["phimax"] = acos(conv["Pacmin"] / conv["Pacmax"])
@@ -918,12 +918,12 @@ function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series
         if contingencies["type"] == "N-1"
             number_of_contingencies = 1
             for element_type in contingencies["elements"]
-                number_of_contingencies = number_of_contingencies + length(data[element_type]) 
+                number_of_contingencies = number_of_contingencies + length(data[element_type])
             end
         elseif contingencies["type"] == "largest"
             number_of_contingencies = 1 + length(contingencies["elements"]) * length(data["zones"])
         end
-        
+
         replicates = number_of_hours * number_of_contingencies
         # This for loop determines which "network" belongs to an hour, and which to a contingency, for book-keeping of the network ids
         # Format: [h1, c1 ... cn, h2, c1 ... cn, .... , hn, c1 ... cn]
@@ -944,13 +944,13 @@ function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series
         for i in 1:replicates
             push!(hour_ids, i)
         end
-    end        
+    end
 
     ########### Using _IM.replicate networks
 
     mn_data = _IM.replicate(data, replicates, Set{String}(["source_type", "name", "source_version", "per_unit"]))
 
-    # Add hour_ids and contingency_ids to the data dictionary 
+    # Add hour_ids and contingency_ids to the data dictionary
     mn_data["hour_ids"] = hour_ids
     mn_data["cont_ids"] = cont_ids
     mn_data["number_of_hours"] = number_of_hours
@@ -1035,11 +1035,11 @@ function prepare_redispatch_opf_data(reference_solution, grid_data; contingency 
                 gen["dispatch_status"] = 0
             else
                 gen["dispatch_status"] = 1
-            end 
+            end
         else
             gen["dispatch_status"] = 0
         end
-        
+
         gen["rdcost_up"] = gen["cost"][1] * rd_cost_factor
         gen["rdcost_down"] = gen["cost"][1] * rd_cost_factor * 0
     end
@@ -1138,7 +1138,7 @@ function create_scopf_data(data_in, number_of_hours, g_series, l_series; number_
 
     process_additional_data!(data)
 
-    # Add hour_ids and contingency_ids to the data dictionary 
+    # Add hour_ids and contingency_ids to the data dictionary
     data["hour_ids"] = hour_ids
     data["cont_ids"] = cont_ids
     data["number_of_hours"] = number_of_hours

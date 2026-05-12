@@ -121,17 +121,17 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     for i in _PM.ids(pm, :flex_load)
         constraint_total_flexible_demand(pm, i)
     end
-    
-    for i in _PM.ids(pm, :fixed_load) 
+
+    for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
 
     for i in _PM.ids(pm, :pst)
-        Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for PSTs")
+        Memento.warn(_LOGGER,"IVR formulation is not yet implemented for PSTs")
     end
 
     for i in _PM.ids(pm, :sssc)
-        Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for SSSCs")
+        Memento.warn(_LOGGER,"IVR formulation is not yet implemented for SSSCs")
     end
 
     for i in _PM.ids(pm, :busdc)
@@ -230,11 +230,11 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
         end
 
         for i in _PM.ids(pm, n, :pst)
-            Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for PSTs (nw = $n)")
+            Memento.warn(_LOGGER,"IVR formulation is not yet implemented for PSTs (nw = $n)")
         end
 
         for i in _PM.ids(pm, n, :sssc)
-            Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for SSSCs (nw = $n)")
+            Memento.warn(_LOGGER,"IVR formulation is not yet implemented for SSSCs (nw = $n)")
         end
 
         for i in _PM.ids(pm, n, :busdc)
