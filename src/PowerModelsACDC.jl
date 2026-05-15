@@ -1,5 +1,3 @@
-isdefined(Base, :__precompile__) && __precompile__()
-
 module PowerModelsACDC
 
 # import Compat
@@ -40,7 +38,6 @@ include("prob/rdopf.jl")
 include("prob/scopf.jl")
 include("prob/spcuc.jl")
 
-include("core/solution.jl")
 include("core/data.jl")
 include("core/base.jl")
 include("core/constraint.jl")
@@ -84,4 +81,5 @@ include("formconv/iv.jl")
 
 include("io/multinetwork.jl")
 include("io/results.jl")
-end
+
+end  # module PowerModelsACDC

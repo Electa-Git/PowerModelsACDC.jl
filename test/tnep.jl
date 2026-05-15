@@ -1,4 +1,4 @@
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
+s = Dict("conv_losses_mp" => true)
 @testset "test dc tnep" begin
     @testset "6-bus case" begin
         resultDC = _PMACDC.solve_tnep("../test/data/tnep/case6_test.m", DCPPowerModel, highs; setting = s)
@@ -213,7 +213,7 @@ end
         @test isapprox(resultLPAC["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
         @test isapprox(resultLPAC["solution"]["convdc_ne"]["1"]["pconv"], -1; atol = 1e-2)
         @test isapprox(resultLPAC["solution"]["ne_branch"]["1"]["built"], 1; atol = 1e-2)
-    end   
+    end
     if local_test == true
         @testset "SOCWR" begin
             resultSOCWR = _PMACDC.solve_tnep("../test/data/tnep/case4_acdc.m", SOCWRPowerModel, gurobi; setting = s)
@@ -267,7 +267,7 @@ end
 end
 
 
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false)
+s = Dict("conv_losses_mp" => true, "process_data_internally" => false)
 @testset "mp-tnep" begin
     @testset "dc tnep" begin
         @testset "DCP" begin
@@ -303,7 +303,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "pr
             @test isapprox(resultLPAC["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"], -2.15833; atol = 1e-2)
         end
         if local_test == true
-            @testset "ACP" begin   
+            @testset "ACP" begin
                 data_dc = build_mn_data("../test/data/tnep/case4_original.m")
                 resultACP = _PMACDC.solve_tnep(data_dc, ACPPowerModel, juniper, multinetwork=true; setting = s)
                 @test isapprox(resultACP["objective"], 10.2; atol = 1e-1)
@@ -349,7 +349,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "pr
         end
         # @testset "LPAC" begin
         #   data_acdc = build_mn_data("../test/data/tnep/case4_acdc.m")
-        #    resultLPAC = run_mp_tnepopf(data_acdc, LPACCPowerModel, juniper, multinetwork=true; setting = s)
+        #    resultLPAC = solve_tnep(data_acdc, LPACCPowerModel, juniper, multinetwork=true; setting = s)
         #    @test isapprox(resultLPAC["objective"], 614.15; atol = 1e-1)
         #    @test isapprox(resultLPAC["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
         #    @test isapprox(resultLPAC["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"], -1.2466; atol = 1e-2)

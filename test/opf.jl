@@ -3,7 +3,7 @@
 # and checks solver status and objective value accuracy.
 
 # Common solver settings used in all tests
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
+s = Dict("conv_losses_mp" => true)
 
 # ---------------------------------------------------------------------------
 # AC Polar OPF Tests

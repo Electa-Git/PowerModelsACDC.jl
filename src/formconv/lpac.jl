@@ -346,7 +346,6 @@ function constraint_converter_current_ne(pm::_PM.AbstractLPACModel, n::Int, i::I
     pconv_ac = _PM.var(pm, n, :pconv_ac_ne, i)
     qconv_ac = _PM.var(pm, n, :qconv_ac_ne, i)
     iconv = _PM.var(pm, n, :iconv_ac_ne, i)
-    # @NLconstraint(pm.model, pconv_ac^2 + qconv_ac^2 <= (1.0+phi_vmc)^2 * (iconv)^2)
     JuMP.@constraint(pm.model, iconv <= Imax)
 end
 
