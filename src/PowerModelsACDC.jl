@@ -40,7 +40,6 @@ include("prob/rdopf.jl")
 include("prob/scopf.jl")
 include("prob/spcuc.jl")
 
-include("core/solution.jl")
 include("core/data.jl")
 include("core/base.jl")
 include("core/constraint.jl")
