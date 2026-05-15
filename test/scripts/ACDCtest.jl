@@ -27,7 +27,7 @@ _PMACDC.process_additional_data!(data)
 
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
 
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
+s = Dict("conv_losses_mp" => true)
 
 result = _PMACDC.solve_acdcpf(file, _PM.ACRPowerModel, ipopt; setting = s)
 result_droop = _PMACDC.solve_acdcpf(file_pf_droop, _PM.ACRPowerModel, ipopt; setting = s)

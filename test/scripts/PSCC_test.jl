@@ -31,7 +31,7 @@ bt = 100 ## constraint tightening setting 95, 90, 85, 80
     gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer)
     juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "mip_solver" => cbc_solver, "nl_solver" => ipopt)
 
-    s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => false, "process_data_internally" => false)
+    s = Dict("conv_losses_mp" => false, "process_data_internally" => false)
 
     converter_parameters_rxb(data)
     # converter_cost(data)      # only to use with 6 and 24 bus systems

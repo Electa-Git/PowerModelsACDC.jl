@@ -27,7 +27,7 @@ ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_le
 mosek = JuMP.optimizer_with_attributes(Mosek.Optimizer)
 scs = JuMP.optimizer_with_attributes(SCS.Optimizer)
 #mosek = MosekSolver()
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
+s = Dict("conv_losses_mp" => true)
 
 objective = Dict{String, Any}()
 

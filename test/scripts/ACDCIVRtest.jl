@@ -16,7 +16,7 @@ _PMACDC.process_additional_data!(data)
 
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
 
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
+s = Dict("conv_losses_mp" => true)
 
 resultAC = _PMACDC.run_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
 resultACPM = _PM.run_opf(file, _PM.ACPPowerModel, ipopt; setting = s)
@@ -43,7 +43,7 @@ end
 
 
 # so = resultIVR["solution"]
-# ir_balance = (so["gen"]["2"]["crg"] - il) - (so["convdc"]["1"]["iik_r"] + so["branch"]["1"]["cr_to"] + so["branch"]["3"]["cr_fr"] + so["branch"]["4"]["cr_fr"] + so["branch"]["5"]["cr_fr"]) 
+# ir_balance = (so["gen"]["2"]["crg"] - il) - (so["convdc"]["1"]["iik_r"] + so["branch"]["1"]["cr_to"] + so["branch"]["3"]["cr_fr"] + so["branch"]["4"]["cr_fr"] + so["branch"]["5"]["cr_fr"])
 
 
 # for (b, bus) in resultIVR["solution"]["bus"]
@@ -64,8 +64,8 @@ end
 #     print(c, "-vk: ", vk, "\n")
 #     print(c, "-vc: ", vc, "\n")
 # end
-# pg_acp = resultAC["solution"]["gen"]["1"]["pg"] + resultAC["solution"]["gen"]["2"]["pg"] 
-# pg_ivr = resultIVR["solution"]["gen"]["1"]["pg"] + resultIVR["solution"]["gen"]["2"]["pg"] 
+# pg_acp = resultAC["solution"]["gen"]["1"]["pg"] + resultAC["solution"]["gen"]["2"]["pg"]
+# pg_ivr = resultIVR["solution"]["gen"]["1"]["pg"] + resultIVR["solution"]["gen"]["2"]["pg"]
 
 # print("pac: ", pg_acp, "\n")
 # print("pivr: ", pg_ivr, "\n")

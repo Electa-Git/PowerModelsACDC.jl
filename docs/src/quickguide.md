@@ -16,7 +16,7 @@ You can also find a test script in the folder `"./test/scripts"`.
 ## Modifying settings
 The flow AC and DC branch results are not written to the result by default. To inspect the flow results, pass a settings Dict
 ```julia
-result = run_acdcopf("case5_acdc.m", ACPPowerModel, IpoptSolver(), setting = Dict("output" => Dict("branch_flows" => true)))
+result = run_acdcopf("case5_acdc.m", ACPPowerModel, IpoptSolver())
 result["solution"]["branchdc"]["1"]
 result["solution"]["branch"]["2"]
 ```

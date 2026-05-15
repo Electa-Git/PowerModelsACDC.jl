@@ -50,7 +50,7 @@ end
 
 
 # OPF settings
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "optimize_converter_droop" => true, "objective_components" => ["gen"],  "dc_converter_passivity" => dc_converter_passivity)
+s = Dict("conv_losses_mp" => true, "optimize_converter_droop" => true, "objective_components" => ["gen"],  "dc_converter_passivity" => dc_converter_passivity)
 # Reference droop
 kref = 1/100
 

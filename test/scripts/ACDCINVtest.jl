@@ -29,7 +29,7 @@ mosek = JuMP.optimizer_with_attributes(Mosek.Optimizer)
 juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => cbc, "time_limit" => 7200)
 #
 #
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => false, "process_data_internally" => false)
+s = Dict("conv_losses_mp" => false, "process_data_internally" => false)
 
 
 resultDC = _PMACDC.run_tnepopf(file, _PM.DCPPowerModel, gurobi, setting = s)
@@ -47,7 +47,7 @@ _PMACDC.display_results_tnep(resultSOCWR)
 _PMACDC.display_results_tnep(resultLPAC)
 _PMACDC.display_results_tnep(resultQC)
 ## TEST ACDC TNEP
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true,"process_data_internally" => false)
+s = Dict("conv_losses_mp" => true,"process_data_internally" => false)
 resultACDC_dcp = _PMACDC.run_acdctnepopf(file_acdc, _PM.DCPPowerModel, gurobi, setting = s)
 resultACDC_acp = _PMACDC.run_acdctnepopf(file_acdc, _PM.ACPPowerModel, juniper, setting = s)
 #resultACDC_socbf = _PMACDC.run_acdctnepopf_bf(file_acdc, _PM.SOCBFPowerModel, gurobi, setting = s)  # BF TNEP not implemented in PowerModels.jl
