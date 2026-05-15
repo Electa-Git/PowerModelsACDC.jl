@@ -112,29 +112,29 @@ for file in files
     case = Dict{String, Any}()
     er_dict = Dict{String, Any}()
 
-    resultAC = run_acdcopf(data, ACPPowerModel, ipopt; setting = s)
+    resultAC = solve_acdcopf(data, ACPPowerModel, ipopt; setting = s)
     case["AC NLP"] = exctract_info(resultAC)
 
-    resultQC = run_acdcopf(data, QCWRPowerModel, ipopt; setting = s)
+    resultQC = solve_acdcopf(data, QCWRPowerModel, ipopt; setting = s)
     case["QC SOC"] = exctract_info(resultQC)
     # #
-    # resultQCTri = run_acdcopf(data, QCWRTriPowerModel, ipopt; setting = s)
+    # resultQCTri = solve_acdcopf(data, QCWRTriPowerModel, ipopt; setting = s)
     # case["QCTri SOC"] = exctract_info(resultQCTri)
     # #
-    resultSOCBIM = run_acdcopf(data, SOCWRPowerModel, ipopt; setting = s)
+    resultSOCBIM = solve_acdcopf(data, SOCWRPowerModel, ipopt; setting = s)
     case["BIM SOC"] = exctract_info(resultSOCBIM)
     # #
-    resultSOCBFM = run_acdcopf_bf(data, SOCBFPowerModel, ipopt; setting = s)
+    resultSOCBFM = solve_acdcopf_bf(data, SOCBFPowerModel, ipopt; setting = s)
     case["BFM SOC"] = exctract_info(resultSOCBFM)
     # #
     case["BIM SDP"] = exctract_info(resultAC)
-    # resultSDP = run_acdcopf(data, SDPWRMPowerModel, mosek; setting = s)
+    # resultSDP = solve_acdcopf(data, SDPWRMPowerModel, mosek; setting = s)
     # case["BIM SDP"] = exctract_info(resultSDP)
     # # #
-    resultDC = run_acdcopf(data, DCPPowerModel, ipopt; setting = s)
+    resultDC = solve_acdcopf(data, DCPPowerModel, ipopt; setting = s)
     case["DC LP"] = exctract_info(resultDC)
     #
-    resultLPAC = run_acdcopf(data, LPACCPowerModel, ipopt; setting = s)
+    resultLPAC = solve_acdcopf(data, LPACCPowerModel, ipopt; setting = s)
     case["LPAC"] = exctract_info(resultLPAC)
 
 

@@ -18,9 +18,9 @@ ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_le
 
 s = Dict("conv_losses_mp" => true)
 
-resultAC = _PMACDC.run_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
-resultACPM = _PM.run_opf(file, _PM.ACPPowerModel, ipopt; setting = s)
-resultIVR = _PMACDC.run_acdcopf_iv(file, _PM.IVRPowerModel, ipopt; setting = s)
+resultAC = _PMACDC.solve_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
+resultACPM = _PM.solve_opf(file, _PM.ACPPowerModel, ipopt; setting = s)
+resultIVR = _PMACDC.solve_acdcopf_iv(file, _PM.IVRPowerModel, ipopt; setting = s)
 
 print("ACP RESULTS")
 print("Objective:", resultAC["objective"],"\n")
@@ -69,6 +69,3 @@ end
 
 # print("pac: ", pg_acp, "\n")
 # print("pivr: ", pg_ivr, "\n")
-
-
-

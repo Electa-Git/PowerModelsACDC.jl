@@ -39,22 +39,22 @@ bt = 100 ## constraint tightening setting 95, 90, 85, 80
     data_pf1 = deepcopy(data)
 
 ##
-resultDC = run_tnepopf(data, DCPPowerModel, gurobi, setting = s)
+resultDC = solve_tnep(data, DCPPowerModel, gurobi, setting = s)
 resultDC["built_cv"], resultDC["built_br"] = display_results(data_pf1, resultDC)
 
-resultSOCBF = run_tnepopf_bf(data, SOCBFPowerModel, gurobi, setting = s)
+resultSOCBF = solve_tnep(data, SOCBFPowerModel, gurobi, setting = s)
 resultSOCBF["built_cv"], resultSOCBF["built_br"] = display_results(data_pf1, resultSOCBF)
 
-resultSOCWR = run_tnepopf(data, SOCWRPowerModel, gurobi, setting = s)
+resultSOCWR = solve_tnep(data, SOCWRPowerModel, gurobi, setting = s)
 resultSOCWR["built_cv"], resultSOCWR["built_br"] = display_results(data_pf1, resultSOCWR)
 
-resultQC     =  run_tnepopf(data, QCRMPowerModel, gurobi; setting = s)
+resultQC     =  solve_tnep(data, QCRMPowerModel, gurobi; setting = s)
 resultQC["built_cv"], resultQC["built_br"] = display_results(data_pf1, resultQC)
 
-resultAC_juni     =  run_tnepopf(data, ACPPowerModel, juniper; setting = s)
+resultAC_juni     =  solve_tnep(data, ACPPowerModel, juniper; setting = s)
 resultAC_juni["built_cv"], resultAC_juni["built_br"] = display_results(data_pf1, resultAC_juni)
 
-resultLPAC     =  run_tnepopf(data, LPACCPowerModel, gurobi; setting = s)
+resultLPAC     =  solve_tnep(data, LPACCPowerModel, gurobi; setting = s)
 resultLPAC["built_cv"], resultLPAC["built_br"] = display_results(data_pf1, resultLPAC)
 
 
