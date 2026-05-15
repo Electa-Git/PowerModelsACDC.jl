@@ -1,4 +1,4 @@
-function mpc = case5_2gr_PM.ids()
+function mpc = case5_2grids()
 %case 5 nodes    Power flow data for 5 bus, 2 generator case.
 %   Please see 'help caseformat' for details on the case file format.
 %
@@ -73,5 +73,5 @@ mpc.gencost = [
 % adds current ratings to branch matrix
 %column_names%	c_rating_a
 mpc.branch_currents = [
-300;    
+300;
 ];

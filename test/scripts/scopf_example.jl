@@ -1,16 +1,12 @@
 # A test script for running a simple preventive SCOPF model considering DC network contingencies, and optimising HVDC Converter droop gains
 
-import PowerModelsACDC
-const _PMACDC = PowerModelsACDC
+using PowerModelsACDC
 import PowerModels
-const _PM = PowerModels
-import InfrastructureModels
-const _IM = InfrastructureModels
 import Ipopt
 import JuMP
 import Plots
 
-path = _PMACDC.BASE_DIR
+path = BASE_DIR
 
 ## Use first one for MA27, check the local path for your HSL library
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer)
@@ -30,7 +26,7 @@ elseif case_name == "case67"
     file = joinpath(path, "test", "data", "case67acdc_scopf.m")
 end
 
-data = _PM.parse_file(file)
+data = PowerModels.parse_file(file)
 
 for (c, conv) in data["convdc"]
     conv["kmax"] = kmax
@@ -63,10 +59,10 @@ number_of_hours = 24
 number_of_contingencies = length(data["contingencies"])
 
 # violations = HVDCdroop.find_binding_contingencies(data, ipopt, l_series, g_series, s, kref)
-data_all = _PMACDC.create_scopf_data(data,  number_of_hours, g_series, l_series)
+data_all = create_scopf_data(data,  number_of_hours, g_series, l_series)
 
 # Solve OPF
-result = _PMACDC.solve_scopf(data_all, _PM.ACPPowerModel, ipopt; multinetwork = true, setting = s)
+result = solve_scopf(data_all, PowerModels.ACPPowerModel, ipopt; multinetwork = true, setting = s)
 
 
 

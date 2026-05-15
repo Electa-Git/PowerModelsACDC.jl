@@ -1,7 +1,5 @@
-import PowerModelsACDC
-const _PMACDC = PowerModelsACDC
+using PowerModelsACDC
 import PowerModels
-const _PM = PowerModels
 import Ipopt
 import Memento
 import JuMP
@@ -21,33 +19,33 @@ file_lcc = "./test/data/lcc_test.m"
 file_588sdet_acdc = "./test/data/pglib_opf_case588_sdet_acdc.m"
 file = file_case3120
 
-data = _PM.parse_file(file)
+data = PowerModels.parse_file(file)
 
-_PMACDC.process_additional_data!(data)
+process_additional_data!(data)
 
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
 
 s = Dict("conv_losses_mp" => true)
 
-result = _PMACDC.solve_acdcpf(file, _PM.ACRPowerModel, ipopt; setting = s)
-result_droop = _PMACDC.solve_acdcpf(file_pf_droop, _PM.ACRPowerModel, ipopt; setting = s)
-result = _PMACDC.solve_acdcpf(file_case3120, _PM.ACRPowerModel, ipopt; setting = s)
-result = _PMACDC.solve_sacdcpf(file_case3120)
+result = solve_acdcpf(file, PowerModels.ACRPowerModel, ipopt; setting = s)
+result_droop = solve_acdcpf(file_pf_droop, PowerModels.ACRPowerModel, ipopt; setting = s)
+result = solve_acdcpf(file_case3120, PowerModels.ACRPowerModel, ipopt; setting = s)
+result = solve_sacdcpf(file_case3120)
 
-resultAC = _PMACDC.solve_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
-resultACSOCBIM = _PM.solve_acdcopf(file, _PM.SOCWRPowerModel, ipopt; setting = s)
-# resultLPAC = _PMACDC.solve_acdcopf(file, _PM.LPACCPowerModel, ipopt; setting = s)
+resultAC = solve_acdcopf(file, PowerModels.ACPPowerModel, ipopt; setting = s)
+resultACSOCBIM = PowerModels.solve_acdcopf(file, PowerModels.SOCWRPowerModel, ipopt; setting = s)
+# resultLPAC = solve_acdcopf(file, PowerModels.LPACCPowerModel, ipopt; setting = s)
 
-# resultQC = _PMACDC.solve_acdcopf(file, _PM.QCRMPowerModel, ipopt; setting = s)
+# resultQC = solve_acdcopf(file, PowerModels.QCRMPowerModel, ipopt; setting = s)
 
-# resultSOCBIM = _PMACDC.solve_acdcopf(file, _PM.SOCWRPowerModel, ipopt; setting = s)
-# resultACSOCBIM = _PM.solve_opf(file, _PM.SOCWRPowerModel, ipopt; setting = s)
+# resultSOCBIM = solve_acdcopf(file, PowerModels.SOCWRPowerModel, ipopt; setting = s)
+# resultACSOCBIM = PowerModels.solve_opf(file, PowerModels.SOCWRPowerModel, ipopt; setting = s)
 # # #
-# resultSOCBFM = _PMACDC.solve_acdcopf_bf(file, _PM.SOCBFPowerModel, ipopt; setting = s)
-# resultSOCBFMConic = _PMACDC.solve_acdcopf_bf(file, _PM.SOCBFConicPowerModel, mosek; setting = s)
-# resultSOCBFMConicSCS = _PMACDC.solve_acdcopf_bf(file, _PM.SOCBFConicPowerModel, scs; setting = s)
+# resultSOCBFM = solve_acdcopf_bf(file, PowerModels.SOCBFPowerModel, ipopt; setting = s)
+# resultSOCBFMConic = solve_acdcopf_bf(file, PowerModels.SOCBFConicPowerModel, mosek; setting = s)
+# resultSOCBFMConicSCS = solve_acdcopf_bf(file, PowerModels.SOCBFConicPowerModel, scs; setting = s)
 # # #
-# resultSDP = _PMACDC.solve_acdcopf(file, _PM.SDPWRMPowerModel, mosek; setting = s)
+# resultSDP = solve_acdcopf(file, PowerModels.SDPWRMPowerModel, mosek; setting = s)
 # # #
-# resultDC = _PMACDC.solve_acdcopf(file, _PM.DCPPowerModel, gurobi; setting = s)
-# resultACPF5 = _PMACDC.solve_acdcpf(file_case5acdc, _PM.ACPPowerModel, ipopt; setting = s)
+# resultDC = solve_acdcopf(file, PowerModels.DCPPowerModel, gurobi; setting = s)
+# resultACPF5 = solve_acdcpf(file_case5acdc, PowerModels.ACPPowerModel, ipopt; setting = s)

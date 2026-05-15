@@ -1,9 +1,9 @@
 function constraint_voltage_product_converter(pm::_PM.AbstractWRModel, wr, wi, w_fr, w_to)
-    InfrastructureModels.relaxation_complex_product(pm.model, w_fr, w_to, wr, wi)
+    _IM.relaxation_complex_product(pm.model, w_fr, w_to, wr, wi)
 end
 
 function constraint_voltage_product_converter(pm::_PM.AbstractWRConicModel, wr, wi, w_fr, w_to)
-    InfrastructureModels.relaxation_complex_product_conic(pm.model, w_fr, w_to, wr, wi)
+    _IM.relaxation_complex_product_conic(pm.model, w_fr, w_to, wr, wi)
 end
 """
 Links converter power & current

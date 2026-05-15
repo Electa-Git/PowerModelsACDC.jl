@@ -1,6 +1,6 @@
 function multinetwork_data(sn_data::Dict{String,Any}, extradata::Dict{String,Any}, global_keys::Set{String})
     count = extradata["dim"]
-    if InfrastructureModels.ismultinetwork(sn_data)
+    if _IM.ismultinetwork(sn_data)
         error("replicate can only be used on single networks")
     end
 

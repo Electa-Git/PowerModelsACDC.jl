@@ -22,7 +22,7 @@ File-based entrypoint to solve a redispatch (RD) Optimal Power Flow problem.
   data-based entrypoint that builds and solves the redispatch model.
 """
 function solve_rdopf(file::String, model_type::Type, optimizer; kwargs...)
-    data = PowerModels.parse_file(file)
+    data = _PM.parse_file(file)
     process_additional_data!(data)
     return _PM.solve_model(data, model_type, optimizer, build_rdopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
@@ -146,7 +146,7 @@ function build_rdopf(pm::_PM.AbstractPowerModel)
         constraint_conv_reactor(pm, i)
         constraint_conv_filter(pm, i)
         if pm.ref[:it][:pm][:nw][_PM.nw_id_default][:convdc][i]["islcc"] == 1
-            _PMACDC.constraint_conv_firing_angle(pm, i)
+            constraint_conv_firing_angle(pm, i)
         end
         if haskey(pm.setting, "fix_converter_setpoints") && pm.setting["fix_converter_setpoints"] == true
             constraint_active_conv_setpoint(pm, i; slack = 0.01)

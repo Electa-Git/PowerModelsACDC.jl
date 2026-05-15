@@ -167,8 +167,8 @@ function constraint_converter_limit_on_off(pm::_PM.AbstractBFModel, n::Int, i, p
     JuMP.@constraint(pm.model,  iconv_ac <= imax * z)
     JuMP.@constraint(pm.model,  iconv_sq <= imax^2 * z)
     #transformer
-    conv = PowerModels.ref(pm, n, :convdc_ne, i)
-    busac_conv = PowerModels.ref(pm, n, :bus, conv["busac_i"])
+    conv = _PM.ref(pm, n, :convdc_ne, i)
+    busac_conv = _PM.ref(pm, n, :bus, conv["busac_i"])
     w_du = _PM.var(pm, n, :w_du, i)
 
     pconv_tf_fr = _PM.var(pm, n, :pconv_tf_fr_ne)[i]

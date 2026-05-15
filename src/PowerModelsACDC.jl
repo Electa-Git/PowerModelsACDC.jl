@@ -4,11 +4,8 @@ module PowerModelsACDC
 import JuMP
 import Memento
 import LinearAlgebra
-import PowerModels
-const _PM = PowerModels
-import InfrastructureModels
-# import InfrastructureModels: ids, ref, var, con, sol, nw_ids, nws, optimize_model!, @im_fields
-const _IM = InfrastructureModels
+import PowerModels as _PM
+import InfrastructureModels as _IM
 import SparseArrays
 import NLsolve
 

@@ -1,11 +1,7 @@
 # This test file will run a multi-period OPF where we can give fixed starting values for the energy content of the storage units for selected hours.
 
-import PowerModelsACDC
-const _PMACDC = PowerModelsACDC
+using PowerModelsACDC
 import PowerModels
-const _PM = PowerModels
-import InfrastructureModels
-const _IM = InfrastructureModels
 import Ipopt
 import JuMP
 import Plots
@@ -13,7 +9,7 @@ import HiGHS
 
 solver = HiGHS.Optimizer
 
-path = _PMACDC.BASE_DIR
+path = BASE_DIR
 
 # test case file
 file = joinpath(path, "test", "data", "case5_2grids_uc_hvdc_strg.m")
@@ -65,13 +61,13 @@ timeseries_g = hcat(day1g, day2g, day1g, day3g, day1g)
 timeseries_l = hcat(day1l, day2l, day1l, day3l, day1l)
 
 # create multinetwork data structure
-mn_data = _PMACDC.create_multinetwork_uc_model!(data, number_of_hours, timeseries_g, timeseries_l)
+mn_data = create_multinetwork_uc_model!(data, number_of_hours, timeseries_g, timeseries_l)
 
 # optimisation settings
 s = Dict("conv_losses_mp" => true,  "objective_components" => ["gen", "demand"])
 
 # run a DC OPF
-resultopf = _PMACDC.solve_acdcopf(mn_data, _PM.DCPPowerModel, solver, setting = s, multinetwork = true)
+resultopf = solve_acdcopf(mn_data, PowerModels.DCPPowerModel, solver, setting = s, multinetwork = true)
 
 # Get storage energy content for each hour and plot
 
