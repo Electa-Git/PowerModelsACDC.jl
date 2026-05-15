@@ -57,17 +57,17 @@ variable_dcgrid_voltage_magnitude(pm)
 constraint_voltage(pm)
 constraint_voltage_dc(pm)
 
-for i in _PM.ids(pm, :ref_buses)
+for i in PowerModels.ids(pm, :ref_buses)
     constraint_theta_ref(pm, i)
 end
 
-for i in _PM.ids(pm, :bus)
+for i in PowerModels.ids(pm, :bus)
     constraint_power_balance_ac(pm, i)
 end
 
-for i in _PM.ids(pm, :branch)
+for i in PowerModels.ids(pm, :branch)
     # dirty, should be improved in the future TODO
-    if typeof(pm) <: _PM.SOCDFPowerModel
+    if typeof(pm) <: PowerModels.SOCDFPowerModel
         constraint_flow_losses(pm, i)
         constraint_voltage_magnitude_difference(pm, i)
         constraint_branch_current(pm, i)
@@ -81,13 +81,13 @@ for i in _PM.ids(pm, :branch)
     constraint_thermal_limit_from(pm, i)
     constraint_thermal_limit_to(pm, i)
 end
-for i in _PM.ids(pm, :busdc)
+for i in PowerModels.ids(pm, :busdc)
     constraint_power_balance_dc(pm, i)
 end
-for i in _PM.ids(pm, :branchdc)
+for i in PowerModels.ids(pm, :branchdc)
     constraint_ohms_dc_branch(pm, i)
 end
-for i in _PM.ids(pm, :convdc)
+for i in PowerModels.ids(pm, :convdc)
     constraint_converter_losses(pm, i)
     constraint_converter_current(pm, i)
     constraint_conv_transformer(pm, i)

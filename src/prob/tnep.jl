@@ -55,7 +55,7 @@ function solve_tnep(data::Dict, model_type::Type, solver; kwargs...)
     if haskey(data, "multinetwork") && data["multinetwork"] == true
         return _PM.solve_model(data, model_type, solver, build_mp_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     else
-        return _PM.solve_model(data, model_type, solver, build_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...) 
+        return _PM.solve_model(data, model_type, solver, build_tnep; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, _PM.ref_add_on_off_va_bounds!, _PM.ref_add_ne_branch!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     end
 end
 """
@@ -150,8 +150,8 @@ function build_tnep(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :flex_load)
         constraint_total_flexible_demand(pm, i)
     end
-    
-    for i in _PM.ids(pm, :fixed_load) 
+
+    for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
 
@@ -185,7 +185,7 @@ function build_tnep(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :busdc)
         constraint_power_balance_dc_dcne(pm, i)
     end
-    
+
     for i in _PM.ids(pm, :busdc_ne)
         constraint_power_balance_dcne_dcne(pm, i)
     end
@@ -293,11 +293,11 @@ function build_mp_tnep(pm::_PM.AbstractPowerModel)
         for i in _PM.ids(pm, n, :flex_load)
             constraint_total_flexible_demand(pm, i; nw = n)
         end
-        
-        for i in _PM.ids(pm, n, :fixed_load) 
+
+        for i in _PM.ids(pm, n, :fixed_load)
             constraint_total_fixed_demand(pm, i; nw = n)
         end
-    
+
         for i in _PM.ids(pm, n, :pst)
             constraint_ohms_y_from_pst(pm, i; nw = n)
             constraint_ohms_y_to_pst(pm, i; nw = n)
@@ -406,7 +406,7 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
     variable_dc_converter_ne(pm)
     variable_dcbranch_current_ne(pm)
     variable_dcgrid_voltage_magnitude_ne(pm)
-    
+
     objective_min_operational_capex_cost(pm)
 
     _PM.constraint_model_voltage(pm)
@@ -429,8 +429,8 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :flex_load)
         constraint_total_flexible_demand(pm, i)
     end
-    
-    for i in _PM.ids(pm, :fixed_load) 
+
+    for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
 
@@ -522,7 +522,7 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
-        
+
         # new variables for TNEP problem
         _PM.variable_ne_branch_indicator(pm; nw = n)
         _PM.variable_ne_branch_power(pm; nw = n)
@@ -533,7 +533,7 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         variable_dcbranch_current_ne(pm; nw = n)
         variable_dcgrid_voltage_magnitude_ne(pm; nw = n)
     end
-    
+
     objective_min_operational_capex_cost(pm)
 
     for (n, networks) in pm.ref[:it][:pm][:nw]
@@ -560,11 +560,11 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         for i in _PM.ids(pm, n, :flex_load)
             constraint_total_flexible_demand(pm, i; nw = n)
         end
-        
-        for i in _PM.ids(pm, n, :fixed_load) 
+
+        for i in _PM.ids(pm, n, :fixed_load)
             constraint_total_fixed_demand(pm, i; nw = n)
         end
-    
+
         for i in _PM.ids(pm, n, :pst)
             constraint_ohms_y_from_pst(pm, i; nw = n)
             constraint_ohms_y_to_pst(pm, i; nw = n)
@@ -596,7 +596,7 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, n, :branchdc)
-            PowerModelsACDC.constraint_ohms_dc_branch(pm, i; nw = n)
+            constraint_ohms_dc_branch(pm, i; nw = n)
         end
         for i in _PM.ids(pm, n, :branchdc_ne)
             constraint_ohms_dc_branch_ne(pm, i; nw = n)

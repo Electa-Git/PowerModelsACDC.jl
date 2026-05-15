@@ -1,7 +1,5 @@
-import PowerModelsACDC
-const _PMACDC = PowerModelsACDC
+using PowerModelsACDC
 import PowerModels
-const _PM = PowerModels
 import Ipopt
 import Memento
 import JuMP
@@ -10,17 +8,17 @@ import JuMP
 file = "./test/data/case3120sp_acdc.m"
 
 
-data = _PM.parse_file(file)
+data = PowerModels.parse_file(file)
 
-_PMACDC.process_additional_data!(data)
+process_additional_data!(data)
 
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
 
 s = Dict("conv_losses_mp" => true)
 
-resultAC = _PMACDC.solve_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
-resultACPM = _PM.solve_opf(file, _PM.ACPPowerModel, ipopt; setting = s)
-resultIVR = _PMACDC.solve_acdcopf_iv(file, _PM.IVRPowerModel, ipopt; setting = s)
+resultAC = solve_acdcopf(file, PowerModels.ACPPowerModel, ipopt; setting = s)
+resultACPM = PowerModels.solve_opf(file, PowerModels.ACPPowerModel, ipopt; setting = s)
+resultIVR = solve_acdcopf_iv(file, PowerModels.IVRPowerModel, ipopt; setting = s)
 
 print("ACP RESULTS")
 print("Objective:", resultAC["objective"],"\n")

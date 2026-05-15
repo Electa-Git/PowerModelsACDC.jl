@@ -105,36 +105,36 @@ function fix_things!(data)
 end
 
 for file in files
-    data = _PM.parse_file(file)
-    PowerModelsACDC.process_additional_data!(data)
+    data = PowerModels.parse_file(file)
+    process_additional_data!(data)
     #fix_things!(data)
 
     case = Dict{String, Any}()
     er_dict = Dict{String, Any}()
 
-    resultAC = solve_acdcopf(data, ACPPowerModel, ipopt; setting = s)
+    resultAC = solve_acdcopf(data, PowerModels.ACPPowerModel, ipopt; setting = s)
     case["AC NLP"] = exctract_info(resultAC)
 
-    resultQC = solve_acdcopf(data, QCWRPowerModel, ipopt; setting = s)
+    resultQC = solve_acdcopf(data, PowerModels.QCWRPowerModel, ipopt; setting = s)
     case["QC SOC"] = exctract_info(resultQC)
     # #
-    # resultQCTri = solve_acdcopf(data, QCWRTriPowerModel, ipopt; setting = s)
+    # resultQCTri = solve_acdcopf(data, PowerModels.QCWRTriPowerModel, ipopt; setting = s)
     # case["QCTri SOC"] = exctract_info(resultQCTri)
     # #
-    resultSOCBIM = solve_acdcopf(data, SOCWRPowerModel, ipopt; setting = s)
+    resultSOCBIM = solve_acdcopf(data, PowerModels.SOCWRPowerModel, ipopt; setting = s)
     case["BIM SOC"] = exctract_info(resultSOCBIM)
     # #
-    resultSOCBFM = solve_acdcopf_bf(data, SOCBFPowerModel, ipopt; setting = s)
+    resultSOCBFM = solve_acdcopf_bf(data, PowerModels.SOCBFPowerModel, ipopt; setting = s)
     case["BFM SOC"] = exctract_info(resultSOCBFM)
     # #
     case["BIM SDP"] = exctract_info(resultAC)
-    # resultSDP = solve_acdcopf(data, SDPWRMPowerModel, mosek; setting = s)
+    # resultSDP = solve_acdcopf(data, PowerModels.SDPWRMPowerModel, mosek; setting = s)
     # case["BIM SDP"] = exctract_info(resultSDP)
     # # #
-    resultDC = solve_acdcopf(data, DCPPowerModel, ipopt; setting = s)
+    resultDC = solve_acdcopf(data, PowerModels.DCPPowerModel, ipopt; setting = s)
     case["DC LP"] = exctract_info(resultDC)
     #
-    resultLPAC = solve_acdcopf(data, LPACCPowerModel, ipopt; setting = s)
+    resultLPAC = solve_acdcopf(data, PowerModels.LPACCPowerModel, ipopt; setting = s)
     case["LPAC"] = exctract_info(resultLPAC)
 
 

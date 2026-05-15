@@ -1,5 +1,4 @@
 using PowerModelsACDC
-const _PMACDC = PowerModelsACDC
 using PowerModels
 using Memento
 using InfrastructureModels
