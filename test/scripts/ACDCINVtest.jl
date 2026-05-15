@@ -48,12 +48,12 @@ _PMACDC.display_results_tnep(resultLPAC)
 _PMACDC.display_results_tnep(resultQC)
 ## TEST ACDC TNEP
 s = Dict("conv_losses_mp" => true,"process_data_internally" => false)
-resultACDC_dcp = _PMACDC.solve_acdctnep(file_acdc, _PM.DCPPowerModel, gurobi, setting = s)
-resultACDC_acp = _PMACDC.solve_acdctnep(file_acdc, _PM.ACPPowerModel, juniper, setting = s)
-#resultACDC_socbf = _PMACDC.solve_acdctnep_bf(file_acdc, _PM.SOCBFPowerModel, gurobi, setting = s)  # BF TNEP not implemented in PowerModels.jl
-resultACDC_socwr = _PMACDC.solve_acdctnep(file_acdc, _PM.SOCWRPowerModel, gurobi, setting = s)
-resultACDC_qc = _PMACDC.solve_acdctnep(file_acdc, _PM.QCRMPowerModel, gurobi, setting = s)
-resultACDC_lpac = _PMACDC.solve_acdctnep(file_acdc, _PM.LPACCPowerModel, gurobi, setting = s)
+resultACDC_dcp = _PMACDC.solve_tnep(file_acdc, _PM.DCPPowerModel, gurobi, setting = s)
+resultACDC_acp = _PMACDC.solve_tnep(file_acdc, _PM.ACPPowerModel, juniper, setting = s)
+#resultACDC_socbf = _PMACDC.solve_tnep(file_acdc, _PM.SOCBFPowerModel, gurobi, setting = s)  # BF TNEP not implemented in PowerModels.jl
+resultACDC_socwr = _PMACDC.solve_tnep(file_acdc, _PM.SOCWRPowerModel, gurobi, setting = s)
+resultACDC_qc = _PMACDC.solve_tnep(file_acdc, _PM.QCRMPowerModel, gurobi, setting = s)
+resultACDC_lpac = _PMACDC.solve_tnep(file_acdc, _PM.LPACCPowerModel, gurobi, setting = s)
 
 t = 1:2
 function build_mn_data(file)
@@ -73,12 +73,12 @@ resultLPAC1 = _PMACDC.solve_tnep(data1, _PM.LPACCPowerModel, juniper, multinetwo
 resultSOCWR1 = _PMACDC.solve_tnep(data1, _PM.SOCWRPowerModel, gurobi, multinetwork=true; setting = s)
 resultSOCBF1 = _PMACDC.solve_tnep(data1, _PM.SOCBFConicPowerModel, mosek, multinetwork=true; setting = s)
 
-mp_resultACDC_acp = _PMACDC.solve_acdctnep(data_acdc, _PM.ACPPowerModel, juniper, multinetwork=true; setting = s)
-mp_resultACDC_dcp = _PMACDC.solve_acdctnep(data_acdc, _PM.DCPPowerModel, gurobi, multinetwork=true; setting = s)
-mp_resultACDC_socwr = _PMACDC.solve_acdctnep(data_acdc, _PM.SOCWRPowerModel, gurobi, multinetwork=true; setting = s)
-mp_resultACDC_qc = _PMACDC.solve_acdctnep(data_acdc, _PM.QCRMPowerModel, gurobi, multinetwork=true; setting = s)
-# mp_resultACDC_socbf = _PMACDC.solve_acdctnep_bf(data_acdc, _PM.SOCBFPowerModel, gurobi, multinetwork=true; setting = s) # BF TNEP not implemented in PowerModels.jl
-mp_resultACDC_lpac = _PMACDC.solve_acdctnep(data_acdc, _PM.LPACCPowerModel, gurobi, multinetwork=true; setting = s)
+mp_resultACDC_acp = _PMACDC.solve_tnep(data_acdc, _PM.ACPPowerModel, juniper, multinetwork=true; setting = s)
+mp_resultACDC_dcp = _PMACDC.solve_tnep(data_acdc, _PM.DCPPowerModel, gurobi, multinetwork=true; setting = s)
+mp_resultACDC_socwr = _PMACDC.solve_tnep(data_acdc, _PM.SOCWRPowerModel, gurobi, multinetwork=true; setting = s)
+mp_resultACDC_qc = _PMACDC.solve_tnep(data_acdc, _PM.QCRMPowerModel, gurobi, multinetwork=true; setting = s)
+# mp_resultACDC_socbf = _PMACDC.solve_tnep(data_acdc, _PM.SOCBFPowerModel, gurobi, multinetwork=true; setting = s) # BF TNEP not implemented in PowerModels.jl
+mp_resultACDC_lpac = _PMACDC.solve_tnep(data_acdc, _PM.LPACCPowerModel, gurobi, multinetwork=true; setting = s)
 
 data1["nw"]["2"]["load"]["2"]["pd"] = 0.5
 resultDC2 = _PMACDC.solve_tnep(data1, _PM.DCPPowerModel, gurobi, multinetwork=true; setting = s)
