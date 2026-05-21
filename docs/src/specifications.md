@@ -14,12 +14,12 @@ solve_acdcpf
 ```
 
 This function builds a JuMP model for a wide variety of the power flow formulations
-supported by PowerModelsACDC. 
+supported by PowerModelsACDC.
 
 ## Sequential AC DC Power Flow (Native)
 
 The sequential ac dc power flow solver in PowerModelsACDC uses the package
-[NLSolve](https://github.com/JuliaNLSolvers/NLsolve.jl) for solving the AC 
+[NLSolve](https://github.com/JuliaNLSolvers/NLsolve.jl) for solving the AC
 DC power flow problem in `ACPPowerModel` formulation sequentially.
 
 ```@docs
@@ -27,7 +27,7 @@ solve_sacdcpf
 ```
 
 !!! tip
-    If `run_sacdcpf` fails to converge try `run_acdcpf` instead.
+    If `solve_sacdcpf` fails to converge try `solve_acdcpf` instead.
 
 
 ## ACDCOPF

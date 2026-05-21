@@ -4,7 +4,7 @@
 
 
     # optimisation settings
-    s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true,  "objective_components" => ["gen", "demand"])
+    s = Dict("conv_losses_mp" => true,  "objective_components" => ["gen", "demand"])
 
     # run a DC OPF
     result = _PMACDC.solve_acdcopf(mn_data,DCPPowerModel, highs, setting = s, multinetwork = true)

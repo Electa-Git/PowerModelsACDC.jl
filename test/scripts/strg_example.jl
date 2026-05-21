@@ -35,7 +35,7 @@ for (g, gen) in data["gen"]
    else
         data["gen"][g]["res"] = false
    end
-end     
+end
 
 # create a matrix with time points where storage should have a fixed content (column 1), and the fixed energy content in p.u. (column 2)
 for (s, strg) in data["storage"]
@@ -68,7 +68,7 @@ timeseries_l = hcat(day1l, day2l, day1l, day3l, day1l)
 mn_data = _PMACDC.create_multinetwork_uc_model!(data, number_of_hours, timeseries_g, timeseries_l)
 
 # optimisation settings
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true,  "objective_components" => ["gen", "demand"])
+s = Dict("conv_losses_mp" => true,  "objective_components" => ["gen", "demand"])
 
 # run a DC OPF
 resultopf = _PMACDC.solve_acdcopf(mn_data, _PM.DCPPowerModel, solver, setting = s, multinetwork = true)
@@ -78,5 +78,5 @@ resultopf = _PMACDC.solve_acdcopf(mn_data, _PM.DCPPowerModel, solver, setting = 
 se1 = [resultopf["solution"]["nw"]["$n"]["storage"]["1"]["se"] for n in 1:120]
 se2 = [resultopf["solution"]["nw"]["$n"]["storage"]["2"]["se"] for n in 1:120]
 
-ps = Plots.plot(se1, xlabel = "Hour", ylabel = "Energy stored in unit x (MWh)", label = "Unit 1")    
+ps = Plots.plot(se1, xlabel = "Hour", ylabel = "Energy stored in unit x (MWh)", label = "Unit 1")
 Plots.plot!(ps, se2, xlabel = "Hour", ylabel = "Energy stored in unit x (MWh)", label = "Unit 2")
