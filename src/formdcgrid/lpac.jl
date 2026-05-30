@@ -84,33 +84,33 @@ function constraint_power_balance_acdc_ne(pm::_PM.AbstractLPACModel, n::Int, i::
     qpst    = _PM.var(pm, n,    :qpst)
     psssc    = _PM.var(pm, n,    :psssc)
     qsssc    = _PM.var(pm, n,    :qsssc)
-    
-    cstr_p = JuMP.@constraint(pm.model, 
+
+    cstr_p = JuMP.@constraint(pm.model,
     sum(p[a] for a in bus_arcs)
-    + sum(ppst[a] for a in bus_arcs_pst) 
-    + sum(psssc[a] for a in bus_arcs_sssc) 
-    + sum(p_ne[a] for a in bus_arcs_ne) 
-    + sum(pconv_grid_ac[c] for c in bus_convs_ac) 
-    + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  
-    == 
-    sum(pg[g] for g in bus_gens)  
+    + sum(ppst[a] for a in bus_arcs_pst)
+    + sum(psssc[a] for a in bus_arcs_sssc)
+    + sum(p_ne[a] for a in bus_arcs_ne)
+    + sum(pconv_grid_ac[c] for c in bus_convs_ac)
+    + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)
+    ==
+    sum(pg[g] for g in bus_gens)
     - sum(ps[s] for s in bus_storage)
     - sum(pflex[d] for d in bus_loads)
     - sum(gs[s] for s in bus_shunts)*(1.0 + 2*phi))
-    
-    cstr_q = JuMP.@constraint(pm.model, 
+
+    cstr_q = JuMP.@constraint(pm.model,
     sum(q[a] for a in bus_arcs)
     + sum(qpst[a] for a in bus_arcs_pst)
     + sum(qsssc[a] for a in bus_arcs_sssc)
-    + sum(q_ne[a] for a in bus_arcs_ne) 
-    + sum(qconv_grid_ac[c] for c in bus_convs_ac) 
-    + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  
-    == 
-    sum(qg[g] for g in bus_gens)  
+    + sum(q_ne[a] for a in bus_arcs_ne)
+    + sum(qconv_grid_ac[c] for c in bus_convs_ac)
+    + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)
+    ==
+    sum(qg[g] for g in bus_gens)
     - sum(qs[s] for s in bus_storage)
     - sum(qflex[d] for d in bus_loads)
     + sum(bs[s] for s in bus_shunts)*(1.0 + 2*phi))
-    
+
     if _IM.report_duals(pm)
         _PM.sol(pm, n, :bus, i)[:lam_kcl_r] = cstr_p
         _PM.sol(pm, n, :bus, i)[:lam_kcl_i] = cstr_q
@@ -129,7 +129,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractLPACModel, n::Int, f_bus, 
     phi_fr_du = _PM.var(pm, n, :phi_vdcm_fr, l)
     phi_to_du = _PM.var(pm, n, :phi_vdcm_to, l)
     z = _PM.var(pm, n, :branchdc_ne, l)
-    phi_to, phi_fr = contraint_ohms_dc_branch_busvoltage_structure_phi(pm, n, f_bus, t_bus, phi_to, phi_fr)
+    phi_to, phi_fr = constraint_ohms_dc_branch_busvoltage_structure_phi(pm, n, f_bus, t_bus, phi_to, phi_fr)
     if r == 0
         JuMP.@constraint(pm.model, p_dc_fr + p_dc_to == 0)
     else
@@ -165,7 +165,7 @@ end
 """
 Helper that maps the from/to bus indices to the corresponding DC-voltage phi variables used by the NE branch Ohm constraints.
 """
-function contraint_ohms_dc_branch_busvoltage_structure_phi(pm::_PM.AbstractPowerModel, n::Int, f_bus, t_bus, phi_to, phi_fr)
+function constraint_ohms_dc_branch_busvoltage_structure_phi(pm::_PM.AbstractPowerModel, n::Int, f_bus, t_bus, phi_to, phi_fr)
     for i in _PM.ids(pm, n, :busdc_ne)
         if t_bus == i
             phi_to = _PM.var(pm, n, :phi_vdcm_ne, t_bus)

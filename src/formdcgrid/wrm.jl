@@ -47,7 +47,7 @@ function constraint_voltage_dc_ne(pm::_PM.AbstractWRMModel, n::Int)
         for (l,i,j) in pm.ref[:it][:pm][:nw][n][:arcs_dcgrid_from_ne]
         wdc_to = []
         wdc_fr = []
-        wdc_to, wdc_fr = contraint_ohms_dc_branch_busvoltage_structure_W(pm, n, i, j, wdc_du_to, wdc_du_fr)
+        wdc_to, wdc_fr = constraint_ohms_dc_branch_busvoltage_structure_W(pm, n, i, j, wdc_du_to, wdc_du_fr)
         JuMP.@constraint(pm.model, [ wdc_du_to[l]/sqrt(2), wdc_du_fr[l]/sqrt(2), wdc_du_frto[l]/sqrt(2), wdc_du_frto[l]/sqrt(2)] in JuMP.RotatedSecondOrderCone() )
         end
 end

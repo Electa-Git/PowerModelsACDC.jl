@@ -108,7 +108,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractBFQPModel, n::Int, f_bus, 
     wdc_to = []
     wdc_fr = []
 
-    wdc_to, wdc_fr = contraint_ohms_dc_branch_busvoltage_structure_W(pm, n, f_bus, t_bus, wdc_to, wdc_fr)
+    wdc_to, wdc_fr = constraint_ohms_dc_branch_busvoltage_structure_W(pm, n, f_bus, t_bus, wdc_to, wdc_fr)
     wdc_du_to = _PM.var(pm, n, :wdc_du_to, l)
     wdc_du_fr = _PM.var(pm, n, :wdc_du_fr, l)
 
@@ -144,7 +144,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractBFConicModel, n::Int, f_bu
     wdc_to = []
     wdc_fr = []
 
-    wdc_to, wdc_fr = contraint_ohms_dc_branch_busvoltage_structure_W(pm, n, f_bus, t_bus, wdc_to, wdc_fr)
+    wdc_to, wdc_fr = constraint_ohms_dc_branch_busvoltage_structure_W(pm, n, f_bus, t_bus, wdc_to, wdc_fr)
     wdc_du_to = _PM.var(pm, n, :wdc_du_to, l)
     wdc_du_fr = _PM.var(pm, n, :wdc_du_fr, l)
 
@@ -191,7 +191,7 @@ variable or the :wdc_ne variable depending on which bus index is provided.
 This abstraction centralizes the selection logic used by the NE Ohm constraints
 above.
 """
-function contraint_ohms_dc_branch_busvoltage_structure_W(pm::_PM.AbstractPowerModel, n::Int, f_bus, t_bus, wdc_to, wdc_fr)
+function constraint_ohms_dc_branch_busvoltage_structure_W(pm::_PM.AbstractPowerModel, n::Int, f_bus, t_bus, wdc_to, wdc_fr)
     for i in _PM.ids(pm, n, :busdc_ne)
         if t_bus == i
             wdc_to = _PM.var(pm, n, :wdc_ne, t_bus)

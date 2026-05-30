@@ -149,33 +149,33 @@ function constraint_power_balance_acdc_ne(pm::_PM.AbstractWModels, n::Int, i::In
     qpst    = _PM.var(pm, n,    :qpst)
     psssc    = _PM.var(pm, n,    :psssc)
     qsssc    = _PM.var(pm, n,    :qsssc)
-    
-    cstr_p = JuMP.@constraint(pm.model, 
+
+    cstr_p = JuMP.@constraint(pm.model,
     sum(p[a] for a in bus_arcs)
-    + sum(ppst[a] for a in bus_arcs_pst) 
+    + sum(ppst[a] for a in bus_arcs_pst)
     + sum(psssc[a] for a in bus_arcs_sssc)
-    + sum(p_ne[a] for a in bus_arcs_ne) 
-    + sum(pconv_grid_ac[c] for c in bus_convs_ac) 
-    + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  
-    == 
-    sum(pg[g] for g in bus_gens)  
+    + sum(p_ne[a] for a in bus_arcs_ne)
+    + sum(pconv_grid_ac[c] for c in bus_convs_ac)
+    + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)
+    ==
+    sum(pg[g] for g in bus_gens)
     - sum(ps[s] for s in bus_storage)
     - sum(pflex[d] for d in bus_loads)
     - sum(gs[s] for s in bus_shunts) * w)
-    
-    cstr_q = JuMP.@constraint(pm.model, 
+
+    cstr_q = JuMP.@constraint(pm.model,
     sum(q[a] for a in bus_arcs)
     + sum(qpst[a] for a in bus_arcs_pst)
     + sum(qsssc[a] for a in bus_arcs_sssc)
-    + sum(q_ne[a] for a in bus_arcs_ne) 
-    + sum(qconv_grid_ac[c] for c in bus_convs_ac) 
-    + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  
-    == 
-    sum(qg[g] for g in bus_gens)  
+    + sum(q_ne[a] for a in bus_arcs_ne)
+    + sum(qconv_grid_ac[c] for c in bus_convs_ac)
+    + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)
+    ==
+    sum(qg[g] for g in bus_gens)
     - sum(qs[s] for s in bus_storage)
     - sum(qflex[d] for d in bus_loads)
     + sum(bs[s] for s in bus_shunts) * w)
-    
+
     if _IM.report_duals(pm)
         _PM.sol(pm, n, :bus, i)[:lam_kcl_r] = cstr_p
         _PM.sol(pm, n, :bus, i)[:lam_kcl_i] = cstr_q
@@ -198,7 +198,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractWRModels, n::Int, f_bus, t
     wdc_fr = []
 
 
-    wdc_to, wdc_fr = contraint_ohms_dc_branch_busvoltage_structure_W(pm, n, f_bus, t_bus, wdc_to, wdc_fr)
+    wdc_to, wdc_fr = constraint_ohms_dc_branch_busvoltage_structure_W(pm, n, f_bus, t_bus, wdc_to, wdc_fr)
     wdc_du_to = _PM.var(pm, n, :wdc_du_to, l)
     wdc_du_fr = _PM.var(pm, n, :wdc_du_fr, l)
     wdc_frto = _PM.var(pm, n, :wdcr_ne, l)
