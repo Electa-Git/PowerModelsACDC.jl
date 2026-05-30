@@ -28,7 +28,7 @@ mosek = JuMP.optimizer_with_attributes(Mosek.Optimizer)
 juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => cbc, "time_limit" => 7200)
 #
 #
-s = Dict("conv_losses_mp" => false, "process_data_internally" => false)
+s = Dict("conv_losses_mp" => false)
 
 
 resultDC = solve_tnep(file, PowerModels.DCPPowerModel, gurobi, setting = s)
@@ -65,7 +65,7 @@ display_results_tnep(resultSOCWR)
 display_results_tnep(resultLPAC)
 display_results_tnep(resultQC)
 ## TEST ACDC TNEP
-s = Dict("conv_losses_mp" => true,"process_data_internally" => false)
+s = Dict("conv_losses_mp" => true)
 resultACDC_dcp = solve_tnep(file_acdc, PowerModels.DCPPowerModel, gurobi, setting = s)
 resultACDC_acp = solve_tnep(file_acdc, PowerModels.ACPPowerModel, juniper, setting = s)
 #resultACDC_socbf = solve_tnep(file_acdc, PowerModels.SOCBFPowerModel, gurobi, setting = s)  # BF TNEP not implemented in PowerModels.jl
