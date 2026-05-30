@@ -517,7 +517,6 @@ end
 
 
 function fix_data!(data; tnep = false)
-    rescale_energy_cost = x -> (MWhbase/dollarbase)*x
     if is_single_network(data)
         fix_data_single_network!(data; tnep = tnep)
     else
@@ -819,35 +818,6 @@ function convert_to_dcbranch_and_converters(data, dcline, branchdc_id, conv_i, f
     return converter1, converter2, branchdc
 end
 
-function converter_bounds(pmin, pmax, loss0, loss1)
-    if pmin >= 0 && pmax >=0
-        pminf = pmin
-        pmaxf = pmax
-        pmint = loss0 - pmaxf * (1 - loss1)
-        pmaxt = loss0 - pminf * (1 - loss1)
-    end
-    if pmin >= 0 && pmax < 0
-        pminf = pmin
-        pmint = pmax
-        pmaxf = (-pmint + loss0) / (1-loss1)
-        pmaxt = loss0 - pminf * (1 - loss1)
-    end
-    if pmin < 0 && pmax >= 0
-        pmaxt = -pmin
-        pmaxf = pmax
-        pminf = (-pmaxt + loss0) / (1-loss1)
-        pmint = loss0 - pmaxf * (1 - loss1)
-    end
-    if pmin < 0 && pmax < 0
-        pmaxt = -pmin
-        pmint = pmax
-        pmaxf = (-pmint + loss0) / (1-loss1)
-        pminf = (-pmaxt + loss0) / (1-loss1)
-    end
-    return pminf, pmaxf, pmint, pmaxt
-end
-
-
 function prepare_uc_data!(data; borders = nothing, uc = false, time_interval = 1, frequency_parameters = Dict())
     prepare_generator_data!(data; uc = uc)
     data["uc_parameters"] = Dict{String, Any}("time_interval" => time_interval)
@@ -957,8 +927,7 @@ function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series
     mn_data["number_of_contingencies"] = number_of_contingencies
 
     if !isnothing(contingencies)
-       # create_contingencies!(mn_data, number_of_hours, number_of_contingencies)
-            # This loop writes the generation and demand time series data
+        # This loop writes the generation and demand time series data
         iter = 0
         for nw = 1:replicates
             if mod(nw, number_of_contingencies) == 1
@@ -992,36 +961,6 @@ function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series
 
     process_additional_data!(mn_data)
 
-    return mn_data
-end
-
-function create_contingencies!(mn_data, number_of_hours, number_of_contingencies)
-
-    gen_keys = sort(parse.(Int, collect(keys(mn_data["nw"]["1"]["gen"]))))
-    conv_keys = sort(parse.(Int, collect(keys(mn_data["nw"]["1"]["convdc"]))))
-    tie_line_keys = sort(parse.(Int, collect(keys(mn_data["nw"]["1"]["tie_lines"]))))
-    dc_branch_keys = sort(parse.(Int, collect(keys(mn_data["nw"]["1"]["branchdc"]))))
-
-    for idx in 1:number_of_hours * number_of_contingencies
-        if any(idx .== mn_data["hour_ids"])
-            mn_data["nw"]["$idx"]["contingency"] = Dict{String, Any}("gen_id" => nothing, "branch_id" => nothing, "conv_id" => nothing, "dcbranch_id" => nothing)
-        elseif mod(idx - 1, number_of_contingencies) <= length(gen_keys)
-            c_id = mod(idx - 1, number_of_contingencies)
-            mn_data["nw"]["$idx"]["contingency"] = Dict{String, Any}("gen_id" => gen_keys[c_id], "branch_id" => nothing, "conv_id" => nothing, "dcbranch_id" => nothing)
-        elseif mod(idx - 1, number_of_contingencies) <= length(gen_keys) + length(tie_line_keys)
-            c_id = mod(idx - 1, number_of_contingencies)
-            b_idx = c_id - length(gen_keys)
-            mn_data["nw"]["$idx"]["contingency"] = Dict{String, Any}("gen_id" => nothing, "branch_id" => tie_line_keys[b_idx], "conv_id" => nothing, "dcbranch_id" => nothing)
-        elseif mod(idx - 1, number_of_contingencies) <= length(gen_keys) + length(tie_line_keys) + length(conv_keys)
-            c_id = mod(idx - 1, number_of_contingencies)
-            c_idx = c_id - length(gen_keys) - length(tie_line_keys)
-            mn_data["nw"]["$idx"]["contingency"] = Dict{String, Any}("gen_id" => nothing, "branch_id" => nothing, "conv_id" => conv_keys[c_idx], "dcbranch_id" => nothing)
-        else
-            c_id = mod(idx-1, number_of_contingencies)
-            b_idx = c_id - length(gen_keys) - length(tie_line_keys) - length(conv_keys)
-            mn_data["nw"]["$idx"]["contingency"] = Dict{String, Any}("gen_id" => nothing, "branch_id" => nothing, "conv_id" => nothing, "dcbranch_id" => dc_branch_keys[b_idx])
-        end
-    end
     return mn_data
 end
 
