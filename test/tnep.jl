@@ -267,7 +267,7 @@ end
 end
 
 
-s = Dict("conv_losses_mp" => true, "process_data_internally" => false)
+s = Dict("conv_losses_mp" => true)
 @testset "mp-tnep" begin
     @testset "dc tnep" begin
         @testset "DCP" begin
