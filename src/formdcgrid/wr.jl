@@ -62,7 +62,7 @@ function constraint_voltage_dc_ne(pm::_PM.AbstractWRModel, n::Int)
     for (l,i,j) in pm.ref[:it][:pm][:nw][n][:arcs_dcgrid_from_ne]
     wdc_to = []
     wdc_fr = []
-    wdc_to, wdc_fr = contraint_ohms_dc_branch_busvoltage_structure_W(pm, n, i, j, wdc_to, wdc_fr)
+    wdc_to, wdc_fr = constraint_ohms_dc_branch_busvoltage_structure_W(pm, n, i, j, wdc_to, wdc_fr)
     relaxation_complex_product(pm.model, wdc_du_to[l], wdc_du_fr[l], wdc_du_frto[l])
     end
 end
@@ -85,7 +85,7 @@ function constraint_voltage_dc_ne(pm::_PM.AbstractWRConicModel, n::Int)
     for (l,i,j) in pm.ref[:it][:pm][:nw][n][:arcs_dcgrid_from_ne]
     wdc_to = []
     wdc_fr = []
-    wdc_to, wdc_fr = contraint_ohms_dc_branch_busvoltage_structure_W(pm, n, i, j, wdc_du_to, wdc_du_fr)
+    wdc_to, wdc_fr = constraint_ohms_dc_branch_busvoltage_structure_W(pm, n, i, j, wdc_du_to, wdc_du_fr)
     relaxation_complex_product_conic(pm.model, wdc_du_to[l], wdc_du_fr[l], wdc_du_frto[l])
     end
 end

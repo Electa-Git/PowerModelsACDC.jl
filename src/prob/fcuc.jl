@@ -35,7 +35,7 @@ Construct the multi-network FCUC JuMP model.
   for AC voltages, DC grid variables, converters and inertia/reserve contributions.
 - Calls `uc_model!` for each scheduling hour (from `pm.ref[:it][:pm][:hour_ids]`) to build
   the per-hour UC submodel (branch power, storage, unit commitment variables, contingencies).
-- Calls `contingency_contraints!` for contingency stages (from `pm.ref[:it][:pm][:cont_ids]`).
+- Calls `contingency_constraints!` for contingency stages (from `pm.ref[:it][:pm][:cont_ids]`).
 - Assembles the global objective via `objective_min_cost_fcuc(pm; droop = true)`.
 """
 function build_fcuc(pm::_PM.AbstractPowerModel)
@@ -64,10 +64,10 @@ function build_fcuc(pm::_PM.AbstractPowerModel)
     end
 
     for n in pm.ref[:it][:pm][:cont_ids]
-        contingency_contraints!(pm, n)
+        contingency_constraints!(pm, n)
     end
 
-    objective_min_cost_fcuc(pm; droop = true)    
+    objective_min_cost_fcuc(pm; droop = true)
 end
 
 """
@@ -106,7 +106,7 @@ function uc_model!(pm, n; cont = ["gen", "conv"])
     for i in _PM.ids(pm, n, :bus)
         constraint_power_balance_ac(pm, i; nw = n) # add storage
     end
-    
+
     for i in _PM.ids(pm, n, :branch)
         _PM.constraint_ohms_yt_from(pm, i; nw = n)
         _PM.constraint_ohms_yt_to(pm, i; nw = n)
@@ -164,7 +164,7 @@ function uc_model!(pm, n; cont = ["gen", "conv"])
     if any(cont .== "gen")
         constraint_generator_contingencies(pm; nw = n)
     end
-    
+
     if any(cont .== "conv")
         constraint_converter_contingencies(pm; nw = n)
     end
@@ -182,7 +182,7 @@ function uc_model!(pm, n; cont = ["gen", "conv"])
     end
 end
 """
-    contingency_contraints!(pm, n)
+    contingency_constraints!(pm, n)
 
 Build constraints for a contingency scenario identified by `n`.
 
@@ -201,7 +201,7 @@ Build constraints for a contingency scenario identified by `n`.
 - Honors `pm.setting["hvdc_inertia_contribution"]` when present to include HVDC contributions
   in frequency constraints.
 """
-function contingency_contraints!(pm, n)
+function contingency_constraints!(pm, n)
     rn_idx = (n - get_reference_network_id(pm, n; uc = true))
 
     for i in _PM.ids(pm, n, :busdc)
@@ -220,7 +220,7 @@ function contingency_contraints!(pm, n)
         constraint_conv_filter(pm, i; nw = n)
         constraint_converter_power_balance(pm, i; nw = n)
     end
-    
+
     gen_status = haskey(pm.setting, "use_gen_status") && pm.setting["use_gen_status"] == true
     for i in _PM.ids(pm, n, :gen)
         constraint_generator_on_off(pm, i; nw = n, use_status = gen_status, second_stage = true)
@@ -265,7 +265,7 @@ function contingency_contraints!(pm, n)
     end
 
     if haskey(_PM.ref(pm, n), :tie_lines) && cont_type == "tie_line" && !isempty(_PM.ref(pm, n, :areas))
-        if haskey(pm.setting, "hvdc_inertia_contribution") 
+        if haskey(pm.setting, "hvdc_inertia_contribution")
             constraint_frequency_tieline_contingency(pm, area; nw = n, hvdc_contribution = pm.setting["hvdc_inertia_contribution"])
         else
             constraint_frequency_tieline_contingency(pm, area; nw = n, hvdc_contribution = false)
@@ -307,11 +307,11 @@ function determine_zone_area_type_of_contingency(pm, rn_idx, n)
         elseif zone * 3 - rn_idx == 1
             type = "conv"
         elseif zone * 3 - rn_idx == 0
-            type = "storage" 
+            type = "storage"
         end
         zone_id = zone_ids[zone]
     else
-        area = rn_idx - 3 * zones       
+        area = rn_idx - 3 * zones
         type = "tie_line"
         area_id = 1
     end
