@@ -77,6 +77,5 @@ include("formconv/shared.jl")
 include("formconv/iv.jl")
 
 include("io/multinetwork.jl")
-include("io/results.jl")
 
 end  # module PowerModelsACDC
