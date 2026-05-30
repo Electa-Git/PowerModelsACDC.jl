@@ -9,10 +9,8 @@ import HiGHS
 
 solver = HiGHS.Optimizer
 
-path = BASE_DIR
-
 # test case file
-file = joinpath(path, "test", "data", "case5_2grids_uc_hvdc_strg.m")
+file = pkgdir(PowerModelsACDC, "test", "data", "case5_2grids_uc_hvdc_strg.m")
 
 # Parse file using PowerModels
 data = PowerModels.parse_file(file)

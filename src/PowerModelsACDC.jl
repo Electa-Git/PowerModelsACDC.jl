@@ -19,10 +19,6 @@ const _LOGGER = Memento.getlogger(@__MODULE__)
 # NOTE: If this line is not included then the precompiled `PowerModelsACDC._LOGGER` won't be registered at runtime.
 __init__() = Memento.register(_LOGGER)
 
-# paths
-const BASE_DIR = dirname(@__DIR__)
-
-
 include("prob/acdcopf.jl")
 include("prob/acdcpf.jl")
 include("prob/acdcopf_bf.jl")

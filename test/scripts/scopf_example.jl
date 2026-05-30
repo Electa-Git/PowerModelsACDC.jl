@@ -6,8 +6,6 @@ import Ipopt
 import JuMP
 import Plots
 
-path = BASE_DIR
-
 ## Use first one for MA27, check the local path for your HSL library
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer)
 
@@ -19,11 +17,11 @@ dc_converter_passivity = true
 #######################
 
 if case_name == "case5"
-    file = joinpath(path, "test", "data", "case5acdc_scopf.m")
+    file = pkgdir(PowerModelsACDC, "test", "data", "case5acdc_scopf.m")
 elseif case_name == "case39"
-    file = joinpath(path, "test", "data", "case39acdc_scopf.m")
+    file = pkgdir(PowerModelsACDC, "test", "data", "case39acdc_scopf.m")
 elseif case_name == "case67"
-    file = joinpath(path, "test", "data", "case67acdc_scopf.m")
+    file = pkgdir(PowerModelsACDC, "test", "data", "case67acdc_scopf.m")
 end
 
 data = PowerModels.parse_file(file)
