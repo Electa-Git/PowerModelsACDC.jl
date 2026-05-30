@@ -4,27 +4,21 @@ Once PowerModelsACDC is installed, Ipopt is installed, and an ACDC network data 
 
 ```julia
 using PowerModelsACDC
-using Ipopt
+import PowerModels
+import Ipopt
+nlp_solver = optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
 
-result = solve_acdcopf("case5_acdc.m", ACPPowerModel, IpoptSolver())
+result = solve_acdcopf("case5_acdc.m", PowerModels.ACPPowerModel, nlp_solver)
 result["solution"]["busdc"]["1"]
 result["solution"]["convdc"]["1"]
 ```
 
 You can also find a test script in the folder `"./test/scripts"`.
 
-## Modifying settings
-The flow AC and DC branch results are not written to the result by default. To inspect the flow results, pass a settings Dict
-```julia
-result = solve_acdcopf("case5_acdc.m", ACPPowerModel, IpoptSolver())
-result["solution"]["branchdc"]["1"]
-result["solution"]["branch"]["2"]
-```
-
 
 ## Remark
-Note that `solve_ac_opf` still works and runs a classic AC OPF on only the AC part of the described grid.
+Note that PowerModels’ `solve_ac_opf` still works and runs a classic AC OPF on only the AC part of the described grid.
 
 ```julia
-result = solve_ac_opf("case5_acdc.m", IpoptSolver())
+result = PowerModels.solve_ac_opf("case5_acdc.m", nlp_solver)
 ```
