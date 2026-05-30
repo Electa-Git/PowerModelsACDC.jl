@@ -1,27 +1,21 @@
 using PowerModelsACDC
 import PowerModels
 import Ipopt
-import Memento
-import JuMP
 
+ipopt = optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
 
-file = "./test/data/case3120sp_acdc.m"
-
+file = pkgdir(PowerModelsACDC, "test", "data", "case3120sp_acdc.m")
 
 data = PowerModels.parse_file(file)
-
 process_additional_data!(data)
-
-ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
-
 s = Dict("conv_losses_mp" => true)
 
-resultAC = solve_acdcopf(file, PowerModels.ACPPowerModel, ipopt; setting = s)
-resultACPM = PowerModels.solve_opf(file, PowerModels.ACPPowerModel, ipopt; setting = s)
-resultIVR = solve_acdcopf_iv(file, PowerModels.IVRPowerModel, ipopt; setting = s)
+resultAC = solve_acdcopf(file, PowerModels.ACPPowerModel, ipopt; setting=s)
+resultACPM = PowerModels.solve_opf(file, PowerModels.ACPPowerModel, ipopt; setting=s)
+resultIVR = solve_acdcopf_iv(file, PowerModels.IVRPowerModel, ipopt; setting=s)
 
 print("ACP RESULTS")
-print("Objective:", resultAC["objective"],"\n")
+print("Objective:", resultAC["objective"], "\n")
 for (c, conv) in resultAC["solution"]["convdc"]
     ploss = conv["pconv"] + conv["pdc"]
     ploss_tot = conv["pgrid"] + conv["pdc"]
@@ -29,10 +23,10 @@ for (c, conv) in resultAC["solution"]["convdc"]
 end
 
 print("IVR RESULTS")
-print("Objective:", resultIVR["objective"],"\n")
+print("Objective:", resultIVR["objective"], "\n")
 for (c, conv) in resultIVR["solution"]["convdc"]
     ploss = conv["pconv"] + conv["pdc"]
-    bus =  data["convdc"][c]["busac_i"]
+    bus = data["convdc"][c]["busac_i"]
     ploss_tot = (conv["iik_r"] * resultIVR["solution"]["bus"]["$bus"]["vr"] + conv["iik_i"] * resultIVR["solution"]["bus"]["$bus"]["vi"]) + conv["pdc"]
     print("Pac: ", conv["pconv"], " Pdc: ", conv["pdc"], " Ploss: ", ploss, " Plosstot: ", ploss_tot, "\n")
 end
