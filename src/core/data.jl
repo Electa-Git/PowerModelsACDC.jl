@@ -271,15 +271,11 @@ end
 
 ### Auxiliary functions
 
-function is_single_network(data)
-    return !haskey(data, "multinetwork") || data["multinetwork"] == false
-end
-
 function _to_pu!(data)
-    if is_single_network(data)
-        _to_pu_single_network!(data)
-    else
+    if _IM.ismultinetwork(data)
         _to_pu_multinetwork!(data)
+    else
+        _to_pu_single_network!(data)
     end
 end
 
@@ -405,10 +401,10 @@ function _to_pu_multinetwork!(data)
 end
 
 function _convert_matpowerdcline_to_branchdc!(data)
-    if is_single_network(data)
-        _convert_matpowerdcline_to_branchdc_single_network!(data)
-    else
+    if _IM.ismultinetwork(data)
         _convert_matpowerdcline_to_branchdc_multinetwork!(data)
+    else
+        _convert_matpowerdcline_to_branchdc_single_network!(data)
     end
 end
 
@@ -516,10 +512,10 @@ end
 
 
 function _fix_data!(data; tnep = false)
-    if is_single_network(data)
-        _fix_data_single_network!(data; tnep = tnep)
-    else
+    if _IM.ismultinetwork(data)
         _fix_data_multinetwork!(data; tnep = tnep)
+    else
+        _fix_data_single_network!(data; tnep = tnep)
     end
 end
 
