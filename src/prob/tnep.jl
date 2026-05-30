@@ -1,4 +1,3 @@
-export solve_tnep
 """
     solve_tnep(file::String, model_type::Type, solver; kwargs...)
 

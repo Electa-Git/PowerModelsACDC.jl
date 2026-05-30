@@ -1,5 +1,3 @@
-export solve_sacdcpf
-
 """
 internal data required used solving a dc power flow
 
