@@ -1,5 +1,4 @@
-
-function get_pu_bases(MVAbase, kVbase)
+function _get_pu_bases(MVAbase, kVbase)
     eurobase = 1 #
     hourbase = 1 #
 
@@ -25,41 +24,41 @@ function get_pu_bases(MVAbase, kVbase)
 end
 
 function process_additional_data!(data; tnep = false)
-    to_pu!(data)
+    _to_pu!(data)
     if haskey(data, "pst")
-        process_pst_data!(data)
+        _process_pst_data!(data)
     end
     if haskey(data, "sssc")
-        process_sssc_data!(data)
+        _process_sssc_data!(data)
     end
     if haskey(data, "load_flex")
-        process_flexible_demand_data!(data)
+        _process_flexible_demand_data!(data)
     end
     if haskey(data, "gendc")
-        process_gendc_data!(data)
+        _process_gendc_data!(data)
     end
-    fix_data!(data; tnep = tnep)
-    convert_matpowerdcline_to_branchdc!(data)
+    _fix_data!(data; tnep = tnep)
+    _convert_matpowerdcline_to_branchdc!(data)
 end
 
-function process_pst_data!(data)
+function _process_pst_data!(data)
     if !haskey(data, "multinetwork") || data["multinetwork"] == false
-        to_pu_single_network_pst!(data)
-        fix_data_single_network_pst!(data)
+        _to_pu_single_network_pst!(data)
+        _fix_data_single_network_pst!(data)
     else
-        to_pu_multi_network_pst!(data)
-        fix_data_multi_network_pst!(data)
+        _to_pu_multi_network_pst!(data)
+        _fix_data_multi_network_pst!(data)
     end
 end
 
-function to_pu_single_network_pst!(data)
+function _to_pu_single_network_pst!(data)
     MVAbase = data["baseMVA"]
     for (i, pst) in data["pst"]
-        scale_pst_data!(pst, MVAbase)
+        _scale_pst_data!(pst, MVAbase)
     end
 end
 
-function fix_data_single_network_pst!(data)
+function _fix_data_single_network_pst!(data)
     for (i, pst) in data["pst"]
         pst["g_fr"] = 0
         pst["b_fr"] = 0
@@ -68,17 +67,17 @@ function fix_data_single_network_pst!(data)
         pst["tap"] = 1.0
     end
 end
-function to_pu_multi_network_pst!(data)
+function _to_pu_multi_network_pst!(data)
     MVAbase = data["baseMVA"]
     for (n, network) in data["nw"]
         MVAbase = network["baseMVA"]
         for (i, pst) in network[n]["pst"]
-            scale_pst_data!(pst, MVAbase)
+            _scale_pst_data!(pst, MVAbase)
         end
     end
 end
 
-function fix_data_multi_network_pst!(data)
+function _fix_data_multi_network_pst!(data)
     for (n, network) in data["nw"]
         for (i, pst) in network[n]data["pst"]
             pst["g_fr"] = 0
@@ -90,34 +89,34 @@ function fix_data_multi_network_pst!(data)
     end
 end
 
-function scale_pst_data!(pst, MVAbase)
-    rescale_power = x -> x/MVAbase
-    _PM._apply_func!(pst, "rate_a", rescale_power)
-    _PM._apply_func!(pst, "rate_b", rescale_power)
-    _PM._apply_func!(pst, "rate_c", rescale_power)
+function _scale_pst_data!(pst, MVAbase)
+    _rescale_power = x -> x/MVAbase
+    _PM._apply_func!(pst, "rate_a", _rescale_power)
+    _PM._apply_func!(pst, "rate_b", _rescale_power)
+    _PM._apply_func!(pst, "rate_c", _rescale_power)
     _PM._apply_func!(pst, "angle", deg2rad)
     _PM._apply_func!(pst, "angmin", deg2rad)
     _PM._apply_func!(pst, "angmax", deg2rad)
 end
 
-function process_sssc_data!(data)
+function _process_sssc_data!(data)
     if !haskey(data, "multinetwork") || data["multinetwork"] == false
-        to_pu_single_network_sssc!(data)
-        fix_data_single_network_sssc!(data)
+        _to_pu_single_network_sssc!(data)
+        _fix_data_single_network_sssc!(data)
     else
-        to_pu_multi_network_sssc!(data)
-        fix_data_multi_network_sssc!(data)
+        _to_pu_multi_network_sssc!(data)
+        _fix_data_multi_network_sssc!(data)
     end
 end
 
-function to_pu_single_network_sssc!(data)
+function _to_pu_single_network_sssc!(data)
     MVAbase = data["baseMVA"]
     for (i, sssc) in data["sssc"]
-        scale_sssc_data!(sssc, MVAbase)
+        _scale_sssc_data!(sssc, MVAbase)
     end
 end
 
-function fix_data_single_network_sssc!(data)
+function _fix_data_single_network_sssc!(data)
     for (i, sssc) in data["sssc"]
         sssc["g_fr"] = 0
         sssc["b_fr"] = 0
@@ -126,17 +125,17 @@ function fix_data_single_network_sssc!(data)
         sssc["tap"] = 1.0
     end
 end
-function to_pu_multi_network_sssc!(data)
+function _to_pu_multi_network_sssc!(data)
     MVAbase = data["baseMVA"]
     for (n, network) in data["nw"]
         MVAbase = network["baseMVA"]
         for (i, sssc) in network[n]["sssc"]
-            scale_sssc_data!(sssc, MVAbase)
+            _scale_sssc_data!(sssc, MVAbase)
         end
     end
 end
 
-function fix_data_multi_network_sssc!(data)
+function _fix_data_multi_network_sssc!(data)
     for (n, network) in data["nw"]
         for (i, sssc) in network[n]data["sssc"]
             sssc["g_fr"] = 0
@@ -148,23 +147,23 @@ function fix_data_multi_network_sssc!(data)
     end
 end
 
-function scale_sssc_data!(sssc, MVAbase)
-    rescale_power = x -> x/MVAbase
-    _PM._apply_func!(sssc, "rate_a", rescale_power)
-    _PM._apply_func!(sssc, "rate_b", rescale_power)
-    _PM._apply_func!(sssc, "rate_c", rescale_power)
+function _scale_sssc_data!(sssc, MVAbase)
+    _rescale_power = x -> x/MVAbase
+    _PM._apply_func!(sssc, "rate_a", _rescale_power)
+    _PM._apply_func!(sssc, "rate_b", _rescale_power)
+    _PM._apply_func!(sssc, "rate_c", _rescale_power)
 end
 
 
-function process_flexible_demand_data!(data)
+function _process_flexible_demand_data!(data)
     if !haskey(data, "multinetwork") || data["multinetwork"] == false
-        process_flexible_demand_data_single_network!(data)
+        _process_flexible_demand_data_single_network!(data)
     else
-        process_flexible_demand_data_multi_network!(data)
+        _process_flexible_demand_data_multi_network!(data)
     end
 end
 
-function process_flexible_demand_data_single_network!(data)
+function _process_flexible_demand_data_single_network!(data)
     for (le, load_flex) in data["load_flex"]
 
         # ID of load point
@@ -188,16 +187,16 @@ function process_flexible_demand_data_single_network!(data)
         end
 
         # Rescale cost and power input values to the p.u. values used internally in the model
-        rescale_cost = x -> x*data["baseMVA"]
-        rescale_power = x -> x/data["baseMVA"]
-        _PM._apply_func!(data["load"]["$idx"], "cost_red", rescale_cost)
-        _PM._apply_func!(data["load"]["$idx"], "cost_curt", rescale_cost)
+        _rescale_cost = x -> x*data["baseMVA"]
+        _rescale_power = x -> x/data["baseMVA"]
+        _PM._apply_func!(data["load"]["$idx"], "cost_red", _rescale_cost)
+        _PM._apply_func!(data["load"]["$idx"], "cost_curt", _rescale_cost)
     end
     delete!(data, "load_flex")
     return data
 end
 
-function process_flexible_demand_data_multi_network!(data)
+function _process_flexible_demand_data_multi_network!(data)
     for (n, network) in data["nw"]
         for (le, load_flex) in data["load_flex"]
             # ID of load point
@@ -220,10 +219,10 @@ function process_flexible_demand_data_multi_network!(data)
             end
 
             # Rescale cost and power input values to the p.u. values used internally in the model
-            rescale_cost = x -> x*data["baseMVA"]
-            rescale_power = x -> x/data["baseMVA"]
-            _PM._apply_func!(data["nw"][n]["load"]["$idx"], "cost_red", rescale_cost)
-            _PM._apply_func!(data["nw"][n]["load"]["$idx"], "cost_curt", rescale_cost)
+            _rescale_cost = x -> x*data["baseMVA"]
+            _rescale_power = x -> x/data["baseMVA"]
+            _PM._apply_func!(data["nw"][n]["load"]["$idx"], "cost_red", _rescale_cost)
+            _PM._apply_func!(data["nw"][n]["load"]["$idx"], "cost_curt", _rescale_cost)
         end
     end
     delete!(data, "load_flex")
@@ -231,42 +230,42 @@ function process_flexible_demand_data_multi_network!(data)
 end
 
 
-function process_gendc_data!(data)
+function _process_gendc_data!(data)
     if !haskey(data, "multinetwork") || data["multinetwork"] == false
-        to_pu_single_network_gendc!(data)
+        _to_pu_single_network_gendc!(data)
     else
-        to_pu_multi_network_gendc!(data)
+        _to_pu_multi_network_gendc!(data)
     end
 end
 
-function to_pu_single_network_gendc!(data)
+function _to_pu_single_network_gendc!(data)
     MVAbase = data["baseMVA"]
     for (g, gen) in data["gendc"]
-        scale_gendc_data!(gen, MVAbase)
+        _scale_gendc_data!(gen, MVAbase)
     end
 end
 
-function to_pu_multi_network_gendc!(data)
+function _to_pu_multi_network_gendc!(data)
     MVAbase = data["baseMVA"]
     for (n, network) in data["nw"]
         MVAbase = network["baseMVA"]
         for (g, gen) in network[n]["gendc"]
-            scale_gendc_data!(gen, MVAbase)
+            _scale_gendc_data!(gen, MVAbase)
         end
     end
 end
 
-function scale_gendc_data!(gen, MVAbase)
-    rescale_power = x -> x/MVAbase
-    _PM._apply_func!(gen, "pgdcset", rescale_power)
-    _PM._apply_func!(gen, "pmin", rescale_power)
-    _PM._apply_func!(gen, "pmax", rescale_power)
-    rescale_dcgen_cost_model!(gen, MVAbase)
+function _scale_gendc_data!(gen, MVAbase)
+    _rescale_power = x -> x/MVAbase
+    _PM._apply_func!(gen, "pgdcset", _rescale_power)
+    _PM._apply_func!(gen, "pmin", _rescale_power)
+    _PM._apply_func!(gen, "pmax", _rescale_power)
+    _rescale_dcgen_cost_model!(gen, MVAbase)
 
 end
 
 
-function rescale_dcgen_cost_model!(gendc, MVAbase)
+function _rescale_dcgen_cost_model!(gendc, MVAbase)
     gendc["cost"] = [gendc["quadratic_cost"] * MVAbase^2 gendc["linear_cost"] * MVAbase gendc["idle_cost"]]
 end
 
@@ -276,59 +275,59 @@ function is_single_network(data)
     return !haskey(data, "multinetwork") || data["multinetwork"] == false
 end
 
-function to_pu!(data)
+function _to_pu!(data)
     if is_single_network(data)
-        to_pu_single_network!(data)
+        _to_pu_single_network!(data)
     else
-        to_pu_multinetwork!(data)
+        _to_pu_multinetwork!(data)
     end
 end
 
-function to_pu_single_network!(data)
+function _to_pu_single_network!(data)
     MVAbase = data["baseMVA"]
     if haskey(data, "convdc")
         for (i, conv) in data["convdc"]
             dcbus = conv["busdc_i"]
             kVbase = conv["basekVac"]
-            Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
-            Ibase = get_pu_bases(MVAbase, kVbase)["I"]
+            Zbase = _get_pu_bases(MVAbase, kVbase)["Z"]
+            Ibase = _get_pu_bases(MVAbase, kVbase)["I"]
 
-            set_conv_pu_power(conv, MVAbase)
-            set_conv_pu_volt(conv, kVbase*sqrt(3))
-            set_conv_pu_ohm(conv, Zbase)
+            _set_conv_pu_power(conv, MVAbase)
+            _set_conv_pu_volt(conv, kVbase*sqrt(3))
+            _set_conv_pu_ohm(conv, Zbase)
         end
     end
     if haskey(data, "branchdc")
         for (i, branchdc) in data["branchdc"]
-            set_branchdc_pu(branchdc, MVAbase)
+            _set_branchdc_pu(branchdc, MVAbase)
         end
     end
     if haskey(data, "busdc")
         for (i, busdc) in data["busdc"]
-            set_busdc_pu(busdc, MVAbase)
+            _set_busdc_pu(busdc, MVAbase)
         end
     end
     if haskey(data, "convdc_ne")
         for (i, conv) in data["convdc_ne"]
             dcbus = conv["busdc_i"]
             kVbase = conv["basekVac"]
-            Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
-            Ibase = get_pu_bases(MVAbase, kVbase)["I"]
+            Zbase = _get_pu_bases(MVAbase, kVbase)["Z"]
+            Ibase = _get_pu_bases(MVAbase, kVbase)["I"]
 
-            set_conv_pu_power(conv, MVAbase)
-            set_conv_pu_volt(conv, kVbase*sqrt(3))
-            set_conv_pu_ohm(conv, Zbase)
+            _set_conv_pu_power(conv, MVAbase)
+            _set_conv_pu_volt(conv, kVbase*sqrt(3))
+            _set_conv_pu_ohm(conv, Zbase)
         end
     end
     if haskey(data, "branchdc_ne")
         for (i, branchdc) in data["branchdc_ne"]
-            set_branchdc_pu(branchdc, MVAbase)
+            _set_branchdc_pu(branchdc, MVAbase)
         end
     end
     if haskey(data, "busdc_ne")
         new_busdc_ne = Dict{String, Any}()
         for (i, busdc) in data["busdc_ne"]
-            set_busdc_pu(busdc, MVAbase)
+            _set_busdc_pu(busdc, MVAbase)
             new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
             if new_bus == i
                 display("candidate dc buses and existing dc buses should have different bus numbers")
@@ -340,47 +339,47 @@ function to_pu_single_network!(data)
     end
 end
 
-function to_pu_multinetwork!(data)
+function _to_pu_multinetwork!(data)
     for (n, network) in data["nw"]
         MVAbase = network["baseMVA"]
         if haskey(data["nw"][n], "convdc")
             for (i, conv) in data["nw"][n]["convdc"]
                 dcbus = conv["busdc_i"]
                 kVbase = conv["basekVac"]
-                Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
-                Ibase = get_pu_bases(MVAbase, kVbase)["I"]
+                Zbase = _get_pu_bases(MVAbase, kVbase)["Z"]
+                Ibase = _get_pu_bases(MVAbase, kVbase)["I"]
 
-                set_conv_pu_power(conv, MVAbase)
-                set_conv_pu_volt(conv, kVbase*sqrt(3))
-                set_conv_pu_ohm(conv, Zbase)
+                _set_conv_pu_power(conv, MVAbase)
+                _set_conv_pu_volt(conv, kVbase*sqrt(3))
+                _set_conv_pu_ohm(conv, Zbase)
             end
         end
         if haskey(data["nw"][n], "branchdc")
             for (i, branchdc) in data["nw"][n]["branchdc"]
-                set_branchdc_pu(branchdc, MVAbase)
+                _set_branchdc_pu(branchdc, MVAbase)
             end
         end
         if haskey(data["nw"][n], "busdc")
             for (i, busdc) in data["nw"][n]["busdc"]
-                set_busdc_pu(busdc, MVAbase)
+                _set_busdc_pu(busdc, MVAbase)
             end
         end
         if haskey(data["nw"][n], "convdc_ne")
             for (i, conv) in data["nw"][n]["convdc_ne"]
                 dcbus = conv["busdc_i"]
                 kVbase = conv["basekVac"]
-                Zbase = get_pu_bases(MVAbase, kVbase)["Z"]
-                Ibase = get_pu_bases(MVAbase, kVbase)["I"]
+                Zbase = _get_pu_bases(MVAbase, kVbase)["Z"]
+                Ibase = _get_pu_bases(MVAbase, kVbase)["I"]
 
-                set_conv_pu_power(conv, MVAbase)
-                set_conv_pu_volt(conv, kVbase*sqrt(3))
-                set_conv_pu_ohm(conv, Zbase)
+                _set_conv_pu_power(conv, MVAbase)
+                _set_conv_pu_volt(conv, kVbase*sqrt(3))
+                _set_conv_pu_ohm(conv, Zbase)
                 # conv["cost"] = conv["cost"]/length(data["nw"])
             end
         end
         if haskey(data["nw"][n], "branchdc_ne")
             for (i, branchdc) in data["nw"][n]["branchdc_ne"]
-                set_branchdc_pu(branchdc, MVAbase)
+                _set_branchdc_pu(branchdc, MVAbase)
                 # branchdc["cost"] = branchdc["cost"]/length(data["nw"])
             end
         end
@@ -392,7 +391,7 @@ function to_pu_multinetwork!(data)
         if haskey(data["nw"][n], "busdc_ne")
             new_busdc_ne = Dict{String, Any}()
             for (i, busdc) in data["nw"][n]["busdc_ne"]
-                set_busdc_pu(busdc, MVAbase)
+                _set_busdc_pu(busdc, MVAbase)
                 new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from exisiting dc bus numbers
                 if new_bus == i
                     display("candidate dc buses and existing dc buses should have different bus numbers")
@@ -405,15 +404,15 @@ function to_pu_multinetwork!(data)
     end
 end
 
-function convert_matpowerdcline_to_branchdc!(data)
+function _convert_matpowerdcline_to_branchdc!(data)
     if is_single_network(data)
-        convert_matpowerdcline_to_branchdc_single_network!(data)
+        _convert_matpowerdcline_to_branchdc_single_network!(data)
     else
-        convert_matpowerdcline_to_branchdc_multinetwork!(data)
+        _convert_matpowerdcline_to_branchdc_multinetwork!(data)
     end
 end
 
-function convert_matpowerdcline_to_branchdc_single_network!(data)
+function _convert_matpowerdcline_to_branchdc_single_network!(data)
     MVAbase = data["baseMVA"]
     if haskey(data, "dcline") && haskey(data["dcline"], "1")
         if !haskey(data, "convdc")
@@ -432,7 +431,7 @@ function convert_matpowerdcline_to_branchdc_single_network!(data)
         for (i, dcline) in data["dcline"]
             # make DC bus from side
             bus_i = bus_i + 1
-            data["busdc"]["$bus_i"] = get_busdc(bus_i)
+            data["busdc"]["$bus_i"] = _get_busdc(bus_i)
 
             prev_bus = bus_i - 1
             if haskey(data["busdc"],["$prev_bus"])
@@ -443,7 +442,7 @@ function convert_matpowerdcline_to_branchdc_single_network!(data)
 
             # DC bus to
             bus_i = bus_i + 1
-            data["busdc"]["$bus_i"] = get_busdc(bus_i)
+            data["busdc"]["$bus_i"] = _get_busdc(bus_i)
             prev_bus = bus_i - 1
             if haskey(data["busdc"],["$prev_bus"])
                 data["busdc"]["$bus_i"]["basekVdc"] = data["busdc"]["$prev_bus"]["basekVdc"]
@@ -453,7 +452,7 @@ function convert_matpowerdcline_to_branchdc_single_network!(data)
 
             branch_i = branch_i + 1
             conv_i = conv_i + 1
-            converter1, converter2, branchdc = convert_to_dcbranch_and_converters(data, dcline, branch_i, conv_i, bus_i-1, bus_i)
+            converter1, converter2, branchdc = _convert_to_dcbranch_and_converters(data, dcline, branch_i, conv_i, bus_i-1, bus_i)
             data["branchdc"]["$branch_i"] = branchdc
             data["convdc"]["$conv_i"] = converter1
             conv_i = conv_i + 1
@@ -463,7 +462,7 @@ function convert_matpowerdcline_to_branchdc_single_network!(data)
     data["dcline"] = []
 end
 
-function convert_matpowerdcline_to_branchdc_multinetwork!(data)
+function _convert_matpowerdcline_to_branchdc_multinetwork!(data)
     for (n, network) in data["nw"]
         MVAbase = network["baseMVA"]
         if haskey(data["nw"][n], "dcline") && haskey(data["nw"][n]["dcline"], "1")
@@ -483,7 +482,7 @@ function convert_matpowerdcline_to_branchdc_multinetwork!(data)
             for (i, dcline) in data["nw"][n]["dcline"]
                 # make DC bus from side
                 bus_i = bus_i + 1
-                data["nw"][n]["busdc"]["$bus_i"] = get_busdc(bus_i)
+                data["nw"][n]["busdc"]["$bus_i"] = _get_busdc(bus_i)
 
                 prev_bus = bus_i - 1
                 if haskey(data["nw"][n]["busdc"],["$prev_bus"])
@@ -494,7 +493,7 @@ function convert_matpowerdcline_to_branchdc_multinetwork!(data)
 
                 # DC bus to
                 bus_i = bus_i + 1
-                data["nw"][n]["busdc"]["$bus_i"] = get_busdc(bus_i)
+                data["nw"][n]["busdc"]["$bus_i"] = _get_busdc(bus_i)
                 prev_bus = bus_i - 1
                 if haskey(data["nw"][n]["busdc"],["$prev_bus"])
                     data["nw"][n]["busdc"]["$bus_i"]["basekVdc"] = data["nw"][n]["busdc"]["$prev_bus"]["basekVdc"]
@@ -504,7 +503,7 @@ function convert_matpowerdcline_to_branchdc_multinetwork!(data)
 
                 branch_i = branch_i + 1
                 conv_i = conv_i + 1
-                converter1, converter2, branchdc = convert_to_dcbranch_and_converters(data["nw"][n], dcline, branch_i, conv_i, bus_i-1, bus_i)
+                converter1, converter2, branchdc = _convert_to_dcbranch_and_converters(data["nw"][n], dcline, branch_i, conv_i, bus_i-1, bus_i)
                 data["nw"][n]["branchdc"]["$branch_i"] = branchdc
                 data["nw"][n]["convdc"]["$conv_i"] = converter1
                 conv_i = conv_i + 1
@@ -516,25 +515,25 @@ function convert_matpowerdcline_to_branchdc_multinetwork!(data)
 end
 
 
-function fix_data!(data; tnep = false)
+function _fix_data!(data; tnep = false)
     if is_single_network(data)
-        fix_data_single_network!(data; tnep = tnep)
+        _fix_data_single_network!(data; tnep = tnep)
     else
-        fix_data_multinetwork!(data; tnep = tnep)
+        _fix_data_multinetwork!(data; tnep = tnep)
     end
 end
 
-function fix_data_single_network!(data; tnep = false)
+function _fix_data_single_network!(data; tnep = false)
     MVAbase = data["baseMVA"]
     @assert(MVAbase>0)
     if haskey(data, "convdc")
         for (i, conv) in data["convdc"]
-            check_conv_parameters(conv)
+            _check_conv_parameters(conv)
         end
     end
     if haskey(data, "branchdc")
         for (i, branchdc) in data["branchdc"]
-            check_branchdc_parameters(branchdc)
+            _check_branchdc_parameters(branchdc)
         end
     end
     if haskey(data, "busdc")
@@ -550,12 +549,12 @@ function fix_data_single_network!(data; tnep = false)
     end
     if haskey(data, "convdc_ne")
         for (i, conv) in data["convdc_ne"]
-            check_conv_parameters(conv)
+            _check_conv_parameters(conv)
         end
     end
     if haskey(data, "branchdc_ne")
         for (i, branchdc) in data["branchdc_ne"]
-            check_branchdc_parameters(branchdc)
+            _check_branchdc_parameters(branchdc)
         end
     end
     if haskey(data, "load")
@@ -572,18 +571,18 @@ function fix_data_single_network!(data; tnep = false)
     end
 end
 
-function fix_data_multinetwork!(data; tnep = false)
+function _fix_data_multinetwork!(data; tnep = false)
     for (n, network) in data["nw"]
         MVAbase = network["baseMVA"]
         @assert(MVAbase>0)
         if haskey(data["nw"][n], "convdc")
             for (i, conv) in data["nw"][n]["convdc"]
-                check_conv_parameters(conv)
+                _check_conv_parameters(conv)
             end
         end
         if haskey(data["nw"][n], "branchdc")
             for (i, branchdc) in data["nw"][n]["branchdc"]
-                check_branchdc_parameters(branchdc)
+                _check_branchdc_parameters(branchdc)
             end
         end
         if haskey(data["nw"][n], "busdc")
@@ -599,12 +598,12 @@ function fix_data_multinetwork!(data; tnep = false)
         end
         if haskey(data["nw"][n], "convdc_ne")
             for (i, conv) in data["nw"][n]["convdc_ne"]
-                check_conv_parameters(conv)
+                _check_conv_parameters(conv)
             end
         end
         if haskey(data["nw"][n], "branchdc_ne")
             for (i, branchdc) in data["nw"][n]["branchdc_ne"]
-                check_branchdc_parameters(branchdc)
+                _check_branchdc_parameters(branchdc)
             end
         end
         if haskey(data["nw"][n], "load")
@@ -622,53 +621,53 @@ function fix_data_multinetwork!(data; tnep = false)
     end
 end
 
-function check_branchdc_parameters(branchdc)
+function _check_branchdc_parameters(branchdc)
     @assert(branchdc["rateA"]>=0)
     @assert(branchdc["rateB"]>=0)
     @assert(branchdc["rateC"]>=0)
 end
 
-function set_branchdc_pu(branchdc, MVAbase)
-    rescale_power = x -> x/MVAbase
-    _PM._apply_func!(branchdc, "rateA", rescale_power)
-    _PM._apply_func!(branchdc, "rateB", rescale_power)
-    _PM._apply_func!(branchdc, "rateC", rescale_power)
+function _set_branchdc_pu(branchdc, MVAbase)
+    _rescale_power = x -> x/MVAbase
+    _PM._apply_func!(branchdc, "rateA", _rescale_power)
+    _PM._apply_func!(branchdc, "rateB", _rescale_power)
+    _PM._apply_func!(branchdc, "rateC", _rescale_power)
 end
 
-function set_busdc_pu(busdc, MVAbase)
-    rescale_power = x -> x/MVAbase
-    _PM._apply_func!(busdc, "Pdc", rescale_power)
+function _set_busdc_pu(busdc, MVAbase)
+    _rescale_power = x -> x/MVAbase
+    _PM._apply_func!(busdc, "Pdc", _rescale_power)
 end
 
-function set_conv_pu_power(conv, MVAbase)
-    rescale_power = x -> x/MVAbase
-    _PM._apply_func!(conv, "P_g", rescale_power)
-    _PM._apply_func!(conv, "Q_g", rescale_power)
-    _PM._apply_func!(conv, "Pdcset", rescale_power)
+function _set_conv_pu_power(conv, MVAbase)
+    _rescale_power = x -> x/MVAbase
+    _PM._apply_func!(conv, "P_g", _rescale_power)
+    _PM._apply_func!(conv, "Q_g", _rescale_power)
+    _PM._apply_func!(conv, "Pdcset", _rescale_power)
     if haskey(conv, "Pacset")
-        _PM._apply_func!(conv, "Pacset", rescale_power)
+        _PM._apply_func!(conv, "Pacset", _rescale_power)
     end
-    _PM._apply_func!(conv, "LossA", rescale_power)
-    _PM._apply_func!(conv, "Pacmax", rescale_power)
-    _PM._apply_func!(conv, "Pacmin", rescale_power)
-    _PM._apply_func!(conv, "Qacmax", rescale_power)
-    _PM._apply_func!(conv, "Qacmin", rescale_power)
-    _PM._apply_func!(conv, "Pacrated", rescale_power)
-    _PM._apply_func!(conv, "Qacrated", rescale_power)
+    _PM._apply_func!(conv, "LossA", _rescale_power)
+    _PM._apply_func!(conv, "Pacmax", _rescale_power)
+    _PM._apply_func!(conv, "Pacmin", _rescale_power)
+    _PM._apply_func!(conv, "Qacmax", _rescale_power)
+    _PM._apply_func!(conv, "Qacmin", _rescale_power)
+    _PM._apply_func!(conv, "Pacrated", _rescale_power)
+    _PM._apply_func!(conv, "Qacrated", _rescale_power)
 end
 
-function set_conv_pu_volt(conv, kVbase)
-    rescale_volt = x -> x  / (kVbase)
-    _PM._apply_func!(conv, "LossB", rescale_volt)
+function _set_conv_pu_volt(conv, kVbase)
+    _rescale_volt = x -> x  / (kVbase)
+    _PM._apply_func!(conv, "LossB", _rescale_volt)
 end
 
-function set_conv_pu_ohm(conv, Zbase)
-    rescale_ohm = x -> x / Zbase
-    _PM._apply_func!(conv, "LossCrec", rescale_ohm)
-    _PM._apply_func!(conv, "LossCinv", rescale_ohm)
+function _set_conv_pu_ohm(conv, Zbase)
+    _rescale_ohm = x -> x / Zbase
+    _PM._apply_func!(conv, "LossCrec", _rescale_ohm)
+    _PM._apply_func!(conv, "LossCinv", _rescale_ohm)
 end
 
-function check_conv_parameters(conv)
+function _check_conv_parameters(conv)
     @assert(conv["LossA"]>=0)
     @assert(conv["LossB"]>=0)
     @assert(conv["LossCrec"]>=0)
@@ -703,7 +702,7 @@ function check_conv_parameters(conv)
 end
 
 
-function get_branchdc(matpowerdcline, branch_i, fbusdc, tbusdc)
+function _get_branchdc(matpowerdcline, branch_i, fbusdc, tbusdc)
     branchdc = Dict{String, Any}()
     branchdc["index"] = branch_i
     branchdc["fbusdc"] = fbusdc
@@ -718,7 +717,7 @@ function get_branchdc(matpowerdcline, branch_i, fbusdc, tbusdc)
     return branchdc
 end
 
-function get_busdc(bus_i)
+function _get_busdc(bus_i)
     busdc = Dict{String, Any}()
     busdc["index"] = bus_i
     busdc["busdc_i"] = bus_i
@@ -731,7 +730,7 @@ function get_busdc(bus_i)
     return busdc
 end
 
-function get_converter(conv_i, dcbus, acbus, kVbaseAC, vmax, vmin, status, pac, qac, qmaxac, qminac, vmac, Imax, lossA, lossB, pmaxac, pminac)
+function _get_converter(conv_i, dcbus, acbus, kVbaseAC, vmax, vmin, status, pac, qac, qmaxac, qminac, vmac, Imax, lossA, lossB, pmaxac, pminac)
     conv = Dict{String, Any}()
     conv["index"] = conv_i
     conv["busdc_i"] = dcbus
@@ -768,14 +767,14 @@ function get_converter(conv_i, dcbus, acbus, kVbaseAC, vmax, vmin, status, pac, 
     conv["Qacmin"] = qminac
     conv["Pacmax"] = pmaxac
     conv["Pacmin"] = pminac
-    check_conv_parameters(conv)
+    _check_conv_parameters(conv)
     return conv
 end
 
 
-function convert_to_dcbranch_and_converters(data, dcline, branchdc_id, conv_i, fbusdc, tbusdc)
+function _convert_to_dcbranch_and_converters(data, dcline, branchdc_id, conv_i, fbusdc, tbusdc)
     # make one more DC branch
-    branchdc = get_branchdc(dcline, branchdc_id, fbusdc, tbusdc)
+    branchdc = _get_branchdc(dcline, branchdc_id, fbusdc, tbusdc)
     vmaxf = data["bus"]["$fbusdc"]["vmax"]
     vminf = data["bus"]["$fbusdc"]["vmin"]
     vmaxt =  data["bus"]["$tbusdc"]["vmax"]
@@ -795,7 +794,7 @@ function convert_to_dcbranch_and_converters(data, dcline, branchdc_id, conv_i, f
     vac = 1
     pmaxac = dcline["pmaxf"]
     pminac = dcline["pminf"]
-    converter1 =  get_converter(conv_i, fbusdc, acbus, kVbaseAC, vmaxf, vminf, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
+    converter1 =  _get_converter(conv_i, fbusdc, acbus, kVbaseAC, vmaxf, vminf, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
 
 
     # converter 2
@@ -813,13 +812,13 @@ function convert_to_dcbranch_and_converters(data, dcline, branchdc_id, conv_i, f
     pminac =  dcline["pmint"]
     qmaxac = dcline["qmaxt"]
     qminac = dcline["qmint"]
-    converter2 =  get_converter(conv_i, tbusdc, acbus, kVbaseAC, vmaxt, vmint, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
+    converter2 =  _get_converter(conv_i, tbusdc, acbus, kVbaseAC, vmaxt, vmint, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
 
     return converter1, converter2, branchdc
 end
 
 function prepare_uc_data!(data; borders = nothing, uc = false, time_interval = 1, frequency_parameters = Dict())
-    prepare_generator_data!(data; uc = uc)
+    _prepare_generator_data!(data; uc = uc)
     data["uc_parameters"] = Dict{String, Any}("time_interval" => time_interval)
     data["frequency_parameters"] = frequency_parameters
 
@@ -861,7 +860,7 @@ function prepare_uc_data!(data; borders = nothing, uc = false, time_interval = 1
 end
 
 
-function prepare_generator_data!(data; uc = false)
+function _prepare_generator_data!(data; uc = false)
     for (g, gen) in data["gen"]
         bus_id = gen["gen_bus"]
         gen["zone"] = data["bus"]["$bus_id"]["zone"]

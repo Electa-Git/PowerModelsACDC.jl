@@ -1,7 +1,5 @@
 # ...existing code...
 
-export solve_acdcopf_bf
-
 """
     solve_acdcopf_bf(file::String, model_type::Type, solver; kwargs...)
 
@@ -139,8 +137,8 @@ function build_acdcopf_bf(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :flex_load)
         constraint_total_flexible_demand(pm, i)
     end
-    
-    for i in _PM.ids(pm, :fixed_load) 
+
+    for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
 

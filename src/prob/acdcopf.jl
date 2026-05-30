@@ -1,5 +1,3 @@
-export solve_acdcopf
-
 """
     solve_acdcopf(file::String, model_type::Type, solver; kwargs...)
 
@@ -71,7 +69,7 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
     variable_flexible_demand(pm)
     variable_pst(pm)
     variable_sssc(pm)
-    
+
 
     objective_min_operational_cost(pm)
 
@@ -97,8 +95,8 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :flex_load)
         constraint_total_flexible_demand(pm, i)
     end
-    
-    for i in _PM.ids(pm, :fixed_load) 
+
+    for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
 
@@ -194,8 +192,8 @@ function mp_build_acdcopf(pm::_PM.AbstractPowerModel)
         for i in _PM.ids(pm, n, :flex_load)
             constraint_total_flexible_demand(pm, i; nw = n)
         end
-        
-        for i in _PM.ids(pm, n, :fixed_load) 
+
+        for i in _PM.ids(pm, n, :fixed_load)
             constraint_total_fixed_demand(pm, i; nw = n)
         end
 

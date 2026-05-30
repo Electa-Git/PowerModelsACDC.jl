@@ -1,5 +1,3 @@
-export solve_acdcopf_iv
-
 """
     solve_acdcopf_iv(file::String, model_type::Type, optimizer; kwargs...)
 

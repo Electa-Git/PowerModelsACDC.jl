@@ -33,18 +33,15 @@ data_dc = build_mn_data("../test/data/tnep/case4_original.m")
 
 @testset "PowerModelsACDC" begin
 
-include("pf.jl")
+    # Problems
+    include("pf.jl")
+    include("opf.jl")
+    include("cbaopf.jl")
+    include("tnep.jl")
+    include("spf.jl")
+    include("uc.jl")
+    include("strgopf.jl")
 
-include("opf.jl")
-
-include("cbaopf.jl")
-
-include("tnep.jl")
-
-include("spf.jl")
-
-include("uc.jl")
-
-include("strgopf.jl")
-
+    # Exported names
+    include("export.jl")
 end

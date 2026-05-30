@@ -9,9 +9,6 @@ import InfrastructureModels as _IM
 import SparseArrays
 import NLsolve
 
-import JuMP: optimizer_with_attributes
-export optimizer_with_attributes
-
 # Create our module level logger (this will get precompiled)
 const _LOGGER = Memento.getlogger(@__MODULE__)
 
@@ -73,5 +70,8 @@ include("formconv/shared.jl")
 include("formconv/iv.jl")
 
 include("io/multinetwork.jl")
+
+# This must come last to support automated export
+include("core/export.jl")
 
 end  # module PowerModelsACDC

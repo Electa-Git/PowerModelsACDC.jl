@@ -35,11 +35,11 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
 
             # Bus converters for existing ac buses
             bus_convs_ac = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
-            nw_ref[:bus_convs_ac] = assign_bus_converters!(nw_ref[:convdc], bus_convs_ac, "busac_i")
+            nw_ref[:bus_convs_ac] = _assign_bus_converters!(nw_ref[:convdc], bus_convs_ac, "busac_i")
 
             # Bus converters for existing ac buses
             bus_convs_dc = Dict([(bus["busdc_i"], []) for (i,bus) in nw_ref[:busdc]])
-            nw_ref[:bus_convs_dc]= assign_bus_converters!(nw_ref[:convdc], bus_convs_dc, "busdc_i")
+            nw_ref[:bus_convs_dc]= _assign_bus_converters!(nw_ref[:convdc], bus_convs_dc, "busdc_i")
 
 
             # Add DC reference buses
@@ -92,7 +92,7 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
             nw_ref[:buspairsdc] = Dict{String, Any}()
             # Bus converters for existing ac buses
             bus_convs_ac = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
-            nw_ref[:bus_convs_ac] = assign_bus_converters!(nw_ref[:convdc], bus_convs_ac, "busac_i")
+            nw_ref[:bus_convs_ac] = _assign_bus_converters!(nw_ref[:convdc], bus_convs_ac, "busac_i")
         end
     end
 end
@@ -167,13 +167,13 @@ function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
 
             # Bus converters for existing ac buses
             bus_convs_ac_ne = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
-            nw_ref[:bus_convs_ac_ne] = assign_bus_converters!(nw_ref[:convdc_ne], bus_convs_ac_ne, "busac_i")
+            nw_ref[:bus_convs_ac_ne] = _assign_bus_converters!(nw_ref[:convdc_ne], bus_convs_ac_ne, "busac_i")
             # Bus converters forexisting DC buses
             bus_convs_dc_ne = Dict([(bus["busdc_i"], []) for (i,bus) in nw_ref[:busdc]])
-            nw_ref[:bus_convs_dc_ne] = assign_bus_converters!(nw_ref[:convdc_ne], bus_convs_dc_ne, "busdc_i")
+            nw_ref[:bus_convs_dc_ne] = _assign_bus_converters!(nw_ref[:convdc_ne], bus_convs_dc_ne, "busdc_i")
             # Bus converters for candidate DC buses
             bus_ne_convs_dc_ne = Dict([(bus["busdc_i"], []) for (i,bus) in nw_ref[:busdc_ne]])
-            nw_ref[:bus_ne_convs_dc_ne] = assign_bus_converters!(nw_ref[:convdc_ne], bus_ne_convs_dc_ne, "busdc_i")
+            nw_ref[:bus_ne_convs_dc_ne] = _assign_bus_converters!(nw_ref[:convdc_ne], bus_ne_convs_dc_ne, "busdc_i")
         else
             nw_ref[:convdc_ne] = Dict{String, Any}()
             nw_ref[:arcs_conv_acdc_ne] = Dict{String, Any}()
@@ -181,13 +181,13 @@ function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
 
             # Bus converters for existing ac buses
             bus_convs_ac_ne = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
-            nw_ref[:bus_convs_ac_ne] = assign_bus_converters!(nw_ref[:convdc_ne], bus_convs_ac_ne, "busac_i")
+            nw_ref[:bus_convs_ac_ne] = _assign_bus_converters!(nw_ref[:convdc_ne], bus_convs_ac_ne, "busac_i")
             # Bus converters forexisting DC buses
             bus_convs_dc_ne = Dict([(bus["busdc_i"], []) for (i,bus) in nw_ref[:busdc]])
-            nw_ref[:bus_convs_dc_ne] = assign_bus_converters!(nw_ref[:convdc_ne], bus_convs_dc_ne, "busdc_i")
+            nw_ref[:bus_convs_dc_ne] = _assign_bus_converters!(nw_ref[:convdc_ne], bus_convs_dc_ne, "busdc_i")
             # Bus converters for candidate DC buses
             bus_ne_convs_dc_ne = Dict([(bus["busdc_i"], []) for (i,bus) in nw_ref[:busdc_ne]])
-            nw_ref[:bus_ne_convs_dc_ne] = assign_bus_converters!(nw_ref[:convdc_ne], bus_ne_convs_dc_ne, "busdc_i")
+            nw_ref[:bus_ne_convs_dc_ne] = _assign_bus_converters!(nw_ref[:convdc_ne], bus_ne_convs_dc_ne, "busdc_i")
         end
     end
 end
@@ -239,7 +239,7 @@ function buspair_parameters_dc_ne(arcs_dcgrid_from, branches, busesdc_ne, busesd
 end
 
 
-function assign_bus_converters!(convs, dict, key)
+function _assign_bus_converters!(convs, dict, key)
     for (i,conv) in convs
         if haskey(dict, conv[key])
             push!(dict[conv[key]], i)
@@ -248,7 +248,7 @@ function assign_bus_converters!(convs, dict, key)
     return dict
 end
 
-function assign_bus_generators!(gens, dict, key)
+function _assign_bus_generators!(gens, dict, key)
     for (i,gen) in gens
         if haskey(dict, gen[key])
             push!(dict[gen[key]], i)
@@ -341,7 +341,7 @@ function ref_add_gendc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
         # Bus converters for existing ac buses
 
         bus_gens_dc = Dict((i, Int[]) for (i,bus) in nw_ref[:busdc])
-        nw_ref[:bus_gens_dc]= assign_bus_generators!(nw_ref[:gendc], bus_gens_dc, "gen_bus")
+        nw_ref[:bus_gens_dc]= _assign_bus_generators!(nw_ref[:gendc], bus_gens_dc, "gen_bus")
     end
 end
 
