@@ -4,7 +4,7 @@ bt = 100 ## constraint tightening setting 95, 90, 85, 80
     include("./test/data/tnep/PSCC/conv_spec.jl")
     file = "./test/data/tnep/PSCC/$casename.m"
     data1 = PowerModels.parse_file(file)
-    PowerModelsACDC.process_additional_data!(data1)
+    process_additional_data!(data1)
     # PowerModelsACDCInv.process_additional_data!(data1)
     data = deepcopy(data1)
 
@@ -31,7 +31,7 @@ bt = 100 ## constraint tightening setting 95, 90, 85, 80
     gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer)
     juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "mip_solver" => cbc_solver, "nl_solver" => ipopt)
 
-    s = Dict("conv_losses_mp" => false, "process_data_internally" => false)
+    s = Dict("conv_losses_mp" => false)
 
     converter_parameters_rxb(data)
     # converter_cost(data)      # only to use with 6 and 24 bus systems
