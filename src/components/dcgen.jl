@@ -1,6 +1,5 @@
 #### VARIABLES
 "DC generator power"
-
 function variable_dcgenerator_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     pgdc = _PM.var(pm, nw)[:pgdc] = JuMP.@variable(pm.model,
         [i in _PM.ids(pm, nw, :gendc)], base_name="$(nw)_pgdc",
@@ -18,7 +17,7 @@ end
 #### CONSTRAINT TEMPLATES AND CONSTRAINTS
 
 function constraint_dcgenerator_voltage_and_power(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
-    
+
     gen =_PM.ref(pm, nw, :gendc, i)
 
     gen_bus = gen["gen_bus"]
@@ -29,7 +28,6 @@ function constraint_dcgenerator_voltage_and_power(pm::_PM.AbstractPowerModel, i:
 
     return constraint_dcgenerator_voltage_and_power(pm, nw, i, gen_bus, k_droop, control_type, v_set, p_set)
 end
-
 
 function constraint_dcgenerator_voltage_and_power(pm::_PM.AbstractPowerModel, nw::Int, i::Int, gen_bus::Int, k_droop, control_type::Int, v_set, p_set)
     pgdc = _PM.var(pm, nw)[:pgdc][i]

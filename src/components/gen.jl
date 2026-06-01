@@ -20,7 +20,7 @@ function variable_generator_state(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_
         upper_bound = 1,
         lower_bound = 0,
     )
-    
+
     for (g, gen) in _PM.ref(pm, nw, :gen)
         if res_on == true && (gen["type"] == "Wind" || gen["type"] == "Solar")
             JuMP.set_lower_bound(alpha_g[g], 1)
@@ -91,7 +91,6 @@ function variable_generator_redispatch(pm; kwargs...)
     variable_generator_redispatch_down(pm; kwargs...)
 end
 
-
 "Variable for upwards generator redispatch each time step"
 function variable_generator_redispatch_up(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     dpg_up = _PM.var(pm, nw)[:dpg_up] = JuMP.@variable(pm.model,
@@ -114,7 +113,6 @@ function variable_generator_redispatch_down(pm::_PM.AbstractPowerModel; nw::Int=
     report && _PM.sol_component_value(pm, nw, :gen, :dpg_down, _PM.ids(pm, nw, :gen), dpg_down)
 end
 
-
 "Variable for representing generator actions in the scopf model"
 function variable_generator_actions(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     ΔPg  = _PM.var(pm, nw)[:delta_pg] = JuMP.@variable(pm.model,
@@ -129,7 +127,7 @@ function variable_generator_actions(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_i
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :gen, :delta_pg, _PM.ids(pm, nw, :gen), ΔPg)
+    report && _PM.sol_component_value(pm, nw, :gen, :delta_pg, _PM.ids(pm, nw, :gen), ΔPg)
 end
 
 # Constraint templates:
@@ -207,7 +205,7 @@ function constraint_minimum_generator_up_time(pm::_PM.AbstractPowerModel, i::Int
     else
         interval = 1
     end
-    h_start = max(1, (nw + interval - (mut * interval))) 
+    h_start = max(1, (nw + interval - (mut * interval)))
     τ = h_start : interval : nw
 
     return constraint_minimum_generator_up_time(pm, i, nw, τ)
@@ -221,7 +219,7 @@ function constraint_minimum_generator_down_time(pm::_PM.AbstractPowerModel, i::I
     else
         interval = 1
     end
-    h_start = max(1, (nw + interval - (mdt * interval))) 
+    h_start = max(1, (nw + interval - (mdt * interval)))
     τ = h_start : interval : nw
 
     return constraint_minimum_generator_down_time(pm, i, nw, τ)
@@ -369,7 +367,6 @@ function  constraint_generator_fcr_contribution_abs(pm::_PM.AbstractPowerModel, 
     JuMP.@constraint(pm.model, pg_droop_abs >= -pg_droop)
 end
 
-
 "Generator active power behaviour as corrective actions in scopf model"
 function constraint_gen_actions(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     hour_id = get_reference_network_id(pm::_PM.AbstractPowerModel, nw::Int, uc = true)
@@ -397,7 +394,6 @@ function constraint_gen_actions(pm::_PM.AbstractPowerModel, n::Int, i::Int, hour
     JuMP.@constraint(pm.model, delta_pg == pg - pg_ref)
 end
 
-
 ######################################
 # Generator realetd constraints DCP:
 ######################################
@@ -407,7 +403,6 @@ function constraint_generator_inertia_limit(pm::_PM.AbstractDCPModel, n::Int, ge
     JuMP.@constraint(pm.model, sum([properties["inertia"] * properties["rating"] * alpha_g[g] / 0.9 for (g, properties) in generator_properties])  >= inertia_limit)
 end
 
-
 function constraint_generator_redispatch(pm::_PM.AbstractDCPModel, n::Int, i, pg_ref)
     pg       = _PM.var(pm, n, :pg, i)
     dpg_up   = _PM.var(pm, n, :dpg_up, i)
@@ -416,7 +411,6 @@ function constraint_generator_redispatch(pm::_PM.AbstractDCPModel, n::Int, i, pg
     # Starting from the reference dispatch pg_ref, the new dispatch point is pg == pg_ref + dpg_up - dpg_down
     JuMP.@constraint(pm.model, pg == pg_ref + dpg_up - dpg_down)
 end
-
 
 function constraint_generator_on_off(pm::_PM.AbstractDCPModel, n::Int, i, pmax, pmin, status)
     pg = _PM.var(pm, n, :pg, i)

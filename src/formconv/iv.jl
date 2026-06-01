@@ -336,14 +336,13 @@ function constraint_converter_limits(pm::_PM.AbstractIVRModel, n::Int, i, imax, 
     JuMP.@constraint(pm.model, (ikc_r)^2 + (ikc_i)^2 <=  imax^2) #(34)
     JuMP.@constraint(pm.model, (ick_r)^2 + (ick_i)^2 <=  imax^2) #(35)
     JuMP.@constraint(pm.model, (ic_r)^2 + (ic_i)^2 <=  imax^2) #(39)
-    JuMP.@constraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2) #(47)  
-    ## relaxed version 
+    JuMP.@constraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2) #(47)
+    ## relaxed version
     #JuMP.@constraint(pm.model, (ic_r)^2 + (ic_i)^2 ==  (iconv_lin)^2) #(49)
     JuMP.@constraint(pm.model, (vk_r)^2 + (vk_i)^2 <=  vmax^2) #(22)
     JuMP.@constraint(pm.model, (vk_r)^2 + (vk_i)^2 >=  vmin^2) #(22)
     JuMP.@constraint(pm.model, (vc_r)^2 + (vc_i)^2 <=  vmax^2) #(23)
     JuMP.@constraint(pm.model, (vc_r)^2 + (vc_i)^2 >=  vmin^2) #(23)
-
 
     vc = _PM.var(pm, n, :vdcm)[b_idx]
     pconv_dc = _PM.var(pm, n, :pconv_dc)[i]
@@ -351,7 +350,6 @@ function constraint_converter_limits(pm::_PM.AbstractIVRModel, n::Int, i, imax, 
 
     JuMP.@constraint(pm.model, pconv_dc ==  vc * iconv_dc)
 end
-
 
 ######## Constraint converter losses ######
 "Converter losses in IVR models. Enforces `pconv_ac + pconv_dc = a + b*iconv_lin + c*iconv_lin^2`."
@@ -371,8 +369,6 @@ function constraint_converter_current(pm::_PM.AbstractIVRModel, n::Int, i::Int, 
     ic_i = _PM.var(pm, n, :ic_i, i)
     pconv_ac = _PM.var(pm, n, :pconv_ac, i)
     qconv_ac = _PM.var(pm, n, :qconv_ac, i)
-
-
 
     JuMP.@constraint(pm.model, pconv_ac == vc_r * ic_r + vc_i * ic_i)
     JuMP.@constraint(pm.model, qconv_ac == vc_i * ic_r - vc_r * ic_i)
@@ -472,13 +468,13 @@ function constraint_current_balance_ac(pm::_PM.AbstractIVRModel, n::Int, i, bus_
                                 ==
                                 sum(crg[g] for g in bus_gens)
                                 - sum(crl[a] for a in bus_loads)
-                                - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi 
+                                - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi
                                 )
     JuMP.@constraint(pm.model, sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
                                 + sum(cidc[d] for d in bus_arcs_dc)
                                 ==
                                 sum(cig[g] for g in bus_gens)
                                 - sum(cil[a] for a in bus_loads)
-                                - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr 
+                                - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
                                 )
 end
