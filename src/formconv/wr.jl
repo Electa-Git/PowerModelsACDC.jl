@@ -45,7 +45,7 @@ function constraint_voltage_product_converter_ne(pm::_PM.AbstractWRConicModel, w
     JuMP.@constraint(pm.model, wr <= z*JuMP.upper_bound(wr))
     JuMP.@constraint(pm.model, wi >= z*JuMP.lower_bound(wi))
     JuMP.@constraint(pm.model, wi <= z*JuMP.upper_bound(wi))
-    relaxation_complex_product_conic_on_off(pm.model, w_fr, w_to, wr, wi, z)
+    _IM.relaxation_complex_product_conic_on_off(pm.model, w_fr, w_to, wr, wi, z)
 end
 
 function constraint_voltage_product_converter_ne(pm::_PM.AbstractWRModel, wr, wi, w_fr, w_to, z)
