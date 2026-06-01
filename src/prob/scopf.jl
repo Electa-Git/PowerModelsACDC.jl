@@ -32,8 +32,7 @@ Construct the preventive SCOPF JuMP model.
 - `pm::_PM.AbstractPowerModel` : PowerModels internal model holder (parsed data, settings and references).
 
 # Details
-- For each network/time index declared in `pm.ref[:it][:pm][:nw]`:
-  - creates per-network variables (bus voltages, generator/branch/storage power, DC variables, PST, SSSC, flexible demand, generator action variables).
+- Creates per-network variables (bus voltages, generator/branch/storage power, DC variables, PST, SSSC, flexible demand, generator action variables).
 - Calls `first_stage_model!` for each specified first-stage network/hour (`pm.ref[:it][:pm][:hour_ids]`) to add pre-contingency constraints.
 - Calls `second_stage_model!` for each contingency network (`pm.ref[:it][:pm][:cont_ids]`) to add post-contingency constraints and component outage handling.
 - Assembles the preventive SCOPF objective through `objective_min_scopf_cost(pm; network_ids = ...)`.
@@ -42,7 +41,7 @@ Construct the preventive SCOPF JuMP model.
 - Converter droop optimization and DC converter passivity checks are supported via `pm.setting` flags.
 """
 function build_scopf(pm::_PM.AbstractPowerModel)
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
         _PM.variable_branch_power(pm; nw = n)
@@ -123,7 +122,7 @@ function first_stage_model!(pm, n)
         constraint_conv_transformer(pm, i; nw = n)
         constraint_conv_reactor(pm, i; nw = n)
         constraint_conv_filter(pm, i; nw = n)
-        if pm.ref[:it][:pm][:nw][n][:convdc][i]["islcc"] == 1
+        if _PM.ref(pm, n, :convdc, i, "islcc") == 1
             constraint_conv_firing_angle(pm, i; nw = n)
         end
         if haskey(pm.setting, "optimize_converter_droop") && pm.setting["optimize_converter_droop"] == true
@@ -200,8 +199,8 @@ function second_stage_model!(pm, n)
             constraint_ohms_dc_branch(pm, i; nw = n)
         end
     end
-    
-    
+
+
     for i in _PM.ids(pm, n, :convdc)
         if contingencies[cont_id]["dcconv_id1"] == i || contingencies[cont_id]["dcconv_id2"] == i || contingencies[cont_id]["dcconv_id3"] == i
             constraint_converter_contingencies(pm, i; nw = n)
@@ -211,10 +210,10 @@ function second_stage_model!(pm, n)
             constraint_conv_transformer(pm, i; nw = n)
             constraint_conv_reactor(pm, i; nw = n)
             constraint_conv_filter(pm, i; nw = n)
-            if pm.ref[:it][:pm][:nw][n][:convdc][i]["islcc"] == 1
+            if _PM.ref(pm, n, :convdc, i, "islcc") == 1
                 constraint_conv_firing_angle(pm, i; nw = n)
             end
             constraint_dc_droop_control(pm, i, nw = n; scopf = true)
-        end 
+        end
     end
 end

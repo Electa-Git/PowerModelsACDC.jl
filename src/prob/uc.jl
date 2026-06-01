@@ -33,12 +33,11 @@ Construct the multi-network / multi-period Unit Commitment (UC) JuMP model.
 - `pm::_PM.AbstractPowerModel` : PowerModels internal model holder with multi-network/time references.
 
 # Details
-- For each network/time index in `pm.ref[:it][:pm][:nw]` the builder:
-  - creates operational variables: bus voltages, branch/gen/storage powers, branch currents (if BF/SOCBF), DC variables, flexible demand, PST/SSSC variables.
-  - creates UC-specific variables: generator start/on/off/state indicators, storage on/off, contingency/state variables if present.
-  - enforces per-network constraints: reference bus angle, AC power balance, branch Ohm/voltage-angle/thermal limits, DC power balance and DC Ohm laws, converter losses/current limits, flexible demand aggregation.
-  - enforces generator UC constraints (on/off linking, unit commitment constraints) and (optionally) UC reserves via `pm.setting["uc_reserves"]`.
-  - enforces storage coupling and storage on/off constraints when storage is present.
+- Creates operational variables: bus voltages, branch/gen/storage powers, branch currents (if BF/SOCBF), DC variables, flexible demand, PST/SSSC variables.
+- Creates UC-specific variables: generator start/on/off/state indicators, storage on/off, contingency/state variables if present.
+- Enforces per-network constraints: reference bus angle, AC power balance, branch Ohm/voltage-angle/thermal limits, DC power balance and DC Ohm laws, converter losses/current limits, flexible demand aggregation.
+- Enforces generator UC constraints (on/off linking, unit commitment constraints) and (optionally) UC reserves via `pm.setting["uc_reserves"]`.
+- Enforces storage coupling and storage on/off constraints when storage is present.
 - Applies optional global constraints:
   - fixed cross-border flows when `pm.setting["fix_cross_border_flows"] == true`.
 - Assembles the objective via `objective_min_cost_uc(pm)`.
@@ -47,7 +46,7 @@ Construct the multi-network / multi-period Unit Commitment (UC) JuMP model.
 - The builder relies on ACDC-specific primitives; extend `pm.setting` to enable/disable features.
 """
 function build_uc(pm::_PM.AbstractPowerModel)
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_branch_power(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
@@ -67,15 +66,15 @@ function build_uc(pm::_PM.AbstractPowerModel)
         constraint_voltage_dc(pm; nw = n)
     end
 
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         for i in _PM.ids(pm, n, :ref_buses)
             _PM.constraint_theta_ref(pm, i; nw = n)
         end
-    
+
         for i in _PM.ids(pm, n, :bus)
             constraint_power_balance_ac(pm, i; nw = n)
         end
-        
+
         for i in _PM.ids(pm, n, :branch)
             _PM.constraint_ohms_yt_from(pm, i; nw = n)
             _PM.constraint_ohms_yt_to(pm, i; nw = n)
@@ -96,11 +95,11 @@ function build_uc(pm::_PM.AbstractPowerModel)
             constraint_conv_reactor(pm, i; nw = n)
             constraint_conv_filter(pm, i; nw = n)
         end
-    
+
         for i in _PM.ids(pm, n, :flex_load)
             constraint_total_flexible_demand(pm, i; nw = n)
         end
-    
+
         for i in _PM.ids(pm, n, :gen)
             constraint_generator_on_off(pm, i; nw = n, use_status = false)
             constraint_unit_commitment(pm, i; nw = n)
@@ -108,13 +107,12 @@ function build_uc(pm::_PM.AbstractPowerModel)
                 constraint_unit_commitment_reserves(pm, i; nw = n)
             end
         end
-    
+
         for i in _PM.ids(pm, n, :pst)
             constraint_ohms_y_from_pst(pm, i; nw = n)
             constraint_ohms_y_to_pst(pm, i; nw = n)
             constraint_limits_pst(pm, i; nw = n)
         end
-
 
         for i in _PM.ids(pm, n, :sssc)
             constraint_ohms_y_from_sssc(pm, i; nw = n)
@@ -164,7 +162,7 @@ function objective_min_cost_uc(pm::_PM.AbstractPowerModel; report::Bool=true, dr
     gen_cost = Dict()
 
     for n in pm.ref[:it][:pm][:hour_ids]
-        for (i,gen) in _PM.nws(pm)[n][:gen]
+        for (i,gen) in _PM.ref(pm, n, :gen)
             beta_g =  _PM.var(pm, n, :beta_g, i)
             alpha_g =  _PM.var(pm, n, :alpha_g, i)
             pg =  _PM.var(pm, n, :pg, i)
@@ -175,8 +173,8 @@ function objective_min_cost_uc(pm::_PM.AbstractPowerModel; report::Bool=true, dr
     load_cost_red, load_cost_curt = calc_load_operational_cost_uc(pm)
 
     return JuMP.@objective(pm.model, Min,
-        sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gen]) for n in pm.ref[:it][:pm][:hour_ids]) 
-        + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in pm.ref[:it][:pm][:hour_ids])
-        + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in pm.ref[:it][:pm][:hour_ids])
+        sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.ref(pm, n, :gen)) for n in pm.ref[:it][:pm][:hour_ids])
+        + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.ref(pm, n, :load)) for n in pm.ref[:it][:pm][:hour_ids])
+        + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.ref(pm, n, :load)) for n in pm.ref[:it][:pm][:hour_ids])
     )
 end

@@ -64,7 +64,7 @@ function calc_load_operational_cost_uc(pm::_PM.AbstractPowerModel)
     load_cost_red = Dict()
     load_cost_curt = Dict()
     for n in pm.ref[:it][:pm][:hour_ids]
-        for (l, load) in _PM.nws(pm)[n][:load]
+        for (l, load) in _PM.ref(pm, n, :load)
             p_red = _PM.var(pm, n, :pred, l)
             p_curt = _PM.var(pm, n, :pcurt, l)
             load_cost_red[n, l] = load["cost_red"]  * p_red
