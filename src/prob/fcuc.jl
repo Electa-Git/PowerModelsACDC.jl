@@ -31,8 +31,8 @@ Construct the multi-network FCUC JuMP model.
 - `pm::_PM.AbstractPowerModel` : PowerModels internal model holder with multi-network and time-series references.
 
 # Details
-- Iterates networks declared in `pm.ref[:it][:pm][:nw]` and adds network-scoped variables
-  for AC voltages, DC grid variables, converters and inertia/reserve contributions.
+- Adds network-scoped variables for AC voltages, DC grid variables, converters and
+  inertia/reserve contributions.
 - Calls `uc_model!` for each scheduling hour (from `pm.ref[:it][:pm][:hour_ids]`) to build
   the per-hour UC submodel (branch power, storage, unit commitment variables, contingencies).
 - Calls `contingency_constraints!` for contingency stages (from `pm.ref[:it][:pm][:cont_ids]`).
@@ -40,7 +40,7 @@ Construct the multi-network FCUC JuMP model.
 """
 function build_fcuc(pm::_PM.AbstractPowerModel)
 
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.variable_bus_voltage(pm; nw = n)
 
         variable_active_dcbranch_flow(pm; nw = n)

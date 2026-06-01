@@ -203,7 +203,7 @@ function build_tnep(pm::_PM.AbstractPowerModel)
         constraint_conv_transformer(pm, i)
         constraint_conv_reactor(pm, i)
         constraint_conv_filter(pm, i)
-        if pm.ref[:it][:pm][:nw][_PM.nw_id_default][:convdc][i]["islcc"] == 1
+        if _PM.ref(pm, :convdc, i, "islcc") == 1
             constraint_conv_firing_angle(pm, i)
         end
     end
@@ -215,7 +215,7 @@ function build_tnep(pm::_PM.AbstractPowerModel)
         constraint_conv_transformer_ne(pm, i)
         constraint_conv_reactor_ne(pm, i)
         constraint_conv_filter_ne(pm, i)
-        if pm.ref[:it][:pm][:nw][_PM.nw_id_default][:convdc_ne][i]["islcc"] == 1
+        if _PM.ref(pm, :convdc_ne, i, "islcc") == 1
             constraint_conv_firing_angle_ne(pm, i)
         end
     end
@@ -226,7 +226,7 @@ end
 Build a multi-period / multi-network TNEP JuMP model.
 
 # Inputs
-- `pm::_PM.AbstractPowerModel` : PowerModels internal model holder containing `pm.ref[:it][:pm][:nw]`.
+- `pm::_PM.AbstractPowerModel` : PowerModels internal model holder.
 
 # Details
 - For each network/time index `n` creates network-scoped operational variables
@@ -240,7 +240,7 @@ Build a multi-period / multi-network TNEP JuMP model.
 - Assembles the combined operational + CAPEX objective via `objective_min_operational_capex_cost(pm)`.
 """
 function build_mp_tnep(pm::_PM.AbstractPowerModel)
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
         _PM.variable_branch_power(pm; nw = n)
@@ -269,7 +269,7 @@ function build_mp_tnep(pm::_PM.AbstractPowerModel)
 
     objective_min_operational_capex_cost(pm)
 
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.constraint_model_voltage(pm; nw = n)
         _PM.constraint_ne_model_voltage(pm; nw = n)
         constraint_voltage_dc(pm; nw = n)
@@ -344,7 +344,7 @@ function build_mp_tnep(pm::_PM.AbstractPowerModel)
             constraint_conv_transformer(pm, i; nw = n)
             constraint_conv_reactor(pm, i; nw = n)
             constraint_conv_filter(pm, i; nw = n)
-            if pm.ref[:it][:pm][:nw][n][:convdc][i]["islcc"] == 1
+            if _PM.ref(pm, n, :convdc, i, "islcc") == 1
                 constraint_conv_firing_angle(pm, i; nw = n)
             end
         end
@@ -358,7 +358,7 @@ function build_mp_tnep(pm::_PM.AbstractPowerModel)
             constraint_conv_transformer_ne(pm, i; nw = n)
             constraint_conv_reactor_ne(pm, i; nw = n)
             constraint_conv_filter_ne(pm, i; nw = n)
-            if pm.ref[:it][:pm][:nw][n][:convdc_ne][i]["islcc"] == 1
+            if _PM.ref(pm, n, :convdc_ne, i, "islcc") == 1
                 constraint_conv_firing_angle_ne(pm, i; nw = n)
             end
         end
@@ -474,7 +474,7 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
         constraint_conv_transformer(pm, i)
         constraint_conv_reactor(pm, i)
         constraint_conv_filter(pm, i)
-        if pm.ref[:it][:pm][:nw][_PM.nw_id_default][:convdc][i]["islcc"] == 1
+        if _PM.ref(pm, :convdc, i, "islcc") == 1
             constraint_conv_firing_angle(pm, i)
         end
     end
@@ -486,7 +486,7 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
         constraint_conv_transformer_ne(pm, i)
         constraint_conv_reactor_ne(pm, i)
         constraint_conv_filter_ne(pm, i)
-        if pm.ref[:it][:pm][:nw][_PM.nw_id_default][:convdc_ne][i]["islcc"] == 1
+        if _PM.ref(pm, :convdc_ne, i, "islcc") == 1
             constraint_conv_firing_angle_ne(pm, i)
         end
     end
@@ -504,7 +504,7 @@ variables and constraints for each network/time `nw` and mirrors the logic of
   other BF-specific variable/constraint primitives per network.
 """
 function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
         _PM.variable_branch_power(pm; nw = n)
@@ -535,7 +535,7 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
 
     objective_min_operational_capex_cost(pm)
 
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.constraint_model_voltage(pm; nw = n)
         _PM.constraint_ne_model_voltage(pm; nw = n)
         constraint_voltage_dc(pm; nw = n)
@@ -611,7 +611,7 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
             constraint_conv_transformer(pm, i; nw = n)
             constraint_conv_reactor(pm, i; nw = n)
             constraint_conv_filter(pm, i; nw = n)
-            if pm.ref[:it][:pm][:nw][n][:convdc][i]["islcc"] == 1
+            if _PM.ref(pm, n, :convdc, i, "islcc") == 1
                 constraint_conv_firing_angle(pm, i; nw = n)
             end
         end
@@ -625,7 +625,7 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
             constraint_conv_transformer_ne(pm, i; nw = n)
             constraint_conv_reactor_ne(pm, i; nw = n)
             constraint_conv_filter_ne(pm, i; nw = n)
-            if pm.ref[:it][:pm][:nw][n][:convdc_ne][i]["islcc"] == 1
+            if _PM.ref(pm, n, :convdc_ne, i, "islcc") == 1
                 constraint_conv_firing_angle_ne(pm, i; nw = n)
             end
         end

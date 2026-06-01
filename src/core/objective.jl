@@ -1,20 +1,20 @@
 "Sum of generation, demand reduction and demand shedding costs"
-function objective_min_operational_cost(pm::_PM.AbstractPowerModel; network_ids = [n for n in _PM.nw_ids(pm)])
+function objective_min_operational_cost(pm::_PM.AbstractPowerModel; network_ids = _PM.nw_ids(pm))
     if haskey(pm.setting, "objective_components")
         components = pm.setting["objective_components"]
     else
         components = ["gen"]
-    end   
+    end
 
     gen_cost, gendc_cost = calc_gen_cost(pm; components = components, network_ids = network_ids)
     load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = components, network_ids = network_ids)
 
 
     return JuMP.@objective(pm.model, Min,
-        sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gen]) for n in network_ids)
-        + sum( sum( gendc_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gendc]) for n in network_ids)
-        + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in network_ids)
-        + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in network_ids)
+        sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.ref(pm, n, :gen)) for n in network_ids)
+        + sum( sum( gendc_cost[(n,i)] for (i,gen) in _PM.ref(pm, n, :gendc)) for n in network_ids)
+        + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.ref(pm, n, :load)) for n in network_ids)
+        + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.ref(pm, n, :load)) for n in network_ids)
     )
 end
 
@@ -24,7 +24,7 @@ function objective_min_operational_capex_cost(pm::_PM.AbstractPowerModel)
         components = pm.setting["objective_components"]
     else
         components = ["gen", "dc_converter", "dc_branch", "ac_branch"]
-    end   
+    end
 
     gen_cost, gendc_cost = calc_gen_cost(pm; components = components)
     load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = components)
@@ -42,13 +42,13 @@ function objective_min_operational_capex_cost(pm::_PM.AbstractPowerModel)
     )
 end
 
-function calc_gen_cost(pm::_PM.AbstractPowerModel; report::Bool=true, components = ["gen"], network_ids = [n for n in _PM.nw_ids(pm)])
+function calc_gen_cost(pm::_PM.AbstractPowerModel; report::Bool=true, components = ["gen"], network_ids = _PM.nw_ids(pm))
     gen_cost = Dict()
     gendc_cost = Dict()
 
     if any(components .== "gen")
         for n in network_ids
-            for (i,gen) in _PM.nws(pm)[n][:gen]
+            for (i,gen) in _PM.ref(pm, n, :gen)
                 pg = _PM.var(pm, n, :pg, i)
 
                 if length(gen["cost"]) == 1
@@ -62,8 +62,8 @@ function calc_gen_cost(pm::_PM.AbstractPowerModel; report::Bool=true, components
                 end
             end
 
-            if !isempty(_PM.nws(pm)[n][:gendc])
-                for (i,gen) in _PM.nws(pm)[n][:gendc]
+            if !isempty(_PM.ref(pm, n, :gendc))
+                for (i,gen) in _PM.ref(pm, n, :gendc)
                     pgdc = _PM.var(pm, n, :pgdc, i)
 
                     if length(gen["cost"]) == 1
@@ -80,10 +80,10 @@ function calc_gen_cost(pm::_PM.AbstractPowerModel; report::Bool=true, components
         end
     else
          for n in network_ids
-            for (i,gen) in _PM.nws(pm)[n][:gen]
+            for (i,gen) in _PM.ref(pm, n, :gen)
                 gen_cost[(n,i)] = 0.0
             end
-            for (i,gen) in _PM.nws(pm)[n][:gendc]
+            for (i,gen) in _PM.ref(pm, n, :gendc)
                 gendc_cost[(n,i)] = 0.0
             end
         end
@@ -91,13 +91,13 @@ function calc_gen_cost(pm::_PM.AbstractPowerModel; report::Bool=true, components
     return gen_cost, gendc_cost
 end
 
-function calc_load_operational_cost(pm::_PM.AbstractPowerModel; components = [], network_ids = [n for n in _PM.nw_ids(pm)])
+function calc_load_operational_cost(pm::_PM.AbstractPowerModel; components = [], network_ids = _PM.nw_ids(pm))
     load_cost_red = Dict()
     load_cost_curt = Dict()
 
     if any(components .== "demand")
-        for n in network_ids 
-            for (i,load) in _PM.nws(pm)[n][:load]
+        for n in network_ids
+            for (i,load) in _PM.ref(pm, n, :load)
                 p_red = _PM.var(pm, n, :pred, i)
                 p_curt = _PM.var(pm, n, :pcurt, i)
                 load_cost_red[(n,i)] = load["cost_red"]  * p_red
@@ -122,7 +122,7 @@ function objective_min_rd_cost(pm::_PM.AbstractPowerModel; report::Bool=true)
         components = pm.setting["objective_components"]
     else
         components = []
-    end 
+    end
 
     gen_cost = Dict()
     for (n, nw_ref) in _PM.nws(pm)
@@ -148,7 +148,7 @@ function objective_min_rd_cost_inertia(pm::_PM.AbstractPowerModel; report::Bool=
         components = pm.setting["objective_components"]
     else
         components = []
-    end 
+    end
     gen_cost = Dict()
 
     for (n, nw_ref) in _PM.nws(pm)
@@ -161,7 +161,7 @@ function objective_min_rd_cost_inertia(pm::_PM.AbstractPowerModel; report::Bool=
     load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = components)
 
     return JuMP.@objective(pm.model, Min,
-        sum( sum( gen_cost[(n,i)] for (i,gen) in nw_ref[:gen]) for (n, nw_ref) in _PM.nws(pm)) 
+        sum( sum( gen_cost[(n,i)] for (i,gen) in nw_ref[:gen]) for (n, nw_ref) in _PM.nws(pm))
         + sum( sum( load_cost_curt[(n,i)] for (i,load) in nw_ref[:load]) for (n, nw_ref) in _PM.nws(pm))
         + sum( sum( load_cost_red[(n,i)] for (i,load) in nw_ref[:load]) for (n, nw_ref) in _PM.nws(pm))
     )
@@ -216,15 +216,15 @@ end
 "Sum of generator operational and start-up costs, FCR and FFR costs, demand reduction and demand shedding costs"
 function objective_min_cost_fcuc(pm::_PM.AbstractPowerModel; report::Bool=true, droop = false, storage = true)
     gen_cost, gendc_cost = calc_gen_cost(pm)
-    ffr_cost, fcr_cost_gen, fcr_cost_strg = calc_reserve_cost(pm; droop = droop, storage = storage) #; components = ["fcr", "ffr"]) 
+    ffr_cost, fcr_cost_gen, fcr_cost_strg = calc_reserve_cost(pm; droop = droop, storage = storage) #; components = ["fcr", "ffr"])
     load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = ["demand"], network_ids = pm.ref[:it][:pm][:hour_ids])
 
     return JuMP.@objective(pm.model, Min,
-          sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gen]) for n in pm.ref[:it][:pm][:hour_ids]) 
-        + sum( sum( gendc_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gendc]) for n in pm.ref[:it][:pm][:hour_ids])
-        + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in pm.ref[:it][:pm][:hour_ids])
-        + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in pm.ref[:it][:pm][:hour_ids])
-        + sum( sum( ffr_cost[(n,i)] for (i,conv) in _PM.nws(pm)[n][:convdc]) for n in pm.ref[:it][:pm][:hour_ids])
+          sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.ref(pm, n, :gen)) for n in pm.ref[:it][:pm][:hour_ids])
+        + sum( sum( gendc_cost[(n,i)] for (i,gen) in _PM.ref(pm, n, :gendc)) for n in pm.ref[:it][:pm][:hour_ids])
+        + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.ref(pm, n, :load)) for n in pm.ref[:it][:pm][:hour_ids])
+        + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.ref(pm, n, :load)) for n in pm.ref[:it][:pm][:hour_ids])
+        + sum( sum( ffr_cost[(n,i)] for (i,conv) in _PM.ref(pm, n, :convdc)) for n in pm.ref[:it][:pm][:hour_ids])
         + sum( sum( fcr_cost_gen[(n,i)] for (i,gen) in nw_ref[:gen]) for (n, nw_ref) in _PM.nws(pm))
         + sum( sum( fcr_cost_strg[(n,i)] for (i,gen) in nw_ref[:storage]) for (n, nw_ref) in _PM.nws(pm))
     )
@@ -236,33 +236,33 @@ function calc_reserve_cost(pm; droop = false, storage = true)
     fcr_cost_gen = Dict()
     fcr_cost_strg = Dict()
 
-    for (n, network) in pm.ref[:it][:pm][:nw]
-        for (i,gen) in _PM.nws(pm)[n][:gen]
+    for n in _PM.nw_ids(pm)
+        for i in _PM.ids(pm, n, :gen)
             if n == 1 || droop == false
                 fcr_cost_gen[(n,i)] = 0.0
             else
-                pgd =  _PM.var(pm, n, :pg_droop_abs, i)
-                fcr_cost_gen[(n,i)] = (pgd * network[:frequency_parameters]["fcr_cost"])
+                pgd = _PM.var(pm, n, :pg_droop_abs, i)
+                fcr_cost_gen[(n,i)] = pgd * _PM.ref(pm, n, :frequency_parameters, "fcr_cost")
             end
         end
 
         if storage == true
-            for (s,strg) in _PM.nws(pm)[n][:storage]
+            for s in _PM.ids(pm, n, :storage)
                 if n == 1 || droop == false
                     fcr_cost_strg[(n,s)] = 0.0
                 else
-                    pgs =  _PM.var(pm, n, :ps_droop_abs, s)
-                    fcr_cost_strg[(n,s)] = (pgs * network[:frequency_parameters]["fcr_cost"])
+                    pgs = _PM.var(pm, n, :ps_droop_abs, s)
+                    fcr_cost_strg[(n,s)] = pgs * _PM.ref(pm, n, :frequency_parameters, "fcr_cost")
                 end
             end
         end
 
-        for (c, conv) in _PM.nws(pm)[n][:convdc]
+        for c in _PM.ids(pm, n, :convdc)
             if n == 1
                 ffr_cost[(n,c)] = 0.0
             else
-                pconv =  _PM.var(pm, n, :pconv_in_abs, c)
-                ffr_cost[(n,c)] = (pconv * network[:frequency_parameters]["ffr_cost"]) * 1/2  # as it is summed-up
+                pconv = _PM.var(pm, n, :pconv_in_abs, c)
+                ffr_cost[(n,c)] = pconv * _PM.ref(pm, n, :frequency_parameters, "ffr_cost") * 1/2  # as it is summed-up
             end
         end
     end
@@ -271,21 +271,21 @@ end
 
 
 "Sum of generation, demand reduction and demand shedding costs"
-function objective_min_scopf_cost(pm::_PM.AbstractPowerModel; network_ids = [n for n in _PM.nw_ids(pm)])
+function objective_min_scopf_cost(pm::_PM.AbstractPowerModel; network_ids = _PM.nw_ids(pm))
     if haskey(pm.setting, "objective_components")
         components = pm.setting["objective_components"]
     else
         components = ["gen"]
-    end   
+    end
 
     gen_cost, gendc_cost = calc_gen_cost(pm; components = components, network_ids = network_ids)
-    load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = "demand", network_ids = [n for n in _PM.nw_ids(pm)])
+    load_cost_red, load_cost_curt = calc_load_operational_cost(pm; components = "demand", network_ids = _PM.nw_ids(pm))
 
 
     return JuMP.@objective(pm.model, Min,
-        sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gen]) for n in network_ids)
-        + sum( sum( gendc_cost[(n,i)] for (i,gen) in _PM.nws(pm)[n][:gendc]) for n in network_ids)
-        + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in _PM.nw_ids(pm))
-        + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.nws(pm)[n][:load]) for n in _PM.nw_ids(pm))
+        sum( sum( gen_cost[(n,i)] for (i,gen) in _PM.ref(pm, n, :gen)) for n in network_ids)
+        + sum( sum( gendc_cost[(n,i)] for (i,gen) in _PM.ref(pm, n, :gendc)) for n in network_ids)
+        + sum( sum( load_cost_curt[(n,i)] for (i,load) in _PM.ref(pm, n, :load)) for n in _PM.nw_ids(pm))
+        + sum( sum( load_cost_red[(n,i)] for (i,load) in _PM.ref(pm, n, :load)) for n in _PM.nw_ids(pm))
     )
 end
