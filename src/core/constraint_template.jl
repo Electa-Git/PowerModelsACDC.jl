@@ -23,7 +23,6 @@ function constraint_power_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int
     constraint_power_balance_ac(pm, nw, i, bus_arcs, bus_arcs_pst, bus_arcs_sssc, bus_convs_ac, bus_arcs_sw, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
 end
 
-
 function constraint_current_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     bus = _PM.ref(pm, nw, :bus, i)
     bus_arcs = _PM.ref(pm, nw, :bus_arcs, i)
@@ -192,7 +191,6 @@ function constraint_power_balance_acdc_ne(pm::_PM.AbstractPowerModel, i::Int; nw
     bus_storage = _PM.ref(pm, nw, :bus_storage, i)
     bus_arcs_sssc = _PM.ref(pm, nw, :bus_arcs_sssc, i)
 
-
     pd = Dict(k => _PM.ref(pm, nw, :load, k, "pd") for k in bus_loads)
     qd = Dict(k => _PM.ref(pm, nw, :load, k, "qd") for k in bus_loads)
 
@@ -279,12 +277,12 @@ function constraint_converter_losses_ne(pm::_PM.AbstractPowerModel, i::Int; nw::
     constraint_converter_losses_ne(pm, nw, i, a, b, c, plmax)
 end
 #
- function constraint_converter_current_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
-     conv = _PM.ref(pm, nw, :convdc_ne, i)
-     Vmax = conv["Vmmax"]
-     Imax = conv["Imax"]
-     constraint_converter_current_ne(pm, nw, i, Vmax, Imax)
- end
+function constraint_converter_current_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    conv = _PM.ref(pm, nw, :convdc_ne, i)
+    Vmax = conv["Vmmax"]
+    Imax = conv["Imax"]
+    constraint_converter_current_ne(pm, nw, i, Vmax, Imax)
+end
 
 function constraint_conv_reactor_ne(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     conv = _PM.ref(pm, nw, :convdc_ne, i)
@@ -312,7 +310,6 @@ function constraint_conv_firing_angle_ne(pm::_PM.AbstractPowerModel, i::Int; nw:
      Q2 = sin(pi) * S
      constraint_conv_firing_angle_ne(pm, n, i, S, P1, Q1, P2, Q2)
 end
-
 
 function constraint_converter_limits(pm::_PM.AbstractIVRModel, i::Int; nw::Int=_PM.nw_id_default)
     bigM = 1.1;

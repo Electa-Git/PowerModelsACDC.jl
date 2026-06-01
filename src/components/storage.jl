@@ -8,7 +8,6 @@ function variable_storage_on_off(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_d
     report && _PM.sol_component_value(pm, nw, :storage, :alpha_s, _PM.ids(pm, nw, :storage), alpha_s)
 end
 
-
 # storage constaints for multi - period problems
 function storage_constraints(pm, n; uc = false)
     for i in _PM.ids(pm, n, :storage)
@@ -99,7 +98,6 @@ function constraint_storage_fcr_contribution(pm::_PM.AbstractPowerModel, i::Int,
     JuMP.@constraint(pm.model, ps_droop <=   ramp_rate * (ΔTdroop - ΔTin))
 end
 
-
 function  constraint_storage_fcr_contribution_abs(pm::_PM.AbstractPowerModel, i::Int, n::Int)
     ps_droop = _PM.var(pm, n, :ps_droop, i)
     ps_droop_abs = _PM.var(pm, n, :ps_droop_abs, i)
@@ -109,20 +107,17 @@ function  constraint_storage_fcr_contribution_abs(pm::_PM.AbstractPowerModel, i:
 end
 
 
-
 function constraint_storage_state_final(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
     initial_energy = _PM.ref(pm, nw, :storage, i)["energy"]
 
     constraint_storage_state_final(pm, nw, initial_energy, i)
 end
 
-
 function constraint_storage_state_final(pm::_PM.AbstractPowerModel, n, initial_energy, i)
     se_final = _PM.var(pm, n, :se, i)
 
     JuMP.@constraint(pm.model, se_final >= initial_energy)
 end
-
 
 function constraint_fixed_storage_state(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
     fixed_energy_vector = _PM.ref(pm, nw, :storage, i)["fixed_energy"]

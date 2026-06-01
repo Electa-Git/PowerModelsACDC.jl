@@ -41,7 +41,7 @@ function variable_converter_active_power(pm::_PM.AbstractPowerModel; nw::Int=_PM
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :pconv, _PM.ids(pm, nw, :convdc), pc)
+    report && _PM.sol_component_value(pm, nw, :convdc, :pconv, _PM.ids(pm, nw, :convdc), pc)
 end
 
 "variable: `qconv_ac[j]` for `j` in `convdc`"
@@ -58,9 +58,8 @@ function variable_converter_reactive_power(pm::_PM.AbstractPowerModel; nw::Int=_
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :qconv, _PM.ids(pm, nw, :convdc), qc)
+    report && _PM.sol_component_value(pm, nw, :convdc, :qconv, _PM.ids(pm, nw, :convdc), qc)
 end
-
 
 "variable: `pconv_grid_ac_to[j]` for `j` in `convdc`"
 function variable_conv_transformer_active_power_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -76,7 +75,7 @@ function variable_conv_transformer_active_power_to(pm::_PM.AbstractPowerModel; n
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :ptf_to, _PM.ids(pm, nw, :convdc), ptfto)
+    report && _PM.sol_component_value(pm, nw, :convdc, :ptf_to, _PM.ids(pm, nw, :convdc), ptfto)
 end
 
 "variable: `qconv_grid_ac_to[j]` for `j` in `convdc`"
@@ -93,9 +92,8 @@ function variable_conv_transformer_reactive_power_to(pm::_PM.AbstractPowerModel;
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :qtf_to, _PM.ids(pm, nw, :convdc), qtfto)
+    report && _PM.sol_component_value(pm, nw, :convdc, :qtf_to, _PM.ids(pm, nw, :convdc), qtfto)
 end
-
 
 "variable: `pconv_pr_from[j]` for `j` in `convdc`"
 function variable_conv_reactor_active_power_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -111,7 +109,7 @@ function variable_conv_reactor_active_power_from(pm::_PM.AbstractPowerModel; nw:
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :ppr_fr, _PM.ids(pm, nw, :convdc), pprfr)
+    report && _PM.sol_component_value(pm, nw, :convdc, :ppr_fr, _PM.ids(pm, nw, :convdc), pprfr)
 end
 
 "variable: `qconv_pr_from[j]` for `j` in `convdc`"
@@ -128,7 +126,7 @@ function variable_conv_reactor_reactive_power_from(pm::_PM.AbstractPowerModel; n
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :qpr_fr, _PM.ids(pm, nw, :convdc), qprfr)
+    report && _PM.sol_component_value(pm, nw, :convdc, :qpr_fr, _PM.ids(pm, nw, :convdc), qprfr)
 end
 
 "variable: `pconv_grid_ac[j]` for `j` in `convdc`"
@@ -145,7 +143,7 @@ function variable_converter_to_grid_active_power(pm::_PM.AbstractPowerModel; nw:
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :pgrid, _PM.ids(pm, nw, :convdc), ptffr)
+    report && _PM.sol_component_value(pm, nw, :convdc, :pgrid, _PM.ids(pm, nw, :convdc), ptffr)
 end
 
 "variable: `qconv_grid_ac[j]` for `j` in `convdc`"
@@ -162,9 +160,8 @@ function variable_converter_to_grid_reactive_power(pm::_PM.AbstractPowerModel; n
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :qgrid, _PM.ids(pm, nw, :convdc), qtffr)
+    report && _PM.sol_component_value(pm, nw, :convdc, :qgrid, _PM.ids(pm, nw, :convdc), qtffr)
 end
-
 
 "variable: `pconv_dc[j]` for `j` in `convdc`"
 function variable_dcside_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -180,7 +177,7 @@ function variable_dcside_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_def
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :pdc, _PM.ids(pm, nw, :convdc), pcdc)
+    report && _PM.sol_component_value(pm, nw, :convdc, :pdc, _PM.ids(pm, nw, :convdc), pcdc)
 end
 
 "variable: `pconv_dc[j]` for `j` in `convdc`"
@@ -196,7 +193,7 @@ function variable_converter_firing_angle(pm::_PM.AbstractPowerModel; nw::Int=_PM
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :phi, _PM.ids(pm, nw, :convdc), phic)
+    report && _PM.sol_component_value(pm, nw, :convdc, :phi, _PM.ids(pm, nw, :convdc), phic)
 end
 
 "variable: `iconv_ac[j]` for `j` in `convdc`"
@@ -215,7 +212,7 @@ function variable_acside_current(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_d
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :iconv, _PM.ids(pm, nw, :convdc), ic)
+    report && _PM.sol_component_value(pm, nw, :convdc, :iconv, _PM.ids(pm, nw, :convdc), ic)
 end
 
 "variable: `iconv_ac[j]` and `iconv_ac_sq[j]` for `j` in `convdc`"
@@ -237,8 +234,8 @@ function variable_acside_current(pm::_PM.AbstractWModels; nw::Int=_PM.nw_id_defa
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :iconv_ac, _PM.ids(pm, nw, :convdc), ic)
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :iconv_ac_sq, _PM.ids(pm, nw, :convdc), icsq)
+    report && _PM.sol_component_value(pm, nw, :convdc, :iconv_ac, _PM.ids(pm, nw, :convdc), ic)
+    report && _PM.sol_component_value(pm, nw, :convdc, :iconv_ac_sq, _PM.ids(pm, nw, :convdc), icsq)
 end
 
 "variable: `iconv_ac[j]` and `iconv_ac_sq[j]` for `j` in `convdc` for ACR formulation"
@@ -260,8 +257,8 @@ function variable_acside_current(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_def
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :iconv_ac, _PM.ids(pm, nw, :convdc), ic)
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :iconv_ac_sq, _PM.ids(pm, nw, :convdc), icsq)
+    report && _PM.sol_component_value(pm, nw, :convdc, :iconv_ac, _PM.ids(pm, nw, :convdc), ic)
+    report && _PM.sol_component_value(pm, nw, :convdc, :iconv_ac_sq, _PM.ids(pm, nw, :convdc), icsq)
 end
 
 "variable: `itf_sq[j]` for `j` in `convdc`"
@@ -277,9 +274,8 @@ function variable_conv_transformer_current_sqr(pm::_PM.AbstractWModels; nw::Int=
             JuMP.set_upper_bound(itfsq[c], (bigM * convdc["Imax"])^2)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :itf_sq, _PM.ids(pm, nw, :convdc), itfsq)
+    report && _PM.sol_component_value(pm, nw, :convdc, :itf_sq, _PM.ids(pm, nw, :convdc), itfsq)
 end
-
 
 "variable: `irc_sq[j]` for `j` in `convdc`"
 function variable_conv_reactor_current_sqr(pm::_PM.AbstractWModels; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -294,15 +290,13 @@ function variable_conv_reactor_current_sqr(pm::_PM.AbstractWModels; nw::Int=_PM.
             JuMP.set_upper_bound(iprsq[c], (bigM * convdc["Imax"])^2)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :ipr_sq, _PM.ids(pm, nw, :convdc), iprsq)
+    report && _PM.sol_component_value(pm, nw, :convdc, :ipr_sq, _PM.ids(pm, nw, :convdc), iprsq)
 end
-
 
 function variable_converter_filter_voltage(pm::_PM.AbstractPowerModel; kwargs...)
     variable_converter_filter_voltage_magnitude(pm; kwargs...)
     variable_converter_filter_voltage_angle(pm; kwargs...)
 end
-
 
 "variable: `vmf[j]` for `j` in `convdc`"
 function variable_converter_filter_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -317,9 +311,8 @@ function variable_converter_filter_voltage_magnitude(pm::_PM.AbstractPowerModel;
             JuMP.set_upper_bound(vmf[c], convdc["Vmmax"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :vmfilt, _PM.ids(pm, nw, :convdc), vmf)
+    report && _PM.sol_component_value(pm, nw, :convdc, :vmfilt, _PM.ids(pm, nw, :convdc), vmf)
 end
-
 
 "variable: `vaf[j]` for `j` in `convdc`"
 function variable_converter_filter_voltage_angle(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -334,15 +327,13 @@ function variable_converter_filter_voltage_angle(pm::_PM.AbstractPowerModel; nw:
             JuMP.set_upper_bound(vaf[c],  bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :vafilt, _PM.ids(pm, nw, :convdc), vaf)
+    report && _PM.sol_component_value(pm, nw, :convdc, :vafilt, _PM.ids(pm, nw, :convdc), vaf)
 end
-
 
 function variable_converter_filter_voltage(pm::_PM.AbstractACRModel; kwargs...)
     variable_converter_filter_voltage_real(pm; kwargs...)
     variable_converter_filter_voltage_imaginary(pm; kwargs...)
 end
-
 
 "real part of the voltage variable `vrf[j]` for `j` in `convdc`"
 function variable_converter_filter_voltage_real(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -353,16 +344,16 @@ function variable_converter_filter_voltage_real(pm::_PM.AbstractACRModel; nw::In
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(vrf[c],  -convdc["Vmmax"] * bigM)   
-            JuMP.set_upper_bound(vrf[c],  convdc["Vmmax"] * bigM)   
+            JuMP.set_lower_bound(vrf[c],  -convdc["Vmmax"] * bigM)
+            JuMP.set_upper_bound(vrf[c],  convdc["Vmmax"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :vrfilt, _PM.ids(pm, nw, :convdc), vrf)
+    report && _PM.sol_component_value(pm, nw, :convdc, :vrfilt, _PM.ids(pm, nw, :convdc), vrf)
 end
 
 "imaginary part of the voltage variable `vif[j]` for `j` in `convdc`"
 function variable_converter_filter_voltage_imaginary(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2; 
+    bigM = 1.2;
     vif = _PM.var(pm, nw)[:vif] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_vif",
     start = 0
@@ -373,15 +364,13 @@ function variable_converter_filter_voltage_imaginary(pm::_PM.AbstractACRModel; n
             JuMP.set_upper_bound(vif[c],  convdc["Vmmax"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :vifilt, _PM.ids(pm, nw, :convdc), vif)
+    report && _PM.sol_component_value(pm, nw, :convdc, :vifilt, _PM.ids(pm, nw, :convdc), vif)
 end
-
 
 function variable_converter_internal_voltage(pm::_PM.AbstractPowerModel; kwargs...)
     variable_converter_internal_voltage_magnitude(pm; kwargs...)
     variable_converter_internal_voltage_angle(pm; kwargs...)
 end
-
 
 "variable: `vmc[j]` for `j` in `convdc`"
 function variable_converter_internal_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -395,7 +384,7 @@ function variable_converter_internal_voltage_magnitude(pm::_PM.AbstractPowerMode
             JuMP.set_upper_bound(vmc[c], convdc["Vmmax"])
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :vmconv, _PM.ids(pm, nw, :convdc), vmc)
+    report && _PM.sol_component_value(pm, nw, :convdc, :vmconv, _PM.ids(pm, nw, :convdc), vmc)
 end
 
 "variable: `vac[j]` for `j` in `convdc`"
@@ -411,10 +400,8 @@ function variable_converter_internal_voltage_angle(pm::_PM.AbstractPowerModel; n
             JuMP.set_upper_bound(vac[c],  bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :vaconv, _PM.ids(pm, nw, :convdc), vac)
+    report && _PM.sol_component_value(pm, nw, :convdc, :vaconv, _PM.ids(pm, nw, :convdc), vac)
 end
-
-
 
 function variable_converter_internal_voltage(pm::_PM.AbstractACRModel; kwargs...)
     variable_converter_internal_voltage_real(pm; kwargs...)
@@ -433,7 +420,7 @@ function variable_converter_internal_voltage_real(pm::_PM.AbstractACRModel; nw::
             JuMP.set_upper_bound(vrc[c],  convdc["Vmmax"])
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :vrconv, _PM.ids(pm, nw, :convdc), vrc)
+    report && _PM.sol_component_value(pm, nw, :convdc, :vrconv, _PM.ids(pm, nw, :convdc), vrc)
 end
 
 "imaginary part of the voltage variable `vic[j]` for `j` in `convdc`"
@@ -448,10 +435,8 @@ function variable_converter_internal_voltage_imaginary(pm::_PM.AbstractACRModel;
             JuMP.set_upper_bound(vic[c],  convdc["Vmmax"])
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :viconv, _PM.ids(pm, nw, :convdc), vic)
+    report && _PM.sol_component_value(pm, nw, :convdc, :viconv, _PM.ids(pm, nw, :convdc), vic)
 end
-
-
 
 "variable: `wrf_ac[j]` and `wif_ac`  for `j` in `convdc`"
 function variable_converter_filter_voltage_cross_products(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -473,8 +458,8 @@ function variable_converter_filter_voltage_cross_products(pm::_PM.AbstractPowerM
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :wrfilt, _PM.ids(pm, nw, :convdc), wrfac)
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :wifilt, _PM.ids(pm, nw, :convdc), wifac)
+    report && _PM.sol_component_value(pm, nw, :convdc, :wrfilt, _PM.ids(pm, nw, :convdc), wrfac)
+    report && _PM.sol_component_value(pm, nw, :convdc, :wifilt, _PM.ids(pm, nw, :convdc), wifac)
 end
 
 "variable: `wf_ac` for `j` in `convdc`"
@@ -490,9 +475,8 @@ function variable_converter_filter_voltage_magnitude_sqr(pm::_PM.AbstractPowerMo
             JuMP.set_upper_bound(wfac[c], (convdc["Vmmax"] * bigM)^2)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :wfilt, _PM.ids(pm, nw, :convdc), wfac)
+    report && _PM.sol_component_value(pm, nw, :convdc, :wfilt, _PM.ids(pm, nw, :convdc), wfac)
 end
-
 
 "variable: `wrc_ac[j]` and `wic_ac[j]`  for `j` in `convdc`"
 function variable_converter_internal_voltage_cross_products(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -514,8 +498,8 @@ function variable_converter_internal_voltage_cross_products(pm::_PM.AbstractPowe
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :wrconv, _PM.ids(pm, nw, :convdc), wrcac)
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :wiconv, _PM.ids(pm, nw, :convdc), wicac)
+    report && _PM.sol_component_value(pm, nw, :convdc, :wrconv, _PM.ids(pm, nw, :convdc), wrcac)
+    report && _PM.sol_component_value(pm, nw, :convdc, :wiconv, _PM.ids(pm, nw, :convdc), wicac)
 end
 
 "variable: `wc_ac[j]` for `j` in `convdc`"
@@ -530,13 +514,12 @@ function variable_converter_internal_voltage_magnitude_sqr(pm::_PM.AbstractPower
             JuMP.set_upper_bound(wcac[c], (convdc["Vmmax"])^2)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :wconv, _PM.ids(pm, nw, :convdc), wcac)
+    report && _PM.sol_component_value(pm, nw, :convdc, :wconv, _PM.ids(pm, nw, :convdc), wcac)
 end
 
 function variable_cos_voltage(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     #only for lpac
 end
-
 
 "Variable for optimizing the converter droop coeffcient"
 function variable_converter_droop_coefficient(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -552,9 +535,8 @@ function variable_converter_droop_coefficient(pm::_PM.AbstractPowerModel; nw::In
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :k_droop, _PM.ids(pm, nw, :convdc), k_droop)
+    report && _PM.sol_component_value(pm, nw, :convdc, :k_droop, _PM.ids(pm, nw, :convdc), k_droop)
 end
-
 
 ##################################### TNEP variables ##################################
 "All converter variables"
@@ -586,7 +568,6 @@ function variable_conv_reactor_flow_ne(pm::_PM.AbstractPowerModel; kwargs...)
     variable_conv_reactor_reactive_power_from_ne(pm; kwargs...)
 end
 
-
 "variable: `0 <= convdc_ne[c] <= 1` for `c` in `candidate converters"
 function variable_converter_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, relax::Bool=false, report::Bool=true)
     if !relax
@@ -603,8 +584,8 @@ function variable_converter_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_def
         start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc_ne, i), "branchdc_tnep_start", 1.0)
         )
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :isbuilt, _PM.ids(pm, nw, :convdc_ne), Z_dc_conv_ne)
- end
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :isbuilt, _PM.ids(pm, nw, :convdc_ne), Z_dc_conv_ne)
+end
 
 "variable: `pconv_ac_ne[j]` for `j` in `candidate convdc`"
 function variable_converter_active_power_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -618,8 +599,8 @@ function variable_converter_active_power_ne(pm::_PM.AbstractPowerModel; nw::Int=
             JuMP.set_upper_bound(pc_ne[c],  convdc["Pacmax"])
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :pconv, _PM.ids(pm, nw, :convdc_ne), pc_ne)
- end
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :pconv, _PM.ids(pm, nw, :convdc_ne), pc_ne)
+end
 
 "variable: `qconv_ac_ne[j]` for `j` in `candidate convdc`"
 function variable_converter_reactive_power_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -633,9 +614,8 @@ function variable_converter_reactive_power_ne(pm::_PM.AbstractPowerModel; nw::In
             JuMP.set_upper_bound(qc_ne[c],  convdc["Qacmax"])
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :qconv, _PM.ids(pm, nw, :convdc_ne), qc_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :qconv, _PM.ids(pm, nw, :convdc_ne), qc_ne)
 end
-
 
 "variable: `pconv_grid_ac_to_ne[j]` for `j` in `candidate convdc`"
 function variable_conv_transformer_active_power_to_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -650,8 +630,8 @@ function variable_conv_transformer_active_power_to_ne(pm::_PM.AbstractPowerModel
             JuMP.set_upper_bound(ptfto_ne[c],   convdc["Pacrated"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :ptf_to, _PM.ids(pm, nw, :convdc_ne), ptfto_ne)
- end
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :ptf_to, _PM.ids(pm, nw, :convdc_ne), ptfto_ne)
+end
 
 "variable: `qconv_grid_ac_to_ne[j]` for `j` in `candidate convdc`"
 function variable_conv_transformer_reactive_power_to_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -666,9 +646,8 @@ function variable_conv_transformer_reactive_power_to_ne(pm::_PM.AbstractPowerMod
             JuMP.set_upper_bound(qtfto_ne[c],   convdc["Qacrated"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :qtf_to, _PM.ids(pm, nw, :convdc_ne), qtfto_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :qtf_to, _PM.ids(pm, nw, :convdc_ne), qtfto_ne)
 end
-
 
 "variable: `pconv_pr_from_ne[j]` for `j` in `candidate convdc`"
 function variable_conv_reactor_active_power_from_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -683,7 +662,7 @@ function variable_conv_reactor_active_power_from_ne(pm::_PM.AbstractPowerModel; 
             JuMP.set_upper_bound(pprfr_ne[c],   convdc["Pacrated"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :ppr_fr, _PM.ids(pm, nw, :convdc_ne), pprfr_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :ppr_fr, _PM.ids(pm, nw, :convdc_ne), pprfr_ne)
 end
 
 "variable: `qconv_pr_from_ne[j]` for `j` in `candidate convdc`"
@@ -699,9 +678,8 @@ function variable_conv_reactor_reactive_power_from_ne(pm::_PM.AbstractPowerModel
            JuMP.set_upper_bound(qprfr_ne[c],   convdc["Qacrated"] * bigM)
        end
    end
-   report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :qpr_fr, _PM.ids(pm, nw, :convdc_ne), qprfr_ne)
+   report && _PM.sol_component_value(pm, nw, :convdc_ne, :qpr_fr, _PM.ids(pm, nw, :convdc_ne), qprfr_ne)
 end
-
 
 "variable: `pconv_grid_ac_ne[j]` for `j` in `candidate convdc`"
 function variable_converter_to_grid_active_power_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -716,7 +694,7 @@ function variable_converter_to_grid_active_power_ne(pm::_PM.AbstractPowerModel; 
            JuMP.set_upper_bound(ptffr_ne[c],   convdc["Pacrated"] * bigM)
        end
    end
-   report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :pgrid, _PM.ids(pm, nw, :convdc_ne), ptffr_ne)
+   report && _PM.sol_component_value(pm, nw, :convdc_ne, :pgrid, _PM.ids(pm, nw, :convdc_ne), ptffr_ne)
 end
 
 "variable: `qconv_grid_ac_ne[j]` for `j` in `candidate convdc`"
@@ -732,9 +710,8 @@ function variable_converter_to_grid_reactive_power_ne(pm::_PM.AbstractPowerModel
                JuMP.set_upper_bound(qtffr_ne[c],   convdc["Qacrated"] * bigM)
            end
        end
-       report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :qgrid, _PM.ids(pm, nw, :convdc_ne), qtffr_ne)
+       report && _PM.sol_component_value(pm, nw, :convdc_ne, :qgrid, _PM.ids(pm, nw, :convdc_ne), qtffr_ne)
 end
-
 
 "variable: `pconv_dc_ne[j]` for `j` in `candidate convdc`"
 function variable_dcside_power_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -749,8 +726,8 @@ function variable_dcside_power_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_
             JuMP.set_upper_bound(pcdc_ne[c],   convdc["Pacrated"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :pdc, _PM.ids(pm, nw, :convdc_ne), pcdc_ne)
- end
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :pdc, _PM.ids(pm, nw, :convdc_ne), pcdc_ne)
+end
 
 "variable: `pconv_dc_ne[j]` for `j` in `candidate convdc`"
 function variable_converter_firing_angle_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -766,7 +743,7 @@ function variable_converter_firing_angle_ne(pm::_PM.AbstractPowerModel; nw::Int=
             JuMP.set_upper_bound(phic_ne[c],  pi)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :phi, _PM.ids(pm, nw, :convdc_ne), phic_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :phi, _PM.ids(pm, nw, :convdc_ne), phic_ne)
 end
 
 "variable: `iconv_ac_ne[j]` for `j` in `candidate convdc`"
@@ -782,8 +759,8 @@ function variable_acside_current_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_i
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :iconv, _PM.ids(pm, nw, :convdc_ne), ic_ne)
- end
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :iconv, _PM.ids(pm, nw, :convdc_ne), ic_ne)
+end
 
 "variable: `iconv_ac_ne[j]` and `iconv_ac_sq_ne[j]` for `j` in `candidate convdc`"
 function variable_acside_current_ne(pm::_PM.AbstractWModels; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -803,8 +780,8 @@ function variable_acside_current_ne(pm::_PM.AbstractWModels; nw::Int=_PM.nw_id_d
         JuMP.set_upper_bound(icsq_ne[c],  convdc["Imax"]^2)
     end
 end
-report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :iconv_ac, _PM.ids(pm, nw, :convdc_ne), ic_ne)
-report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :iconv_ac_sq, _PM.ids(pm, nw, :convdc_ne), icsq_ne)
+report && _PM.sol_component_value(pm, nw, :convdc_ne, :iconv_ac, _PM.ids(pm, nw, :convdc_ne), ic_ne)
+report && _PM.sol_component_value(pm, nw, :convdc_ne, :iconv_ac_sq, _PM.ids(pm, nw, :convdc_ne), icsq_ne)
 end
 
 "variable: `itf_sq_ne[j]` for `j` in `candidate convdc`"
@@ -820,9 +797,8 @@ function variable_conv_transformer_current_sqr_ne(pm::_PM.AbstractWModels;  nw::
             JuMP.set_upper_bound(itfsq_ne[c], (bigM * convdc["Imax"])^2)
         end
     end
-report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :itf_sq, _PM.ids(pm, nw, :convdc_ne), itfsq_ne)
+report && _PM.sol_component_value(pm, nw, :convdc_ne, :itf_sq, _PM.ids(pm, nw, :convdc_ne), itfsq_ne)
 end
-
 
 "variable: `irc_sq_ne[j]` for `j` in `candidate convdc`"
 function variable_conv_reactor_current_sqr_ne(pm::_PM.AbstractWModels;  nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -837,15 +813,13 @@ function variable_conv_reactor_current_sqr_ne(pm::_PM.AbstractWModels;  nw::Int=
             JuMP.set_upper_bound(iprsq_ne[c], (bigM * convdc["Imax"])^2)
         end
     end
-report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :ipr_sq, _PM.ids(pm, nw, :convdc_ne), iprsq_ne)
+report && _PM.sol_component_value(pm, nw, :convdc_ne, :ipr_sq, _PM.ids(pm, nw, :convdc_ne), iprsq_ne)
 end
-
 
 function variable_converter_filter_voltage_ne(pm::_PM.AbstractPowerModel; kwargs...)
     variable_converter_filter_voltage_magnitude_ne(pm; kwargs...)
     variable_converter_filter_voltage_angle_ne(pm; kwargs...)
 end
-
 
 "variable: `vmf_ne[j]` for `j` in `candidate convdc`"
 function variable_converter_filter_voltage_magnitude_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -860,9 +834,8 @@ function variable_converter_filter_voltage_magnitude_ne(pm::_PM.AbstractPowerMod
             JuMP.set_upper_bound(vmf_ne[c], convdc["Vmmax"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :vmfilt, _PM.ids(pm, nw, :convdc_ne), vmf_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :vmfilt, _PM.ids(pm, nw, :convdc_ne), vmf_ne)
 end
-
 
 "variable: `vaf_ne[j]` for `j` in `candidate convdc`"
 function variable_converter_filter_voltage_angle_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -877,15 +850,13 @@ function variable_converter_filter_voltage_angle_ne(pm::_PM.AbstractPowerModel; 
             JuMP.set_upper_bound(vaf_ne[c],  bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :vafilt, _PM.ids(pm, nw, :convdc_ne), vaf_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :vafilt, _PM.ids(pm, nw, :convdc_ne), vaf_ne)
 end
-
 
 function variable_converter_internal_voltage_ne(pm::_PM.AbstractPowerModel; kwargs...)
     variable_converter_internal_voltage_magnitude_ne(pm; kwargs...)
     variable_converter_internal_voltage_angle_ne(pm; kwargs...)
 end
-
 
 "variable: `vmc_ne[j]` for `j` in `candidate convdc`"
 function variable_converter_internal_voltage_magnitude_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -899,7 +870,7 @@ function variable_converter_internal_voltage_magnitude_ne(pm::_PM.AbstractPowerM
             JuMP.set_upper_bound(vmc_ne[c], convdc["Vmmax"])
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :vmconv, _PM.ids(pm, nw, :convdc_ne), vmc_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :vmconv, _PM.ids(pm, nw, :convdc_ne), vmc_ne)
 end
 
 "variable: `vac_ne[j]` for `j` in `candidate convdc`"
@@ -915,9 +886,8 @@ function variable_converter_internal_voltage_angle_ne(pm::_PM.AbstractPowerModel
             JuMP.set_upper_bound(vac_ne[c],  bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :vaconv, _PM.ids(pm, nw, :convdc_ne), vac_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :vaconv, _PM.ids(pm, nw, :convdc_ne), vac_ne)
 end
-
 
 
 "variable: `wrf_ac_ne[j]` and `wif_ac`  for `j` in `candidate convdc`"
@@ -939,8 +909,8 @@ function variable_converter_filter_voltage_cross_products_ne(pm::_PM.AbstractPow
             JuMP.set_upper_bound(wifac_ne[c],  (convdc["Vmmax"] * bigM)^2)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :wrfilt, _PM.ids(pm, nw, :convdc_ne), wrfac_ne)
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :wifilt, _PM.ids(pm, nw, :convdc_ne), wifac_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :wrfilt, _PM.ids(pm, nw, :convdc_ne), wrfac_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :wifilt, _PM.ids(pm, nw, :convdc_ne), wifac_ne)
 end
 
 "variable: `wf_ac_ne` for `j` in `candidate convdc`"
@@ -957,9 +927,8 @@ function variable_converter_filter_voltage_magnitude_sqr_ne(pm::_PM.AbstractPowe
             JuMP.set_upper_bound(wfac_ne[c], (convdc["Vmmax"] * bigM)^2)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :wfilt, _PM.ids(pm, nw, :convdc_ne), wfac_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :wfilt, _PM.ids(pm, nw, :convdc_ne), wfac_ne)
 end
-
 
 "variable: `wrc_ac_ne[j]` and `wic_ac_ne[j]`  for `j` in `candidate convdc`"
 function variable_converter_internal_voltage_cross_products_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -981,8 +950,8 @@ function variable_converter_internal_voltage_cross_products_ne(pm::_PM.AbstractP
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :wrconv, _PM.ids(pm, nw, :convdc_ne), wrcac_ne)
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :wiconv, _PM.ids(pm, nw, :convdc_ne), wicac_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :wrconv, _PM.ids(pm, nw, :convdc_ne), wrcac_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :wiconv, _PM.ids(pm, nw, :convdc_ne), wicac_ne)
 
 end
 
@@ -999,7 +968,7 @@ function variable_converter_internal_voltage_magnitude_sqr_ne(pm::_PM.AbstractPo
             JuMP.set_upper_bound(wcac_ne[c], (convdc["Vmmax"])^2)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :wconv, _PM.ids(pm, nw, :convdc_ne), wcac_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :wconv, _PM.ids(pm, nw, :convdc_ne), wcac_ne)
 end
 "variable: `w_du[j]` for `j` in `candidate convdc`"
 function variable_voltage_slack(pm::_PM.AbstractWModels; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=false)
@@ -1013,14 +982,13 @@ function variable_voltage_slack(pm::_PM.AbstractWModels; nw::Int=_PM.nw_id_defau
             JuMP.set_upper_bound(w_du[c], 2) # check
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :wdu, _PM.ids(pm, nw, :convdc_ne), w_du)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :wdu, _PM.ids(pm, nw, :convdc_ne), w_du)
 end
 
 "variable: cos voltage fro LPAC"
 function variable_cos_voltage_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     #only for lpac
 end
-
 
 ########### Frequency related constraints ############
 function constraint_converter_reserve_contribution_absolute(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
@@ -1051,7 +1019,6 @@ function constraint_converter_power_balance(pm::_PM.AbstractPowerModel, i::Int, 
     JuMP.@constraint(pm.model, pconv == pconv_ref - pconv_in)
 end
 
-
 ### Droop optimisation realted constraints and constraint templates
 # Set all droop coefficients to be equal in the current hour and the previous hour
 function constraint_droop_coefficient(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
@@ -1081,7 +1048,6 @@ end
 """
 Passivity condition: -Pref / (Vref)^2 + k / Vref > 0
 """
-
 function constraint_dc_converter_passivity(pm::_PM.AbstractACPModel, i::Int, busdc_i, hour_id)
     pref_dc = _PM.var(pm, hour_id, :pconv_dc, i) # first stage dispatch
     vref_dc = _PM.var(pm, hour_id, :vdcm, busdc_i) # first stage nodal voltage
@@ -1089,7 +1055,6 @@ function constraint_dc_converter_passivity(pm::_PM.AbstractACPModel, i::Int, bus
 
     JuMP.@constraint(pm.model, -pref_dc / (vref_dc)^2 + k_droop / (vref_dc) >= 0)
 end
-
 
 function constraint_dc_droop_control(pm::_PM.AbstractACPModel, n::Int, i::Int, busdc_i, hour_id)
     pref_dc = _PM.var(pm, hour_id, :pconv_dc, i) # first stage dispatch

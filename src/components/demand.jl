@@ -35,7 +35,6 @@ function variable_total_flex_demand_reactive(pm::_PM.AbstractPowerModel; nw::Int
     report && _PM.sol_component_value(pm, nw, :load, :qflex, _PM.ids(pm, nw, :load), qflex)
 end
 
-
 "Variable for the power not consumed (voluntary load reduction) at each flex load point and each time step"
 function variable_demand_reduction(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     pred = _PM.var(pm, nw)[:pred] = JuMP.@variable(pm.model,

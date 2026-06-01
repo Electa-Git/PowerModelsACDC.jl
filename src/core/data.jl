@@ -911,8 +911,6 @@ function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series
         end
     end
 
-    ########### Using _IM.replicate networks
-
     mn_data = _PM.replicate(data, replicates; global_keys = Set{String}(["source_type", "name", "source_version", "per_unit"]))
 
     # Add hour_ids and contingency_ids to the data dictionary
@@ -1049,8 +1047,6 @@ function create_scopf_data(data_in, number_of_hours, g_series, l_series; number_
             push!(cont_ids, i)
         end
     end
-
-    ########### Using _IM.replicate networks
 
     data = _PM.replicate(data, number_of_hours * number_of_contingencies; global_keys = Set{String}(["source_type", "name", "source_version", "per_unit"]))
 

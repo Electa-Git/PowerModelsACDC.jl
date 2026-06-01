@@ -131,7 +131,6 @@ function constraint_ohms_y_from_sssc(pm::_PM.AbstractACPModel, n::Int, i::Int, f
     va_fr = _PM.var(pm, n, :va, f_bus)
     va_to = _PM.var(pm, n, :va, t_bus)
 
-
     vm_fr_star =  JuMP.@expression(pm.model, sqrt(vm_fr^2 + 2 * vm_fr * sin(va_fr) * vq + vq^2))
     va_fr_star =  JuMP.@expression(pm.model, atan((vm_fr * sin(va_fr) + vq) / (vm_fr * cos(va_fr))))
 
@@ -150,7 +149,6 @@ function constraint_ohms_y_to_sssc(pm::_PM.AbstractACPModel, n::Int, i::Int, f_b
 
     vm_fr_star =  JuMP.@expression(pm.model, sqrt(vm_fr^2 + 2 * vm_fr * sin(va_fr) * vq + vq^2))
     va_fr_star =  JuMP.@expression(pm.model, atan((vm_fr * sin(va_fr) + vq) / (vm_fr * cos(va_fr))))
-
 
     JuMP.@constraint(pm.model, p_to ==  (g+g_to)*vm_to^2 - g*vm_to*vm_fr_star*cos(va_to-va_fr_star) + -b*vm_to*vm_fr_star*sin(va_to-va_fr_star) )
     JuMP.@constraint(pm.model, q_to == -(b+b_to)*vm_to^2 + b*vm_to*vm_fr_star*cos(va_to-va_fr_star) + -g*vm_to*vm_fr_star*sin(va_to-va_fr_star) )
@@ -171,7 +169,6 @@ function constraint_ohms_y_from_sssc(pm::_PM.AbstractACRModel, n::Int, i::Int, f
     JuMP.@constraint(pm.model, q_fr == -(b+b_fr)*(vr_fr^2 + vi_fr_star^2) - (-b)*(vr_fr*vr_to + vi_fr_star*vi_to) + (-g)*(vi_fr_star*vr_to - vr_fr*vi_to) )
 end
 
-
 function constraint_ohms_y_to_sssc(pm::_PM.AbstractACRModel, n::Int, i::Int, f_bus, t_bus, f_idx, t_idx, g, b, g_to, b_to)
     vq = _PM.var(pm, n,  :vqsssc, i)
     p_to = _PM.var(pm, n, :psssc, t_idx)
@@ -185,7 +182,6 @@ function constraint_ohms_y_to_sssc(pm::_PM.AbstractACRModel, n::Int, i::Int, f_b
     JuMP.@constraint(pm.model, p_to ==  (g+g_to)*(vr_to^2 + vi_to^2) + (-g)*(vr_fr*vr_to + vi_fr_star*vi_to) + (-b)*(-(vi_fr_star*vr_to - vr_fr*vi_to)) )
     JuMP.@constraint(pm.model, q_to == -(b+b_to)*(vr_to^2 + vi_to^2) - (-b)*(vr_fr*vr_to + vi_fr_star*vi_to) + (-g)*(-(vi_fr_star*vr_to - vr_fr*vi_to)) )
 end
-
 
 function constraint_limits_sssc(pm::_PM.DCPPowerModel, i::Int; nw::Int=_PM.nw_id_default)
     sssc = _PM.ref(pm, nw, :sssc, i)
@@ -212,7 +208,6 @@ function constraint_ohms_y_from_sssc(pm::_PM.AbstractDCPModel, n::Int, i::Int, f
 
     JuMP.@constraint(pm.model, p_fr ==   -b * vm * (va_fr - va_to - alpha))
 end
-
 
 function constraint_ohms_y_to_sssc(pm::_PM.AbstractDCPModel, n::Int, i::Int, f_bus, t_bus, f_idx, t_idx, g, b, g_to, b_to)
     p_fr  = _PM.var(pm, n,  :psssc, f_idx)

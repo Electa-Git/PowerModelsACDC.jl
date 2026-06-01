@@ -15,7 +15,7 @@ function variable_dcbranch_current(pm::_PM.AbstractIVRModel; nw::Int=_PM.nw_id_d
             JuMP.set_upper_bound(igrid_dc[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"] / vpu)
         end
     end
-    report && _IM.sol_component_value_edge(pm, _PM.pm_it_sym, nw, :branchdc, :if, :it, _PM.ref(pm, nw, :arcs_dcgrid_from), _PM.ref(pm, nw, :arcs_dcgrid_to), igrid_dc)
+    report && _PM.sol_component_value_edge(pm, nw, :branchdc, :if, :it, _PM.ref(pm, nw, :arcs_dcgrid_from), _PM.ref(pm, nw, :arcs_dcgrid_to), igrid_dc)
 end
 
 # Kirchhoff's current law for DC nodes

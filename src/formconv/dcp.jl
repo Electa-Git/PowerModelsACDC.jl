@@ -230,8 +230,8 @@ end
 Converter current constraint for network expansion in DCP models (placeholder).
 """
 function constraint_converter_current_ne(pm::_PM.AbstractDCPModel, n::Int, i::Int, Umax, Imax)
-     # not used
- end
+    # not used
+end
 #
 #
 """
@@ -274,7 +274,7 @@ function variable_voltage_slack(pm::_PM.AbstractDCPModel; nw::Int=_PM.nw_id_defa
     upper_bound = 2*pi,
     start = 0,
     )
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :va, _PM.ids(pm, nw, :convdc_ne), va_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :va, _PM.ids(pm, nw, :convdc_ne), va_ne)
 
     vaf_ne = _PM.var(pm, nw)[:vaf_du] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_vaf_du",
@@ -282,7 +282,7 @@ function variable_voltage_slack(pm::_PM.AbstractDCPModel; nw::Int=_PM.nw_id_defa
     upper_bound = 2*pi,
     start = 0,
     )
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :vaf, _PM.ids(pm, nw, :convdc_ne), vaf_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :vaf, _PM.ids(pm, nw, :convdc_ne), vaf_ne)
 
     vac_ne = _PM.var(pm, nw)[:vac_du] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc_ne)], base_name="$(nw)_vac_du",
@@ -290,5 +290,5 @@ function variable_voltage_slack(pm::_PM.AbstractDCPModel; nw::Int=_PM.nw_id_defa
     upper_bound = 2*pi,
     start = 0,
     )
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc_ne, :vac, _PM.ids(pm, nw, :convdc_ne), vac_ne)
+    report && _PM.sol_component_value(pm, nw, :convdc_ne, :vac, _PM.ids(pm, nw, :convdc_ne), vac_ne)
 end
