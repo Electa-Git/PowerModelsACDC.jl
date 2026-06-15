@@ -26,5 +26,6 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/Electa-Git/PowerModelsACDC.jl.git"
+    repo = "github.com/Electa-Git/PowerModelsACDC.jl.git",
+    push_preview = true
 )

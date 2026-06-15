@@ -1,51 +1,45 @@
 using PowerModelsACDC
-const _PMACDC = PowerModelsACDC
-using PowerModels
-using Memento
-using InfrastructureModels
-using JuMP
+using Test
 
+import Memento
+import InfrastructureModels
+import PowerModels
+
+import Ipopt
+import Juniper
+import HiGHS
+
+# Settings
+local_test = false # If true, additional tests are run using commercial solvers.
 
 # Suppress warnings during testing.
 Memento.setlevel!(Memento.getlogger(InfrastructureModels), "error")
-Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
 Memento.setlevel!(Memento.getlogger(PowerModels), "error")
+Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
 
-using Ipopt
-using Juniper
-using HiGHS
-using Test
-
-local_test = false  # as some tests require Mosek, only limited set sent to CI.
-
-ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
-highs = JuMP.optimizer_with_attributes(HiGHS.Optimizer)
-juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt_solver, "mip_solver" => highs, "time_limit" => 7200)
-
-
-if local_test == true
-    ### ONLY for local testing, not supported intravis due to licensces ##############
+# Solvers
+ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
+highs = optimizer_with_attributes(HiGHS.Optimizer)
+juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt_solver, "mip_solver" => highs, "time_limit" => 7200)
+if local_test
     import Gurobi
-    gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer)
-    ##############################
+    gurobi = optimizer_with_attributes(Gurobi.Optimizer)
 end
+
+# Functions to load test data
 include("common.jl")
-data_dc = build_mn_data("../test/data/tnep/case4_original.m")
 
 @testset "PowerModelsACDC" begin
 
-include("pf.jl")
+    # Problems
+    include("pf.jl")
+    include("opf.jl")
+    include("cbaopf.jl")
+    include("tnep.jl")
+    include("spf.jl")
+    include("uc.jl")
+    include("strgopf.jl")
 
-include("opf.jl")
-
-include("cbaopf.jl")
-
-include("tnep.jl")
-
-include("spf.jl")
-
-include("uc.jl")
-
-include("strgopf.jl")
-
+    # Exported names
+    include("export.jl")
 end

@@ -1,7 +1,5 @@
 # ...existing code...
 
-export solve_acdcopf_bf
-
 """
     solve_acdcopf_bf(file::String, model_type::Type, solver; kwargs...)
 
@@ -139,8 +137,8 @@ function build_acdcopf_bf(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :flex_load)
         constraint_total_flexible_demand(pm, i)
     end
-    
-    for i in _PM.ids(pm, :fixed_load) 
+
+    for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
 
@@ -169,7 +167,7 @@ function build_acdcopf_bf(pm::_PM.AbstractPowerModel)
         constraint_conv_transformer(pm, i)
         constraint_conv_reactor(pm, i)
         constraint_conv_filter(pm, i)
-        if pm.ref[:it][:pm][:nw][_PM.nw_id_default][:convdc][i]["islcc"] == 1
+        if _PM.ref(pm, :convdc, i, "islcc") == 1
             constraint_conv_firing_angle(pm, i)
         end
     end
@@ -196,10 +194,9 @@ formulation for each AC subnetwork.
   parsed data, JuMP model, settings and references for multiple networks.
 
 # Details
-- Iterates networks in `pm.ref[:it][:pm][:nw]` and for each network:
-  - Adds BF variables and DC variables scoped to the network.
-  - Adds the BF-specific set of constraints (per-branch flows, voltage drops,
-    current limits, etc.) and DC constraints for the network.
+- Adds BF variables and DC variables scoped to the network.
+- Adds the BF-specific set of constraints (per-branch flows, voltage drops,
+  current limits, etc.) and DC constraints for the network.
 - Adds inter-network / cross-border constraints where applicable (fixed or free flows).
 - Aggregates objective contributions and applies the global objective.
 """
@@ -208,7 +205,7 @@ formulation for each AC subnetwork.
 
 function mp_build_acdcopf_bf(pm::_PM.AbstractPowerModel)
     # Create variables for each network
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
         _PM.variable_branch_power(pm; nw = n)
@@ -226,7 +223,7 @@ function mp_build_acdcopf_bf(pm::_PM.AbstractPowerModel)
     end
 
     # Add constraints for each network
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.constraint_model_voltage(pm; nw = n)
         constraint_voltage_dc(pm; nw = n)
 
@@ -282,7 +279,7 @@ function mp_build_acdcopf_bf(pm::_PM.AbstractPowerModel)
             constraint_conv_reactor(pm, i; nw = n)
             constraint_conv_filter(pm, i; nw = n)
             # If LCC converter, add firing-angle constraint
-            if haskey(pm.ref[:it][:pm][:nw][n], :convdc) && pm.ref[:it][:pm][:nw][n][:convdc][i]["islcc"] == 1
+            if haskey(_PM.ref(pm, n), :convdc) && _PM.ref(pm, n, :convdc, i, "islcc") == 1
                 constraint_conv_firing_angle(pm, i; nw = n)
             end
         end

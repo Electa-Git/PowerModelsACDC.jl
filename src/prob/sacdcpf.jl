@@ -1,5 +1,3 @@
-export solve_sacdcpf
-
 """
 internal data required used solving a dc power flow
 
@@ -40,7 +38,7 @@ This function solves sequential ac-dc power flow
 """
 function solve_sacdcpf(file::String; kwargs...)
     data = _PM.parse_file(file)
-    PowerModelsACDC.process_additional_data!(data)
+    process_additional_data!(data)
     return solve_sacdcpf(data::Dict{String,Any}, kwargs...)
 end
 
@@ -57,7 +55,7 @@ function solve_sacdcpf(data)
     network = deepcopy(data)
 
     # STEP 1: Add converter injections as additional injections, e.g. generators (PV bus), or loads (PQ bus)
-    
+
     add_converter_ac_injections!(data)
 
     # STEP 2: Calculate Initial AC power flow
@@ -65,9 +63,9 @@ function solve_sacdcpf(data)
     if result["termination_status"] != true
         Memento.warn(_LOGGER, "Initial ac powerflow in sequential acdc power flow does not converge.")
         # exit()
-    end     
-    
-        
+    end
+
+
     conv_qnts = Dict{String, Any}()
     pgrid_slacks = []
     result_sacdc_pf = Dict{String,Any}()
@@ -77,11 +75,11 @@ function solve_sacdcpf(data)
     convergence = 1
     time_start_iteration = time()
     while convergence > 0
-        
+
         # STEP 3: Calculate converter voltages, currents, losses, and DC side PowerModels
 
-        conv_qnts = calc_converter_quantities(result["solution"], data)     
-        
+        conv_qnts = calc_converter_quantities(result["solution"], data)
+
 
         vm_p = Float64[]
         va_p = Float64[]
@@ -94,16 +92,16 @@ function solve_sacdcpf(data)
         # STEP 4: Add dc converter injections as additional injections in dc grid, e.g. generators (PV bus)
 
         add_dc_converter_injections!(data,conv_qnts)
-        
+
         # STEP 5: Calculate DC grid power flows
 
         try
             resultdc = compute_dc_pf(data, conv_qnts)
         catch exception
-            Memento.warn(_LOGGER, "dc powerflow in sequential acdc power flow does not converge.")     
+            Memento.warn(_LOGGER, "dc powerflow in sequential acdc power flow does not converge.")
             break
         end
-        
+
         # STEP 6: Calculate AC power injections from slack converter_quantities
 
         pgrid_slacks = compute_slack_converter_ac_injection(resultdc["solution"], data, conv_qnts)
@@ -113,13 +111,13 @@ function solve_sacdcpf(data)
         for (gen_id, pgrid) in pgrid_slacks
             data["gen"]["$gen_id"]["pg"] = pgrid
         end
-        
+
         # STEP 8: Re-calculate AC power flows
 
         try
             result = _PM.compute_ac_pf(data)
         catch exception
-            Memento.warn(_LOGGER, "ac powerflow in sequential acdc power flow does not converge.")   
+            Memento.warn(_LOGGER, "ac powerflow in sequential acdc power flow does not converge.")
             break
         end
 
@@ -138,10 +136,10 @@ function solve_sacdcpf(data)
         end
 
         iteration += 1
-        
+
     end
 
-    
+
     result_sacdc_pf = generate_results(result_sacdc_pf, data, result, conv_qnts, pgrid_slacks, time_start_iteration, iteration, resultdc)
 
     # data cleanup !
@@ -153,7 +151,7 @@ function solve_sacdcpf(data)
     delete!(data, "gendc")
     delete!(data, "load_ref")
     delete!(data, "bus_ref")
-    
+
     # delete dummy gens
 
     gen_ref_num = maximum([gen["index"] for (g, gen) in data["gen_ref"]])
@@ -173,7 +171,7 @@ end
 
 
 """
-This function adds converter injections as dummy generators and loads in the ac grid 
+This function adds converter injections as dummy generators and loads in the ac grid
 """
 function add_converter_ac_injections!(data)
     load_num = maximum([load["index"] for (l, load) in data["load"]])
@@ -187,11 +185,11 @@ function add_converter_ac_injections!(data)
                 idx = gen_num + gen_idx
                 data["gen"]["$idx"] = Dict{String, Any}()
                 data["gen"]["$idx"]["pg"] = -conv["P_g"]
-                data["gen"]["$idx"]["qg"] = conv["Q_g"]    
+                data["gen"]["$idx"]["qg"] = conv["Q_g"]
                 data["gen"]["$idx"]["model"] = 2
                 data["gen"]["$idx"]["startup"] = 0.0
                 data["gen"]["$idx"]["gen_bus"] = conv_bus
-                data["gen"]["$idx"]["vg"] = conv["Vtar"] 
+                data["gen"]["$idx"]["vg"] = conv["Vtar"]
                 data["gen"]["$idx"]["mbase"] = 100
                 data["gen"]["$idx"]["index"] = idx
                 data["gen"]["$idx"]["cost"] = [0.0, 0.0]
@@ -218,11 +216,11 @@ function add_converter_ac_injections!(data)
                     idx = gen_num + gen_idx
                     data["gen"]["$idx"] = Dict{String, Any}()
                     data["gen"]["$idx"]["pg"] = 0.0
-                    data["gen"]["$idx"]["qg"] = conv["Q_g"]    
+                    data["gen"]["$idx"]["qg"] = conv["Q_g"]
                     data["gen"]["$idx"]["model"] = 2
                     data["gen"]["$idx"]["startup"] = 0.0
                     data["gen"]["$idx"]["gen_bus"] = conv_bus
-                    data["gen"]["$idx"]["vg"] = conv["Vtar"] 
+                    data["gen"]["$idx"]["vg"] = conv["Vtar"]
                     data["gen"]["$idx"]["mbase"] = 100
                     data["gen"]["$idx"]["index"] = idx
                     data["gen"]["$idx"]["cost"] = [0.0, 0.0]
@@ -248,11 +246,11 @@ function add_converter_ac_injections!(data)
                     idx = gen_num + gen_idx
                     data["gen"]["$idx"] = Dict{String, Any}()
                     data["gen"]["$idx"]["pg"] = 0.0
-                    data["gen"]["$idx"]["qg"] = conv["Q_g"]    
+                    data["gen"]["$idx"]["qg"] = conv["Q_g"]
                     data["gen"]["$idx"]["model"] = 2
                     data["gen"]["$idx"]["startup"] = 0.0
                     data["gen"]["$idx"]["gen_bus"] = conv_bus
-                    data["gen"]["$idx"]["vg"] = conv["Vtar"] 
+                    data["gen"]["$idx"]["vg"] = conv["Vtar"]
                     data["gen"]["$idx"]["mbase"] = 100
                     data["gen"]["$idx"]["index"] = idx
                     data["gen"]["$idx"]["cost"] = [0.0, 0.0]
@@ -278,7 +276,7 @@ end
 
 
 """
-This function calculates converter station power flows 
+This function calculates converter station power flows
 """
 function calc_converter_quantities(result, data)
     conv_qnts = Dict{String, Any}()
@@ -291,7 +289,7 @@ function calc_converter_quantities(result, data)
             conv_qnts["$conv_id"]["va_grid"] = result["bus"]["$conv_bus"]["va"]
             tm = data["convdc"]["$conv_id"]["tm"]
             conv_qnts["$conv_id"]["Ugrid"] = Ugrid = (result["bus"]["$conv_bus"]["vm"]*exp(-result["bus"]["$conv_bus"]["va"]im))/tm
-            
+
             # Power injections
             if conv["type_dc"] == 2
                 for (g, gen) in data["gen"]
@@ -299,13 +297,13 @@ function calc_converter_quantities(result, data)
                         conv_qnts["$conv_id"]["Pgrid"] = Pgrid = result["gen"][g]["pg"]
                         conv_qnts["$conv_id"]["Qgrid"] = Qgrid = result["gen"][g]["qg"]
                     end
-                end       
+                end
             elseif conv["type_dc"] == 1
                 if conv["type_ac"] == 1
                     bus_load_ref_pair = Dict(load["load_bus"] => l for (l,load) in data["load_ref"])
                     bus_load_pair_new = Dict(load["load_bus"] => l for (l,load) in data["load"] if !haskey(data["load_ref"],l))
                     if haskey(bus_load_ref_pair, conv_bus)
-                        conv_qnts["$conv_id"]["Pgrid"] = Pgrid = data["load"]["$(bus_load_ref_pair[conv_bus])"]["pd"] - data["load_ref"]["$(bus_load_ref_pair[conv_bus])"]["pd"] 
+                        conv_qnts["$conv_id"]["Pgrid"] = Pgrid = data["load"]["$(bus_load_ref_pair[conv_bus])"]["pd"] - data["load_ref"]["$(bus_load_ref_pair[conv_bus])"]["pd"]
                         conv_qnts["$conv_id"]["Qgrid"] = Qgrid = data["load"]["$(bus_load_ref_pair[conv_bus])"]["qd"] - data["load_ref"]["$(bus_load_ref_pair[conv_bus])"]["qd"]
                     elseif haskey(bus_load_pair_new, conv_bus)
                         conv_qnts["$conv_id"]["Pgrid"] = Pgrid = data["load"]["$(bus_load_pair_new[conv_bus])"]["pd"]
@@ -315,7 +313,7 @@ function calc_converter_quantities(result, data)
                     bus_load_ref_pair = Dict(load["load_bus"] => l for (l,load) in data["load_ref"])
                     bus_load_pair_new = Dict(load["load_bus"] => l for (l,load) in data["load"] if !haskey(data["load_ref"],l))
                     if haskey(bus_load_ref_pair, conv_bus)
-                        conv_qnts["$conv_id"]["Pgrid"] = Pgrid = data["load"]["$(bus_load_ref_pair[conv_bus])"]["pd"] - data["load_ref"]["$(bus_load_ref_pair[conv_bus])"]["pd"] 
+                        conv_qnts["$conv_id"]["Pgrid"] = Pgrid = data["load"]["$(bus_load_ref_pair[conv_bus])"]["pd"] - data["load_ref"]["$(bus_load_ref_pair[conv_bus])"]["pd"]
                     elseif haskey(bus_load_pair_new, conv_bus)
                         conv_qnts["$conv_id"]["Pgrid"] = Pgrid = data["load"]["$(bus_load_pair_new[conv_bus])"]["pd"]
                     end
@@ -323,14 +321,14 @@ function calc_converter_quantities(result, data)
                         if haskey(gen, "type") && gen["type"] == "dcconv" && gen["conv_id"] == conv["index"]
                             conv_qnts["$conv_id"]["Qgrid"] = Qgrid = result["gen"][g]["qg"]
                         end
-                    end        
+                    end
                 end
 
             end
             conv_qnts["$conv_id"]["Sgrid"] = Sgrid = Pgrid + Qgrid*im
             # Transformer current calculation: Itf = Sgrid / Ugrid
             Itf = conj(Sgrid / Ugrid)
-            # Filter current If = -Ufilter * Bf = -(Ugrid - Itf * (Rtf + j Ztf)) 
+            # Filter current If = -Ufilter * Bf = -(Ugrid - Itf * (Rtf + j Ztf))
             Ztf = (data["convdc"]["$conv_id"]["rtf"] + data["convdc"]["$conv_id"]["xtf"]im ) * data["convdc"]["$conv_id"]["transformer"]
             conv_qnts["$conv_id"]["Ztf"] = Ztf
             conv_qnts["$conv_id"]["Bf"] = Bf = data["convdc"]["$conv_id"]["bf"] * data["convdc"]["$conv_id"]["filter"]
@@ -340,35 +338,35 @@ function calc_converter_quantities(result, data)
             # Reactor current Ipr = Itf - If
             conv_qnts["$conv_id"]["Ipr"] = Ipr = Itf - If
             # Converter voltage Uc = Uf - Ic * Zpr & Ic = Ipr
-            Zpr = (data["convdc"]["$conv_id"]["rc"] + data["convdc"]["$conv_id"]["xc"]im ) * data["convdc"]["$conv_id"]["reactor"] 
+            Zpr = (data["convdc"]["$conv_id"]["rc"] + data["convdc"]["$conv_id"]["xc"]im ) * data["convdc"]["$conv_id"]["reactor"]
             conv_qnts["$conv_id"]["Zpr"] = Zpr
             Uc = (Ugrid - Itf*(Ztf)) - Ipr * Zpr
             # Converter power Sconv = Uc * Ic'
             conv_qnts["$conv_id"]["Sconv"] = Sconv = Uc * conj(Ipr)
             Pconv = real(Sconv)
             Qconv = imag(Sconv)
-            # Converter losses Ploss = a + b * |Ic| + c * Ic^2 
+            # Converter losses Ploss = a + b * |Ic| + c * Ic^2
             Ploss = data["convdc"]["$conv_id"]["LossA"] + data["convdc"]["$conv_id"]["LossB"] * abs(Ipr) + data["convdc"]["$conv_id"]["LossCrec"] * abs(Ipr)^2
             # Pdc = Pconv - Ploss
-            Pdc = -Pconv + Ploss 
+            Pdc = -Pconv + Ploss
             conv_qnts["$conv_id"]["Pconv"] = Pconv
             conv_qnts["$conv_id"]["Qconv"] = Qconv
             conv_qnts["$conv_id"]["Pdc"] = Pdc
             conv_qnts["$conv_id"]["Ploss"] = Ploss
             conv_qnts["$conv_id"]["Uc"] = Uc
-            conv_qnts["$conv_id"]["Ptf_to"] = real(Uf * -conj(Itf)) 
+            conv_qnts["$conv_id"]["Ptf_to"] = real(Uf * -conj(Itf))
             conv_qnts["$conv_id"]["Qtf_to"] = imag(Uf * -conj(Itf))
-            conv_qnts["$conv_id"]["Ppr_fr"] = real(Uf * conj(Ipr)) 
+            conv_qnts["$conv_id"]["Ppr_fr"] = real(Uf * conj(Ipr))
             conv_qnts["$conv_id"]["Qpr_fr"] = imag(Uf * conj(Ipr))
 
-        end 
+        end
 
     return conv_qnts
 end
 
 
 """
-This function adds converter injections as dummy generators in the dc grid 
+This function adds converter injections as dummy generators in the dc grid
 """
 function add_dc_converter_injections!(data,conv_qnts)
     # add dummy generators on busdc
@@ -424,10 +422,10 @@ end
 
 
 function instantiate_dcpf_data(data::Dict{String,<:Any}, conv_qnts::Dict{String,<:Any})
-    
+
     pdc_delta = calc_busdc_injection(data)
-    
-    # remove gendc injections from slack 
+
+    # remove gendc injections from slack
     for (i,gendc) in data["gendc"]
         gendc_bus = data["busdc"]["$(gendc["gen_bus"])"]
         if gendc["gen_status"] != 0
@@ -457,15 +455,15 @@ function instantiate_dcpf_data(data::Dict{String,<:Any}, conv_qnts::Dict{String,
     end
 
     amdc = calc_admittance_matrix(data)
-      
+
     busdc_type_idx = Int[data["busdc"]["$(bus_id)"]["bus_type"] for bus_id in amdc.idx_to_bus]
 
     pdc_delta_base_idx = Float64[-pdc_delta[bus_id] for bus_id in amdc.idx_to_bus]
-    
+
     pdc_inject_idx = [0.0 for bus_id in amdc.idx_to_bus]
 
     vmdc_idx = [1.0 for bus_id in amdc.idx_to_bus]
-    
+
 
     # for buses with non-1.0 bus voltages
     for (i,busdc) in data["busdc"]
@@ -490,7 +488,7 @@ function instantiate_dcpf_data(data::Dict{String,<:Any}, conv_qnts::Dict{String,
     J0_V = Float64[]
 
     for i in eachindex(amdc.idx_to_bus)
-    
+
         for j in neighbors[i]
             push!(J0_I, i); push!(J0_J, j); push!(J0_V, 0.0)
         end
@@ -533,7 +531,7 @@ function _compute_dc_pf(dcpf_data::DCPowerFlowData; finite_differencing=false, f
                 if i == j
                     balance_real += vmdc_idx[i] * vmdc_idx[i] *  amdc.matrix[i,i]
                 else
-                    balance_real += vmdc_idx[i] * vmdc_idx[j] * amdc.matrix[i,j] 
+                    balance_real += vmdc_idx[i] * vmdc_idx[j] * amdc.matrix[i,j]
                 end
             end
             F[i] = balance_real
@@ -556,7 +554,7 @@ function _compute_dc_pf(dcpf_data::DCPowerFlowData; finite_differencing=false, f
                         J[i, j] =  2 * y_ii * vmdc_idx[i] + sum(amdc.matrix[i,k] * vmdc_idx[k] for k in neighbors[i] if k != i)
                     else
                         y_ij = amdc.matrix[i,j]
-                        J[i, j] = vmdc_idx[i] * y_ij 
+                        J[i, j] = vmdc_idx[i] * y_ij
                     end
                 elseif bus_type == 2
                     if i == j
@@ -617,7 +615,7 @@ function _compute_dc_pf(dcpf_data::DCPowerFlowData; finite_differencing=false, f
     end
 
 
-    
+
     if finite_differencing
         result = NLsolve.nlsolve(f!, x0; kwargs...)
     else
@@ -699,7 +697,7 @@ end
 
 
 """
-This function calculates dc bus injections 
+This function calculates dc bus injections
 """
 function calc_busdc_injection(data::Dict{String,<:Any})
     busdc_values = Dict(busdc["index"] => Dict{String,Float64}() for (i,busdc) in data["busdc"])
@@ -717,7 +715,7 @@ function calc_busdc_injection(data::Dict{String,<:Any})
     for (i,busdc) in data["busdc"]
         if busdc["bus_type"] != 4
             bvals = busdc_values[busdc["index"]]
-            p_delta = bvals["pg"] 
+            p_delta = bvals["pg"]
         else
             p_delta = NaN
         end
@@ -728,11 +726,11 @@ end
 
 
 """
-This function calculates dc admittance matrix 
+This function calculates dc admittance matrix
 """
 function calc_admittance_matrix(data::Dict{String,<:Any})
 
-    dc_buses = [x.second for x in data["busdc"]]       
+    dc_buses = [x.second for x in data["busdc"]]
     sort!(dc_buses, by=x->x["index"])
 
     idx_to_busdc = [x["index"] for x in dc_buses]
@@ -749,7 +747,7 @@ function calc_admittance_matrix(data::Dict{String,<:Any})
             f_bus = busdc_to_idx[f_bus]
             t_bus = busdc_to_idx[t_bus]
             g = inv(branchdc["r"])
-            p = data["dcpol"]       
+            p = data["dcpol"]
             push!(I, f_bus); push!(J, t_bus); push!(V, -p*g)
             push!(I, t_bus); push!(J, f_bus); push!(V, -p*g)
             push!(I, f_bus); push!(J, f_bus); push!(V, p*g)
@@ -765,7 +763,7 @@ end
 
 
 """
-This function performs internal iteration to calculate slack converter ac grid active injection 
+This function performs internal iteration to calculate slack converter ac grid active injection
 """
 function compute_slack_converter_ac_injection(resultdc, data, conv_qnts)
     Pdc1 = 0.0
@@ -775,7 +773,7 @@ function compute_slack_converter_ac_injection(resultdc, data, conv_qnts)
         if conv["type_dc"] == 2
             for (gen_id, gendc) in data["gendc"]
                 if gendc["gen_bus"] == conv["busdc_i"]
-                    Pdc1 = -resultdc["gendc"]["$gen_id"]["pg"]                    
+                    Pdc1 = -resultdc["gendc"]["$gen_id"]["pg"]
                 end
             end
 
@@ -786,13 +784,13 @@ function compute_slack_converter_ac_injection(resultdc, data, conv_qnts)
             Zpr = conv_qnts["$conv_id"]["Zpr"]
             Ztf = conv_qnts["$conv_id"]["Ztf"]
             Bf = conv_qnts["$conv_id"]["Bf"]
-            
+
             # iteration 1-Fwd
-            Pconv1 = -Pdc1 + Ploss0 
+            Pconv1 = -Pdc1 + Ploss0
             Sconv1 = Pconv1 + Qconv0*im
             Ipr1 = conj(Sconv1/Uc0)
             If1 = (Uc0 + Ipr1 * Zpr) * (-Bf*im)
-            Itf1 = If1 + Ipr1    
+            Itf1 = If1 + Ipr1
             Sgrid1 = Ugrid0 * conj(Itf1)
 
             # iteration 1-Rev
@@ -801,16 +799,16 @@ function compute_slack_converter_ac_injection(resultdc, data, conv_qnts)
             If2 = (Ugrid0 - Itf2*(Ztf)) * (-Bf*im)
             Ipr2 = Itf2 - If2
             # Uc1 = (Ugrid0 - Itf2*(Ztf)) - Ipr2 * Zpr
-            Sconv2 = Uc0 * conj(Ipr2) 
+            Sconv2 = Uc0 * conj(Ipr2)
             Pconv2 = real(Sconv2)
             Ploss1 = Pconv2 + Pdc1
 
             # Extract new values
-            Pconv_new = -Pdc1 + Ploss1 
+            Pconv_new = -Pdc1 + Ploss1
             Sconv_new = Pconv_new + Qconv0*im
             Ipr_new = conj(Sconv_new/Uc0)
             If_new = (Uc0 + Ipr2 * Zpr) * (-Bf*im)
-            Itf_new = If_new + Ipr_new 
+            Itf_new = If_new + Ipr_new
             Sgrid_new = Ugrid0 * conj(Itf_new)
             slack_conv_busac_i = conv["busac_i"]
 
@@ -858,7 +856,7 @@ function generate_results(result_sacdc_pf, data, result, conv_qnts, pgrid_slacks
                     "phi"    => angle(conv_qnts[i]["Sconv"]),
                     "vaconv" => angle(conv_qnts[i]["Uc"]),
                     "pconv"  => conv_qnts[i]["Pconv"],
-                    "ptf_to" => conv_qnts[i]["Ptf_to"],                     
+                    "ptf_to" => conv_qnts[i]["Ptf_to"],
                     "vmconv" => abs(conv_qnts[i]["Uc"]),
                     "vafilt" => angle(conv_qnts[i]["Uf"]),
                     "pdc"    => conv_qnts[i]["Pdc"],
@@ -890,12 +888,12 @@ function generate_results(result_sacdc_pf, data, result, conv_qnts, pgrid_slacks
                     "phi"    => angle(conv_qnts[i]["Sconv"]),
                     "vaconv" => angle(conv_qnts[i]["Uc"]),
                     "pconv"  => real(conv_qnts[i]["Sconv"]),
-                    "ptf_to" => conv_qnts[i]["Ptf_to"],                     
+                    "ptf_to" => conv_qnts[i]["Ptf_to"],
                     "vmconv" => abs(conv_qnts[i]["Uc"]),
                     "vafilt" => angle(conv_qnts[i]["Uf"]),
                     "pdc"    => -conv_qnts[i]["Pdc"],
                     "qgrid"  => [result["solution"]["gen"][g]["qg"] for (g, gen) in data["gen"] if haskey(gen, "type") && gen["type"] == "dcconv" && gen["conv_id"] == conv["index"]][1]
-                )        
+                )
             end
         end
     end

@@ -64,7 +64,7 @@ function variable_generator_contingency(pm::_PM.AbstractPowerModel; nw::Int=_PM.
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :contingency, :gen_cont, _PM.ids(pm, nw, :zones), δPg)
+    report && _PM.sol_component_value(pm, nw, :contingency, :gen_cont, _PM.ids(pm, nw, :zones), δPg)
 end
 """
     variable_generator_contingency_indicator(pm; nw=_PM.nw_id_default, bounded=true, report=true)
@@ -111,8 +111,8 @@ function variable_converter_contingency(pm::_PM.AbstractPowerModel; nw::Int=_PM.
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :contingency, :conv_cont_plus, _PM.ids(pm, nw, :zones), δPc_plus)
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :contingency, :conv_cont_minus, _PM.ids(pm, nw, :zones), δPc_minus)
+    report && _PM.sol_component_value(pm, nw, :contingency, :conv_cont_plus, _PM.ids(pm, nw, :zones), δPc_plus)
+    report && _PM.sol_component_value(pm, nw, :contingency, :conv_cont_minus, _PM.ids(pm, nw, :zones), δPc_minus)
 end
 
 """
@@ -165,7 +165,7 @@ function variable_storage_contingency(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :contingency, :storage_cont, _PM.ids(pm, nw, :zones), δPs)
+    report && _PM.sol_component_value(pm, nw, :contingency, :storage_cont, _PM.ids(pm, nw, :zones), δPs)
 end
 """
     variable_storage_contingency_indicator(pm; nw=_PM.nw_id_default, bounded=true, report=true)
@@ -210,8 +210,8 @@ function variable_tieline_contingency(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :contingency_l, :tieline_cont_plus, _PM.ids(pm, nw, :areas), δPl_plus)
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :contingency_l, :tieline_cont_minus, _PM.ids(pm, nw, :areas), δPl_minus)
+    report && _PM.sol_component_value(pm, nw, :contingency_l, :tieline_cont_plus, _PM.ids(pm, nw, :areas), δPl_plus)
+    report && _PM.sol_component_value(pm, nw, :contingency_l, :tieline_cont_minus, _PM.ids(pm, nw, :areas), δPl_minus)
 end
 """
     variable_tieline_contingency_indicator(pm; nw=_PM.nw_id_default, bounded=true, report=true)
@@ -275,7 +275,7 @@ function constraint_generator_contingency(pm::_PM.AbstractPowerModel; nw::Int = 
                 constraint_generator_contingency(pm, g, reference_network_idx, zone)
             end
         end
-    end 
+    end
 end
 """
     constraint_generator_contingency_indicator(pm, i; nw=_PM.nw_id_default)
@@ -316,7 +316,7 @@ function constraint_select_generator_contingency(pm::_PM.AbstractPowerModel; nw:
     else
         excluded_zones = []
     end
-    
+
     zones = [i for i in _PM.ids(pm, nw, :zones) if !any(i .== excluded_zones)]
     for zone in zones
         zone_gens = []
@@ -326,7 +326,7 @@ function constraint_select_generator_contingency(pm::_PM.AbstractPowerModel; nw:
             end
         end
         constraint_select_generator_contingency(pm, reference_network_idx, zone_gens)
-    end 
+    end
 end
 
 function constraint_generator_contingency(pm::_PM.AbstractPowerModel, i::Int, n::Int, zone)
@@ -443,7 +443,7 @@ function constraint_select_converter_contingency(pm::_PM.AbstractPowerModel; nw:
             end
         end
         constraint_select_converter_contingency(pm, reference_network_idx, zone_convs)
-    end 
+    end
 end
 
 function constraint_converter_contingency_severity(pm::_PM.AbstractPowerModel, i::Int, n::Int, zone)
@@ -478,7 +478,7 @@ function constraint_contingent_converter(pm::_PM.AbstractPowerModel, n::Int, ref
     δc = _PM.var(pm, ref_id, :delta_c_plus)
     pconv_in = _PM.var(pm, n, :pconv_in)
     for (c, conv) in zone_convs
-        JuMP.@constraint(pm.model, -2 * _PM.ref(pm, ref_id, :convdc, c)["Pacrated"] * (1 - δc[c]) <= pconv_in[c]) 
+        JuMP.@constraint(pm.model, -2 * _PM.ref(pm, ref_id, :convdc, c)["Pacrated"] * (1 - δc[c]) <= pconv_in[c])
         JuMP.@constraint(pm.model,  2 * _PM.ref(pm, ref_id, :convdc, c)["Pacrated"] * (1 - δc[c]) >= pconv_in[c])
     end
 end
@@ -495,7 +495,6 @@ function constraint_converter_outage(pm::_PM.AbstractPowerModel, i::Int; nw::Int
     constraint_reactive_power_converter_outage(pm::_PM.AbstractPowerModel, nw::Int, i::Int)
     constraint_voltage_converter_outage(pm::_PM.AbstractPowerModel, nw::Int, i::Int)
 end
-
 
 function constraint_active_power_converter_outage(pm::_PM.AbstractPowerModel, n::Int, i::Int)
     pconv_ac = _PM.var(pm, n, :pconv_ac, i)
@@ -573,7 +572,7 @@ function constraint_tieline_contingency(pm::_PM.AbstractPowerModel; nw::Int = _P
     areas = [i for i in _PM.ids(pm, nw, :areas)]
     for area in areas
         for (t, tieline) in _PM.ref(pm, nw, :tie_lines)
-            if (haskey(tieline, "area_fr") && _PM.ref(pm, nw, :areas, area)["area"] == tieline["area_fr"])  || (haskey(tieline, "area_to") && _PM.ref(pm, nw, :areas, area)["area"] == tieline["area_to"]) 
+            if (haskey(tieline, "area_fr") && _PM.ref(pm, nw, :areas, area)["area"] == tieline["area_fr"])  || (haskey(tieline, "area_to") && _PM.ref(pm, nw, :areas, area)["area"] == tieline["area_to"])
                 br_idx = tieline["br_idx"]
                 fbus = _PM.ref(pm, nw, :branch, br_idx)["f_bus"]
                 tbus = _PM.ref(pm, nw, :branch, br_idx)["t_bus"]
@@ -594,7 +593,7 @@ function constraint_tieline_contingency_indicator(pm::_PM.AbstractPowerModel, i:
     areas = [a for a in _PM.ids(pm, nw, :areas)]
     for a in areas
         area = _PM.ref(pm, nw, :areas, a)
-        if (haskey(tieline, "area_fr") && _PM.ref(pm, nw, :areas, a)["area"] == tieline["area_fr"])  || (haskey(tieline, "area_to") && _PM.ref(pm, nw, :areas, a)["area"] == tieline["area_to"]) 
+        if (haskey(tieline, "area_fr") && _PM.ref(pm, nw, :areas, a)["area"] == tieline["area_fr"])  || (haskey(tieline, "area_to") && _PM.ref(pm, nw, :areas, a)["area"] == tieline["area_to"])
             constraint_tieline_contingency_indicator(pm, i, br_idx, fbus, tbus, reference_network_idx, bigM, a)
         end
     end
@@ -614,7 +613,7 @@ function constraint_select_tieline_contingency(pm::_PM.AbstractPowerModel; nw::I
             println(area, " ", tielines)
             constraint_select_tieline_contingency(pm, reference_network_idx, tielines)
         end
-    end 
+    end
 end
 
 function constraint_tieline_contingency(pm::_PM.AbstractPowerModel, br_idx, fbus, tbus, n::Int, area)
@@ -679,7 +678,7 @@ function constraint_storage_contingency(pm::_PM.AbstractPowerModel; nw::Int = _P
                 constraint_storage_contingency(pm, s, reference_network_idx, zone)
             end
         end
-    end 
+    end
 end
 
 function constraint_storage_contingency_indicator(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
@@ -709,7 +708,7 @@ function constraint_select_storage_contingency(pm::_PM.AbstractPowerModel; nw::I
     else
         excluded_zones = []
     end
-    
+
     zones = [i for i in _PM.ids(pm, nw, :zones) if !any(i .== excluded_zones)]
     for zone in zones
         zone_storages = []
@@ -719,7 +718,7 @@ function constraint_select_storage_contingency(pm::_PM.AbstractPowerModel; nw::I
             end
         end
         constraint_select_storage_contingency(pm, reference_network_idx, zone_storages)
-    end 
+    end
 end
 
 function constraint_storage_contingency(pm::_PM.AbstractPowerModel, i::Int, n::Int, zone)
@@ -744,7 +743,6 @@ function constraint_storage_contingency_indicator(pm::_PM.AbstractPowerModel, i:
     JuMP.@constraint(pm.model, δPs - ps <= (1-δs) * bigM)
 end
 
-
 ############################################
 ### DC Branch Contingencies ################
 ############################################
@@ -768,7 +766,7 @@ function variable_dcgrid_auxiliary_voltage_magnitude(pm::_PM.AbstractPowerModel;
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :busdc, :vm_star, _PM.ids(pm, nw, :busdc), vdcm)
+    report && _PM.sol_component_value(pm, nw, :busdc, :vm_star, _PM.ids(pm, nw, :busdc), vdcm)
 end
 """
     constraint_dc_branch_contingencies(pm, i; nw=_PM.nw_id_default)
@@ -778,7 +776,7 @@ For outages the DC branch flows are forced to zero and Ohm outage constraints
 are applied to auxiliary variables.
 """
 function constraint_dc_branch_contingencies(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
-    constraint_dc_branch_outage(pm::_PM.AbstractPowerModel, i; nw = nw)  
+    constraint_dc_branch_outage(pm::_PM.AbstractPowerModel, i; nw = nw)
 end
 """
     constraint_dc_branch_outage(pm, n, f_idx, t_idx)
@@ -787,7 +785,7 @@ Enforce p_fr == 0 and p_to == 0 for the specified DC branch incidence indices
 in the contingency network `n`.
 """
 function constraint_dc_branch_outage(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
-    branch = PowerModels.ref(pm, nw, :branchdc, i)
+    branch = _PM.ref(pm, nw, :branchdc, i)
     f_bus = branch["fbusdc"]
     t_bus = branch["tbusdc"]
     f_idx = (i, f_bus, t_bus)
@@ -797,8 +795,8 @@ function constraint_dc_branch_outage(pm::_PM.AbstractPowerModel, i::Int; nw::Int
 end
 
 function constraint_dc_branch_outage(pm::_PM.AbstractPowerModel, n::Int, f_idx, t_idx)
-    p_fr = PowerModels.var(pm, n, :p_dcgrid, f_idx)
-    p_to = PowerModels.var(pm, n, :p_dcgrid, t_idx)
+    p_fr = _PM.var(pm, n, :p_dcgrid, f_idx)
+    p_to = _PM.var(pm, n, :p_dcgrid, t_idx)
 
     JuMP.@constraint(pm.model, p_fr == 0)
     JuMP.@constraint(pm.model, p_to == 0)
@@ -823,7 +821,7 @@ function constraint_ohms_dc_branch_contingency(pm::_PM.AbstractPowerModel, i::In
     f_idx = (i, f_bus, t_bus)
     t_idx = (i, t_bus, f_bus)
 
-    constraint_ohms_dc_branch_outage(pm::_PM.AbstractPowerModel, nw, f_idx, t_idx, f_bus, t_bus, online, r, p, bigM)  
+    constraint_ohms_dc_branch_outage(pm::_PM.AbstractPowerModel, nw, f_idx, t_idx, f_bus, t_bus, online, r, p, bigM)
 end
 
 function constraint_ohms_dc_branch_outage(pm::_PM.AbstractPowerModel, n, f_idx, t_idx, f_bus, t_bus, online, r, p, bigM)
@@ -831,14 +829,13 @@ function constraint_ohms_dc_branch_outage(pm::_PM.AbstractPowerModel, n, f_idx, 
     p_to = _PM.var(pm, n, :p_dcgrid, t_idx)
 
     vm_fr = _PM.var(pm, n, :vdcm, f_bus)
-    vm_to = _PM.var(pm, n, :vdcm, t_bus)   
+    vm_to = _PM.var(pm, n, :vdcm, t_bus)
     vm_fr_star = _PM.var(pm, n, :vdcm_star, f_bus)
-    vm_to_star = _PM.var(pm, n, :vdcm_star, t_bus) 
+    vm_to_star = _PM.var(pm, n, :vdcm_star, t_bus)
 
     g = 1 / r
     JuMP.@constraint(pm.model, p_fr == p * g * vm_fr_star * (vm_fr_star - vm_to_star))
     JuMP.@constraint(pm.model, p_to == p * g * vm_to_star * (vm_to_star - vm_fr_star))
-
 
     JuMP.@constraint(pm.model, (online-1) * bigM <= vm_fr_star - vm_fr <= (1-online) * bigM)
     JuMP.@constraint(pm.model, (online-1) * bigM <= vm_to_star - vm_to <= (1-online) * bigM)
@@ -846,7 +843,7 @@ end
 
 function constraint_fixed_converter_response(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
     ref_id = get_reference_network_id(pm, nw; uc = true)
-    
+
     pconv_ac_ref = _PM.var(pm, ref_id, :pconv_ac, i)
     pconv_ac = _PM.var(pm, nw, :pconv_ac, i)
 
@@ -859,13 +856,12 @@ end
 
 function constraint_fixed_demand_response(pm::_PM.AbstractPowerModel, i::Int; nw::Int = _PM.nw_id_default)
     ref_id = get_reference_network_id(pm, nw; uc = true)
-    
+
     pflex_ref = _PM.var(pm, ref_id, :pflex, i)
     pflex = _PM.var(pm, nw, :pflex, i)
 
     JuMP.@constraint(pm.model, pflex == pflex_ref)
 end
-
 
 function constraint_generator_inertial_response_to_contingency(pm::_PM.AbstractPowerModel, i::Int, gen_id; nw::Int = _PM.nw_id_default)
     # then calculate individual generator inertia of the particular generator i
@@ -877,8 +873,6 @@ function constraint_generator_inertial_response_to_contingency(pm::_PM.AbstractP
     constraint_generator_inertial_response_to_contingency(pm, i, gen_id, nw, hg, pmin, pmax)
 end
 
-
-
 function constraint_generator_inertial_response_to_contingency(pm, i, gen_id, nw, hg, pmin, pmax)
     ref_id = get_reference_network_id(pm, nw; uc = true)
     M = 2 * pmax  # big M value
@@ -886,11 +880,10 @@ function constraint_generator_inertial_response_to_contingency(pm, i, gen_id, nw
     αg = _PM.var(pm, ref_id, :alpha_g, i)
     pgref = _PM.var(pm, ref_id, :pg, i)
 
-
     δPg = _PM.var(pm, ref_id, :pg, gen_id) # size of contingency
-    δ = zeros(length(_PM.var(pm, ref_id, :alpha_g))) 
+    δ = zeros(length(_PM.var(pm, ref_id, :alpha_g)))
     δ[gen_id] = 1 #idx of generator outage
-    
+
     pg = _PM.var(pm, nw, :pg, i)
     dpg_in = _PM.var(pm, nw, :dpg_in, i)
 
@@ -899,12 +892,9 @@ function constraint_generator_inertial_response_to_contingency(pm, i, gen_id, nw
 
     htot = JuMP.@expression(pm.model, sum([gens[g]["inertia_constants"] * gens[g]["pmax"] * (α[g] - δ[g]) for (g, gen) in gens]))
 
-
-
     # JuMP.@constraint(pm.model, pg == pgref + dpg_in)
     JuMP.@constraint(pm.model, dpg_in - (hg * (αg - δ[i]) / htot) * δPg  <=  M * (1 - (αg - δ[i])))
     JuMP.@constraint(pm.model, dpg_in - (hg * (αg - δ[i]) / htot) * δPg  >= -M * (1 - (αg - δ[i])))
-
 
     JuMP.@constraint(pm.model, pg <= pmax * (αg - δ[i]) * 3)
     JuMP.@constraint(pm.model, pg >= pmin * (αg - δ[i]) * 3)
@@ -912,4 +902,3 @@ function constraint_generator_inertial_response_to_contingency(pm, i, gen_id, nw
     JuMP.@constraint(pm.model, pg - (pgref + dpg_in) <=  M * δ[i])
     JuMP.@constraint(pm.model, pg - (pgref + dpg_in) >= -M * δ[i])
 end
-

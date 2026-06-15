@@ -1,7 +1,7 @@
 # Type Hierarchy
-The original type hierarchy of PowerModels is used in general. 
+The original type hierarchy of PowerModels is used in general.
 
-For details on `GenericPowerModel`, see _PM.jl [documentation](https://lanl-ansi.github.io/_PM.jl/stable/).
+For details on `GenericPowerModel`, see PowerModels.jl [documentation](https://lanl-ansi.github.io/PowerModels.jl/stable/).
 
 #  Formulations overview
 

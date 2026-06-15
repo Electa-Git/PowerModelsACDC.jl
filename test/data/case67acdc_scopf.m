@@ -1,7 +1,7 @@
 % An open source meshed AC/HVDC-Overlay test system
-% Sass, F., Sennewald, T., Marten, A.-K. and Westermann, D. (2017), 
-% Mixed AC high-voltage direct current benchmark test system for security constrained optimal power flow calculation. 
-% IET Gener. Transm. Distrib., 11: 447-455. 
+% Sass, F., Sennewald, T., Marten, A.-K. and Westermann, D. (2017),
+% Mixed AC high-voltage direct current benchmark test system for security constrained optimal power flow calculation.
+% IET Gener. Transm. Distrib., 11: 447-455.
 
 function mpc = case67_acdc_scopf
 mpc.version = '2';
@@ -83,7 +83,7 @@ mpc.bus = [
 	65 		1 			315.0	97.0	  0.0	 0.0	 3	    1.0	    0	 		380.0	  1	      1.10000	    0.90000;
 	66 		2 			0.0	    0.0	      0.0	 0.0	 3	    1.0	    0	 		380.0	  1	      1.10000	    0.90000;
 	67 		2 			0.0	    0.0	      0.0	 0.0	 4	    1.0	    0	 		380.0	  1	      1.10000	    0.90000;
-	
+
 ];
 %
 
@@ -92,7 +92,7 @@ mpc.bus = [
 %	bus	   Pg	  Qg		Qmax		 Qmin	  Vg	   mBase	status		Pmax	  Pmin	 Pc1	 Pc2   Qc1min	Qc1max    Qc2min	Qc2max	ramp_agc	    ramp_10	      ramp_30	  ramp_q	   apf         alpha
 mpc.gen = [
 	1	  700.0	  23.0	 	1000.0	    -500.0	 1.0526    100.0	 1	 		1000.0	  0.0	 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0	 		0.0	 		0.0	 		0.0			1;
-	2	  1500.0  100.0	 	0.0	     	   0.0	 1.0526    100.0	 1	 		1500.0	  0.0 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0	 		0.0	 		0.0	 		0.0			1;  
+	2	  1500.0  100.0	 	0.0	     	   0.0	 1.0526    100.0	 1	 		1500.0	  0.0 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0	 		0.0	 		0.0	 		0.0			1;
 	4	  523.0	  140.0	 	350.0	    -350.0	 1.0526    100.0	 1	 		560.0	  0.0	 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0	 		0.0	 		0.0	 		0.0			1;
 	5	  1200.0  100.0	 	000.0	     000.0	 1.0526    100.0	 1	 		1200.0	  0.0 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0	 		0.0	 		0.0	 		0.0			1;
 	10	  436.0	  105.0	 	350.0	    -350.0	 1.0526	   100.0	 1			560.0	  0.0	 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0			0.0	 		0.0	 		0.0			1;
@@ -118,7 +118,7 @@ mpc.gen = [
 %	bus	   Pg	  Qg		Qmax		 Qmin	  Vg	   mBase	status		Pmax	  Pmin	 Pc1	 Pc2   Qc1min	Qc1max    Qc2min	Qc2max	ramp_agc	    ramp_10	      ramp_30	  ramp_q	   apf         alpha
 %mpc.gen = [
 %	1	  700.0	  23.0	 	1000.0	    -500.0	 1.0526    100.0	 1	 		1000.0	  400.0	 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0	 		0.0	 		0.0	 		0.0			1;
-%	2	  1500.0  100.0	 	0.0	     	   0.0	 1.0526    100.0	 1	 		1500.0	  1500.0 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0	 		0.0	 		0.0	 		0.0			1;  
+%	2	  1500.0  100.0	 	0.0	     	   0.0	 1.0526    100.0	 1	 		1500.0	  1500.0 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0	 		0.0	 		0.0	 		0.0			1;
 %	4	  523.0	  140.0	 	350.0	    -350.0	 1.0526    100.0	 1	 		560.0	  220.0	 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0	 		0.0	 		0.0	 		0.0			1;
 %	5	  1200.0  100.0	 	000.0	     000.0	 1.0526    100.0	 1	 		1200.0	  1200.0 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0	 		0.0	 		0.0	 		0.0			1;
 %	10	  436.0	  105.0	 	350.0	    -350.0	 1.0526	   100.0	 1			560.0	  220.0	 0.0	 0.0	 0.0	  0.0	    0.0	     0.0	  0.0	 			0.0			0.0	 		0.0	 		0.0			1;
@@ -164,7 +164,7 @@ mpc.gencost = [
 	2	 0.0	 0.0	 3	   0.000000	  10.000000	   0.000000;
 	2	 0.0	 0.0	 3	   0.000000	  10.000000	   0.000000;
 	2	 0.0	 0.0	 3	   0.000000	  10.000000	   0.000000;
-	
+
 ];
 
 %

@@ -1,29 +1,21 @@
-import PowerModelsACDC
-const _PMACDC = PowerModelsACDC
+using PowerModelsACDC
 import PowerModels
-const _PM = PowerModels
 import Ipopt
-import Memento
-import JuMP
 
+ipopt = optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
 
-file = "./test/data/case3120sp_acdc.m"
+file = pkgdir(PowerModelsACDC, "test", "data", "case3120sp_acdc.m")
 
+data = PowerModels.parse_file(file)
+process_additional_data!(data)
+s = Dict("conv_losses_mp" => true)
 
-data = _PM.parse_file(file)
-
-_PMACDC.process_additional_data!(data)
-
-ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
-
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
-
-resultAC = _PMACDC.run_acdcopf(file, _PM.ACPPowerModel, ipopt; setting = s)
-resultACPM = _PM.run_opf(file, _PM.ACPPowerModel, ipopt; setting = s)
-resultIVR = _PMACDC.run_acdcopf_iv(file, _PM.IVRPowerModel, ipopt; setting = s)
+resultAC = solve_acdcopf(file, PowerModels.ACPPowerModel, ipopt; setting=s)
+resultACPM = PowerModels.solve_opf(file, PowerModels.ACPPowerModel, ipopt; setting=s)
+resultIVR = solve_acdcopf_iv(file, PowerModels.IVRPowerModel, ipopt; setting=s)
 
 print("ACP RESULTS")
-print("Objective:", resultAC["objective"],"\n")
+print("Objective:", resultAC["objective"], "\n")
 for (c, conv) in resultAC["solution"]["convdc"]
     ploss = conv["pconv"] + conv["pdc"]
     ploss_tot = conv["pgrid"] + conv["pdc"]
@@ -31,10 +23,10 @@ for (c, conv) in resultAC["solution"]["convdc"]
 end
 
 print("IVR RESULTS")
-print("Objective:", resultIVR["objective"],"\n")
+print("Objective:", resultIVR["objective"], "\n")
 for (c, conv) in resultIVR["solution"]["convdc"]
     ploss = conv["pconv"] + conv["pdc"]
-    bus =  data["convdc"][c]["busac_i"]
+    bus = data["convdc"][c]["busac_i"]
     ploss_tot = (conv["iik_r"] * resultIVR["solution"]["bus"]["$bus"]["vr"] + conv["iik_i"] * resultIVR["solution"]["bus"]["$bus"]["vi"]) + conv["pdc"]
     print("Pac: ", conv["pconv"], " Pdc: ", conv["pdc"], " Ploss: ", ploss, " Plosstot: ", ploss_tot, "\n")
 end
@@ -43,7 +35,7 @@ end
 
 
 # so = resultIVR["solution"]
-# ir_balance = (so["gen"]["2"]["crg"] - il) - (so["convdc"]["1"]["iik_r"] + so["branch"]["1"]["cr_to"] + so["branch"]["3"]["cr_fr"] + so["branch"]["4"]["cr_fr"] + so["branch"]["5"]["cr_fr"]) 
+# ir_balance = (so["gen"]["2"]["crg"] - il) - (so["convdc"]["1"]["iik_r"] + so["branch"]["1"]["cr_to"] + so["branch"]["3"]["cr_fr"] + so["branch"]["4"]["cr_fr"] + so["branch"]["5"]["cr_fr"])
 
 
 # for (b, bus) in resultIVR["solution"]["bus"]
@@ -64,11 +56,8 @@ end
 #     print(c, "-vk: ", vk, "\n")
 #     print(c, "-vc: ", vc, "\n")
 # end
-# pg_acp = resultAC["solution"]["gen"]["1"]["pg"] + resultAC["solution"]["gen"]["2"]["pg"] 
-# pg_ivr = resultIVR["solution"]["gen"]["1"]["pg"] + resultIVR["solution"]["gen"]["2"]["pg"] 
+# pg_acp = resultAC["solution"]["gen"]["1"]["pg"] + resultAC["solution"]["gen"]["2"]["pg"]
+# pg_ivr = resultIVR["solution"]["gen"]["1"]["pg"] + resultIVR["solution"]["gen"]["2"]["pg"]
 
 # print("pac: ", pg_acp, "\n")
 # print("pivr: ", pg_ivr, "\n")
-
-
-

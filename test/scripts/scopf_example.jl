@@ -1,36 +1,29 @@
 # A test script for running a simple preventive SCOPF model considering DC network contingencies, and optimising HVDC Converter droop gains
 
-import PowerModelsACDC
-const _PMACDC = PowerModelsACDC
+using PowerModelsACDC
 import PowerModels
-const _PM = PowerModels
-import InfrastructureModels
-const _IM = InfrastructureModels
 import Ipopt
-import JuMP
 import Plots
 
-path = _PMACDC.BASE_DIR
-
 ## Use first one for MA27, check the local path for your HSL library
-ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer)
+ipopt = optimizer_with_attributes(Ipopt.Optimizer)
 
 
 ###### Load your test file
-case_name = "case67"
+case_name = "case5"
 kmax = 100
 dc_converter_passivity = true
 #######################
 
 if case_name == "case5"
-    file = joinpath(path, "test", "data", "case5acdc_scopf.m")
+    file = pkgdir(PowerModelsACDC, "test", "data", "case5acdc_scopf.m")
 elseif case_name == "case39"
-    file = joinpath(path, "test", "data", "case39acdc_scopf.m")
+    file = pkgdir(PowerModelsACDC, "test", "data", "case39acdc_scopf.m")
 elseif case_name == "case67"
-    file = joinpath(path, "test", "data", "case67acdc_scopf.m")
+    file = pkgdir(PowerModelsACDC, "test", "data", "case67acdc_scopf.m")
 end
 
-data = _PM.parse_file(file)
+data = PowerModels.parse_file(file)
 
 for (c, conv) in data["convdc"]
     conv["kmax"] = kmax
@@ -40,33 +33,33 @@ for (g, gen) in data["gen"]
     gen["gen_slack"] = 0.0
 end
 
-    # Process demand reduction and curtailment data
-    for (l, load) in data["load"]
-        data["load"][l]["pred_rel_max"] = 0.3
-        data["load"][l]["cost_red"] = 100.0 * data["baseMVA"]
-        data["load"][l]["cost_curt"] = 10000.0 * data["baseMVA"]
-        data["load"][l]["flex"] = 1
-    end
+# Process demand reduction and curtailment data
+for (l, load) in data["load"]
+    data["load"][l]["pred_rel_max"] = 0.3
+    data["load"][l]["cost_red"] = 100.0 * data["baseMVA"]
+    data["load"][l]["cost_curt"] = 10000.0 * data["baseMVA"]
+    data["load"][l]["flex"] = 1
+end
 
 
 # OPF settings
-s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "optimize_converter_droop" => true, "objective_components" => ["gen"],  "dc_converter_passivity" => dc_converter_passivity)
+s = Dict("conv_losses_mp" => true, "optimize_converter_droop" => true, "objective_components" => ["gen"], "dc_converter_passivity" => dc_converter_passivity)
 # Reference droop
-kref = 1/100
+kref = 1 / 100
 
 # Random generation and demand time series, later replace with something more representative
-g_series = [1.0  0.7  0.75  0.78  0.85  0.88  0.9  1.0  1.12  1.25  1.2  1.08  0.99  0.92  0.8  0.73  0.8  0.9  1.03  1.2  1.11  0.99  0.8  0.69]
-l_series = [1.0  0.7  0.75  0.78  0.85  0.88  0.9  1.0  1.12  1.25  1.2  1.08  0.99  0.92  0.8  0.73  0.8  0.9  1.03  1.2  1.11  0.99  0.8  0.69]
+g_series = [1.0 0.7 0.75 0.78 0.85 0.88 0.9 1.0 1.12 1.25 1.2 1.08 0.99 0.92 0.8 0.73 0.8 0.9 1.03 1.2 1.11 0.99 0.8 0.69]
+l_series = [1.0 0.7 0.75 0.78 0.85 0.88 0.9 1.0 1.12 1.25 1.2 1.08 0.99 0.92 0.8 0.73 0.8 0.9 1.03 1.2 1.11 0.99 0.8 0.69]
 # Select the nunmber of hours for which you want to run the optimisation
 number_of_hours = 24
 # get the number of contingencies from the data dictionary
 number_of_contingencies = length(data["contingencies"])
 
 # violations = HVDCdroop.find_binding_contingencies(data, ipopt, l_series, g_series, s, kref)
-data_all = _PMACDC.create_scopf_data(data,  number_of_hours, g_series, l_series)
+data_all = create_scopf_data(data, number_of_hours, g_series, l_series)
 
 # Solve OPF
-result = _PMACDC.solve_scopf(data_all, _PM.ACPPowerModel, ipopt; multinetwork = true, setting = s)
+result = solve_scopf(data_all, PowerModels.ACPPowerModel, ipopt; multinetwork=true, setting=s)
 
 
 
@@ -114,9 +107,8 @@ for (n, network) in result["solution"]["nw"]
     if parse(Int, n) < data_all["number_of_contingencies"]
         for (c, conv) in network["convdc"]
             bus_id = data_all["nw"]["1"]["convdc"][c]["busdc_i"]
-            pd = result["solution"]["nw"][n]["convdc"][c]["pdc"] + (result["solution"]["nw"]["1"]["convdc"][c]["k_droop"] * (network["busdc"]["$bus_id"]["vm"]- result["solution"]["nw"][n]["busdc"]["$bus_id"]["vm"]))
-            println("Contingency ID: ", n, " Conv ID: ", c," Pdc calc: ", pd, " Pdc: ", network["convdc"][c]["pdc"])
+            pd = result["solution"]["nw"][n]["convdc"][c]["pdc"] + (result["solution"]["nw"]["1"]["convdc"][c]["k_droop"] * (network["busdc"]["$bus_id"]["vm"] - result["solution"]["nw"][n]["busdc"]["$bus_id"]["vm"]))
+            println("Contingency ID: ", n, " Conv ID: ", c, " Pdc calc: ", pd, " Pdc: ", network["convdc"][c]["pdc"])
         end
     end
 end
-

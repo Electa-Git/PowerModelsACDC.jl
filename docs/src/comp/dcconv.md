@@ -165,7 +165,7 @@ Major optimisation variables created per converter:
 Auxiliary variables (per converter / per-zone) used in frequency/security models:
 - zone-aggregated converter contributions, absolute-value proxies for reserve sizing, converter auxiliary DC voltage variables for contingency stages.
 
-All variables are registered via _PM.var(pm, nw) and prepared for reporting when enabled.
+All variables are registered via PowerModels.var(pm, nw) and prepared for reporting when enabled.
 
 
 ## Variables
@@ -173,7 +173,7 @@ All variables are registered via _PM.var(pm, nw) and prepared for reporting when
 Optimisation variables representing AC Branch behaviour
 
 | name          | symb.                 | unit  | formulation                       | definition                                                                 |
-|---------------|-----------------------|-------|-----------------------------------|----------------------------------------------------------------------------|  
+|---------------|-----------------------|-------|-----------------------------------|----------------------------------------------------------------------------|
 | p             |$p_{b,i,j}$            | p.u.  | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Active power flow through AC branch b, connecting AC nodes i and j |
 | q             |$q_{b,i,j}$            | p.u.  | ACP, ACR, LPAC, IVR, SOC, DCP, NF | Reactive power flow through AC branch b, connecting AC nodes i and j |
 | cr            |$\Re(i_{b,i,j})$       | p.u.  | IVR | Real current flow through AC branch b, connecting AC nodes i and j |

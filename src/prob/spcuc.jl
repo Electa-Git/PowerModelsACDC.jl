@@ -1,4 +1,4 @@
- 
+
 """
     solve_spcuc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
 
@@ -49,7 +49,7 @@ function build_spcuc(pm::_PM.AbstractPowerModel)
         spcuc_contingency_model!(pm, n)
     end
 
-    objective_min_cost_uc(pm)   
+    objective_min_cost_uc(pm)
 end
 
 """
@@ -92,15 +92,15 @@ function base_uc_model!(pm, n)
         constraint_voltage_dc(pm; nw = n)
 
         variable_contingencies(pm, nw = n)
-        
+
         for i in _PM.ids(pm, n, :ref_buses)
             _PM.constraint_theta_ref(pm, i; nw = n)
         end
-    
+
         for i in _PM.ids(pm, n, :bus)
             constraint_power_balance_ac(pm, i; nw = n)
         end
-        
+
         for i in _PM.ids(pm, n, :branch)
             _PM.constraint_ohms_yt_from(pm, i; nw = n)
             _PM.constraint_ohms_yt_to(pm, i; nw = n)
@@ -121,11 +121,11 @@ function base_uc_model!(pm, n)
             constraint_conv_reactor(pm, i; nw = n)
             constraint_conv_filter(pm, i; nw = n)
         end
-    
+
         for i in _PM.ids(pm, n, :flex_load)
             constraint_total_flexible_demand(pm, i; nw = n)
         end
-    
+
         for i in _PM.ids(pm, n, :gen)
             constraint_generator_on_off(pm, i; nw = n, use_status = false)
             constraint_unit_commitment(pm, i; nw = n)
@@ -133,7 +133,7 @@ function base_uc_model!(pm, n)
                 constraint_unit_commitment_reserves(pm, i; nw = n)
             end
         end
-    
+
         for i in _PM.ids(pm, n, :pst)
             constraint_ohms_y_from_pst(pm, i; nw = n)
             constraint_ohms_y_to_pst(pm, i; nw = n)
@@ -233,8 +233,7 @@ function spcuc_contingency_model!(pm, n)
     for i in _PM.ids(pm, n, :branch)
         _PM.constraint_ohms_yt_from(pm, i; nw = n)
         _PM.constraint_ohms_yt_to(pm, i; nw = n)
-        constraint_thermal_limit_to(pm, i; nw = n)
-        if haskey(pm.setting, "add_split_constraints") && pm.setting["add_split_constraints"] == true &&  any(i .== pm.ref[:it][:pm][:nw][n][:tie_lines]) 
+        if haskey(pm.setting, "add_split_constraints") && pm.setting["add_split_constraints"] == true &&  any(i .== _PM.ref(pm, n, :tie_lines))
             _PM.constraint_voltage_angle_difference(pm, i; nw = n)
         end
     end

@@ -1,5 +1,3 @@
-export solve_acdcopf
-
 """
     solve_acdcopf(file::String, model_type::Type, solver; kwargs...)
 
@@ -71,7 +69,7 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
     variable_flexible_demand(pm)
     variable_pst(pm)
     variable_sssc(pm)
-    
+
 
     objective_min_operational_cost(pm)
 
@@ -97,8 +95,8 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :flex_load)
         constraint_total_flexible_demand(pm, i)
     end
-    
-    for i in _PM.ids(pm, :fixed_load) 
+
+    for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
 
@@ -126,7 +124,7 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
         constraint_conv_transformer(pm, i)
         constraint_conv_reactor(pm, i)
         constraint_conv_filter(pm, i)
-        if pm.ref[:it][:pm][:nw][_PM.nw_id_default][:convdc][i]["islcc"] == 1
+        if _PM.ref(pm, :convdc, i, "islcc") == 1
             constraint_conv_firing_angle(pm, i)
         end
     end
@@ -154,7 +152,7 @@ Constructs the JuMP model for a multinetwork AC/DC OPF problem.
 Adds variables and constraints for each network in a multinetwork scenario, including AC/DC components, storage, and cross-border flows. Sets the objective to minimize operational cost.
 """
 function mp_build_acdcopf(pm::_PM.AbstractPowerModel)
-    for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
         _PM.variable_branch_power(pm; nw = n)
@@ -171,7 +169,7 @@ function mp_build_acdcopf(pm::_PM.AbstractPowerModel)
     end
 
 
-     for (n, networks) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.constraint_model_voltage(pm; nw = n)
         constraint_voltage_dc(pm; nw = n)
 
@@ -194,8 +192,8 @@ function mp_build_acdcopf(pm::_PM.AbstractPowerModel)
         for i in _PM.ids(pm, n, :flex_load)
             constraint_total_flexible_demand(pm, i; nw = n)
         end
-        
-        for i in _PM.ids(pm, n, :fixed_load) 
+
+        for i in _PM.ids(pm, n, :fixed_load)
             constraint_total_fixed_demand(pm, i; nw = n)
         end
 
@@ -223,7 +221,7 @@ function mp_build_acdcopf(pm::_PM.AbstractPowerModel)
             constraint_conv_transformer(pm, i; nw = n)
             constraint_conv_reactor(pm, i; nw = n)
             constraint_conv_filter(pm, i; nw = n)
-            if pm.ref[:it][:pm][:nw][n][:convdc][i]["islcc"] == 1
+            if _PM.ref(pm, n, :convdc, i, "islcc") == 1
                 constraint_conv_firing_angle(pm, i; nw = n)
             end
         end

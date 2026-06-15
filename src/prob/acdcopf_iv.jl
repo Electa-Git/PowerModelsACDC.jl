@@ -1,5 +1,3 @@
-export solve_acdcopf_iv
-
 """
     solve_acdcopf_iv(file::String, model_type::Type, optimizer; kwargs...)
 
@@ -121,17 +119,17 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     for i in _PM.ids(pm, :flex_load)
         constraint_total_flexible_demand(pm, i)
     end
-    
-    for i in _PM.ids(pm, :fixed_load) 
+
+    for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
 
     for i in _PM.ids(pm, :pst)
-        Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for PSTs")
+        Memento.warn(_LOGGER,"IVR formulation is not yet implemented for PSTs")
     end
 
     for i in _PM.ids(pm, :sssc)
-        Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for SSSCs")
+        Memento.warn(_LOGGER,"IVR formulation is not yet implemented for SSSCs")
     end
 
     for i in _PM.ids(pm, :busdc)
@@ -165,12 +163,10 @@ end
 Build the JuMP model for a multinetwork IVR (current-voltage) AC/DC problem.
 
 # Inputs
-- `pm::_PM.AbstractIVRModel` : PowerModels internal model holder containing multi-network data
-  in `pm.ref[:it][:pm][:nw]`.
+- `pm::_PM.AbstractIVRModel` : PowerModels internal model holder.
 
 # Details
-- Iterates over networks declared in `pm.ref[:it][:pm][:nw]` and creates
-  network-scoped IV variables and constraints for each network:
+- Creates network-scoped IV variables and constraints for each network:
   - bus voltages, branch currents, generator currents, DC-line currents, storage powers,
   - DC branch flows/currents, converters, DC grid voltages, flexible/fixed loads,
   - PST and SSSC variables (with warnings if IV handling is incomplete).
@@ -181,7 +177,7 @@ Build the JuMP model for a multinetwork IVR (current-voltage) AC/DC problem.
 """
 function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     # Create variables for each network
-    for (n, _) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_branch_current(pm; nw = n)
         _PM.variable_storage_power(pm; nw = n)
@@ -199,7 +195,7 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     end
 
     # Per-network constraints
-    for (n, _) in pm.ref[:it][:pm][:nw]
+    for n in _PM.nw_ids(pm)
         _PM.constraint_model_voltage(pm; nw = n)
 
         for i in _PM.ids(pm, n, :ref_buses)
@@ -230,11 +226,11 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
         end
 
         for i in _PM.ids(pm, n, :pst)
-            Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for PSTs (nw = $n)")
+            Memento.warn(_LOGGER,"IVR formulation is not yet implemented for PSTs (nw = $n)")
         end
 
         for i in _PM.ids(pm, n, :sssc)
-            Memento.warn(_PM._LOGGER,"IVR formulation is not yet implemented for SSSCs (nw = $n)")
+            Memento.warn(_LOGGER,"IVR formulation is not yet implemented for SSSCs (nw = $n)")
         end
 
         for i in _PM.ids(pm, n, :busdc)

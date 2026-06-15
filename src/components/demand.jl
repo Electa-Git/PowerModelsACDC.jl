@@ -35,7 +35,6 @@ function variable_total_flex_demand_reactive(pm::_PM.AbstractPowerModel; nw::Int
     report && _PM.sol_component_value(pm, nw, :load, :qflex, _PM.ids(pm, nw, :load), qflex)
 end
 
-
 "Variable for the power not consumed (voluntary load reduction) at each flex load point and each time step"
 function variable_demand_reduction(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     pred = _PM.var(pm, nw)[:pred] = JuMP.@variable(pm.model,
@@ -65,7 +64,7 @@ function calc_load_operational_cost_uc(pm::_PM.AbstractPowerModel)
     load_cost_red = Dict()
     load_cost_curt = Dict()
     for n in pm.ref[:it][:pm][:hour_ids]
-        for (l, load) in _PM.nws(pm)[n][:load]
+        for (l, load) in _PM.ref(pm, n, :load)
             p_red = _PM.var(pm, n, :pred, l)
             p_curt = _PM.var(pm, n, :pcurt, l)
             load_cost_red[n, l] = load["cost_red"]  * p_red
