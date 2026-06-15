@@ -233,6 +233,7 @@ function spcuc_contingency_model!(pm, n)
     for i in _PM.ids(pm, n, :branch)
         _PM.constraint_ohms_yt_from(pm, i; nw = n)
         _PM.constraint_ohms_yt_to(pm, i; nw = n)
+        constraint_thermal_limit_to(pm, i; nw = n)
         if haskey(pm.setting, "add_split_constraints") && pm.setting["add_split_constraints"] == true &&  any(i .== pm.ref[:it][:pm][:nw][n][:tie_lines]) 
             _PM.constraint_voltage_angle_difference(pm, i; nw = n)
         end
