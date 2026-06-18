@@ -61,7 +61,7 @@ function solve_sacdcpf(data)
     # STEP 2: Calculate Initial AC power flow
     result = _PM.compute_ac_pf(data)
     if result["termination_status"] != true
-        Memento.warn(_LOGGER, "Initial ac powerflow in sequential acdc power flow does not converge.")
+        @_warn("Initial ac powerflow in sequential acdc power flow does not converge.")
         # exit()
     end
 
@@ -98,7 +98,7 @@ function solve_sacdcpf(data)
         try
             resultdc = compute_dc_pf(data, conv_qnts)
         catch exception
-            Memento.warn(_LOGGER, "dc powerflow in sequential acdc power flow does not converge.")
+            @_warn("dc powerflow in sequential acdc power flow does not converge.")
             break
         end
 
@@ -117,7 +117,7 @@ function solve_sacdcpf(data)
         try
             result = _PM.compute_ac_pf(data)
         catch exception
-            Memento.warn(_LOGGER, "ac powerflow in sequential acdc power flow does not converge.")
+            @_warn("ac powerflow in sequential acdc power flow does not converge.")
             break
         end
 
@@ -131,7 +131,7 @@ function solve_sacdcpf(data)
         end
 
         if isapprox(vm_p,vm_c; atol = 0.00001) && isapprox(abs.(va_p), abs.(va_c); atol = 0.001)
-            Memento.info(_LOGGER, "Sequential acdc power flow has converged.")
+            @_info("Sequential acdc power flow has converged.")
             break
         end
 
@@ -628,7 +628,7 @@ function _compute_dc_pf(dcpf_data::DCPowerFlowData; finite_differencing=false, f
     converged = result.x_converged || result.f_converged
 
     if !converged
-        Memento.warn(_LOGGER, "dc power flow solver convergence failed! use `show_trace = true` for more details")
+        @_warn("dc power flow solver convergence failed! use `show_trace = true` for more details")
     else
         data = dcpf_data.data
         busdc_gens = dcpf_data.busdc_gens

@@ -167,7 +167,7 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
             if typeof(pm) <: _PM.AbstractACPModel || typeof(pm) <: _PM.AbstractACRModel
                 constraint_dc_droop_control(pm, c)
             else
-                Memento.warn(_LOGGER, join(["Droop only defined for ACP and ACR formulations, converter ", c, " will be treated as type 2"]))
+                @_warn(join(["Droop only defined for ACP and ACR formulations, converter ", c, " will be treated as type 2"]))
                 constraint_dc_voltage_magnitude_setpoint(pm, c)
             end
         else
