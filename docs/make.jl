@@ -20,7 +20,7 @@ makedocs(
                 "DC branches" => "comp/dcbranch.md"
                 "AC branches" => "comp/acbranch.md"
                 "AC Generators" => "comp/gen.md"
-                "CC Generators" => "comp/dcgen.md"
+                "DC Generators" => "comp/dcgen.md"
                 "DC Converters" => "comp/dcconv.md"
             ]
             "File IO" => "parser.md"
