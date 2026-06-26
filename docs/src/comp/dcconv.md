@@ -190,3 +190,335 @@ Optimisation variables representing AC Branch behaviour
 **NF model**: In this model there are no losses, no impedances, as such only the active power limits are binding.
 
 
+
+# AC/DC converter constraints
+
+This section documents the steady-state AC/DC converter constraints used in PowerModelsACDC. The converter is modelled as the interface between one AC bus and one DC bus, with optional transformer, filter, phase reactor and converter loss model. The constraints below use the variables and parameters introduced in the variables and parser documentation.
+
+The notation follows the rest of the formulation documentation:
+
+- `i` denotes the AC bus connected to converter `c`.
+- `j` denotes the DC bus connected to converter `c`.
+- $P^{conv,ac}_c,Q^{conv,ac}_c$ are the active and reactive power injections at the AC side of the converter.
+- $P^{conv,dc}_c$ is the active power injection at the DC side of the converter.
+- $a_c,b_c,c_c$ are the constant, linear-current and quadratic-current converter loss coefficients.
+- $I^{conv}_c$ is the converter AC current magnitude and $i^{conv,sq}_c$ is its square.
+- $U_i$ is the AC voltage magnitude, $W_i=U_i^2$ is the lifted squared-voltage variable, and $U^{dc}_j$ or $W^{dc}_j$ denote analogous DC voltage variables.
+
+!!! note
+    Sign conventions follow the PowerModelsACDC implementation: converter AC and DC powers are injections into their respective AC/DC network equations. The loss balance is therefore written as the sum of AC-side and DC-side converter powers being equal to converter losses.
+
+## Constraints used by AC/DC OPF
+
+The AC/DC OPF model calls the following converter constraint groups for each converter:
+
+- converter loss balance;
+- converter AC-current relation;
+- optional transformer equations;
+- optional phase-reactor equations;
+- optional filter equations;
+- LCC firing-angle equations when `islcc == 1`.
+
+The mathematical form of these constraints depends on the selected power-flow formulation.
+
+## Common converter loss model
+
+For all non-linear and convexified converter formulations, converter losses are represented by
+
+```math
+P^{conv,ac}_c + P^{conv,dc}_c = P^{loss}_c,
+```
+
+with
+
+```math
+P^{loss}_c = a_c + b_c I^{conv}_c + c_c \left(I^{conv}_c\right)^2.
+```
+
+When both current magnitude and squared-current variables are present, the loss model is written as
+
+```math
+P^{conv,ac}_c + P^{conv,dc}_c
+= a_c + b_c I^{conv}_c + c_c i^{conv,sq}_c.
+```
+
+The coefficients are normally non-negative:
+
+```math
+a_c \geq 0, \qquad b_c \geq 0, \qquad c_c \geq 0.
+```
+
+## ACPPowerModel
+
+In the polar AC formulation, the AC bus voltage magnitude is represented by $U_i$. The converter current relation is non-linear and non-convex:
+
+```math
+\left(P^{conv,ac}_c\right)^2 + \left(Q^{conv,ac}_c\right)^2 = U_i^2 \left(I^{conv}_c\right)^2.
+```
+
+The converter loss balance is
+
+```math
+P^{conv,ac}_c + P^{conv,dc}_c
+= a_c + b_c I^{conv}_c + c_c \left(I^{conv}_c\right)^2.
+```
+
+If the converter is an LCC converter, active and reactive power are linked by the converter firing-angle or power-factor relation:
+
+```math
+P^{conv,ac}_c = \cos(\varphi_c) S^{conv,rated}_c,
+```
+
+```math
+Q^{conv,ac}_c = \sin(\varphi_c) S^{conv,rated}_c.
+```
+
+## ACRPowerModel
+
+In the rectangular AC formulation, the AC bus voltage is represented by real and imaginary parts $U^{r}_i$ and $U^{i}_i$. The squared voltage magnitude is
+
+```math
+U_i^2 = \left(U^{r}_i\right)^2 + \left(U^{i}_i\right)^2.
+```
+
+The converter current relation becomes
+
+```math
+\left(P^{conv,ac}_c
+\right)^2 + \left(Q^{conv,ac}_c
+\right)^2
+= \left(\left(U^{r}_i
+\right)^2 + \left(U^{i}_i
+\right)^2
+\right) i^{conv,sq}_c.
+```
+
+The link between the current magnitude and squared-current variable is
+
+```math
+\left(I^{conv}_c
+\right)^2 = i^{conv,sq}_c.
+```
+
+The loss balance is
+
+```math
+P^{conv,ac}_c + P^{conv,dc}_c
+= a_c + b_c I^{conv}_c + c_c i^{conv,sq}_c.
+```
+
+The LCC firing-angle relation is the same as in the polar formulation.
+
+## IVRPowerModel
+
+In the current-voltage rectangular formulation, converter currents may be represented explicitly by real and imaginary current components. Let $I^{r,conv}_c$ and $I^{i,conv}_c$ denote the converter current components at the AC side. Then
+
+```math
+i^{conv,sq}_c = \left(I^{r,conv}_c
+\right)^2 + \left(I^{i,conv}_c
+\right)^2.
+```
+
+The AC-side converter power is linked to voltage and current by
+
+```math
+P^{conv,ac}_c = U^r_i I^{r,conv}_c + U^i_i I^{i,conv}_c,
+```
+
+```math
+Q^{conv,ac}_c = U^i_i I^{r,conv}_c - U^r_i I^{i,conv}_c.
+```
+
+The loss balance is
+
+```math
+P^{conv,ac}_c + P^{conv,dc}_c
+= a_c + b_c I^{conv}_c + c_c i^{conv,sq}_c,
+```
+
+with the current-magnitude link
+
+```math
+\left(I^{conv}_c
+\right)^2 = i^{conv,sq}_c.
+```
+
+## SOCWRPowerModel, SDPWRMPowerModel, QCWRPowerModel and QCWRTriPowerModel
+
+The WR-space relaxations use lifted voltage variables. Let $W_i$ denote the squared voltage magnitude at the AC bus. The non-convex converter current relation is relaxed as
+
+```math
+\left(P^{conv,ac}_c
+\right)^2 + \left(Q^{conv,ac}_c
+\right)^2
+\leq W_i i^{conv,sq}_c.
+```
+
+Equivalently, this can be represented by a rotated second-order cone:
+
+```math
+\left| \begin{bmatrix}
+2P^{conv,ac}_c \\
+2Q^{conv,ac}_c \\
+W_i - i^{conv,sq}_c
+\end{bmatrix}
+\right|_2
+\leq W_i + i^{conv,sq}_c.
+```
+
+The current-magnitude link is convexified as
+
+```math
+\left(I^{conv}_c
+\right)^2 \leq i^{conv,sq}_c.
+```
+
+The converter loss balance remains
+
+```math
+P^{conv,ac}_c + P^{conv,dc}_c
+= a_c + b_c I^{conv}_c + c_c i^{conv,sq}_c.
+```
+
+For QC-type formulations, the bilinear and quadratic expressions in the current relation are additionally tightened by the corresponding QC envelopes used for the AC network model. The converter loss balance itself is unchanged.
+
+## DCPPowerModel
+
+In the DC approximation, AC voltage magnitudes are fixed to one per unit and reactive power equations are omitted:
+
+```math
+U_i = 1.
+```
+
+The active-power-only converter current approximation is
+
+```math
+I^{conv}_c \approx \left|P^{conv,ac}_c
+\right|.
+```
+
+When losses are represented, the active-power loss balance is
+
+```math
+P^{conv,ac}_c + P^{conv,dc}_c
+= a_c + b_c I^{conv}_c + c_c i^{conv,sq}_c,
+```
+
+with
+
+```math
+i^{conv,sq}_c \approx \left(P^{conv,ac}_c
+\right)^2.
+```
+
+When the lossless DC approximation is used, this reduces to
+
+```math
+P^{conv,ac}_c + P^{conv,dc}_c = 0.
+```
+
+## LPACPowerModel / LPACCPowerModel
+
+The LPAC formulations use a linearized voltage magnitude representation. If $\phi_i$ denotes the voltage magnitude deviation around $1.0$ p.u., then
+
+```math
+U_i \approx 1 + \phi_i,
+```
+
+and
+
+```math
+U_i^2 \approx 1 + 2\phi_i.
+```
+
+The converter current relation is linearized around the flat-voltage operating point. For the active-power-dominated approximation,
+
+```math
+I^{conv}_c \approx \left|P^{conv,ac}_c
+\right|,
+```
+
+or, when an auxiliary non-negative current variable is used,
+
+```math
+I^{conv}_c \geq P^{conv,ac}_c,
+```
+
+```math
+I^{conv}_c \geq -P^{conv,ac}_c.
+```
+
+The linearized converter loss balance is
+
+```math
+P^{conv,ac}_c + P^{conv,dc}_c = a_c + b_c I^{conv}_c,
+```
+
+or, if the quadratic-loss term is retained through an auxiliary squared-current variable,
+
+```math
+P^{conv,ac}_c + P^{conv,dc}_c
+= a_c + b_c I^{conv}_c + c_c i^{conv,sq}_c.
+```
+
+## Transformer, reactor and filter constraints
+
+The converter station may contain a transformer, filter and phase reactor. These elements are modelled on the AC side of the converter and are switched off by setting the corresponding impedance or susceptance to zero.
+
+### Transformer
+
+The transformer links the AC grid bus voltage to the filter-side voltage. Its active and reactive power equations follow the same AC branch equations as the underlying AC formulation, using the transformer admittance and tap ratio:
+
+```math
+(P^{tf,fr}_c,Q^{tf,fr}_c,P^{tf,to}_c,Q^{tf,to}_c)
+= f^{tf}\left(V^{grid}_i,V^{filt}_c,y^{tf}_c,t^{tf}_c
+\right).
+```
+
+In ACP this is the polar AC branch equation, in ACR/IVR it is the rectangular AC branch equation, and in WR/QC formulations it is the corresponding lifted or relaxed branch equation.
+
+### Filter
+
+The shunt filter consumes or injects reactive power proportional to the local voltage-squared term:
+
+```math
+P^{filter}_c = 0,
+```
+
+```math
+Q^{filter}_c = - b^{filter}_c U_{filt,c}^2.
+```
+
+In WR formulations, $U_{filt,c}^2$ is replaced by the corresponding lifted voltage variable $W_{filt,c}$; in LPAC it is replaced by the linearized squared voltage $1+2\phi_{filt,c}$.
+
+### Phase reactor
+
+The phase reactor links the filter-side voltage to the converter-side AC voltage. Its active and reactive power equations again follow the AC branch equations of the selected formulation:
+
+```math
+(P^{pr,fr}_c,Q^{pr,fr}_c,P^{pr,to}_c,Q^{pr,to}_c)
+= f^{pr}\left(V^{filt}_c,V^{conv}_c,y^{pr}_c
+\right).
+```
+
+## Summary by formulation
+
+| Formulation | Voltage representation | Converter current relation | Loss model |
+| --- | --- | --- | --- |
+| `ACPPowerModel` | $U_i,	heta_i$ | $(P^{ac})^2+(Q^{ac})^2 = U_i^2 I^2$ | $P^{ac}+P^{dc}=a+bI+cI^2$ |
+| `ACRPowerModel` | $U^r_i,U^i_i$ | $(P^{ac})^2+(Q^{ac})^2=((U^r_i)^2+(U^i_i)^2)i^{sq}$ | $P^{ac}+P^{dc}=a+bI+ci^{sq}$ |
+| `IVRPowerModel` | $U^r_i,U^i_i$ and current components | $P,Q$ linked directly to voltage and current components | $P^{ac}+P^{dc}=a+bI+ci^{sq}$ |
+| `SOCWRPowerModel` | $W_i$ | $(P^{ac})^2+(Q^{ac})^2 \leq W_i i^{sq}$ | $P^{ac}+P^{dc}=a+bI+ci^{sq}$ |
+| `SDPWRMPowerModel` | voltage matrix variables | lifted relaxation of current relation | $P^{ac}+P^{dc}=a+bI+ci^{sq}$ |
+| `QCWRPowerModel` / `QCWRTriPowerModel` | lifted voltage variables with QC envelopes | QC relaxation of current relation | $P^{ac}+P^{dc}=a+bI+ci^{sq}$ |
+| `DCPPowerModel` | $U_i=1$ | active-power-only approximation | $P^{ac}+P^{dc}=0$ or linearized losses |
+| `LPACPowerModel` / `LPACCPowerModel` | $U_i \approx 1+\phi_i$ | linearized active-power-dominated current | linearized losses |
+
+## References
+
+The converter loss model, formulation hierarchy, and convex/linearized converter models are based on:
+
+H. Ergun, J. Dave, D. Van Hertem and F. Geth, "Optimal Power Flow for AC/DC Grids: Formulation, Convex Relaxation, Linear Approximation and Implementation," IEEE Transactions on Power Systems, DOI: 10.1109/TPWRS.2019.2897835.
+
+
+
