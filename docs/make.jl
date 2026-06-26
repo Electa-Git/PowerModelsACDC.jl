@@ -18,7 +18,10 @@ makedocs(
                 "Phase shifting transformers" => "comp/pst.md"
                 "Static synchronous series compensation" => "comp/sssc.md"
                 "DC branches" => "comp/dcbranch.md"
-                "Generators" => "comp/gen.md"
+                "AC branches" => "comp/acbranch.md"
+                "AC Generators" => "comp/gen.md"
+                "CC Generators" => "comp/dcgen.md"
+                "DC Converters" => "comp/dcconv.md"
             ]
             "File IO" => "parser.md"
         ]
