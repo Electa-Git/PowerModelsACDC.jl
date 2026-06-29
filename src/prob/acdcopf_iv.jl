@@ -125,11 +125,11 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     end
 
     for i in _PM.ids(pm, :pst)
-        Memento.warn(_LOGGER,"IVR formulation is not yet implemented for PSTs")
+        @_warn("IVR formulation is not yet implemented for PSTs")
     end
 
     for i in _PM.ids(pm, :sssc)
-        Memento.warn(_LOGGER,"IVR formulation is not yet implemented for SSSCs")
+        @_warn("IVR formulation is not yet implemented for SSSCs")
     end
 
     for i in _PM.ids(pm, :busdc)
@@ -226,11 +226,11 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
         end
 
         for i in _PM.ids(pm, n, :pst)
-            Memento.warn(_LOGGER,"IVR formulation is not yet implemented for PSTs (nw = $n)")
+            @_warn("IVR formulation is not yet implemented for PSTs (nw = $n)")
         end
 
         for i in _PM.ids(pm, n, :sssc)
-            Memento.warn(_LOGGER,"IVR formulation is not yet implemented for SSSCs (nw = $n)")
+            @_warn("IVR formulation is not yet implemented for SSSCs (nw = $n)")
         end
 
         for i in _PM.ids(pm, n, :busdc)
