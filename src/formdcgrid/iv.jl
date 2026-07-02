@@ -11,11 +11,69 @@ function variable_dcbranch_current(pm::_PM.AbstractIVRModel; nw::Int=_PM.nw_id_d
     if bounded
         for arc in _PM.ref(pm, nw, :arcs_dcgrid)
             l,i,j = arc
-            JuMP.set_lower_bound(igrid_dc[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"] / vpu)
-            JuMP.set_upper_bound(igrid_dc[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"] / vpu)
+            if !haskey(_PM.ref(pm, nw, :branchdc, l), "dcr") || _PM.ref(pm, nw, :branchdc, l)["dcr"] == 0
+                JuMP.set_lower_bound(igrid_dc[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"] / vpu)
+                JuMP.set_upper_bound(igrid_dc[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"] / vpu)
+            else
+                JuMP.set_lower_bound(igrid_dc[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"] / vpu * 10)
+                JuMP.set_upper_bound(igrid_dc[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"] / vpu * 10)
+            end
         end
     end
     report && _PM.sol_component_value_edge(pm, nw, :branchdc, :if, :it, _PM.ref(pm, nw, :arcs_dcgrid_from), _PM.ref(pm, nw, :arcs_dcgrid_to), igrid_dc)
+end
+
+"""
+Creates DC branch current variables for IVR models.
+"""
+function variable_dcbranch_temperature(pm::_PM.AbstractIVRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+    cond_temp_dc = _PM.var(pm, nw)[:cond_temp_dc] = JuMP.@variable(pm.model,
+    [l in _PM.ids(pm, nw, :branchdc)], base_name="$(nw)_cond_temp_dc",
+    start = _PM.comp_start_value(_PM.ref(pm, nw, :branchdc, l), "cond_temp_start", 0.0)
+    )
+    if bounded
+        for l in _PM.ids(pm, nw, :branchdc)
+            JuMP.set_lower_bound(cond_temp_dc[l], _PM.ref(pm, nw, :branchdc, l)["cond_temp_min"])
+            JuMP.set_upper_bound(cond_temp_dc[l], _PM.ref(pm, nw, :branchdc, l)["cond_temp_max"])
+        end
+    end
+
+    Δ_cond_temp_dc = _PM.var(pm, nw)[:delta_cond_temp_dc] = JuMP.@variable(pm.model,
+    [l in _PM.ids(pm, nw, :branchdc)], base_name="$(nw)_delta_cond_temp_dc",
+    start = _PM.comp_start_value(_PM.ref(pm, nw, :branchdc, l), "cond_temp_start", 0.0)
+    )
+    if bounded
+        for l in _PM.ids(pm, nw, :branchdc)
+            JuMP.set_lower_bound(Δ_cond_temp_dc[l], _PM.ref(pm, nw, :branchdc, l)["delta_cond_temp_min"])
+            JuMP.set_upper_bound(Δ_cond_temp_dc[l], _PM.ref(pm, nw, :branchdc, l)["delta_cond_temp_max"])
+        end
+    end
+
+    cable_surface_temp_dc = _PM.var(pm, nw)[:cable_surface_temp_dc] = JuMP.@variable(pm.model,
+    [l in _PM.ids(pm, nw, :branchdc)], base_name="$(nw)_cable_surface_temp_dc",
+    start = _PM.comp_start_value(_PM.ref(pm, nw, :branchdc, l), "cable_surface_temp_start", 0.0)
+    )
+    if bounded
+        for l in _PM.ids(pm, nw, :branchdc)
+            JuMP.set_lower_bound( cable_surface_temp_dc[l], _PM.ref(pm, nw, :branchdc, l)["surf_temp_min"])
+            JuMP.set_upper_bound( cable_surface_temp_dc[l], _PM.ref(pm, nw, :branchdc, l)["surf_temp_max"])
+        end
+    end
+
+
+    Δ_cable_surface_temp_dc = _PM.var(pm, nw)[:delta_cable_surface_temp_dc] = JuMP.@variable(pm.model,
+    [l in _PM.ids(pm, nw, :branchdc)], base_name="$(nw)_delta_cable_surface_temp_dc",
+    start = _PM.comp_start_value(_PM.ref(pm, nw, :branchdc, l), "cable_surface_temp_start", 0.0)
+    )
+    if bounded
+        for l in _PM.ids(pm, nw, :branchdc)
+            JuMP.set_lower_bound(Δ_cable_surface_temp_dc[l], _PM.ref(pm, nw, :branchdc, l)["delta_surf_temp_min"])
+            JuMP.set_upper_bound(Δ_cable_surface_temp_dc[l], _PM.ref(pm, nw, :branchdc, l)["delta_surf_temp_max"])
+        end
+    end
+
+    report && _PM.sol_component_value(pm, nw, :branchdc, :cable_cond_temp, _PM.ids(pm, nw, :branchdc), cond_temp_dc)
+    report && _PM.sol_component_value(pm, nw, :branchdc, :cable_surface_temp, _PM.ids(pm, nw, :branchdc), cable_surface_temp_dc)
 end
 
 # Kirchhoff's current law for DC nodes

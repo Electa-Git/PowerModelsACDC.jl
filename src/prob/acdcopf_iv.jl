@@ -186,6 +186,7 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
 
         variable_active_dcbranch_flow(pm; nw = n)
         variable_dcbranch_current(pm; nw = n)
+        variable_dcbranch_temperature(pm; nw = n)
         variable_dcgrid_voltage_magnitude(pm; nw = n)
         variable_dc_converter(pm; nw = n)
         variable_flexible_demand(pm; nw = n)
@@ -238,6 +239,9 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
         end
         for i in _PM.ids(pm, n, :branchdc)
             constraint_ohms_dc_branch(pm, i; nw = n)
+            if haskey(_PM.ref(pm, n, :branchdc, i), "dcr") && _PM.ref(pm, n, :branchdc, i)["dcr"] == 1
+               constraint_dynamic_cable_rating(pm, i; nw = n)
+            end
         end
         for i in _PM.ids(pm, n, :convdc)
             constraint_converter_limits(pm, i; nw = n)
