@@ -56,22 +56,22 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
                         ref_buses_dc["$k"] = v
                     end
                 end
-                Memento.warn(_LOGGER, "no reference DC bus found, setting reference bus based on AC bus type")
+                @_warn("no reference DC bus found, setting reference bus based on AC bus type")
             end
 
             for (k,conv) in nw_ref[:convdc]
                 conv_id = conv["index"]
                 if conv["type_ac"] == 2 && conv["type_dc"] == 1
-                    Memento.warn(_LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+                    @_warn("For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
                 elseif conv["type_ac"] == 1 && conv["type_dc"] == 1
-                    Memento.warn(_LOGGER, "For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
+                    @_warn("For converter $conv_id is chosen P is fixed on AC and DC side. This can lead to infeasibility in the PF problem.")
                 end
                 convbus_ac = conv["busac_i"]
                 if conv["Vmmax"] < nw_ref[:bus][convbus_ac]["vmin"]
-                    Memento.warn(_LOGGER, "The maximum AC side voltage of converter $conv_id is smaller than the minimum AC bus voltage")
+                    @_warn("The maximum AC side voltage of converter $conv_id is smaller than the minimum AC bus voltage")
                 end
                 if conv["Vmmin"] > nw_ref[:bus][convbus_ac]["vmax"]
-                    Memento.warn(_LOGGER, "The miximum AC side voltage of converter $conv_id is larger than the maximum AC bus voltage")
+                    @_warn("The miximum AC side voltage of converter $conv_id is larger than the maximum AC bus voltage")
                 end
             end
 
@@ -80,7 +80,7 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
                 for (rb) in keys(ref_buses_dc)
                     ref_buses_warn = ref_buses_warn*rb*", "
                 end
-                Memento.warn(_LOGGER, "multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
+                @_warn("multiple reference buses found, i.e. "*ref_buses_warn*"this can cause infeasibility if they are in the same connected component")
             end
             nw_ref[:ref_buses_dc] = ref_buses_dc
             nw_ref[:buspairsdc] = buspair_parameters_dc(nw_ref[:arcs_dcgrid_from], nw_ref[:branchdc], nw_ref[:busdc])
@@ -262,7 +262,7 @@ function ref_add_pst!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (nw, nw_ref) in ref[:it][:pm][:nw]
         if !haskey(nw_ref, :pst)
             nw_ref[:pst] = Dict()
-            Memento.warn(_LOGGER, "required pst data not found")
+            @_warn("required pst data not found")
         end
 
         nw_ref[:pst] = Dict(x for x in nw_ref[:pst] if (x.second["pst_status"] == 1 && x.second["f_bus"] in keys(nw_ref[:bus]) && x.second["t_bus"] in keys(nw_ref[:bus])))
@@ -311,7 +311,7 @@ function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (nw, nw_ref) in ref[:it][:pm][:nw]
         if !haskey(nw_ref, :sssc)
             nw_ref[:sssc] = Dict()
-            Memento.warn(_LOGGER, "required pst data not found")
+            @_warn("required pst data not found")
         end
 
         nw_ref[:sssc] = Dict(x for x in nw_ref[:sssc] if (x.second["sssc_status"] == 1 && x.second["f_bus"] in keys(nw_ref[:bus]) && x.second["t_bus"] in keys(nw_ref[:bus])))
@@ -333,7 +333,7 @@ function ref_add_gendc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (nw, nw_ref) in ref[:it][:pm][:nw]
         if !haskey(nw_ref, :gendc)
             nw_ref[:gendc] = Dict()
-            Memento.warn(_LOGGER, "required dc generator data not found")
+            @_warn("required dc generator data not found")
         end
 
         nw_ref[:gendc] = Dict(x for x in nw_ref[:gendc] if (x.second["gen_status"] == 1 && x.second["gen_bus"] in keys(nw_ref[:busdc])))

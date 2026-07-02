@@ -1,7 +1,6 @@
 using PowerModelsACDC
 using Test
 
-import Memento
 import InfrastructureModels
 import PowerModels
 
@@ -12,10 +11,8 @@ import HiGHS
 # Settings
 local_test = false # If true, additional tests are run using commercial solvers.
 
-# Suppress warnings during testing.
-Memento.setlevel!(Memento.getlogger(InfrastructureModels), "error")
-Memento.setlevel!(Memento.getlogger(PowerModels), "error")
-Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
+# Silence logging within PowerModelsACDC, PowerModels and InfrastructureModels.
+silence()
 
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
