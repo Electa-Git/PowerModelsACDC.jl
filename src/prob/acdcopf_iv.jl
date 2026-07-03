@@ -186,13 +186,16 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
 
         variable_active_dcbranch_flow(pm; nw = n)
         variable_dcbranch_current(pm; nw = n)
-        variable_dcbranch_temperature(pm; nw = n)
         variable_dcgrid_voltage_magnitude(pm; nw = n)
         variable_dc_converter(pm; nw = n)
         variable_flexible_demand(pm; nw = n)
         variable_load_current(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
+
+        # variable_dcbranch_temperature(pm; nw = n)
+
+        add_additional_variables(pm; nw = n)
     end
 
     # Per-network constraints
@@ -268,4 +271,17 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
 
     # Global objective assembly (IVR-specific)
     _PM.objective_min_fuel_and_flow_cost(pm)
+end
+
+function add_additional_variables(pm; nw::Int = _PM.nw_id_default)
+    dc_branch_ids = []
+    for i in _PM.ids(pm, nw, :branchdc)
+        if haskey(_PM.ref(pm, nw, :branchdc, i), "dcr") && _PM.ref(pm, nw, :branchdc, i)["dcr"] == 1
+            push!(dc_branch_ids, i)
+        end
+    end
+
+    if !isempty(dc_branch_ids)
+        variable_dcbranch_temperature(pm, dc_branch_ids; nw = nw)
+    end
 end

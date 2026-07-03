@@ -71,8 +71,13 @@ function variable_active_dcbranch_flow(pm::_PM.AbstractPowerModel; nw::Int=_PM.n
     if bounded
         for arc in _PM.ref(pm, nw, :arcs_dcgrid)
             l,i,j = arc
-            JuMP.set_lower_bound(p[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"])
-            JuMP.set_upper_bound(p[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"])
+            if !haskey(_PM.ref(pm, nw, :branchdc, l), "dcr") || _PM.ref(pm, nw, :branchdc, l)["dcr"] == 0
+                JuMP.set_lower_bound(p[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"])
+                JuMP.set_upper_bound(p[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"])
+            else
+                JuMP.set_lower_bound(p[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"] * 10)
+                JuMP.set_upper_bound(p[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"] * 10)
+            end
         end
     end
 

@@ -18,8 +18,9 @@ mpc.baseMVA = 100;
 %% bus data
 %	bus_i	type	Pd	Qd	Gs	Bs	area	Vm      Va	baseKV	zone	Vmax	Vmin
 mpc.bus = [
-	1       3       0	0	0   0   1       1.06	0	345     1       1.1     0.9;
-	2       2       1950 0	0   0   1       1       0	345     1       1.1    0.9;
+	1       3       0	0	0   0   1       1.06	0	345     1       1.1    0.9;
+	2       2       4000 0	0   0   1       1       0	345     1       1.1    0.9;
+    3       2       4000 0	0   0   1       1       0	345     1       1.1    0.9;
 ];
 
 %% generator data
@@ -27,6 +28,7 @@ mpc.bus = [
 mpc.gen = [
 	1	0       0	500      -500    1.00	100       1       5000     0 0 0 0 0 0 0 0 0 0 0 0;
     2	0       0	500      -500    1.00	100       1       5000     0 0 0 0 0 0 0 0 0 0 0 0;
+    3	0       0	500      -500    1.00	100       1       5000     0 0 0 0 0 0 0 0 0 0 0 0;
 ];
 
 %% branch data
@@ -46,19 +48,22 @@ mpc.dcpol=2;
 mpc.busdc = [
     1              1       0       1       525         1.0     1.0     0;
     2              1       0       1       525         1.1     0.9     0;
+    3              1       0       1       525         1.1     0.9     0;
 ];
 
 %% converters
 %column_names%   busdc_i busac_i type_dc type_ac P_g   Q_g islcc  Vtar    rtf xtf  transformer tm   bf filter    rc      xc  reactor   basekVac    Vmmax   Vmmin   Imax    status   LossA LossB  LossCrec LossCinv  droop      Pdcset    Vdcset  dVdcset Pacmax Pacmin Qacmax Qacmin
 mpc.convdc = [
-    1       1   1       1       0       0     0 1     0.01  0.01 0 1 0.01 0 0.01   0.01 0  525         1.0     1.0     50     1       0.0 0.0  0.0    0.0      0.0    0.0   1.00   0 4100 -4100 500 -500;
-    2       2   2       1       0       0     0 1     0.01  0.01 0 1 0.01 0 0.01   0.01 0  525         1.1     0.9     50     1       0.0 0.0  0.0    0.0      0.0    0.0   1.00   0 4100 -4100 500 -500;
+    1       1   1       1       0       0     0 1     0.01  0.01 0 1 0.01 0 0.01   0.01 0  525         1.0     1.0     50     1       0.0 0.0  0.0    0.0      0.0    0.0   1.00   0 4000 -4000 1000 -1000;
+    2       2   2       1       0       0     0 1     0.01  0.01 0 1 0.01 0 0.01   0.01 0  525         1.1     0.9     50     1       0.0 0.0  0.0    0.0      0.0    0.0   1.00   0 4000 -4000 1000 -1000;
 ];
 
 %% branches
 %column_names%   fbusdc  tbusdc  r      l        c   rateA   rateB   rateC   status
 mpc.branchdc = [
-    1       2       0.00078367   0   0    1500     1500     1500     1;
+    1       2       0.00078367   0   0    2000     2000     2000     1;
+    1       3       0.00065306   0   0    2000     2000     2000     1;
+    2       3       0.00039183   0   0    2000     2000     2000     1;
  ];
 
 %% generator cost data
@@ -66,11 +71,7 @@ mpc.branchdc = [
 %	2	startup	shutdown	n	c(n-1)	...	c0
 mpc.gencost = [
 	2	0	0	3	0  1	0;
+    2	0	0	3	0  10	0;
     2	0	0	3	0  100	0;
 ];
 
-% adds current ratings to branch matrix
-%column_names%	c_rating_a
-%mpc.branch_currents = [
-%100;100;100;100;100;100;100;
-%];
