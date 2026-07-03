@@ -37,7 +37,7 @@ s = Dict("conv_losses_mp" => true)
     end
 end
 
-if local_test
+if use_commercial_solvers
     @testset "test soc tnep" begin
         @testset "test SOC-BFM tnep" begin
             @testset "6-bus case" begin
@@ -216,7 +216,7 @@ end
         @test isapprox(resultLPAC["solution"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
     end
 
-    if local_test
+    if use_commercial_solvers
         @testset "SOCWR" begin
             resultSOCWR = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_acdc.m"), PowerModels.SOCWRPowerModel, gurobi; setting=s)
             @test isapprox(resultSOCWR["objective"], 348.021; atol=1e-1)
@@ -302,7 +302,7 @@ s = Dict("conv_losses_mp" => true)
             @test isapprox(resultLPAC["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
             @test isapprox(resultLPAC["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"], -2.15833; atol=1e-2)
         end
-        if local_test
+        if use_commercial_solvers
             @testset "ACP" begin
                 data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_original.m"))
                 resultACP = solve_tnep(data_dc, PowerModels.ACPPowerModel, juniper, multinetwork=true; setting=s)
@@ -359,7 +359,7 @@ s = Dict("conv_losses_mp" => true)
         #    @test isapprox(resultLPAC["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"], -1.2355; atol=1e-2)
         #    @test isapprox(resultLPAC["solution"]["nw"]["1"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
         # end
-        if local_test
+        if use_commercial_solvers
             @testset "ACP" begin
                 data_acdc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_acdc.m"))
                 resultACP = solve_tnep(data_acdc, PowerModels.ACPPowerModel, juniper, multinetwork=true; setting=s)

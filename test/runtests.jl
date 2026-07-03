@@ -9,16 +9,16 @@ import Juniper
 import HiGHS
 
 # Settings
-local_test = false # If true, additional tests are run using commercial solvers.
+use_commercial_solvers = false # Run additional tests using commercial solvers.
 
 # Silence logging within PowerModelsACDC, PowerModels and InfrastructureModels.
 silence()
 
 # Solvers
-ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
+ipopt = optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer)
-juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt_solver, "mip_solver" => highs, "time_limit" => 7200)
-if local_test
+juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => highs, "time_limit" => 7200)
+if use_commercial_solvers
     import Gurobi
     gurobi = optimizer_with_attributes(Gurobi.Optimizer)
 end
