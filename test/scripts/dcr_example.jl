@@ -65,7 +65,7 @@ end
 s = Dict("conv_losses_mp" => true, "objective_components" => ["gen", "load"])
 
 # Number of hours
-number_of_hours = 168 # one week
+number_of_hours = 168*2 # one week
 
 # time_interval
 time_interval = 2 # the fraction of an hour to model thermal behaviour time step: 2 => half hour steps, 4 => quarter hour steps etc....
@@ -90,17 +90,17 @@ println("Objective base: ", result_dcr["objective"] / time_interval)
 power_base = zeros(length(result_base["solution"]["nw"]))
 
 for (n, network) in result_base["solution"]["nw"]
-    # cond_temp[parse(Int, n)] = network["branchdc"]["1"]["cable_cond_temp"] 
-    # surf_temp[parse(Int, n)] = network["branchdc"]["1"]["cable_surface_temp"] 
     power_base[parse(Int, n)] = network["branchdc"]["1"]["pf"] 
 end
 
 
-power_dcr  = zeros(length(result_dcr["solution"]["nw"]))
-cond_temp = zeros(length(result_dcr["solution"]["nw"]))
+power_dcr  = zeros(length(result_dcr["solution"]["nw"]), length(result_dcr["solution"]["nw"]["1"]["branchdc"]))
+cond_temp = zeros(length(result_dcr["solution"]["nw"]), length(result_dcr["solution"]["nw"]["1"]["branchdc"]))
 for (n, network) in result_dcr["solution"]["nw"]
-    cond_temp[parse(Int, n)] = network["branchdc"]["1"]["cable_cond_temp"] 
-    power_dcr[parse(Int, n)] = network["branchdc"]["1"]["pf"] 
+    for (br, branch) in network["branchdc"]
+        cond_temp[parse(Int, n), parse(Int, br)] = branch["cable_cond_temp"] 
+        power_dcr[parse(Int, n), parse(Int, br)] = branch["pf"] 
+    end
 end
 
 p = Plots.plot(power_base)
