@@ -72,7 +72,7 @@ mpc.branchdc = [
 %	2	startup	shutdown	n	c(n-1)	...	c0
 mpc.gencost = [
 	2	0	0	3	0  1	0;
-    2	0	0	3	0  10	0;
-    2	0	0	3	0  100	0;
+    2	0	0	3	0  1	0;
+    2	0	0	3	0  1	0;
 ];
 

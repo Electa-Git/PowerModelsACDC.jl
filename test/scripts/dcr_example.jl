@@ -61,17 +61,37 @@ function build_dcr_data(file, number_of_hours::Int, time_interval::Int)
     return dcr_data
 end
 
+function add_gen_profile!(data, profile; gen = 1)
+    for (nw, network) in data["nw"]
+        network["gen"]["$gen"]["pmax"] = network["gen"]["$gen"]["pmax"] * profile[parse(Int, nw)]
+    end
+end
+
+function add_price_profile!(data, profile; gen = 1)
+    for (nw, network) in data["nw"]
+        network["gen"]["$gen"]["cost"][1] = profile[parse(Int, nw)]
+    end
+end
 # OPF settings
 s = Dict("conv_losses_mp" => true, "objective_components" => ["gen", "load"])
 
 # Number of hours
 number_of_hours = 168 # one week
+price_profile_2_ = [1.5, 2.0, 1.5, 1.0, 2.5, 1.5, 1.5] .* 100
+price_profile_3_ = [2.0, 5.0, 1.5, 1.5, 4.5, 3.5, 1.5] .* 100
 
 # time_interval
 time_interval = 2 # the fraction of an hour to model thermal behaviour time step: 2 => half hour steps, 4 => quarter hour steps etc....
 
 data = build_mn_data(file, number_of_hours)
 PMACDC.process_additional_data!(data)
+price_profile_2 = repeat(price_profile_2_, inner = Int(number_of_hours / length(price_profile_2_)))
+price_profile_3 = repeat(price_profile_3_, inner = Int(number_of_hours / length(price_profile_3_)))
+add_price_profile!(data, price_profile_2, gen = 2)
+add_price_profile!(data, price_profile_3, gen = 3)
+
+# profile = rand(length(data["nw"]))
+# add_gen_profile!(data, profile, gen = 1)
 
 # Solve OPF
 result_base = PMACDC.solve_acdcopf_iv(data, PowerModels.IVRPowerModel, ipopt; multinetwork=true, setting=s)
@@ -79,12 +99,18 @@ result_base = PMACDC.solve_acdcopf_iv(data, PowerModels.IVRPowerModel, ipopt; mu
 # Add DCR data
 dcr_data = build_dcr_data(file, number_of_hours, time_interval)
 PMACDC.process_additional_data!(dcr_data)
+price_profile_2 = repeat(price_profile_2_, inner = Int(number_of_hours / length(price_profile_2_) * time_interval))
+price_profile_3 = repeat(price_profile_3_, inner = Int(number_of_hours / length(price_profile_3_) * time_interval))
+add_price_profile!(dcr_data, price_profile_2, gen = 2)
+add_price_profile!(dcr_data, price_profile_3, gen = 3)
+# dcr_profile = repeat(profile, inner = time_interval)
+# add_gen_profile!(dcr_data, dcr_profile, gen = 1)
 
 # Solve DCR OPF
 result_dcr = PMACDC.solve_acdcopf_iv(dcr_data, PowerModels.IVRPowerModel, ipopt; multinetwork=true, setting=s)
 
 println("Objective base: ", result_base["objective"])
-println("Objective base: ", result_dcr["objective"] / time_interval)
+println("Objective DCR: ", result_dcr["objective"] / time_interval)
 
 
 power_base = zeros(length(result_base["solution"]["nw"]))
