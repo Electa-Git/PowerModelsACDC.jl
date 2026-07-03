@@ -38,12 +38,12 @@
         data = PowerModels.parse_file(pkgdir(PowerModelsACDC, "test", "data", "case5.m"))
         s = Dict("conv_losses_mp" => true, "objective_components" => ["gen"])
         @testset "ACR model" begin
-            resultOPF = solve_acdcopf(data_sssc, PowerModels.ACRPowerModel, ipopt_solver; setting=s)
+            resultOPF = solve_acdcopf(data_sssc, PowerModels.ACRPowerModel, ipopt; setting=s)
             @test isapprox(resultOPF["objective"], 16702.0, atol=1)
             @test isapprox(resultOPF["solution"]["sssc"]["1"]["pf"], -1.50085, atol=1e-2)
         end
         @testset "ACP model" begin
-            resultOPF = solve_acdcopf(data_sssc, PowerModels.ACPPowerModel, ipopt_solver; setting=s)
+            resultOPF = solve_acdcopf(data_sssc, PowerModels.ACPPowerModel, ipopt; setting=s)
             @test isapprox(resultOPF["objective"], 16702.0, atol=1)
             @test isapprox(resultOPF["solution"]["sssc"]["1"]["pf"], -1.50085, atol=1e-2)
         end

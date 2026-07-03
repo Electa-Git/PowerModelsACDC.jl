@@ -1,7 +1,7 @@
 s = Dict("conv_losses_mp" => true)
 @testset "test ac polar pf" begin
     @testset "5-bus ac dc case" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc.m"), PowerModels.ACPPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc.m"), PowerModels.ACPPowerModel, ipopt; setting=s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
@@ -20,7 +20,7 @@ s = Dict("conv_losses_mp" => true)
     end
 
     @testset "5-bus ac dc case with DC generator" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_gendc.m"), PowerModels.ACPPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_gendc.m"), PowerModels.ACPPowerModel, ipopt; setting=s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
@@ -39,7 +39,7 @@ s = Dict("conv_losses_mp" => true)
     end
 
     @testset "5-bus ac dc case with 2 seperate ac grids" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_2grids.m"), PowerModels.ACPPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_2grids.m"), PowerModels.ACPPowerModel, ipopt; setting=s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
@@ -59,7 +59,7 @@ s = Dict("conv_losses_mp" => true)
     end
 
     @testset "5-bus ac dc droop case" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_droop.m"), PowerModels.ACPPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_droop.m"), PowerModels.ACPPowerModel, ipopt; setting=s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
@@ -78,7 +78,7 @@ s = Dict("conv_losses_mp" => true)
     end
 
     @testset "5-bus ac dc droop case with DC generator" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_gendc_droop.m"), PowerModels.ACPPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_gendc_droop.m"), PowerModels.ACPPowerModel, ipopt; setting=s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
@@ -97,7 +97,7 @@ s = Dict("conv_losses_mp" => true)
     end
 
     @testset "5-bus ac dc droop case with ac side refernce power" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_droop_acside.m"), PowerModels.ACPPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_droop_acside.m"), PowerModels.ACPPowerModel, ipopt; setting=s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
@@ -116,7 +116,7 @@ s = Dict("conv_losses_mp" => true)
     end
     # REMOVED for TRAVIS, otherwise case ok
     # @testset "24-bus rts ac dc case with three zones" begin
-    #     result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case24_3zones_acdc.m"), PowerModels.ACPPowerModel, ipopt_solver; setting=s)
+    #     result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case24_3zones_acdc.m"), PowerModels.ACPPowerModel, ipopt; setting=s)
 
     #     @test result["termination_status"] == LOCALLY_SOLVED
     #     @test isapprox(result["objective"], 0; atol=1e-2)
@@ -137,7 +137,7 @@ end
 
 @testset "test ac rectangular pf" begin
     @testset "5-bus ac dc case" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc.m"), PowerModels.ACRPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc.m"), PowerModels.ACRPowerModel, ipopt; setting=s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
@@ -156,7 +156,7 @@ end
     end
 
     @testset "5-bus ac dc droop case" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_droop.m"), PowerModels.ACRPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_droop.m"), PowerModels.ACRPowerModel, ipopt; setting=s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
@@ -175,7 +175,7 @@ end
     end
 
     @testset "5-bus ac dc droop case with ac side refernce power" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_droop_acside.m"), PowerModels.ACRPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_droop_acside.m"), PowerModels.ACRPowerModel, ipopt; setting=s)
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
 
@@ -195,7 +195,7 @@ end
 
 @testset "test dc pf" begin
     @testset "5-bus ac dc case" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc.m"), PowerModels.DCPPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc.m"), PowerModels.DCPPowerModel, ipopt; setting=s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
@@ -208,7 +208,7 @@ end
     end
 
     @testset "24-bus rts ac dc case with three zones" begin
-        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case24_3zones_acdc.m"), PowerModels.DCPPowerModel, ipopt_solver; setting=s)
+        result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case24_3zones_acdc.m"), PowerModels.DCPPowerModel, ipopt; setting=s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0; atol=1e-2)
@@ -223,7 +223,7 @@ end
 end
 
 @testset "4-bus ac voltage droop case" begin
-    result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case4_acdroop.m"), PowerModels.ACPPowerModel, ipopt_solver; setting=s)
+    result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case4_acdroop.m"), PowerModels.ACPPowerModel, ipopt; setting=s)
 
     @test result["termination_status"] == LOCALLY_SOLVED || result["termination_status"] == SLOW_PROGRESS
     @test isapprox(result["objective"], 0; atol=1e-2)
