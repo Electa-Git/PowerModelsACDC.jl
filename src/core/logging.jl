@@ -1,16 +1,19 @@
 const _LOGGER = Ref{Logging.ConsoleLogger}()
 
 """
-    silence()
+    silence(; all_levels = false)
 
 Silence logging within PowerModelsACDC, PowerModels and InfrastructureModels.
 
-This is equivalent to calling `logger_config!("error")`.
+By default, error-level messages remain enabled; this is equivalent to calling
+`logger_config!("error")` for all three packages.
+Set `all_levels = true` to silence all log messages, including errors.
 """
-function silence()
-    logger_config!("error")
-    _PM.logger_config!("error")
-    _IM.logger_config!("error")
+function silence(; all_levels::Bool = false)
+    log_level = all_levels ? Logging.AboveMaxLevel : "error"
+    logger_config!(log_level)
+    _PM.logger_config!(log_level)
+    _IM.logger_config!(log_level)
     return
 end
 

@@ -9,18 +9,40 @@ import Juniper
 import HiGHS
 
 # Settings
+logging = false # Print logs from modeling packages and solvers to the REPL.
 use_commercial_solvers = false # Run additional tests using commercial solvers.
 
-# Silence logging within PowerModelsACDC, PowerModels and InfrastructureModels.
-silence()
+if logging
+    logger_config!("info")
+    PowerModels.logger_config!("info")
+    InfrastructureModels.logger_config!("info")
+else
+    silence(all_levels=true) # Silence logging within PowerModelsACDC, PowerModels and InfrastructureModels.
+end
 
 # Solvers
-ipopt = optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
-highs = optimizer_with_attributes(HiGHS.Optimizer)
-juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => highs, "time_limit" => 7200)
+ipopt = optimizer_with_attributes(
+    Ipopt.Optimizer,
+    "tol" => 1e-6,
+    "print_level" => logging ? 2 : 0,
+    "sb" => "yes"
+)
+highs = optimizer_with_attributes(
+    HiGHS.Optimizer,
+    "output_flag" => logging ? true : false
+)
+juniper = optimizer_with_attributes(
+    Juniper.Optimizer,
+    "nl_solver" => ipopt,
+    "mip_solver" => highs,
+    "log_levels" => logging ? [:Table,:Info,:Options] : []
+)
 if use_commercial_solvers
     import Gurobi
-    gurobi = optimizer_with_attributes(Gurobi.Optimizer)
+    gurobi = optimizer_with_attributes(
+        Gurobi.Optimizer,
+        "OutputFlag" => logging ? 1 : 0
+    )
 end
 
 # Functions to load test data
@@ -39,4 +61,4 @@ include("common.jl")
 
     # Exported names
     include("export.jl")
-end
+end; # The colon suppresses output when running tests in a REPL.
