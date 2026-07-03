@@ -65,7 +65,7 @@ end
 s = Dict("conv_losses_mp" => true, "objective_components" => ["gen", "load"])
 
 # Number of hours
-number_of_hours = 168*2 # one week
+number_of_hours = 168 # one week
 
 # time_interval
 time_interval = 2 # the fraction of an hour to model thermal behaviour time step: 2 => half hour steps, 4 => quarter hour steps etc....
