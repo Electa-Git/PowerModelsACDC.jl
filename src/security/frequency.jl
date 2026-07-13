@@ -1068,3 +1068,84 @@ function calculate_storage_fcr_contribution(ps_droop, ΔTin, ΔTdroop, zone_stor
 
     return str_contr
 end
+
+
+
+#### ROCOF CONSTRAINT BASED ON PRE-DEFINED SPLITS
+
+function constraint_rocof_split(pm::_PM.AbstractPowerModel, zone_id; nw::Int = _PM.nw_id_default)
+    if haskey(_PM.ref(pm, nw), :ignored_zones) && any(zone_id .== _PM.ref(pm, nw, :ignored_zones))
+        # do nothing if the zone is ignored
+    else
+        generator_properties = Dict((i, []) for i in zone_id)
+        storage_properties = Dict((i, []) for i in zone_id)
+        for (g, gen) in _PM.ref(pm, nw, :gen)
+            if haskey(gen, "zone") &&  gen["zone"] == zone_id
+                push!(generator_properties[zone_id], g => Dict("inertia" => gen["inertia_constants"], "rating" => gen["pmax"]))
+            end
+        end
+
+        for (s, storage) in _PM.ref(pm, nw, :storage)
+            if haskey(storage, "zone") && storage["zone"] == zone_id
+                push!(storage_properties[zone_id], s => Dict("inertia" => storage["inertia_constants"], "rating" => storage["thermal_rating"]))
+            end
+        end
+
+
+        tielines_fr =   Dict((i, []) for i in zone_id) 
+        tielines_to =   Dict((i, []) for i in zone_id) 
+        for (t, tieline) in _PM.ref(pm, nw, :tie_lines)
+            line_id = tieline["line_id"]
+            if haskey(tieline, "zone_fr") || haskey(tieline, "zone_to")
+                from_zone = tieline["zone_fr"]
+                to_zone = tieline["zone_to"]
+                if from_zone == zone_id
+                    branch = _PM.ref(pm, nw, :branch, line_id)
+                    arc = (branch["index"], branch["f_bus"], branch["t_bus"])
+                    push!(tielines_fr[zone_id], arc)
+                elseif to_zone == zone_id
+                    branch = _PM.ref(pm, nw, :branch, line_id)
+                    arc = (branch["index"], branch["t_bus"], branch["f_bus"])
+                    push!(tielines_to[zone_id], arc)
+                end 
+            end
+        end
+
+        rocof_max = _PM.ref(pm, nw, :frequency_parameters)["rocof_max"]
+        rocof_min = _PM.ref(pm, nw, :frequency_parameters)["rocof_min"]
+        f0 = _PM.ref(pm, nw, :frequency_parameters)["f0"]
+
+
+        return constraint_rocof_split(pm::_PM.AbstractPowerModel, nw, zone_id, generator_properties[zone_id], storage_properties[zone_id], rocof_max, rocof_min, f0, tielines_fr[zone_id], tielines_to[zone_id])
+    end
+end
+
+function constraint_rocof_split(pm::_PM.AbstractPowerModel, n::Int, zone_id, generator_properties, storage_properties, rocof_max, rocof_min, f0, tielines_fr, tielines_to)
+    αg = _PM.var(pm, n, :alpha_g) # committed generators
+    αs = _PM.var(pm, n, :alpha_s) # committed storage
+    p = _PM.var(pm, n, :p) # branch flows
+
+    ΔPsplit = _PM.var(pm, n, :split_cont, zone_id)
+
+    println(zone_id, " fr: ", tielines_fr)
+    println(zone_id, " to: ", tielines_to)
+
+    println("TO: ")
+    for a in tielines_to
+        println(a)
+        p[a]
+        sum([p[a] for a in tielines_to]) 
+    end
+
+    println("FR: ")
+    for a in tielines_fr
+        println(a)
+        p[a]
+        sum([p[a] for a in tielines_fr]) 
+    end
+
+    JuMP.@constraint(pm.model,  ΔPsplit ==  sum(p[a] for a in tielines_fr) + sum(p[a] for a in tielines_to)  ) # This makes the split event to the some of the power flows defined as outgoing, sum([p[l,i,j] for (l,i,j) in tielines_fr]) +
+
+    JuMP.@constraint(pm.model, rocof_max / f0 * 2 * ((sum(properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties) + (sum(properties["inertia"] * properties["rating"] * αs[s] for (s, properties) in storage_properties)))) >= ΔPsplit)
+    JuMP.@constraint(pm.model, rocof_min / f0 * 2 * ((sum(properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties) + (sum(properties["inertia"] * properties["rating"] * αs[s] for (s, properties) in storage_properties)))) <= ΔPsplit)  
+end

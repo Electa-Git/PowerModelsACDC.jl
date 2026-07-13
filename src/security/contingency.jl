@@ -42,6 +42,7 @@ function variable_contingencies(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_de
     variable_tieline_contingency_indicator(pm, nw = nw)
     variable_storage_contingency(pm, nw = nw)
     variable_storage_contingency_indicator(pm, nw = nw)
+    variable_split_contingency(pm, nw = nw)
 end
 """
     variable_generator_contingency(pm; nw=_PM.nw_id_default, bounded=true, report=true)
@@ -239,6 +240,31 @@ function variable_tieline_contingency_indicator(pm::_PM.AbstractPowerModel; nw::
     report && _PM.sol_component_value(pm, nw, :tie_lines, :delta_l_plus, _PM.ids(pm, nw, :tie_lines), delta_l_plus)
     report && _PM.sol_component_value(pm, nw, :tie_lines, :delta_l_minus, _PM.ids(pm, nw, :tie_lines), delta_l_minus)
 end
+
+
+"""
+    variable_split_contingency(pm; nw=_PM.nw_id_default, bounded=true, report=true)
+
+Creates a continuous variable for the RoCoF dimensioing incident based on a given system spli.
+"""
+function variable_split_contingency(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+    δPsplit = _PM.var(pm, nw)[:split_cont] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :zones)], base_name="$(nw)_split_cont",
+    start = 0.0
+    )
+
+    if bounded
+        pg_max = maximum([gen["pmax"] for (g, gen) in _PM.ref(pm, nw, :gen)])
+        for (z, zone) in _PM.ref(pm, nw, :zones)
+            JuMP.set_lower_bound(δPsplit[z], -50e3) # setting an arbitrary value for now, this should be set to the maximum power that can be lost in a split.
+            JuMP.set_upper_bound(δPsplit[z],  50e3) # setting an arbitrary value for now, this should be set to the maximum power that can be lost in a split.
+        end
+    end
+
+    report && _PM.sol_component_value(pm, nw, :contingency, :split_cont, _PM.ids(pm, nw, :zones), δPsplit)
+end
+
+#### CONSTRAINTS
 """
     constraint_generator_contingencies(pm; nw=_PM.nw_id_default)
 
