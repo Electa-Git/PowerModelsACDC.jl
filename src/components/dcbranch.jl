@@ -71,8 +71,13 @@ function variable_active_dcbranch_flow(pm::_PM.AbstractPowerModel; nw::Int=_PM.n
     if bounded
         for arc in _PM.ref(pm, nw, :arcs_dcgrid)
             l,i,j = arc
-            JuMP.set_lower_bound(p[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"])
-            JuMP.set_upper_bound(p[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"])
+            if !haskey(_PM.ref(pm, nw, :branchdc, l), "dcr") || _PM.ref(pm, nw, :branchdc, l)["dcr"] == 0
+                JuMP.set_lower_bound(p[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"])
+                JuMP.set_upper_bound(p[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"])
+            else
+                JuMP.set_lower_bound(p[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"] * 10)
+                JuMP.set_upper_bound(p[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"] * 10)
+            end
         end
     end
 
@@ -276,4 +281,75 @@ function variable_branch_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_defaul
         )
     end
     report && _PM.sol_component_value(pm, nw, :branchdc_ne, :isbuilt, _PM.ids(pm, nw, :branchdc_ne), Z_dc_branch_ne)
+end
+
+#
+function constraint_dynamic_cable_rating(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    if nw == 1 
+        constraint_dynamic_cable_rating(pm, i, nw)
+    elseif nw >= 1
+        previous_nw = nw - 1
+        constraint_dynamic_cable_rating(pm, i, previous_nw, nw)
+    end 
+end
+
+function constraint_dynamic_cable_rating(pm::_PM.AbstractPowerModel, i::Int, nw::Int)
+    branchdc = _PM.ref(pm, nw, :branchdc, i)
+    cond_temp_init = branchdc["initial_conductor_temperature"] 
+    surf_temp_init = branchdc["initial_cable_surface_temperature"]    
+    return constraint_dynamic_cable_rating(pm, i, nw, cond_temp_init, surf_temp_init)
+end
+
+function constraint_dynamic_cable_rating(pm::_PM.AbstractPowerModel, i::Int, nw::Int, cond_temp_init, surf_temp_init)
+    cond_temp = _PM.var(pm, nw, :cond_temp_dc, i)
+    surf_temp = _PM.var(pm, nw, :cable_surface_temp_dc, i)
+    Δ_cond_temp = _PM.var(pm, nw, :delta_cond_temp_dc, i)
+    Δ_surf_temp = _PM.var(pm, nw, :delta_cable_surface_temp_dc, i)
+
+    JuMP.@constraint(pm.model, cond_temp == cond_temp_init)
+    JuMP.@constraint(pm.model, surf_temp == surf_temp_init)
+
+    JuMP.@constraint(pm.model, Δ_cond_temp == 0.0)
+    JuMP.@constraint(pm.model, Δ_surf_temp == 0.0)
+end
+
+
+function constraint_dynamic_cable_rating(pm::_PM.AbstractPowerModel, i::Int, nw_::Int, nw::Int)
+    branchdc = _PM.ref(pm, nw, :branchdc, i)
+    f_bus = branchdc["fbusdc"]
+    t_bus = branchdc["tbusdc"]
+    f_idx = (i, f_bus, t_bus)
+    Δt = branchdc["time_interval"]
+    Ta = branchdc["thermal_resistance_a"]
+    Tb = branchdc["thermal_resistance_b"]
+    Ca = branchdc["thermal_capacitance_a"]
+    Cb = branchdc["thermal_capacitance_b"]
+    Θamb = branchdc["ambient_temperature"]
+    α = branchdc["temperature_coefficient"]
+    r = branchdc["r"]
+    l = branchdc["length"]
+
+    r_per_m = r / l
+
+    return constraint_dynamic_cable_rating(pm, i, nw_, nw, Δt, Ta, Tb, Ca, Cb, Θamb, f_idx, α, r_per_m)
+end
+
+function constraint_dynamic_cable_rating(pm::_PM.AbstractPowerModel, i::Int, nw_::Int, nw::Int, Δt, Ta, Tb, Ca, Cb, Θamb, f_idx, α, r_per_m)
+    cond_temp = _PM.var(pm, nw, :cond_temp_dc, i)
+    surf_temp = _PM.var(pm, nw, :cable_surface_temp_dc, i)
+    Δ_cond_temp = _PM.var(pm, nw, :delta_cond_temp_dc, i)
+    Δ_surf_temp = _PM.var(pm, nw, :delta_cable_surface_temp_dc, i)
+
+    cond_temp_ = _PM.var(pm, nw_, :cond_temp_dc, i)
+    Δ_cond_temp_ = _PM.var(pm, nw_, :delta_cond_temp_dc, i)
+    Δ_surf_temp_ = _PM.var(pm, nw_, :delta_cable_surface_temp_dc, i)
+
+    I = _PM.var(pm, nw,  :igrid_dc, f_idx)
+
+    Wloss = JuMP.@expression(pm.model, (I/2)^2 * r_per_m * (1 + α * (cond_temp_ - 20.0)))
+    JuMP.@constraint(pm.model, Δ_cond_temp == cond_temp - Θamb)
+    JuMP.@constraint(pm.model, Δ_surf_temp == surf_temp - Θamb)
+
+    JuMP.@constraint(pm.model, Δ_cond_temp == Δ_cond_temp_ + Δt / Ca * (Wloss - (Δ_cond_temp_ - Δ_surf_temp_) / Ta) )
+    JuMP.@constraint(pm.model, Δ_surf_temp == Δ_surf_temp_ + Δt / Cb * ((Δ_cond_temp_ - Δ_surf_temp_) / Ta - Δ_surf_temp_ / Tb) )
 end
