@@ -27,6 +27,13 @@ ipopt = optimizer_with_attributes(
     "print_level" => logging ? 2 : 0,
     "sb" => "yes"
 )
+ipopt_warmstart = optimizer_with_attributes(
+    Ipopt.Optimizer,
+    "warm_start_init_point" => "yes",
+    "tol" => 1e-6,
+    "print_level" => logging ? 2 : 0,
+    "sb" => "yes"
+)
 highs = optimizer_with_attributes(
     HiGHS.Optimizer,
     "output_flag" => logging ? true : false
@@ -34,6 +41,12 @@ highs = optimizer_with_attributes(
 juniper = optimizer_with_attributes(
     Juniper.Optimizer,
     "nl_solver" => ipopt,
+    "mip_solver" => highs,
+    "log_levels" => logging ? [:Table,:Info,:Options] : []
+)
+juniper_warmstart = optimizer_with_attributes(
+    Juniper.Optimizer,
+    "nl_solver" => ipopt_warmstart,
     "mip_solver" => highs,
     "log_levels" => logging ? [:Table,:Info,:Options] : []
 )
