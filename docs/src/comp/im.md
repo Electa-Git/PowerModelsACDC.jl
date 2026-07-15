@@ -34,8 +34,8 @@ The torque model is implemented as $T(\omega) = T_0 * (A*\omega^m+B \omega + C)$
 | Name | Symbol | Unit | Type | Default | Description |
 |------|--------|------|------|---------|-------------|
 | T_0 | $T_0$ | p.u. | Real | - | Per-unit torque scaling factor (base torque is approximately equal to the system base power) |
-| A | $A$ | $\mathrm{s}^2/\mathrm{rad}^2$ | Real | - | Quadratic coefficient of the mechanical torque characteristic (inertia-dominated load component) |
-| B | $B$ | $\mathrm{s}/\mathrm{rad}$ | Real | - | Linear coefficient of the mechanical torque characteristic (friction-dominated load component) |
+| A | $A$ | $\mathrm{s}^2/\mathrm{rad}^2$ | Real | - | Quadratic coefficient of the mechanical torque characteristic (load component typical for centrifugal devices or aerodynamic drag) |
+| B | $B$ | $\mathrm{s}/\mathrm{rad}$ | Real | - | Linear coefficient of the mechanical torque characteristic (friction load component) |
 | C | $C$ | - | Real | - | Constant coefficient of the mechanical torque characteristic (static load component) |
 | m | $m$ | - | Real | - | Mechanical torque exponent describing the load type (see Kundur) |
 
