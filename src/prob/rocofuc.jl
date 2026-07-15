@@ -53,9 +53,6 @@ function build_rocofuc(pm::_PM.AbstractPowerModel)
         constraint_voltage_dc(pm; nw = n)
 
         variable_inertia(pm; nw = n)
-        variable_hvdc_contribution(pm; nw = n)
-        variable_generator_contribution(pm; nw = n)
-        variable_storage_contribution(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
     end
 
