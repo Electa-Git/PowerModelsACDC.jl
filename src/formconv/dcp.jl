@@ -44,6 +44,19 @@ function constraint_conv_transformer(pm::_PM.AbstractDCPModel, n::Int,  i::Int, 
     end
 end
 """
+Converter transformer constraints
+
+```
+Keep power balance over transformer
+```
+"""
+function constraint_conv_transformer(pm::_PM.AbstractNFAModel, n::Int,  i::Int, rtf, xtf, acbus, tm, transformer)
+    ptf_fr = _PM.var(pm, n, :pconv_tf_fr, i)
+    ptf_to = _PM.var(pm, n, :pconv_tf_to, i)
+
+    JuMP.@constraint(pm.model, ptf_fr + ptf_to  == 0)
+end
+"""
 Converter reactor constraints
 
 ```
@@ -67,6 +80,19 @@ function constraint_conv_reactor(pm::_PM.AbstractDCPModel, n::Int,  i::Int, rc, 
         JuMP.@constraint(pm.model, vac == vaf)
         JuMP.@constraint(pm.model, ppr_fr + ppr_to  == 0)
     end
+end
+"""
+Converter reactor constraints
+
+```
+Keep power balance over inductor
+```
+"""
+function constraint_conv_reactor(pm::_PM.AbstractNFAModel, n::Int,  i::Int, rc, xc, reactor)
+    pconv_ac = _PM.var(pm, n, :pconv_ac, i)
+    ppr_to = - pconv_ac
+    ppr_fr = _PM.var(pm, n, :pconv_pr_fr, i)
+    JuMP.@constraint(pm.model, ppr_fr + ppr_to  == 0)
 end
 """
 Converter filter constraints (no active power losses)

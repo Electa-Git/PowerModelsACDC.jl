@@ -33,6 +33,7 @@ include("prob/fcuc.jl")
 include("prob/rdopf.jl")
 include("prob/scopf.jl")
 include("prob/spcuc.jl")
+include("prob/rocofuc.jl")
 
 include("security/contingency.jl")
 include("security/frequency.jl")
