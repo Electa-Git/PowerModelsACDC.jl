@@ -25,6 +25,7 @@ makedocs(
             ]
             "File IO" => "parser.md"
         ]
+        "Developer" => "developer.md"
     ]
 )
 
