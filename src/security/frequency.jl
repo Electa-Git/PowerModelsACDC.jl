@@ -1127,25 +1127,8 @@ function constraint_rocof_split(pm::_PM.AbstractPowerModel, n::Int, zone_id, gen
 
     ΔPsplit = _PM.var(pm, n, :split_cont, zone_id)
 
-    println(zone_id, " fr: ", tielines_fr)
-    println(zone_id, " to: ", tielines_to)
+    JuMP.@constraint(pm.model,  ΔPsplit ==  sum(p[a] for a in tielines_fr) + sum(p[a] for a in tielines_to)) # This makes the split event to the some of the power flows defined as outgoing, sum([p[l,i,j] for (l,i,j) in tielines_fr]) +
 
-    println("TO: ")
-    for a in tielines_to
-        println(a)
-        p[a]
-        sum([p[a] for a in tielines_to]) 
-    end
-
-    println("FR: ")
-    for a in tielines_fr
-        println(a)
-        p[a]
-        sum([p[a] for a in tielines_fr]) 
-    end
-
-    JuMP.@constraint(pm.model,  ΔPsplit ==  sum(p[a] for a in tielines_fr) + sum(p[a] for a in tielines_to)  ) # This makes the split event to the some of the power flows defined as outgoing, sum([p[l,i,j] for (l,i,j) in tielines_fr]) +
-
-    JuMP.@constraint(pm.model, rocof_max / f0 * 2 * ((sum(properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties) + (sum(properties["inertia"] * properties["rating"] * αs[s] for (s, properties) in storage_properties)))) >= ΔPsplit)
-    JuMP.@constraint(pm.model, rocof_min / f0 * 2 * ((sum(properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties) + (sum(properties["inertia"] * properties["rating"] * αs[s] for (s, properties) in storage_properties)))) <= ΔPsplit)  
+    JuMP.@constraint(pm.model, rocof_max / f0 * 2 * (sum(properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties) + (sum(properties["inertia"] * properties["rating"] * αs[s] for (s, properties) in storage_properties))) >= ΔPsplit)
+    JuMP.@constraint(pm.model, rocof_min / f0 * 2 * (sum(properties["inertia"] * properties["rating"] * αg[g] for (g, properties) in generator_properties) + (sum(properties["inertia"] * properties["rating"] * αs[s] for (s, properties) in storage_properties))) <= ΔPsplit)  
 end

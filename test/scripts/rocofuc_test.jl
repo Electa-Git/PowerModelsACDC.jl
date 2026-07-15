@@ -69,10 +69,11 @@ function prepare_uc_test_data(file; contingencies = nothing)
     number_of_hours = 2
 
     # define time series for RES generation,
-    res_series = [1.0  1.0] #  0.66  0.7   0.7   0.9   0.95 1.02  1.15  1.3   1.35 1.3   1.21  1.08  1.0  0.96  0.93 1.0  1.1   1.2  1.08  1.05  0.99 0.89]
 
-    # define time series for demand
-    l_series = [1.0  1.0]#  0.75  0.78  0.85  0.88  0.9  1.0   1.12  1.25  1.2  1.08  0.99  0.92  0.8  0.73  0.8  0.9  1.03  1.2  1.11  0.99  0.8  0.69]
+    number_of_hours = 24
+
+    res_series = [0.4 0.5 0.66 0.7 0.7 0.9 0.95 1.02 1.15 1.3 1.35 1.3 1.21 1.08 1.0 0.96 0.93 1.0 1.1 1.2 1.08 1.05 0.99 0.89]
+    l_series = [0.6 0.7 0.75 0.78 0.85 0.88 0.9 1.0 1.12 1.25 1.2 1.08 0.99 0.92 0.8 0.73 0.8 0.9 1.03 1.2 1.11 0.99 0.8 0.69]
 
     # Finally create a data dictionary that includes all information
     mn_data = PMACDC.create_multinetwork_uc_model!(data, number_of_hours, res_series, l_series, contingencies = contingencies)
@@ -87,32 +88,44 @@ file = pkgdir(PMACDC, "test", "data", "rocof_test.m")
 rocof_data = prepare_uc_test_data(file)
 
 setting = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "relax_uc_binaries" => true, "objective_components" => ["gen", "load"])
-	
-result = PMACDC.solve_rocofuc(rocof_data, PowerModels.NFAPowerModel, solver, setting = setting, multinetwork = true)
 
-
-
-
-sum([gen["pmax"] * gen["inertia_constants"] for (g, gen) in rocof_data["nw"]["1"]["gen"] if parse(Int, g) <= 5] )
-
-# To Do's:
-
-# - Make sure it can ingore splits / zones that are asynchronous (i.e. connected via hvdc) and not include them in the rocof constraints.
-
-global htot1 = 0
-global htot3 = 0
-for (g, gen) in result["solution"]["nw"]["1"]["gen"] 
-    if parse(Int, g) <= 5
-    global htot1 = htot1 + gen["alpha_g"] * rocof_data["nw"]["1"]["gen"][g]["inertia_constants"] * rocof_data["nw"]["1"]["gen"][g]["pmax"] 
+rocof = 0.5:0.1:2.0
+opex = zeros(1, length(rocof))
+result = Dict([i => Dict() for i in 1: length(rocof)])
+for (i, r) in enumerate(rocof)
+    for (n, network) in rocof_data["nw"]
+        network["frequency_parameters"]["rocof_max"] =  r
+        network["frequency_parameters"]["rocof_min"] = -r
     end
-    if parse(Int, g) >= 11 && parse(Int, g) <= 15
-    global htot3 = htot3 + gen["alpha_g"] * rocof_data["nw"]["1"]["gen"][g]["inertia_constants"] * rocof_data["nw"]["1"]["gen"][g]["pmax"] 
-    end
+    result[i] = PMACDC.solve_rocofuc(rocof_data, PowerModels.NFAPowerModel, solver, setting = setting, multinetwork = true)
+    opex[i] = result[i]["objective"]
 end
 
-rocof1 = result["solution"]["nw"]["1"]["contingency"]["1"]["split_cont"] / (2 * htot1) * 50.0
-rocof3 = result["solution"]["nw"]["1"]["contingency"]["3"]["split_cont"] / (2 * htot1) * 50.0
 
-sum([gen["alpha_g"] * gen["pg"] for (g, gen) in result["solution"]["nw"]["1"]["gen"]])
-sum([load["pflex"]  for (l, load) in result["solution"]["nw"]["1"]["load"]])
-sum([load["pcurt"]  for (l, load) in result["solution"]["nw"]["1"]["load"]])
+htot1 = zeros(1, 24)
+htot3 = zeros(1, 24)
+ΔPsplit1 = zeros(1, 24)
+ΔPsplit3 = zeros(1, 24)
+power_exchange = zeros(1, 24)
+r = 16 # rocof = 1Hz/s 
+for h in 1:24
+    for (g, gen) in result[r]["solution"]["nw"]["$h"]["gen"] 
+        if parse(Int, g) <= 5
+            htot1[h] = htot1[h] + gen["alpha_g"] * rocof_data["nw"]["$h"]["gen"][g]["inertia_constants"] * rocof_data["nw"]["$h"]["gen"][g]["pmax"] 
+        end
+        if parse(Int, g) >= 11 && parse(Int, g) <= 15
+            htot3[h] = htot3[h] + gen["alpha_g"] * rocof_data["nw"]["$h"]["gen"][g]["inertia_constants"] * rocof_data["nw"]["$h"]["gen"][g]["pmax"] 
+        end
+    end
+   ΔPsplit1[h] = result[r]["solution"]["nw"]["$h"]["contingency"]["1"]["split_cont"]
+   ΔPsplit3[h] = result[r]["solution"]["nw"]["$h"]["contingency"]["3"]["split_cont"]
+   power_exchange[h] = result[r]["solution"]["nw"]["$h"]["branch"]["19"]["pf"] + result[r]["solution"]["nw"]["$h"]["branch"]["20"]["pf"]
+end
+
+rocof1 = ΔPsplit1 ./ (2 * htot1) * 50.0 
+rocof3 = ΔPsplit3 ./ (2 * htot3) * 50.0
+
+p = Plots.plot(1:24, rocof1', label = "RoCoF zone 1", xlabel = "Hour ID", ylabel = "Rocof in Hz/s",  fontfamily = "Computer Modern")
+Plots.plot(p, 1:24, rocof3', label = "RoCoF zone 3")
+p1 = Plots.plot(1:24, power_exchange' .* 100, xlabel = "Hour ID", ylabel = "Power Exchange in MW", fontfamily = "Computer Modern", label = "Zone 1 → Zone 3")
+p2 = Plots.plot(rocof, opex' ./ 1e3, xlabel = "Allowed RoCoF in Hz/s", ylabel = "OPEX in k€", fontfamily = "Computer Modern", legend = false)
