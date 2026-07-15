@@ -306,7 +306,7 @@ function ref_add_storage!(ref::Dict{Symbol,Any}, data::Dict{String,<:Any})
     end
 end
 
-"Add refernce for SSSC"
+"Add reference for SSSC"
 function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (nw, nw_ref) in ref[:it][:pm][:nw]
         if !haskey(nw_ref, :sssc)
@@ -328,7 +328,7 @@ function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     end
 end
 
-"Add refernce for DC generators"
+"Add reference for DC generators"
 function ref_add_gendc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (nw, nw_ref) in ref[:it][:pm][:nw]
         if !haskey(nw_ref, :gendc)

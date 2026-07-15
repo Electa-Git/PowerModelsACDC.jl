@@ -42,13 +42,13 @@ juniper = optimizer_with_attributes(
     Juniper.Optimizer,
     "nl_solver" => ipopt,
     "mip_solver" => highs,
-    "log_levels" => logging ? [:Table,:Info,:Options] : []
+    "log_levels" => logging ? [:Table, :Info, :Options] : []
 )
 juniper_warmstart = optimizer_with_attributes(
     Juniper.Optimizer,
     "nl_solver" => ipopt_warmstart,
     "mip_solver" => highs,
-    "log_levels" => logging ? [:Table,:Info,:Options] : []
+    "log_levels" => logging ? [:Table, :Info, :Options] : []
 )
 if use_commercial_solvers
     import Gurobi
@@ -63,14 +63,19 @@ include("common.jl")
 
 @testset "PowerModelsACDC" begin
 
+    # Components
+    include("conv.jl")
+    include("dcgen.jl")
+    include("pst.jl")
+    include("sssc.jl")
+
     # Problems
     include("pf.jl")
-    include("opf.jl")
-    include("cbaopf.jl")
-    include("tnep.jl")
     include("spf.jl")
+    include("opf.jl")
+    include("rdopf.jl")
     include("uc.jl")
-    include("strgopf.jl")
+    include("tnep.jl")
 
     # Exported names
     include("export.jl")
