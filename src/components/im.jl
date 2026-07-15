@@ -1,5 +1,5 @@
 # collect all converter variables
-"All converter variables"
+"All ims variables"
 function variable_im(pm::_PM.AbstractPowerModel; kwargs...)
     variable_im_stator_flow(pm; kwargs...)
     variable_im_rotor_inductance_flow(pm; kwargs...)
@@ -339,87 +339,6 @@ function variable_im_airgap_voltage_imaginary(pm::_PM.AbstractACRModel; nw::Int=
 end
 
 
-
-# "variable: `wrf_ac[j]` and `wif_ac`  for `j` in `im`"
-# function variable_converter_filter_voltage_cross_products(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-#     bigM = 1.2; # only internal converter voltage is strictly regulated
-#     wrfac = _PM.var(pm, nw)[:wrf_ac] = JuMP.@variable(pm.model,
-#     [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_wrf_ac",
-#     start = _PM.ref(pm, nw, :im, i, "Vtar")^2
-#     )
-#     wifac = _PM.var(pm, nw)[:wif_ac] = JuMP.@variable(pm.model,
-#     [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_wif_ac",
-#     start = _PM.ref(pm, nw, :im, i, "Vtar")^2
-#     )
-#     if bounded
-#         for (c, im) in _PM.ref(pm, nw, :im)
-#             JuMP.set_lower_bound(wrfac[c],  0)
-#             JuMP.set_upper_bound(wrfac[c],  (im["Vmmax"] * bigM)^2)
-#             JuMP.set_lower_bound(wifac[c], -(im["Vmmax"] * bigM)^2)
-#             JuMP.set_upper_bound(wifac[c],  (im["Vmmax"] * bigM)^2)
-#         end
-#     end
-
-#     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :wrfilt, _PM.ids(pm, nw, :im), wrfac)
-#     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :wifilt, _PM.ids(pm, nw, :im), wifac)
-# end
-
-# "variable: `wf_ac` for `j` in `im`"
-# function variable_converter_filter_voltage_magnitude_sqr(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-#     bigM = 1.2; # only internal converter voltage is strictly regulated
-#     wfac = _PM.var(pm, nw)[:wf_ac] = JuMP.@variable(pm.model,
-#     [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_wf_ac",
-#     start = 1.0 #_PM.ref(pm, nw, :im, i, "Vtar")^2
-#     )
-#     if bounded
-#         for (c, im) in _PM.ref(pm, nw, :im)
-#             JuMP.set_lower_bound(wfac[c], (im["Vmmin"] / bigM)^2)
-#             JuMP.set_upper_bound(wfac[c], (im["Vmmax"] * bigM)^2)
-#         end
-#     end
-#     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :wfilt, _PM.ids(pm, nw, :im), wfac)
-# end
-
-
-# "variable: `wrc_ac[j]` and `wic_ac[j]`  for `j` in `im`"
-# function variable_converter_internal_voltage_cross_products(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-#     bigM = 1.2; # only internal converter voltage is strictly regulated
-#     wrcac = _PM.var(pm, nw)[:wrc_ac] = JuMP.@variable(pm.model,
-#     [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_wrc_ac",
-#     start = _PM.ref(pm, nw, :im, i, "Vtar")^2
-#     )
-#     wicac = _PM.var(pm, nw)[:wic_ac] = JuMP.@variable(pm.model,
-#     [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_wic_ac",
-#     start = _PM.ref(pm, nw, :im, i, "Vtar")^2
-#     )
-#     if bounded
-#         for (c, im) in _PM.ref(pm, nw, :im)
-#             JuMP.set_lower_bound(wrcac[c],  0)
-#             JuMP.set_upper_bound(wrcac[c],  (im["Vmmax"] * bigM)^2)
-#             JuMP.set_lower_bound(wicac[c], -(im["Vmmax"] * bigM)^2)
-#             JuMP.set_upper_bound(wicac[c],  (im["Vmmax"] * bigM)^2)
-#         end
-#     end
-
-#     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :wrconv, _PM.ids(pm, nw, :im), wrcac)
-#     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :wiconv, _PM.ids(pm, nw, :im), wicac)
-# end
-
-# "variable: `wc_ac[j]` for `j` in `im`"
-# function variable_converter_internal_voltage_magnitude_sqr(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-#     wcac = _PM.var(pm, nw)[:wc_ac] = JuMP.@variable(pm.model,
-#     [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_wc_ac",
-#     start = _PM.ref(pm, nw, :im, i, "Vtar")^2
-#     )
-#     if bounded
-#         for (c, im) in _PM.ref(pm, nw, :im)
-#             JuMP.set_lower_bound(wcac[c], (im["Vmmin"])^2)
-#             JuMP.set_upper_bound(wcac[c], (im["Vmmax"])^2)
-#         end
-#     end
-#     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :wconv, _PM.ids(pm, nw, :im), wcac)
-# end
-
 ############## Constraint template for IMs ###################################################
 
 function constraint_im_rotor_inductance(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
@@ -454,15 +373,38 @@ end
 
 
 ########## ACP formulation ####################################################################
-
-
-"""
-Im stator constraints (keep same code as transformer)
+@doc raw"""
+Im stator constraints  (Based on transformer formulation)
+```math
+p_{im,s,fr}
+=
+g v_{m,fr}^{2}
+- g v_{m,fr} v_{m,to}\cos\left(v_{a,fr}-v_{a,to}\right)
+- b v_{m,fr} v_{m,to}\sin\left(v_{a,fr}-v_{a,to}\right)
 ```
-p_im_s_fr ==  g*vm_fr^2 + -g*vm_fr*vm_to * cos(va_fr-va_to) + -b*vm_fr*vm_to*sin(va_fr-va_to)
-q_im_s_fr == -b*vm_fr^2 +  b*vm_fr*vm_to * cos(va_fr-va_to) + -g*vm_fr*vm_to*sin(va_fr-va_to)
-p_im_s_to ==  g*vm_to^2 + -g*vm_to*vm_fr  *    cos(va_to - va_fr)     + -b*vm_to*vm_fr    *sin(va_to - va_fr)
-q_im_s_to == -b*vm_to^2 +  b*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g*vm_to*vm_fr    *sin(va_to - va_fr)
+
+```math
+q_{im,s,fr}
+=
+- b v_{m,fr}^{2}
++ b v_{m,fr} v_{m,to}\cos\left(v_{a,fr}-v_{a,to}\right)
+- g v_{m,fr} v_{m,to}\sin\left(v_{a,fr}-v_{a,to}\right)
+```
+
+```math
+p_{im,s,to}
+=
+g v_{m,to}^{2}
+- g v_{m,to} v_{m,fr}\cos\left(v_{a,to}-v_{a,fr}\right)
+- b v_{m,to} v_{m,fr}\sin\left(v_{a,to}-v_{a,fr}\right)
+```
+
+```math
+q_{im,s,to}
+=
+- b v_{m,to}^{2}
++ b v_{m,to} v_{m,fr}\cos\left(v_{a,to}-v_{a,fr}\right)
+- g v_{m,to} v_{m,fr}\sin\left(v_{a,to}-v_{a,fr}\right)
 ```
 """
 function constraint_im_stator(pm::_PM.AbstractACPModel, n::Int, i::Int, rtf, xtf, acbus)
@@ -483,6 +425,7 @@ function constraint_im_stator(pm::_PM.AbstractACPModel, n::Int, i::Int, rtf, xtf
     gtf_sh = 0 # No shunt impedance
     c1, c2, c3, c4 = ac_power_flow_constraints(pm.model, gtf, btf, gtf_sh, vm, vmf, va, vaf, ptf_fr, ptf_to, qtf_fr, qtf_to)
 end
+
 "constraints for a voltage magnitude transformer + series impedance"
 function ac_power_flow_constraints(model, g, b, gsh_fr, vm_fr, vm_to, va_fr, va_to, p_fr, p_to, q_fr, q_to)
     c1 = JuMP.@constraint(model, p_fr ==  g*vm_fr^2 + -g*vm_fr*vm_to * cos(va_fr-va_to) + -b*vm_fr*vm_to*sin(va_fr-va_to))
@@ -491,13 +434,40 @@ function ac_power_flow_constraints(model, g, b, gsh_fr, vm_fr, vm_to, va_fr, va_
     c4 = JuMP.@constraint(model, q_to == -b*vm_to^2 +  b*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g*vm_to*vm_fr    *sin(va_to - va_fr))
     return c1, c2, c3, c4
 end
-"""
-IM rotor inductance constraints (copy conv reactor code)
+
+@doc raw"""
+IM rotor inductance constraints
+
+```math
+-p_{im,ag}
+=
+g_c v_{m,ag}^{2}
+- g_c v_{m,ag} v_{m,m}\cos\left(v_{a,ag}-v_{a,m}\right)
+- b_c v_{m,ag} v_{m,m}\sin\left(v_{a,ag}-v_{a,m}\right)
 ```
--pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf)
--qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf)
-p_pr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac)
-q_pr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac)
+
+```math
+-q_{im,ag}
+=
+- b_c v_{m,ag}^{2}
++ b_c v_{m,ag} v_{m,m}\cos\left(v_{a,ag}-v_{a,m}\right)
+- g_c v_{m,ag} v_{m,m}\sin\left(v_{a,ag}-v_{a,m}\right)
+```
+
+```math
+p_{im,ri,f}
+=
+g_c v_{m,m}^{2}
+- g_c v_{m,m} v_{m,ag}\cos\left(v_{a,m}-v_{a,ag}\right)
+- b_c v_{m,m} v_{m,ag}\sin\left(v_{a,m}-v_{a,ag}\right)
+```
+
+```math
+q_{im,ri,f}
+=
+- b_c v_{m,m}^{2}
++ b_c v_{m,m} v_{m,ag}\cos\left(v_{a,m}-v_{a,ag}\right)
+- g_c v_{m,m} v_{m,ag}\sin\left(v_{a,m}-v_{a,ag}\right)
 ```
 """
 function constraint_im_rotor_inductance(pm::_PM.AbstractACPModel, n::Int, i::Int, xc)
@@ -514,21 +484,26 @@ function constraint_im_rotor_inductance(pm::_PM.AbstractACPModel, n::Int, i::Int
     vac = _PM.var(pm, n, :va_ag, i)
 
     zc = im*xc
-   
+
     yc = 1/(zc)
     gc = real(yc)
     bc = imag(yc)
-    JuMP.@constraint(pm.model, - pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf)) # JuMP doesn't allow affine expressions in NL constraints
-    JuMP.@constraint(pm.model, - qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf)) # JuMP doesn't allow affine expressions in NL constraints
+    JuMP.@constraint(pm.model, - pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf))
+    JuMP.@constraint(pm.model, - qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf))
     JuMP.@constraint(pm.model, ppr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac))
-    JuMP.@constraint(pm.model, qpr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac))
 
+    JuMP.@constraint(pm.model, qpr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac))
 end
-"""
-IM magnetisation constraint (copy from conv filter)
+
+@doc raw"""
+IM magnetisation constraint 
+
+```math
+p_{im,ri,f}+p_{im,s,to}=0
 ```
-ppr_fr + ptf_to == 0
-qpr_fr + qtf_to +  (-bv)  *vmf^2 == 0
+
+```math
+q_{im,ri,f}+q_{im,s,to}+b_v v_{m,m}^{2}=0
 ```
 """
 function constraint_im_magnetisation(pm::_PM.AbstractACPModel, n::Int, i::Int, x_m)
@@ -543,12 +518,24 @@ function constraint_im_magnetisation(pm::_PM.AbstractACPModel, n::Int, i::Int, x
     JuMP.@constraint(pm.model,   ppr_fr + ptf_to == 0 )
     JuMP.@constraint(pm.model, qpr_fr + qtf_to +  (bv) *(vmf^2) == 0)
 end
-"""
-IM slip constraints (slip out balance air-gap power with mechanical torque, see Van Cutsem Voltage stability)
+
+@doc raw"""
+IM slip constraints (slip from balance air-gap power with mechanical torque, see Van Cutsem Voltage stability)
+
+```math
+T_0\left(A(1-s)^m+B(1-s)+C\right)
+=
+\frac{v_{m,ag}^{2}s}{r_r}
 ```
-T_0*(A*(1-slip)^m+B*(1-slip)+C) == (vm_ag^2)*slip/r_r
-p_im_ag == (vm_ag^2)*slip/r_r
-q_im_ag == 0.0
+
+```math
+p_{im,ag}
+=
+\frac{v_{m,ag}^{2}s}{r_r}
+```
+
+```math
+q_{im,ag}=0
 ```
 """
 function constraint_im_slip(pm::_PM.AbstractACPModel, n::Int, i::Int,T_0, A, B, C, m, r_r)

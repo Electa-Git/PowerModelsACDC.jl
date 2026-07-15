@@ -37,6 +37,9 @@ include("common.jl")
     include("uc.jl")
     include("strgopf.jl")
 
+    # Components
+    include("im.jl")
+
     # Exported names
     include("export.jl")
 end
