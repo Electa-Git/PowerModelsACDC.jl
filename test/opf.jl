@@ -19,6 +19,7 @@
             end
             @testset "24-bus RTS AC/DC case with 3 zones" begin
                 result = solve_acdcopf(pkgdir(PowerModelsACDC, "test", "data", "case24_3zones_acdc.m"), PowerModels.ACPPowerModel, ipopt; setting=s)
+                @test result["termination_status"] == LOCALLY_SOLVED
                 @test result["objective"] ≈ 150228.15 atol=1e0
             end
         end
@@ -40,6 +41,7 @@
             end
             @testset "24-bus RTS AC/DC case with 3 zones" begin
                 result = solve_acdcopf(pkgdir(PowerModelsACDC, "test", "data", "case24_3zones_acdc.m"), PowerModels.ACRPowerModel, ipopt; setting=s)
+                @test result["termination_status"] == LOCALLY_SOLVED
                 @test result["objective"] ≈ 150228.15 atol=1e0
             end
         end
@@ -145,6 +147,7 @@
             mn_data = prepare_storage_opf_data(file)
             s = Dict("conv_losses_mp" => true, "objective_components" => ["gen", "demand"])
             result = solve_acdcopf(mn_data, PowerModels.DCPPowerModel, highs, setting=s, multinetwork=true)
+            @test result["termination_status"] == OPTIMAL
             @test result["objective"] ≈ 5.41642e6 atol=1e2
         end
     end
