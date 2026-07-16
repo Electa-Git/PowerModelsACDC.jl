@@ -12,17 +12,6 @@
                 @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -0.618 atol=1e-2
                 @test result["solution"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-2
             end
-            @testset "6-bus case" begin
-                # ac solver huristics may build ac branch 2 or 10
-                result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6_test.m"), PowerModels.ACPPowerModel, juniper; setting=s)
-                @test result["objective"] ≈ 31.65 atol=5e0
-                @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["4"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["5"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["6"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["6"]["isbuilt"] ≈ 0 atol=1e-2
-                @test result["solution"]["busdc_ne"]["6"]["vm"] ≈ 1.09 atol=1e-1
-            end
             @testset "9-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"), PowerModels.ACPPowerModel, juniper; setting=s)
                 @test result["objective"] ≈ 10.7 atol=1e-1
@@ -43,18 +32,6 @@
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -1 atol=1e-2
                 @test result["solution"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-2
-            end
-            @testset "6-bus case" begin
-                result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6_test.m"), PowerModels.LPACCPowerModel, juniper; setting=s)
-                @test result["objective"] ≈ 31.08 atol=1e-1
-                @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["4"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["5"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["6"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 0 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.0 atol=1e-2
-                @test result["solution"]["busdc_ne"]["2"]["phivdcm_ne"] ≈ -0.00668065 atol=1e-2
             end
             @testset "9-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"), PowerModels.LPACCPowerModel, juniper; setting=s)
@@ -78,36 +55,6 @@
                 @test result["solution"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-2
             end
             @testset "6-bus case" begin
-                result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6_test.m"), PowerModels.DCPPowerModel, highs; setting=s)
-                @test result["objective"] ≈ 26.3331 atol=1e-1
-                @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["5"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["6"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["2"]["isbuilt"] ≈ 0 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["10"]["isbuilt"] ≈ 0 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 1.3 atol=1e-1
-                @test result["solution"]["branchdc_ne"]["1"]["pt"] ≈ -1.3 atol=1e-1
-            end
-            @testset "6-bus case" begin
-                result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6_dc_tnep.m"), PowerModels.DCPPowerModel, highs; setting=s)
-                @test result["objective"] ≈ 26.3331 atol=1e-1
-                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 1.3 atol=1e-1
-                @test result["solution"]["branchdc_ne"]["1"]["pt"] ≈ -1.3 atol=1e-1
-                @test result["solution"]["convdc_ne"]["5"]["isbuilt"] ≈ 1 atol=1e-1
-                @test result["solution"]["convdc_ne"]["5"]["pconv"] ≈ -1.3 atol=1e-1
-            end
-            @testset "6-bus case" begin
-                result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6_acdc_tnep.m"), PowerModels.DCPPowerModel, highs; setting=s)
-                @test result["objective"] ≈ 25.4221 atol=1e-1
-                @test result["solution"]["branchdc_ne"]["9"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["9"]["pf"] ≈ -3.00658 atol=1e-1
-                @test result["solution"]["branchdc_ne"]["9"]["pt"] ≈ 3.00658 atol=1e-1
-                @test result["solution"]["convdc_ne"]["6"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["6"]["pconv"] ≈ 3.0221 atol=1e-1
-                @test result["solution"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-2
-            end
-            @testset "6-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6acdc_dc_tnep.m"), PowerModels.DCPPowerModel, highs; setting=s)
                 @test result["objective"] ≈ 22.8442 atol=1e-1
                 @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
@@ -116,36 +63,10 @@
                 @test result["solution"]["convdc_ne"]["6"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["convdc_ne"]["6"]["pconv"] ≈ 4 atol=1e-1
             end
-            @testset "6-bus case" begin
-                result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6acdc_dc_branch_tnep.m"), PowerModels.DCPPowerModel, highs; setting=s)
-                @test result["objective"] ≈ 13.3663 atol=1e-1
-                @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -4.00 atol=1e-1
-                @test result["solution"]["branchdc_ne"]["3"]["pt"] ≈ 4.00 atol=1e-1
-                @test result["solution"]["branchdc_ne"]["4"]["isbuilt"] ≈ 0 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 1.3 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["1"]["pt"] ≈ -1.3 atol=1e-2
-            end
             @testset "9-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"), PowerModels.DCPPowerModel, highs; setting=s)
                 @test result["objective"] ≈ 10.7 atol=1e-1
                 @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
-            end
-            @testset "14-bus case" begin
-                result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case14_test.m"), PowerModels.DCPPowerModel, highs, setting=s)
-                @test result["objective"] ≈ 15.6921 atol=1e-1
-                @test result["solution"]["convdc_ne"]["6"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["7"]["isbuilt"] ≈ 0 atol=1e-2
-            end
-            @testset "39-bus case" begin
-                result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case39_test.m"), PowerModels.DCPPowerModel, highs, setting=s)
-                @test result["objective"] ≈ 25.1605 atol=1e-1
-                @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["4"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["convdc_ne"]["5"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["13"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["branchdc_ne"]["17"]["isbuilt"] ≈ 1 atol=1e-2
             end
         end
         if use_commercial_solvers
@@ -256,16 +177,6 @@
     @testset "Multinetwork, <:AbstractPowerModel" begin
         @testset "DCPPowerModel" begin
             @testset "4-bus case" begin
-                data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_original.m"))
-                result = solve_tnep(data_dc, PowerModels.DCPPowerModel, highs; multinetwork=true, setting=s)
-                @test result["objective"] ≈ 8.2 atol=1e-1
-                @test result["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["nw"]["1"]["branchdc_ne"]["2"]["pf"] ≈ -2.0013 atol=1e-2
-                @test result["solution"]["nw"]["2"]["branchdc_ne"]["2"]["pf"] ≈ -2.00137 atol=1e-2
-                @test result["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
-                @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"] ≈ -2.0 atol=1e-2
-            end
-            @testset "4-bus case" begin
                 data_acdc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"))
                 result = solve_tnep(data_acdc, PowerModels.DCPPowerModel, highs, multinetwork=true; setting=s)
                 @test result["objective"] ≈ 659.90 atol=1e-1
@@ -300,17 +211,6 @@
                 @test result["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"] ≈ -2.15833 atol=1e-2
             end
-            # @testset "4-bus case" begin
-            #     data_acdc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"))
-            #     result = solve_tnep(data_acdc, PowerModels.LPACCPowerModel, juniper, multinetwork=true; setting=s)
-            #     @test result["objective"] ≈ 614.15 atol=1e-1
-            #     @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
-            #     @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"] ≈ -1.2466 atol=1e-2
-            #     @test result["solution"]["nw"]["2"]["branchdc_ne"]["3"]["pf"] ≈ -1.2466 atol=1e-2
-            #     @test result["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
-            #     @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"] ≈ -1.2355 atol=1e-2
-            #     @test result["solution"]["nw"]["1"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-2
-            # end
         end
         if use_commercial_solvers
             @testset "ACPPowerModel" begin

@@ -30,20 +30,6 @@
             @test result["solution"]["convdc"]["2"]["pdc"] ≈ 0.56872 atol=2e-3
             @test result["solution"]["busdc"]["1"]["vm"] ≈ 1.015 atol=2e-3
         end
-        # @testset "24-bus RTS AC/DC case with 3 zones" begin
-        #     result = solve_acdcpf(pkgdir(PowerModelsACDC, "test", "data", "case24_3zones_acdc.m"), PowerModels.ACPPowerModel, ipopt; setting=s)
-        #     @test result["termination_status"] == LOCALLY_SOLVED
-        #     @test result["objective"] ≈ 0 atol=1e-2
-        #     @test result["solution"]["gen"]["65"]["pg"] ≈ 1.419 atol=2e-3
-        #     @test result["solution"]["gen"]["65"]["qg"] ≈ -1.29648 atol=2e-3
-        #     @test result["solution"]["bus"]["101"]["vm"] ≈ 1.035 atol=2e-3
-        #     @test result["solution"]["bus"]["101"]["va"] ≈ -0.1389 atol=2e-3
-        #     @test result["solution"]["bus"]["205"]["vm"] ≈ 1.0318 atol=2e-3
-        #     @test result["solution"]["bus"]["301"]["vm"] ≈ 1.026266 atol=2e-3
-        #     @test result["solution"]["convdc"]["2"]["pgrid"] ≈ -0.753 atol=2e-3
-        #     @test result["solution"]["convdc"]["3"]["pdc"] ≈ -1.37301 atol=2e-3
-        #     @test result["solution"]["busdc"]["5"]["vm"] ≈ 1.012 atol=2e-3
-        # end
     end
     @testset "ACRPowerModel" begin
         @testset "5-bus AC/DC case" begin
