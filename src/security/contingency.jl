@@ -636,7 +636,6 @@ function constraint_select_tieline_contingency(pm::_PM.AbstractPowerModel; nw::I
             end
         end
         if !isempty(tielines)
-            println(area, " ", tielines)
             constraint_select_tieline_contingency(pm, reference_network_idx, tielines)
         end
     end
