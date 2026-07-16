@@ -4,6 +4,7 @@
         @testset "ACPPowerModel" begin
             @testset "4-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"), PowerModels.ACPPowerModel, juniper; setting=s)
+                @test result["termination_status"] == LOCALLY_SOLVED
                 @test result["objective"] ≈ 348.0219 atol=1e-1
                 @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -0.631 atol=1e-2
@@ -14,6 +15,7 @@
             end
             @testset "9-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"), PowerModels.ACPPowerModel, juniper; setting=s)
+                @test result["termination_status"] == LOCALLY_SOLVED
                 @test result["objective"] ≈ 10.7 atol=1e-1
                 @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
@@ -25,6 +27,7 @@
         @testset "LPACCPowerModel" begin
             @testset "4-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"), PowerModels.LPACCPowerModel, juniper; setting=s)
+                @test result["termination_status"] == LOCALLY_SOLVED
                 @test result["objective"] ≈ 333.095 atol=1e-1
                 @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 atol=1e-2
@@ -35,6 +38,7 @@
             end
             @testset "9-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"), PowerModels.LPACCPowerModel, juniper; setting=s)
+                @test result["termination_status"] == LOCALLY_SOLVED
                 @test result["objective"] ≈ 10.7 atol=1e-1
                 @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
@@ -46,6 +50,7 @@
         @testset "DCPPowerModel" begin
             @testset "4-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"), PowerModels.DCPPowerModel, highs; setting=s)
+                @test result["termination_status"] == OPTIMAL
                 @test result["objective"] ≈ 329.95456 atol=1e-1
                 @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 atol=1e-2
@@ -56,6 +61,7 @@
             end
             @testset "6-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6acdc_dc_tnep.m"), PowerModels.DCPPowerModel, highs; setting=s)
+                @test result["termination_status"] == OPTIMAL
                 @test result["objective"] ≈ 22.8442 atol=1e-1
                 @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -4 atol=1e-1
@@ -65,6 +71,7 @@
             end
             @testset "9-bus case" begin
                 result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"), PowerModels.DCPPowerModel, highs; setting=s)
+                @test result["termination_status"] == OPTIMAL
                 @test result["objective"] ≈ 10.7 atol=1e-1
                 @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
             end
@@ -73,6 +80,7 @@
             @testset "SOCWRPowerModel" begin
                 @testset "4-bus case" begin
                     result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"), PowerModels.SOCWRPowerModel, gurobi; setting=s)
+                    @test result["termination_status"] == OPTIMAL
                     @test result["objective"] ≈ 348.021 atol=1e-1
                     @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
                     @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -0.631 atol=1e-2
@@ -83,6 +91,7 @@
                 end
                 @testset "6-bus case" begin
                     result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6_test.m"), PowerModels.SOCWRPowerModel, gurobi; setting=s)
+                    @test result["termination_status"] == OPTIMAL
                     @test result["objective"] ≈ 31.63 atol=1e-1
                     @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 0 atol=1e-2
                     @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
@@ -96,6 +105,7 @@
                 end
                 @testset "9-bus case" begin
                     result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"), PowerModels.SOCWRPowerModel, gurobi; setting=s)
+                    @test result["termination_status"] == OPTIMAL
                     @test result["objective"] ≈ 10.7 atol=1e-1
                     @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
                     @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
@@ -107,6 +117,7 @@
             @testset "QCRMPowerModel" begin
                 @testset "6-bus case" begin
                     result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6_test.m"), PowerModels.QCRMPowerModel, gurobi; setting=s)
+                    @test result["termination_status"] == OPTIMAL
                     @test result["objective"] ≈ 31.6 atol=1e-1
                     @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
                     @test result["solution"]["convdc_ne"]["4"]["isbuilt"] ≈ 1 atol=1e-2
@@ -119,6 +130,7 @@
                 end
                 @testset "9-bus case" begin
                     result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"), PowerModels.QCRMPowerModel, gurobi; setting=s)
+                    @test result["termination_status"] == OPTIMAL
                     @test result["objective"] ≈ 10.7 atol=1e-1
                     @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
                     @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-2
@@ -148,6 +160,7 @@
             @testset "4-bus case" begin
                 data_acdc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"))
                 result = solve_tnep(data_acdc, PowerModels.DCPPowerModel, highs, multinetwork=true; setting=s)
+                @test result["termination_status"] == OPTIMAL
                 @test result["objective"] ≈ 659.90 atol=1e-1
                 @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 atol=1e-2
@@ -159,6 +172,7 @@
             @testset "6-bus case" begin
                 data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6_strg.m"))
                 result = solve_tnep(data_dc, PowerModels.DCPPowerModel, highs; multinetwork=true, setting=s)
+                @test result["termination_status"] == OPTIMAL
                 @test result["objective"] ≈ 52.67 atol=1e-1
                 @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["nw"]["1"]["convdc_ne"]["5"]["isbuilt"] ≈ 1 atol=1e-2
@@ -173,6 +187,7 @@
             @testset "4-bus case" begin
                 data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_original.m"))
                 result = solve_tnep(data_dc, PowerModels.LPACCPowerModel, juniper, multinetwork=true; setting=s)
+                @test result["termination_status"] == LOCALLY_SOLVED
                 @test result["objective"] ≈ 10.2 atol=1e-1
                 @test result["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
                 @test result["solution"]["nw"]["1"]["branchdc_ne"]["2"]["pf"] ≈ -1.2868 atol=1e-2
@@ -186,6 +201,7 @@
                 @testset "4-bus case" begin
                     data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_original.m"))
                     result = solve_tnep(data_dc, PowerModels.ACPPowerModel, juniper, multinetwork=true; setting=s)
+                    @test result["termination_status"] == LOCALLY_SOLVED
                     @test result["objective"] ≈ 10.2 atol=1e-1
                     @test result["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
                     @test result["solution"]["nw"]["1"]["branchdc_ne"]["2"]["pf"] ≈ -1.07017 atol=1e-2
@@ -196,6 +212,7 @@
                 @testset "4-bus case" begin
                     data_acdc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"))
                     result = solve_tnep(data_acdc, PowerModels.ACPPowerModel, juniper, multinetwork=true; setting=s)
+                    @test result["termination_status"] == LOCALLY_SOLVED
                     @test result["objective"] ≈ 696.043 atol=1e-1
                     @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
                     @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"] ≈ -0.631 atol=1e-2
@@ -209,6 +226,7 @@
                 @testset "4-bus case" begin
                     data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_original.m"))
                     result = solve_tnep(data_dc, PowerModels.SOCWRPowerModel, gurobi, multinetwork=true; setting=s)
+                    @test result["termination_status"] == OPTIMAL
                     @test result["objective"] ≈ 10.2 atol=1e-1
                     @test result["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-2
                     @test result["solution"]["nw"]["1"]["branchdc_ne"]["2"]["pf"] ≈ -1.227 atol=1e-2
@@ -219,6 +237,7 @@
                 @testset "4-bus case" begin
                     data_acdc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"))
                     result = solve_tnep(data_acdc, PowerModels.SOCWRPowerModel, gurobi, multinetwork=true; setting=s)
+                    @test result["termination_status"] == OPTIMAL
                     @test result["objective"] ≈ 696.04 atol=1e-1
                     @test result["solution"]["nw"]["2"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-2
                     @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"] ≈ -0.631 atol=1e-2

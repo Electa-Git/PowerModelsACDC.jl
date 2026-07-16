@@ -11,12 +11,14 @@
         # Fix HVDC converter setpoints
         s = Dict("output" => Dict("duals" => true), "conv_losses_mp" => false, "fix_converter_setpoints" => true, "inertia_limit" => false, "objective_components" => ["demand"])
         result = solve_rdopf(data, PowerModels.DCPPowerModel, highs; setting=s)
+        @test result["termination_status"] == OPTIMAL
         @test result["objective"] ≈ 19878.0 atol=1
     end
     @testset "With control" begin
         # Allow HVDC converter setpoints to be determined optimally
         s = Dict("output" => Dict("duals" => true), "conv_losses_mp" => false, "fix_converter_setpoints" => false, "inertia_limit" => false, "objective_components" => ["demand"])
         result = solve_rdopf(data, PowerModels.DCPPowerModel, highs; setting=s)
+        @test result["termination_status"] == OPTIMAL
         @test result["objective"] ≈ 19844.6 atol=1
     end
 end
