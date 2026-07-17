@@ -9,18 +9,18 @@ CurrentModule = PowerModelsACDC
 PowerModelsACDC.jl is a Julia/JuMP package extending PowerModels.jl, which focuses on Steady-State Power Network Optimization. PowerModels.jl provides utilities for parsing and modifying network data and is designed to enable computational evaluation of emerging power network formulations and algorithms in a common platform.
 
 PowerModelsACDC.jl adds new problem types:
-- Power flow with both ac and dc lines, from point-to-point connections to meshed grids, with converters connecting ac and dc grid lines
+- Power flow with both AC and DC lines, from point-to-point connections to meshed grids, with converters connecting ac and dc grid lines
 - The equivalent optimal power flow problem type and TNEP problem type
 
 PowerModelsACDC.jl extends the formulation hierarchy developed for AC grids, with equivalent DC grid and converter station formulations:
 - ACPPowerModel
 - ACRPowerModel
 - DCPPowerModel
-- SOCWRPowerModel
+- LPACCPowerModel
+- QCLSPowerModel
+- QCRMPowerModel
 - SDPWRMPowerModel
-- QCWRPowerModel
-- QCWRTriPowerModel
-- LPACPowerModel
+- SOCWRPowerModel
 
 Developed by:
 - Hakan Ergun, Jay Dave, KU Leuven / EnergyVille

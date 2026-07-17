@@ -1,29 +1,26 @@
 # Type Hierarchy
-The original type hierarchy of PowerModels is used in general.
 
-For details on `GenericPowerModel`, see PowerModels.jl [documentation](https://lanl-ansi.github.io/PowerModels.jl/stable/).
+PowerModelsACDC uses the same [type hierarchy](https://lanl-ansi.github.io/PowerModels.jl/stable/formulations/) as PowerModels.
+
 
 #  Formulations overview
 
-Note that not all problem types are (yet) implemented for all power flow formulations. The below table provides a mapping of all problem types implemented and for which formulations they have been implemented so far.
+Note that not all problem types are implemented (yet) for all power flow formulations.
+The table below provides a mapping of all implemented problem types and the formulations for which they have been implemented so far.
 
-
-
-
-
-
-Extending PowerModels,  formulations for balanced  OPF in DC grids have been implemented and mapped to the following AC grid formulations:
+Extending PowerModels, formulations for balanced OPF in DC grids have been implemented and mapped to the following AC grid formulations:
 - ACPPowerModel
 - ACRPowerModel
 - DCPPowerModel
-- LPACPowerModel
-- SOCWRPowerModel
+- LPACCPowerModel
+- QCLSPowerModel
+- QCRMPowerModel
 - SDPWRMPowerModel
-- QCWRPowerModel
-- QCWRTriPowerModel
+- SOCWRPowerModel
 
 
-Note that from the perspective of OPF convex relaxation for DC grids, applying the same assumptions as the AC equivalent, the same formulation (and variable space) is obtained for - SOCWRPowerModel,  SDPWRMPowerModel,  QCWRPowerModel and  QCWRTriPowerModel. These are referred to as formulations in the AC WR(M) variable space.
+Note that, from the perspective of OPF convex relaxation for DC grids, applying the same assumptions as for the AC equivalent yields the same formulation (and variable space) for SOCWRPowerModel, SDPWRMPowerModel, QCRMPowerModel, and QCLSPowerModel.
+These are referred to as formulations in the AC WR(M) variable space.
 
 # Formulation details
 The formulations are categorized as Bus Injection Model (BIM) or Branch Flow Model (BFM).
@@ -84,7 +81,7 @@ Under the same assumptions as MATPOWER ($U_i \approx 1$), $P^{conv, ac}_{ij} \ap
 - Network flow model: $P^{conv, ac}_{ij}$ + $P^{conv, dc}_{ji}$ = $a + b P^{conv, ac}_{ij}$
 - LCC converters, n.a.
 
-## AC WR(M) variable space.  (BFM)
+## AC WR(M) variable space (BFM)
 For the SDP formulation, the norm syntax is used to represent the SOC expressions below.
 
 
@@ -109,7 +106,7 @@ $Q^{2}_{c} =   \sin \varphi_{c}^{\text{max}} \cdot S^{conv,ac,rated}$
 
 
 
-## AC WR(M) variable space.  (BIM)
+## AC WR(M) variable space (BIM)
 For the SDP formulation, the norm syntax is used to represent the SOCs.
 
 
