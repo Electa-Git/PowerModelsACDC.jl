@@ -16,4 +16,5 @@ It is intended to evolve alongside the project and serve as a shared reference f
   2. Specific feature of the network component, or specific implementation of the optimization problem (if there is more than one).
   3. Network model.
   4. Test case (if there is more than one).
+- If a test case is used in multiple related test sets, load it only once before those test sets.
 - Always test the termination status. This helps debug failing tests.
