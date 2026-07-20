@@ -70,7 +70,6 @@ for i in PowerModels.ids(pm, :branch)
     if typeof(pm) <: PowerModels.SOCDFPowerModel
         constraint_flow_losses(pm, i)
         constraint_voltage_magnitude_difference(pm, i)
-        constraint_branch_current(pm, i)
     else
         constraint_ohms_yt_from(pm, i)
         constraint_ohms_yt_to(pm, i)

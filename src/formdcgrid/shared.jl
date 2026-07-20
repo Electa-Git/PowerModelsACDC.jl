@@ -89,7 +89,6 @@ wdc[i] == vdcm^2
 function constraint_dc_voltage_magnitude_setpoint(pm::_PM.AbstractWModels, n::Int,  i, vdcm)
     wdc = _PM.var(pm, n, :wdc, i)
 
-    _PM.con(pm, n, :v_dc)[i] = JuMP.@constraint(pm.model, wdc == vdcm^2)
     JuMP.@constraint(pm.model, wdc == vdcm^2)
 end
 

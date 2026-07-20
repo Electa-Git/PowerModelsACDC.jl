@@ -382,7 +382,7 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_gen_power(pm)
     _PM.variable_branch_power(pm)
-    -PM.variable_storage_power(pm)
+    _PM.variable_storage_power(pm)
 
     _PM.variable_branch_current(pm)
     variable_voltage_slack(pm)
@@ -397,9 +397,12 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
     variable_pst(pm)
     variable_sssc(pm)
 
-    # new variables for TNEP problem
     _PM.variable_ne_branch_indicator(pm)
     _PM.variable_ne_branch_power(pm)
+    if !isempty(_PM.ids(pm, :ne_branch))
+        @_error("Candidate AC branches are not yet implemented in TNEP for BF formulations.")
+        _PM.variable_ne_branch_current(pm) # Not implemented in PowerModels.
+    end
     variable_active_dcbranch_flow_ne(pm)
     variable_branch_ne(pm)
     variable_dc_converter_ne(pm)
@@ -416,11 +419,11 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
         _PM.constraint_theta_ref(pm, i)
     end
     for i in _PM.ids(pm, :bus)
-        constraint_power_balance_acne_dcne(pm, i)
+        constraint_power_balance_acdc_ne(pm, i)
     end
     for i in _PM.ids(pm, :branch)
-        _PM.constraint_ohms_yt_from(pm, i)
-        _PM.constraint_ohms_yt_to(pm, i)
+        _PM.constraint_power_losses(pm, i)
+        _PM.constraint_voltage_magnitude_difference(pm, i)
         _PM.constraint_voltage_angle_difference(pm, i)
         _PM.constraint_thermal_limit_from(pm, i)
         _PM.constraint_thermal_limit_to(pm, i)
@@ -446,8 +449,9 @@ function build_tnep_bf(pm::_PM.AbstractPowerModel)
     end
 
     for i in _PM.ids(pm, :ne_branch)
-        _PM.constraint_ne_ohms_yt_from(pm, i)
-        _PM.constraint_ne_ohms_yt_to(pm, i)
+        @_error("Candidate AC branches are not yet implemented in TNEP for BF formulations.")
+        _PM.constraint_ne_power_losses(pm, i) # Not implemented in PowerModels.
+        _PM.constraint_ne_voltage_magnitude_difference(pm, i) # Not implemented in PowerModels.
         _PM.constraint_ne_voltage_angle_difference(pm, i)
         _PM.constraint_ne_thermal_limit_from(pm, i)
         _PM.constraint_ne_thermal_limit_to(pm, i)
@@ -511,7 +515,7 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         _PM.variable_branch_current(pm; nw = n)
         variable_voltage_slack(pm; nw = n)
         _PM.constraint_model_current(pm; nw = n)
-        _PM.varaiable_storage_power(pm; nw = n)
+        _PM.variable_storage_power(pm; nw = n)
 
         variable_active_dcbranch_flow(pm; nw = n)
         variable_dc_converter(pm; nw = n)
@@ -522,10 +526,12 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
 
-        # new variables for TNEP problem
         _PM.variable_ne_branch_indicator(pm; nw = n)
         _PM.variable_ne_branch_power(pm; nw = n)
-        _PM.variable_ne_branch_voltage(pm; nw = n)
+        if !isempty(_PM.ids(pm, n, :ne_branch))
+            @_error("Candidate AC branches are not yet implemented in TNEP for BF formulations.")
+            _PM.variable_ne_branch_current(pm; nw = n) # Not implemented in PowerModels.
+        end
         variable_active_dcbranch_flow_ne(pm; nw = n)
         variable_branch_ne(pm; nw = n)
         variable_dc_converter_ne(pm; nw = n) # add more variables in variableconv.jl
@@ -545,12 +551,12 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, n, :bus)
-            constraint_power_balance_acne_dcne(pm, i; nw = n)
+            constraint_power_balance_acdc_ne(pm, i; nw = n)
         end
 
         for i in _PM.ids(pm, n, :branch)
-            _PM.constraint_ohms_yt_from(pm, i; nw = n)
-            _PM.constraint_ohms_yt_to(pm, i; nw = n)
+            _PM.constraint_power_losses(pm, i; nw = n)
+            _PM.constraint_voltage_magnitude_difference(pm, i; nw = n)
             _PM.constraint_voltage_angle_difference(pm, i; nw = n)
             _PM.constraint_thermal_limit_from(pm, i; nw = n)
             _PM.constraint_thermal_limit_to(pm, i; nw = n)
@@ -577,8 +583,9 @@ function build_mp_tnep_bf(pm::_PM.AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, n, :ne_branch)
-            _PM.constraint_ne_ohms_yt_from(pm, i; nw = n)
-            _PM.constraint_ne_ohms_yt_to(pm, i; nw = n)
+            @_error("Candidate AC branches are not yet implemented in TNEP for BF formulations.")
+            _PM.constraint_ne_power_losses(pm, i; nw = n) # Not implemented in PowerModels.
+            _PM.constraint_ne_voltage_magnitude_difference(pm, i; nw = n) # Not implemented in PowerModels.
             _PM.constraint_ne_voltage_angle_difference(pm, i; nw = n)
             _PM.constraint_ne_thermal_limit_from(pm, i; nw = n)
             _PM.constraint_ne_thermal_limit_to(pm, i; nw = n)
