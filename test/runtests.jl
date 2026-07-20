@@ -10,7 +10,6 @@ import HiGHS
 
 # Settings
 logging = false # Print logs from modeling packages and solvers to the REPL.
-use_commercial_solvers = false # Run additional tests using commercial solvers.
 
 if logging
     logger_config!("info")
@@ -50,13 +49,6 @@ juniper_warmstart = optimizer_with_attributes(
     "mip_solver" => highs,
     "log_levels" => logging ? [:Table, :Info, :Options] : []
 )
-if use_commercial_solvers
-    import Gurobi
-    gurobi = optimizer_with_attributes(
-        Gurobi.Optimizer,
-        "OutputFlag" => logging ? 1 : 0
-    )
-end
 
 # Functions to load test data
 include("common.jl")

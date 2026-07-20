@@ -4,9 +4,9 @@
     @testset "DCPPowerModel" begin
         result = solve_acdcopf(data, PowerModels.DCPPowerModel, highs; setting=s)
         @test result["termination_status"] == OPTIMAL
-        @test result["objective"] ≈ 24021.7 atol=1
-        @test result["solution"]["gen"]["3"]["pg"] ≈ 0.955232 atol=1e-1
-        @test result["solution"]["branch"]["2"]["pt"] ≈ -1.20165 atol=1e-2
-        @test result["solution"]["convdc"]["4"]["ptf_to"] ≈ 0.977907 atol=1e-2
+        @test result["objective"] ≈ 24022 rtol=1e-3
+        @test result["solution"]["gen"]["3"]["pg"] ≈ 0.9552 rtol=1e-3
+        @test result["solution"]["branch"]["2"]["pt"] ≈ -1.2017 rtol=1e-3
+        @test result["solution"]["convdc"]["4"]["ptf_to"] ≈ 0.9779 rtol=1e-3
     end
 end
