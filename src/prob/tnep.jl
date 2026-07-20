@@ -17,14 +17,11 @@ based entrypoint.
 - PowerModels-style solution dictionary (variable values, objective, solver status).
 
 # Behavior
-- Calls `process_additional_data!(data; tnep = true)` to ensure TNEP candidate
-  structures are present.
-- Delegates to `solve_tnep(data::Dict, ...)`.
+Parses the input file and delegates to `solve_tnep(data::Dict, ...)`.
 """
 function solve_tnep(file::String, model_type::Type, solver; kwargs...)
-    data = _PM.parse_file(file)
     # If there are no AC candicates defined, add empty dictionary
-    process_additional_data!(data; tnep = true)
+    data = parse_file(file; tnep=true)
 
     return solve_tnep(data, model_type, solver; kwargs...)
 end

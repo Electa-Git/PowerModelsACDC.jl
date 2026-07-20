@@ -18,8 +18,7 @@ formulation (BF = branch flow) for the AC portion, combined with DC components.
   objective (when applicable), and solver termination status.
 
 # Details
-- Parses the input file into a PowerModels data dictionary and performs any
-  package-specific preprocessing via `process_additional_data!`.
+- Parses the input file.
 - Delegates to `solve_acdcopf_bf(data::Dict, ...)` with the default set of
   reference extensions for DC grids, PSTs, SSSC, flexible loads, and DC
   generators (these can be overridden via `kwargs`).
@@ -28,8 +27,7 @@ formulation (BF = branch flow) for the AC portion, combined with DC components.
   branch current/flow variables and their convex relaxations are required.
 """
 function solve_acdcopf_bf(file::String, model_type::Type, solver; kwargs...)
-    data = _PM.parse_file(file)
-    process_additional_data!(data)
+    data = parse_file(file)
     return solve_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 
