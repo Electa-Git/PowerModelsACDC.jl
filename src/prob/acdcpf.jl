@@ -130,7 +130,6 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         if typeof(pm) <: _PM.SOCBFPowerModel
             _PM.constraint_power_losses(pm, i)
             _PM.constraint_voltage_magnitude_difference(pm, i)
-            _PM.constraint_branch_current(pm, i)
         else
             _PM.constraint_ohms_yt_from(pm, i)
             _PM.constraint_ohms_yt_to(pm, i)
