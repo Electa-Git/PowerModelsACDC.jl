@@ -1,6 +1,5 @@
 @testset "Redispatch Optimal Power Flow" begin
-    data_opf = PowerModels.parse_file(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_pst_3_grids.m"))
-    process_additional_data!(data_opf)
+    data_opf = parse_file(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_pst_3_grids.m"))
     s = Dict("conv_losses_mp" => true, "objective_components" => ["gen", "demand"])
     result_opf = solve_acdcopf(data_opf, PowerModels.DCPPowerModel, highs; setting=s)
     contingency = 8 # Deactivates a line (branch 5)

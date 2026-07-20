@@ -1,7 +1,6 @@
 function build_mn_data(file_name)
-    mp_data = PowerModels.parse_file(file_name)
+    mp_data = parse_file(file_name; tnep=true)
     mp_data1 = PowerModels.replicate(mp_data, 2; global_keys=Set{String}(["source_type", "name", "source_version", "per_unit"]))
-    process_additional_data!(mp_data1; tnep=true)
     return mp_data1
 end
 

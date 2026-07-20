@@ -77,6 +77,7 @@ include("common.jl")
     include("uc.jl")
     include("tnep.jl")
 
-    # Exported names
+    # Other
+    include("data.jl")
     include("export.jl")
 end; # The colon suppresses output when running tests in a REPL.

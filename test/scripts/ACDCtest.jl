@@ -18,8 +18,7 @@ file_lcc = pkgdir(PowerModelsACDC, "test", "data", "lcc_test.m")
 file_588sdet_acdc = pkgdir(PowerModelsACDC, "test", "data", "pglib_opf_case588_sdet_acdc.m")
 file = file_case3120
 
-data = PowerModels.parse_file(file)
-process_additional_data!(data)
+data = parse_file(file)
 s = Dict("conv_losses_mp" => true)
 
 result = solve_acdcpf(file, PowerModels.ACRPowerModel, ipopt; setting=s)

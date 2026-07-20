@@ -1,6 +1,5 @@
 @testset "Phase Shifting Transformer" begin
-    data = PowerModels.parse_file(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_pst_3_grids.m"))
-    process_additional_data!(data)
+    data = parse_file(pkgdir(PowerModelsACDC, "test", "data", "case5_acdc_pst_3_grids.m"))
     s = Dict("conv_losses_mp" => true, "objective_components" => ["gen", "demand"])
     @testset "DCPPowerModel" begin
         result = solve_acdcopf(data, PowerModels.DCPPowerModel, highs; setting=s)

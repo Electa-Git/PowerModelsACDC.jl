@@ -18,14 +18,12 @@ specified PowerModels formulation and solver.
   objective value, variable values and solver termination status.
 
 # Behavior
-This function parses the provided file into a data dictionary, performs any
-additional data processing (via `process_additional_data!`) and delegates to
-`solve_acdcpf(data::Dict, ...)`. By default, reference extensions for DC grid,
-PST, SSSC, flexible loads and DC generators are applied.
+Parses the input file and delegates to `solve_acdcpf(data::Dict, ...)`.
+By default, reference extensions for DC grid, PST, SSSC, flexible loads and DC generators
+are applied.
 """
 function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
-    data = _PM.parse_file(file)
-    process_additional_data!(data)
+    data = parse_file(file)
     return solve_acdcpf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 

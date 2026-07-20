@@ -1,6 +1,5 @@
 @testset "Static Synchronous Series Compensator" begin
-    data = PowerModels.parse_file(pkgdir(PowerModelsACDC, "test", "data", "case5_sssc.m"))
-    process_additional_data!(data)
+    data = parse_file(pkgdir(PowerModelsACDC, "test", "data", "case5_sssc.m"))
     s = Dict("conv_losses_mp" => true, "objective_components" => ["gen"])
     @testset "ACPPowerModel" begin
         result = solve_acdcopf(data, PowerModels.ACPPowerModel, ipopt; setting=s)
