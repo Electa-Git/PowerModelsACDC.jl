@@ -7,6 +7,7 @@ import PowerModels
 import Ipopt
 import Juniper
 import HiGHS
+import SCIP
 
 # Settings
 logging = false # Print logs from modeling packages and solvers to the REPL.
@@ -26,13 +27,6 @@ ipopt = optimizer_with_attributes(
     "print_level" => logging ? 2 : 0,
     "sb" => "yes"
 )
-ipopt_warmstart = optimizer_with_attributes(
-    Ipopt.Optimizer,
-    "warm_start_init_point" => "yes",
-    "tol" => 1e-6,
-    "print_level" => logging ? 2 : 0,
-    "sb" => "yes"
-)
 highs = optimizer_with_attributes(
     HiGHS.Optimizer,
     "output_flag" => logging ? true : false
@@ -43,11 +37,9 @@ juniper = optimizer_with_attributes(
     "mip_solver" => highs,
     "log_levels" => logging ? [:Table, :Info, :Options] : []
 )
-juniper_warmstart = optimizer_with_attributes(
-    Juniper.Optimizer,
-    "nl_solver" => ipopt_warmstart,
-    "mip_solver" => highs,
-    "log_levels" => logging ? [:Table, :Info, :Options] : []
+scip = optimizer_with_attributes(
+    SCIP.Optimizer,
+    "display/verblevel" => logging ? 3 : 0
 )
 
 # Functions to load test data
