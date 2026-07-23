@@ -28,7 +28,7 @@ formulation (BF = branch flow) for the AC portion, combined with DC components.
 """
 function solve_acdcopf_bf(file::String, model_type::Type, solver; kwargs...)
     data = parse_file(file)
-    return solve_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+    return solve_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
 """
@@ -54,9 +54,9 @@ Solve an AC/DC OPF (Branch-Flow formulation) using an already-parsed data dictio
 """
 function solve_acdcopf_bf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
     if haskey(data, "multinetwork") && data["multinetwork"] == true
-        return _PM.solve_model(data, model_type, solver, mp_build_acdcopf_bf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, mp_build_acdcopf_bf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
     else
-        return _PM.solve_model(data, model_type, solver, build_acdcopf_bf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_acdcopf_bf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
     end
 end
 
@@ -110,6 +110,7 @@ function build_acdcopf_bf(pm::_PM.AbstractPowerModel)
     variable_flexible_demand(pm)
     variable_pst(pm)
     variable_sssc(pm)
+    variable_im(pm)
 
     _PM.objective_min_fuel_cost(pm)
 
@@ -216,6 +217,7 @@ function mp_build_acdcopf_bf(pm::_PM.AbstractPowerModel)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
+        variable_im(pm; nw = n)
     end
 
     # Add constraints for each network

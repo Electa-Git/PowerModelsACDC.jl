@@ -173,9 +173,9 @@ end
 This function adds converter injections as dummy generators and loads in the ac grid
 """
 function add_converter_ac_injections!(data)
-    load_num = maximum([load["index"] for (l, load) in data["load"]])
-    gen_num = maximum([gen["index"] for (g, gen) in data["gen"]])
-    bus_load_pair = Dict(load["load_bus"] => l for (l,load) in data["load_ref"])
+    load_num = isempty(data["load"]) ? 0 : maximum([load["index"] for (l, load) in data["load"]])
+    gen_num = isempty(data["gen"]) ? 0 : maximum([gen["index"] for (g, gen) in data["gen"]])
+    bus_load_pair = isempty(data["load_ref"]) ? Dict{Int64, Int64}() : Dict(load["load_bus"] => l for (l,load) in data["load_ref"])
     load_idx = 1
     gen_idx = 1
     for (c, conv) in data["convdc"]
@@ -372,6 +372,7 @@ function add_dc_converter_injections!(data,conv_qnts)
     if haskey(data, "gendc")
         for (idx, conv) in data["convdc"]
             if conv["type_dc"] == 2
+                data["gendc"]["$idx"] = Dict{String, Any}()
                 data["gendc"]["$idx"]["pg"] = conv_qnts["$idx"]["Pdc"]
             end
         end

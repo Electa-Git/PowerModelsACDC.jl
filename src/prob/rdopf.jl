@@ -43,7 +43,7 @@ Data-based entrypoint to solve a redispatch OPF given an already-parsed data dic
   of reference extensions (override via `kwargs[:ref_extensions]`).
 """
 function solve_rdopf(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_rdopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_rdopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 """
     build_rdopf(pm::_PM.AbstractPowerModel)
@@ -103,6 +103,7 @@ function build_rdopf(pm::_PM.AbstractPowerModel)
     constraint_voltage_dc(pm)
     variable_pst(pm)
     variable_sssc(pm)
+    variable_im(pm)
     variable_flexible_demand(pm)
     variable_generator_redispatch(pm)
 

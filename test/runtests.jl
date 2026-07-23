@@ -50,6 +50,7 @@ include("common.jl")
     # Components
     include("conv.jl")
     include("dcgen.jl")
+    include("im.jl")
     include("pst.jl")
     include("sssc.jl")
 

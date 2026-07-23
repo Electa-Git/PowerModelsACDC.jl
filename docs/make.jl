@@ -29,6 +29,7 @@ makedocs(
                 "AC Generators" => "comp/gen.md"
                 "DC Generators" => "comp/dcgen.md"
                 "DC Converters" => "comp/dcconv.md"
+                "Induction Machines" => "comp/im.md"
             ]
             "File IO" => "parser.md"
         ]
