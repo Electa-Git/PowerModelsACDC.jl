@@ -4,7 +4,7 @@ function variable_im(pm::_PM.AbstractPowerModel; kwargs...)
     variable_im_stator_flow(pm; kwargs...)
     variable_im_rotor_inductance_flow(pm; kwargs...)
 
-    variable_im_active_power(pm; kwargs...) # 
+    variable_im_active_power(pm; kwargs...) #
     variable_im_reactive_power(pm; kwargs...) # To be checked if necessary (simply equal to 0)
     variable_im_slip(pm; kwargs...)
 
@@ -59,7 +59,6 @@ function variable_im_reactive_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_i
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :q_im, _PM.ids(pm, nw, :im), qim)
 end
 
-
 "variable: `p_im_s_to[j]` for `j` in `im`" # TODO: Ask Hakan purpose of using Pacrated instead of Pacmin
 function variable_im_stator_active_power_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 2;
@@ -82,7 +81,7 @@ function variable_im_stator_reactive_power_to(pm::_PM.AbstractPowerModel; nw::In
     bigM = 2;
     q_s_to = _PM.var(pm, nw)[:q_im_s_to] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_q_im_s_to",
-    start = -_PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0) # Reactive power flow is approx air-gap power 
+    start = -_PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0) # Reactive power flow is approx air-gap power
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
@@ -93,7 +92,6 @@ function variable_im_stator_reactive_power_to(pm::_PM.AbstractPowerModel; nw::In
 
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :q_im_s_to, _PM.ids(pm, nw, :im), q_s_to)
 end
-
 
 "variable: `p_im_ri_f[j]` for `j` in `im`"
 function variable_im_rotor_inductance_active_power_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -163,10 +161,9 @@ function variable_im_to_grid_reactive_power(pm::_PM.AbstractPowerModel; nw::Int=
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :qg, _PM.ids(pm, nw, :im), q_s_fr)
 end
 
-
 "variable: `pconv_dc[j]` for `j` in `im`"
 function variable_im_slip(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    
+
     slip = _PM.var(pm, nw)[:slip_im] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_slip_im",
     start = 0.0 # Start with slip to zero
@@ -174,22 +171,17 @@ function variable_im_slip(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default,
     # Always bound slip bcs there is no application where you would want unstable equil point
     for (c, im) in _PM.ref(pm, nw, :im)
         s_kip = im["r_r"] / (im["x_sl"]) + im["x_rl"]
-        println(s_kip)
-        JuMP.set_lower_bound(slip[c], -s_kip) # Generator 
+        JuMP.set_lower_bound(slip[c], -s_kip) # Generator
         JuMP.set_upper_bound(slip[c],  s_kip) # Motor
     end
-    
 
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :slip, _PM.ids(pm, nw, :im), slip)
 end
-
-
 
 function variable_im_magnetisation_voltage(pm::_PM.AbstractPowerModel; kwargs...)
     variable_im_magnetisation_voltage_magnitude(pm; kwargs...)
     variable_im_magnetisation_voltage_angle(pm; kwargs...)
 end
-
 
 "variable: `vm_m[j]` for `j` in `im`"
 function variable_im_magnetisation_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -207,7 +199,6 @@ function variable_im_magnetisation_voltage_magnitude(pm::_PM.AbstractPowerModel;
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :vm_m, _PM.ids(pm, nw, :im), vm_m)
 end
 
-
 "variable: `va_m[j]` for `j` in `im`"
 function variable_im_magnetisation_voltage_angle(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 2*pi; #
@@ -224,12 +215,10 @@ function variable_im_magnetisation_voltage_angle(pm::_PM.AbstractPowerModel; nw:
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :va_m, _PM.ids(pm, nw, :im), va_m)
 end
 
-
 function variable_im_magnetisation_voltage(pm::_PM.AbstractACRModel; kwargs...)
     variable_im_magnetisation_voltage_real(pm; kwargs...)
     variable_im_magnetisation_voltage_imaginary(pm; kwargs...)
 end
-
 
 "real part of the voltage variable `vr_m[j]` for `j` in `im`"
 function variable_im_magnetisation_voltage_real(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -240,8 +229,8 @@ function variable_im_magnetisation_voltage_real(pm::_PM.AbstractACRModel; nw::In
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
-            JuMP.set_lower_bound(vr_m[c],  -im["Vmmax"] * bigM)   
-            JuMP.set_upper_bound(vr_m[c],  im["Vmmax"] * bigM)   
+            JuMP.set_lower_bound(vr_m[c],  -im["Vmmax"] * bigM)
+            JuMP.set_upper_bound(vr_m[c],  im["Vmmax"] * bigM)
         end
     end
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :vr_m, _PM.ids(pm, nw, :im), vr_m)
@@ -249,7 +238,7 @@ end
 
 "imaginary part of the voltage variable `vi_m[j]` for `j` in `im`"
 function variable_im_magnetisation_voltage_imaginary(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2; 
+    bigM = 1.2;
     vi_m = _PM.var(pm, nw)[:vi_m] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vi_m",
     start = 0.0
@@ -263,12 +252,10 @@ function variable_im_magnetisation_voltage_imaginary(pm::_PM.AbstractACRModel; n
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :vi_m, _PM.ids(pm, nw, :im), vi_m)
 end
 
-
 function variable_im_airgap_voltage(pm::_PM.AbstractPowerModel; kwargs...)
     variable_im_airgap_voltage_magnitude(pm; kwargs...)
     variable_im_airgap_voltage_angle(pm; kwargs...)
 end
-
 
 "variable: `vm_ag[j]` for `j` in `im`"
 function variable_im_airgap_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
@@ -300,8 +287,6 @@ function variable_im_airgap_voltage_angle(pm::_PM.AbstractPowerModel; nw::Int=_P
     end
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :va_ag, _PM.ids(pm, nw, :im), va_ag)
 end
-
-
 
 function variable_im_airgap_voltage(pm::_PM.AbstractACRModel; kwargs...)
     variable_im_airgap_voltage_real(pm; kwargs...)
@@ -338,7 +323,6 @@ function variable_im_airgap_voltage_imaginary(pm::_PM.AbstractACRModel; nw::Int=
     report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :vi_ag, _PM.ids(pm, nw, :im), vi_ag)
 end
 
-
 ############## Constraint template for IMs ###################################################
 
 function constraint_im_rotor_inductance(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
@@ -366,11 +350,9 @@ function constraint_im_slip(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_i
     B = im["torque"]["B"]
     C = im["torque"]["C"]
     m = im["torque"]["m"]
-    
-    
+
     constraint_im_slip(pm, nw, i, T_0, A, B, C, m, im["r_r"] )
 end
-
 
 ########## ACP formulation ####################################################################
 @doc raw"""
@@ -496,7 +478,7 @@ function constraint_im_rotor_inductance(pm::_PM.AbstractACPModel, n::Int, i::Int
 end
 
 @doc raw"""
-IM magnetisation constraint 
+IM magnetisation constraint
 
 ```math
 p_{im,ri,f}+p_{im,s,to}=0
