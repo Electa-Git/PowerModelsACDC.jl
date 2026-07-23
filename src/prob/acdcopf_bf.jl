@@ -217,6 +217,7 @@ function mp_build_acdcopf_bf(pm::_PM.AbstractPowerModel)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
+        variable_im(pm; nw = n)
     end
 
     # Add constraints for each network
