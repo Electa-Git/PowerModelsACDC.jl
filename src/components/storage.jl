@@ -22,7 +22,6 @@ function storage_constraints(pm, n; uc = false)
     final_network_id = sort(collect(_PM.nw_ids(pm)))[end]
     if ref_nw_id == 1
         for i in _PM.ids(pm, n, :storage)
-            println(_PM.ref(pm, n, :storage, i)["energy"])
             _PM.constraint_storage_state(pm, i, nw = n)
         end
     elseif ref_nw_id < final_network_id

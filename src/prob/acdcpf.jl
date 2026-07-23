@@ -18,14 +18,12 @@ specified PowerModels formulation and solver.
   objective value, variable values and solver termination status.
 
 # Behavior
-This function parses the provided file into a data dictionary, performs any
-additional data processing (via `process_additional_data!`) and delegates to
-`solve_acdcpf(data::Dict, ...)`. By default, reference extensions for DC grid,
-PST, SSSC, flexible loads and DC generators are applied.
+Parses the input file and delegates to `solve_acdcpf(data::Dict, ...)`.
+By default, reference extensions for DC grid, PST, SSSC, flexible loads and DC generators
+are applied.
 """
 function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
-    data = _PM.parse_file(file)
-    process_additional_data!(data)
+    data = parse_file(file)
     return solve_acdcpf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
@@ -102,7 +100,7 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     variable_im(pm, bounded=false)
 
     _PM.constraint_model_voltage(pm)
-    
+
     constraint_voltage_dc(pm)
 
 
@@ -132,7 +130,6 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         if typeof(pm) <: _PM.SOCBFPowerModel
             _PM.constraint_power_losses(pm, i)
             _PM.constraint_voltage_magnitude_difference(pm, i)
-            _PM.constraint_branch_current(pm, i)
         else
             _PM.constraint_ohms_yt_from(pm, i)
             _PM.constraint_ohms_yt_to(pm, i)

@@ -343,7 +343,7 @@ with the current-magnitude link
 \right)^2 = i^{conv,sq}_c.
 ```
 
-## SOCWRPowerModel, SDPWRMPowerModel, QCWRPowerModel and QCWRTriPowerModel
+## SOCWRPowerModel, SDPWRMPowerModel, QCRMPowerModel and QCLSPowerModel
 
 The WR-space relaxations use lifted voltage variables. Let $W_i$ denote the squared voltage magnitude at the AC bus. The non-convex converter current relation is relaxed as
 
@@ -417,7 +417,7 @@ When the lossless DC approximation is used, this reduces to
 P^{conv,ac}_c + P^{conv,dc}_c = 0.
 ```
 
-## LPACPowerModel / LPACCPowerModel
+## LPACCPowerModel
 
 The LPAC formulations use a linearized voltage magnitude representation. If $\phi_i$ denotes the voltage magnitude deviation around $1.0$ p.u., then
 
@@ -510,9 +510,9 @@ The phase reactor links the filter-side voltage to the converter-side AC voltage
 | `IVRPowerModel` | $U^r_i,U^i_i$ and current components | $P,Q$ linked directly to voltage and current components | $P^{ac}+P^{dc}=a+bI+ci^{sq}$ |
 | `SOCWRPowerModel` | $W_i$ | $(P^{ac})^2+(Q^{ac})^2 \leq W_i i^{sq}$ | $P^{ac}+P^{dc}=a+bI+ci^{sq}$ |
 | `SDPWRMPowerModel` | voltage matrix variables | lifted relaxation of current relation | $P^{ac}+P^{dc}=a+bI+ci^{sq}$ |
-| `QCWRPowerModel` / `QCWRTriPowerModel` | lifted voltage variables with QC envelopes | QC relaxation of current relation | $P^{ac}+P^{dc}=a+bI+ci^{sq}$ |
+| `QCLSPowerModel` / `QCRMPowerModel` | lifted voltage variables with QC envelopes | QC relaxation of current relation | $P^{ac}+P^{dc}=a+bI+ci^{sq}$ |
 | `DCPPowerModel` | $U_i=1$ | active-power-only approximation | $P^{ac}+P^{dc}=0$ or linearized losses |
-| `LPACPowerModel` / `LPACCPowerModel` | $U_i \approx 1+\phi_i$ | linearized active-power-dominated current | linearized losses |
+| `LPACCPowerModel` | $U_i \approx 1+\phi_i$ | linearized active-power-dominated current | linearized losses |
 
 ## References
 

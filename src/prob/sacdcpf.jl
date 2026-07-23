@@ -37,8 +37,7 @@ end
 This function solves sequential ac-dc power flow
 """
 function solve_sacdcpf(file::String; kwargs...)
-    data = _PM.parse_file(file)
-    process_additional_data!(data)
+    data = parse_file(file)
     return solve_sacdcpf(data::Dict{String,Any}, kwargs...)
 end
 

@@ -18,8 +18,7 @@ formulation (BF = branch flow) for the AC portion, combined with DC components.
   objective (when applicable), and solver termination status.
 
 # Details
-- Parses the input file into a PowerModels data dictionary and performs any
-  package-specific preprocessing via `process_additional_data!`.
+- Parses the input file.
 - Delegates to `solve_acdcopf_bf(data::Dict, ...)` with the default set of
   reference extensions for DC grids, PSTs, SSSC, flexible loads, and DC
   generators (these can be overridden via `kwargs`).
@@ -28,8 +27,7 @@ formulation (BF = branch flow) for the AC portion, combined with DC components.
   branch current/flow variables and their convex relaxations are required.
 """
 function solve_acdcopf_bf(file::String, model_type::Type, solver; kwargs...)
-    data = _PM.parse_file(file)
-    process_additional_data!(data)
+    data = parse_file(file)
     return solve_acdcopf_bf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
@@ -201,9 +199,6 @@ formulation for each AC subnetwork.
 - Adds inter-network / cross-border constraints where applicable (fixed or free flows).
 - Aggregates objective contributions and applies the global objective.
 """
-
-# ...existing code...
-
 function mp_build_acdcopf_bf(pm::_PM.AbstractPowerModel)
     # Create variables for each network
     for n in _PM.nw_ids(pm)
@@ -211,6 +206,7 @@ function mp_build_acdcopf_bf(pm::_PM.AbstractPowerModel)
         _PM.variable_gen_power(pm; nw = n)
         _PM.variable_branch_power(pm; nw = n)
         _PM.variable_storage_power(pm; nw = n)
+        _PM.variable_branch_current(pm; nw = n)
 
         # DC & special-component variables (scoped per network)
         variable_active_dcbranch_flow(pm; nw = n)
@@ -238,8 +234,8 @@ function mp_build_acdcopf_bf(pm::_PM.AbstractPowerModel)
 
         for i in _PM.ids(pm, n, :branch)
             # Branch-flow specific constraints: keep thermal/angle/Ohm relations
-            _PM.constraint_ohms_yt_from(pm, i; nw = n)
-            _PM.constraint_ohms_yt_to(pm, i; nw = n)
+            _PM.constraint_power_losses(pm, i; nw = n)
+            _PM.constraint_voltage_magnitude_difference(pm, i; nw = n)
             _PM.constraint_voltage_angle_difference(pm, i; nw = n)
             _PM.constraint_thermal_limit_from(pm, i; nw = n)
             _PM.constraint_thermal_limit_to(pm, i; nw = n)

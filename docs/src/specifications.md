@@ -67,10 +67,9 @@ end
 
 for i in PowerModels.ids(pm, :branch)
     # dirty, should be improved in the future TODO
-    if typeof(pm) <: PowerModels.SOCDFPowerModel
+    if typeof(pm) <: PowerModels.SOCBFPowerModel
         constraint_flow_losses(pm, i)
         constraint_voltage_magnitude_difference(pm, i)
-        constraint_branch_current(pm, i)
     else
         constraint_ohms_yt_from(pm, i)
         constraint_ohms_yt_to(pm, i)

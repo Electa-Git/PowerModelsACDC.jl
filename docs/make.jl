@@ -1,6 +1,13 @@
-using Documenter, PowerModelsACDC
+using Documenter
+using DocumenterInterLinks
+using PowerModelsACDC
+
+links = InterLinks(
+    "PowerModels" => "https://lanl-ansi.github.io/PowerModels.jl/stable/"
+);
 
 makedocs(
+    plugins = [links],
     modules = [PowerModelsACDC],
     sitename = "PowerModelsACDC",
     warnonly = :missing_docs,
@@ -26,6 +33,7 @@ makedocs(
             ]
             "File IO" => "parser.md"
         ]
+        "Developer" => "developer.md"
     ]
 )
 

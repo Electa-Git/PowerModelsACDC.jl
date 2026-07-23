@@ -518,7 +518,7 @@ function variable_converter_internal_voltage_magnitude_sqr(pm::_PM.AbstractPower
 end
 
 function variable_cos_voltage(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    #only for lpac
+    # Only for LPAC
 end
 
 "Variable for optimizing the converter droop coeffcient"
@@ -985,9 +985,9 @@ function variable_voltage_slack(pm::_PM.AbstractWModels; nw::Int=_PM.nw_id_defau
     report && _PM.sol_component_value(pm, nw, :convdc_ne, :wdu, _PM.ids(pm, nw, :convdc_ne), w_du)
 end
 
-"variable: cos voltage fro LPAC"
+"variable: cos voltage for LPAC"
 function variable_cos_voltage_ne(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    #only for lpac
+    # Only for LPAC
 end
 
 ########### Frequency related constraints ############

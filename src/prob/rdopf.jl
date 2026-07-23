@@ -17,13 +17,11 @@ File-based entrypoint to solve a redispatch (RD) Optimal Power Flow problem.
   (when applicable) and solver termination information.
 
 # Behavior
-- Parses the input file into a PowerModels data dictionary, applies package-
-  specific preprocessing via `process_additional_data!` and delegates to the
-  data-based entrypoint that builds and solves the redispatch model.
+Parses the input file and delegates to the data-based entrypoint that builds and solves the
+redispatch model.
 """
 function solve_rdopf(file::String, model_type::Type, optimizer; kwargs...)
-    data = _PM.parse_file(file)
-    process_additional_data!(data)
+    data = parse_file(file)
     return _PM.solve_model(data, model_type, optimizer, build_rdopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 """

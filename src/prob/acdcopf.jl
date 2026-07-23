@@ -13,11 +13,11 @@ Solves an AC/DC Optimal Power Flow (OPF) problem using the specified model type 
 - Solution dictionary containing results, including objective value and solver status.
 
 # Details
-Parses the input file, processes additional data, and calls the main OPF solver with reference extensions for DC grid, phase-shifting transformers, SSSC, flexible loads, and DC generators.
+Parses the input file and calls the main OPF solver with reference extensions for DC grid,
+phase-shifting transformers, SSSC, flexible loads, and DC generators.
 """
 function solve_acdcopf(file::String, model_type::Type, solver; kwargs...)
-    data = _PM.parse_file(file)
-    process_additional_data!(data)
+    data = parse_file(file)
     return solve_acdcopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 """

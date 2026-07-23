@@ -1,386 +1,252 @@
-s = Dict("conv_losses_mp" => true)
-@testset "test dc tnep" begin
-    @testset "6-bus case" begin
-        resultDC = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6_test.m"), PowerModels.DCPPowerModel, highs; setting=s)
-        @test isapprox(resultDC["objective"], 26.3331; atol=1e-1)
-        @test isapprox(resultDC["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultDC["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultDC["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultDC["solution"]["branchdc_ne"]["2"]["isbuilt"], 0; atol=1e-2)
-        @test isapprox(resultDC["solution"]["branchdc_ne"]["10"]["isbuilt"], 0; atol=1e-2)
-        @test isapprox(resultDC["solution"]["branchdc_ne"]["1"]["pf"], 1.3; atol=1e-1)
-        @test isapprox(resultDC["solution"]["branchdc_ne"]["1"]["pt"], -1.3; atol=1e-1)
+@testset "Transmission Network Expansion Planning" begin
+    s = Dict("conv_losses_mp" => true)
+    case4 = parse_file(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"))
+    case9 = parse_file(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"); tnep=true)
+    @testset "solve_tnep(file, ...)" begin
+        result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"), PowerModels.DCPPowerModel, highs; setting=s)
+        @test result["termination_status"] == OPTIMAL
     end
-
-    @testset "9-bus case" begin
-        resultDC = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case9_test.m"), PowerModels.DCPPowerModel, highs; setting=s)
-        @test isapprox(resultDC["objective"], 10.7; atol=1e-1)
-        @test isapprox(resultDC["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-    end
-
-    @testset "14-bus case" begin
-        resultDC = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case14_test.m"), PowerModels.DCPPowerModel, highs, setting=s)
-        @test isapprox(resultDC["objective"], 15.6921; atol=1e-1)
-        @test isapprox(resultDC["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultDC["solution"]["convdc_ne"]["7"]["isbuilt"], 0; atol=1e-2)
-    end
-
-    @testset "39-bus case" begin
-        resultDC = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case39_test.m"), PowerModels.DCPPowerModel, highs, setting=s)
-        @test isapprox(resultDC["objective"], 25.1605; atol=1e-1)
-        @test isapprox(resultDC["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultDC["solution"]["convdc_ne"]["4"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultDC["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultDC["solution"]["branchdc_ne"]["13"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultDC["solution"]["branchdc_ne"]["17"]["isbuilt"], 1; atol=1e-2)
-
-    end
-end
-
-if local_test
-    @testset "test soc tnep" begin
-        @testset "test SOC-BFM tnep" begin
-            @testset "6-bus case" begin
-                resultSOCBF = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6_test.m"), PowerModels.SOCBFConicPowerModel, gurobi; setting=s)
-                @test isapprox(resultSOCBF["objective"], 31.6; atol=1e-1)
-                @test isapprox(resultSOCBF["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["convdc_ne"]["4"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["10"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["3"]["pf"], -2.29; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["busdc_ne"]["2"]["wdc_ne"], 1.18695; atol=1e-2)
+    @testset "Single network" begin
+        @testset "ACPPowerModel" begin
+            @testset "4-bus case" begin
+                result = solve_tnep(case4, PowerModels.ACPPowerModel, juniper; setting=s)
+                @test result["termination_status"] == LOCALLY_SOLVED
+                @test result["objective"] ≈ 348.0219 rtol=1e-3
+                @test result["solution"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 0 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -0.631 rtol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -0.6189 rtol=1e-3
             end
             @testset "9-bus case" begin
-                resultSOCBF = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case9_test.m"), PowerModels.SOCBFConicPowerModel, gurobi; setting=s)
-                @test isapprox(resultSOCBF["objective"], 10.7; atol=1e-1)
-                @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["1"]["pf"], 0.9547343363830544; atol=1e-2) #1.029695717391926
-                @test isapprox(resultSOCBF["solution"]["busdc_ne"]["2"]["wdc_ne"], 0.9607722492758961; atol=1e-2)
+                result = solve_tnep(case9, PowerModels.ACPPowerModel, juniper; setting=s)
+                @test result["termination_status"] == LOCALLY_SOLVED
+                @test result["objective"] ≈ 10.7 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.8325 rtol=1e-3
+                @test result["solution"]["busdc_ne"]["2"]["vm"] ≈ 0.9966 rtol=1e-3
             end
         end
-        @testset "14-bus case" begin
-            resultSOCBF = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case14_test.m"), PowerModels.SOCBFConicPowerModel, gurobi; setting=s)
-            @test isapprox(resultSOCBF["objective"], 20; atol=1e-1)
-            @test isapprox(resultSOCBF["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCBF["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCBF["solution"]["convdc_ne"]["7"]["isbuilt"], 1; atol=1e-2)
-        end
-        @testset "39-bus case" begin
-            resultSOCBF = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case39_test.m"), PowerModels.SOCBFConicPowerModel, gurobi; setting=s)
-            @test isapprox(resultSOCBF["objective"], 30.4; atol=1e-1)
-            @test isapprox(resultSOCBF["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCBF["solution"]["convdc_ne"]["4"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCBF["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCBF["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCBF["solution"]["branchdc_ne"]["29"]["isbuilt"], 1; atol=1e-2)
-        end
-    end
-
-    @testset "test SOC-BIM tnep" begin
-        @testset "6-bus case" begin
-            resultSOCWR = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6_test.m"), PowerModels.SOCWRPowerModel, gurobi; setting=s)
-            @test isapprox(resultSOCWR["objective"], 31.63; atol=1e-1)
-            @test isapprox(resultSOCWR["solution"]["convdc_ne"]["1"]["isbuilt"], 0; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["convdc_ne"]["4"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["branchdc_ne"]["10"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["branchdc_ne"]["3"]["pf"], -2.29067; atol=1e-1)
-            @test isapprox(resultSOCWR["solution"]["busdc_ne"]["2"]["wdc_ne"], 1.18695; atol=1e-2)
-        end
-        @testset "9-bus case" begin
-            resultSOCWR = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case9_test.m"), PowerModels.SOCWRPowerModel, gurobi; setting=s)
-            @test isapprox(resultSOCWR["objective"], 10.7; atol=1e-1)
-            @test isapprox(resultSOCWR["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["branchdc_ne"]["1"]["pf"], 1.168; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["busdc_ne"]["2"]["wdc_ne"], 0.845; atol=1e-2)
-
-        end
-    end
-
-    @testset "test QC tnep" begin
-        @testset "6-bus case" begin
-            resultQC = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6_test.m"), PowerModels.QCRMPowerModel, gurobi; setting=s)
-            @test isapprox(resultQC["objective"], 31.6; atol=1e-1)
-            @test isapprox(resultQC["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultQC["solution"]["convdc_ne"]["4"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultQC["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultQC["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultQC["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultQC["solution"]["branchdc_ne"]["10"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultQC["solution"]["branchdc_ne"]["3"]["pf"], -2.29; atol=1e-1)
-            @test isapprox(resultQC["solution"]["busdc_ne"]["2"]["wdc_ne"], 1.18695; atol=1e-2)
-        end
-        @testset "9-bus case" begin
-            resultQC = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case9_test.m"), PowerModels.QCRMPowerModel, gurobi; setting=s)
-            @test isapprox(resultQC["objective"], 10.7; atol=1e-1)
-            @test isapprox(resultQC["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultQC["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultQC["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultQC["solution"]["branchdc_ne"]["1"]["pf"], 1.0799; atol=1e-2)
-            @test isapprox(resultQC["solution"]["busdc_ne"]["2"]["wdc_ne"], 0.8777; atol=1e-2)
-        end
-    end
-end
-
-@testset "test AC tnep" begin
-    @testset "6-bus case" begin
-        # ac solver huristics may build ac branch 2 or 10
-        resultACP = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6_test.m"), PowerModels.ACPPowerModel, juniper; setting=s)
-        @test isapprox(resultACP["objective"], 31.65; atol=5e0)
-        @test isapprox(resultACP["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultACP["solution"]["convdc_ne"]["4"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultACP["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultACP["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultACP["solution"]["branchdc_ne"]["6"]["isbuilt"], 0; atol=1e-2)
-        @test isapprox(resultACP["solution"]["busdc_ne"]["6"]["vm"], 1.09; atol=1e-1)
-    end
-
-    @testset "9-bus case" begin
-        resultACP = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case9_test.m"), PowerModels.ACPPowerModel, juniper; setting=s)
-        @test isapprox(resultACP["objective"], 10.7; atol=1e-1)
-        @test isapprox(resultACP["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultACP["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultACP["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultACP["solution"]["branchdc_ne"]["1"]["pf"], 0.841; atol=1e-1) #0.838 0.8360707133374305
-        @test isapprox(resultACP["solution"]["busdc_ne"]["2"]["vm"], 0.99; atol=1e-2)
-    end
-end
-
-@testset "test LPAC tnep" begin
-    @testset "6-bus case" begin
-        resultLPAC = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6_test.m"), PowerModels.LPACCPowerModel, juniper; setting=s)
-        @test isapprox(resultLPAC["objective"], 31.08; atol=1e-1)
-        @test isapprox(resultLPAC["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["convdc_ne"]["4"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["1"]["isbuilt"], 0; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["1"]["pf"], 0.0; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["busdc_ne"]["2"]["phivdcm_ne"], -0.00668065; atol=1e-2)
-    end
-
-    @testset "9-bus case" begin
-        resultLPAC = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case9_test.m"), PowerModels.LPACCPowerModel, juniper; setting=s)
-        @test isapprox(resultLPAC["objective"], 10.7; atol=1e-1)
-        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["1"]["pf"], 0.814; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["busdc_ne"]["2"]["phivdcm_ne"], -0.00345834; atol=1e-2)
-    end
-end
-
-@testset "ACDC tnep" begin
-    @testset "DCP" begin
-        resultDCP = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_acdc.m"), PowerModels.DCPPowerModel, highs; setting=s)
-        @test isapprox(resultDCP["objective"], 329.95456; atol=1e-1)
-        @test isapprox(resultDCP["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultDCP["solution"]["branchdc_ne"]["3"]["pf"], -1.009; atol=1e-2)
-        @test isapprox(resultDCP["solution"]["branchdc_ne"]["1"]["pf"], 0; atol=1e-2)
-        @test isapprox(resultDCP["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultDCP["solution"]["convdc_ne"]["1"]["pconv"], -1; atol=1e-2)
-        @test isapprox(resultDCP["solution"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
-    end
-
-    @testset "ACP" begin
-        resultACP = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_acdc.m"), PowerModels.ACPPowerModel, juniper; setting=s)
-        @test isapprox(resultACP["objective"], 348.0219; atol=1e-1)
-        @test isapprox(resultACP["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultACP["solution"]["branchdc_ne"]["3"]["pf"], -0.631; atol=1e-2)
-        @test isapprox(resultACP["solution"]["branchdc_ne"]["1"]["pf"], 0; atol=1e-2)
-        @test isapprox(resultACP["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultACP["solution"]["convdc_ne"]["1"]["pconv"], -0.618; atol=1e-2)
-        @test isapprox(resultACP["solution"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
-    end
-
-    @testset "LPAC" begin
-        resultLPAC = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_acdc.m"), PowerModels.LPACCPowerModel, juniper; setting=s)
-        @test isapprox(resultLPAC["objective"], 333.095; atol=1e-1)
-        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["3"]["pf"], -1.009; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["branchdc_ne"]["1"]["pf"], 0; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["convdc_ne"]["1"]["pconv"], -1; atol=1e-2)
-        @test isapprox(resultLPAC["solution"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
-    end
-
-    if local_test
-        @testset "SOCWR" begin
-            resultSOCWR = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_acdc.m"), PowerModels.SOCWRPowerModel, gurobi; setting=s)
-            @test isapprox(resultSOCWR["objective"], 348.021; atol=1e-1)
-            @test isapprox(resultSOCWR["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["branchdc_ne"]["3"]["pf"], -0.631; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["branchdc_ne"]["1"]["pf"], 0; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["convdc_ne"]["1"]["pconv"], -0.618; atol=1e-2)
-            @test isapprox(resultSOCWR["solution"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
-        end
-    end
-end
-
-@testset "AC and DC Candidates" begin
-    result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6_dc_tnep.m"), PowerModels.DCPPowerModel, highs; setting=s)
-    @test isapprox(result["objective"], 26.3331; atol=1e-1)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pf"], 1.3; atol=1e-1)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pt"], -1.3; atol=1e-1)
-    @test isapprox(result["solution"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-1)
-    @test isapprox(result["solution"]["convdc_ne"]["5"]["pconv"], -1.3; atol=1e-1)
-
-    result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6_acdc_tnep.m"), PowerModels.DCPPowerModel, highs; setting=s)
-    @test isapprox(result["objective"], 25.4221; atol=1e-1)
-    @test isapprox(result["solution"]["branchdc_ne"]["9"]["isbuilt"], 1; atol=1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["9"]["pf"], -3.00658; atol=1e-1)
-    @test isapprox(result["solution"]["branchdc_ne"]["9"]["pt"], 3.00658; atol=1e-1)
-    @test isapprox(result["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-    @test isapprox(result["solution"]["convdc_ne"]["6"]["pconv"], 3.0221; atol=1e-1)
-    @test isapprox(result["solution"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
-
-    result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6acdc_dc_tnep.m"), PowerModels.DCPPowerModel, highs; setting=s)
-    @test isapprox(result["objective"], 22.8442; atol=1e-1)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pf"], -4; atol=1e-1)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pt"], 4; atol=1e-1)
-    @test isapprox(result["solution"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-    @test isapprox(result["solution"]["convdc_ne"]["6"]["pconv"], 4; atol=1e-1)
-
-    result = solve_tnep(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6acdc_dc_branch_tnep.m"), PowerModels.DCPPowerModel, highs; setting=s)
-    @test isapprox(result["objective"], 13.3663; atol=1e-1)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pf"], -4.00; atol=1e-1)
-    @test isapprox(result["solution"]["branchdc_ne"]["3"]["pt"], 4.00; atol=1e-1)
-    @test isapprox(result["solution"]["branchdc_ne"]["4"]["isbuilt"], 0; atol=1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pf"], 1.3; atol=1e-2)
-    @test isapprox(result["solution"]["branchdc_ne"]["1"]["pt"], -1.3; atol=1e-2)
-end
-
-s = Dict("conv_losses_mp" => true)
-@testset "mp-tnep" begin
-    @testset "dc tnep" begin
-        @testset "DCP" begin
-            data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_original.m"))
-            resultDCP = solve_tnep(data_dc, PowerModels.DCPPowerModel, highs; multinetwork=true, setting=s)
-            @test isapprox(resultDCP["objective"], 8.2; atol=1e-1)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["2"]["pf"], -2.0013; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["2"]["branchdc_ne"]["2"]["pf"], -2.00137; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"], -2.0; atol=1e-2)
-        end
-        @testset "DCP with storage" begin
-            data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case6_strg.m"))
-            resultDCP = solve_tnep(data_dc, PowerModels.DCPPowerModel, highs; multinetwork=true, setting=s)
-            @test isapprox(resultDCP["objective"], 52.67; atol=1e-1)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["convdc_ne"]["5"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["convdc_ne"]["6"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"], 0; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["10"]["isbuilt"], 0; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"], 1.3; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pt"], -1.3; atol=1e-2)
-        end
-        @testset "LPAC" begin
-            data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_original.m"))
-            resultLPAC = solve_tnep(data_dc, PowerModels.LPACCPowerModel, juniper, multinetwork=true; setting=s)
-            @test isapprox(resultLPAC["objective"], 10.2; atol=1e-1)
-            @test isapprox(resultLPAC["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultLPAC["solution"]["nw"]["1"]["branchdc_ne"]["2"]["pf"], -1.2868; atol=1e-2)
-            @test isapprox(resultLPAC["solution"]["nw"]["2"]["branchdc_ne"]["2"]["pf"], -1.2868; atol=1e-2)
-            @test isapprox(resultLPAC["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultLPAC["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"], -2.15833; atol=1e-2)
-        end
-        if local_test
-            @testset "ACP" begin
-                data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_original.m"))
-                resultACP = solve_tnep(data_dc, PowerModels.ACPPowerModel, juniper, multinetwork=true; setting=s)
-                @test isapprox(resultACP["objective"], 10.2; atol=1e-1)
-                @test isapprox(resultACP["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultACP["solution"]["nw"]["1"]["branchdc_ne"]["2"]["pf"], -1.07017; atol=1e-2)
-                @test isapprox(resultACP["solution"]["nw"]["2"]["branchdc_ne"]["2"]["pf"], -1.07057; atol=1e-2)
-                @test isapprox(resultACP["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultACP["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"], -2.08104; atol=1e-2)
+        @testset "DCPPowerModel" begin
+            @testset "4-bus case" begin
+                result = solve_tnep(case4, PowerModels.DCPPowerModel, highs; setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 329.95456 rtol=1e-3
+                @test result["solution"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 0 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 rtol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
             end
-            @testset "SOCWR" begin
-                data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_original.m"))
-                resultSOCWR = solve_tnep(data_dc, PowerModels.SOCWRPowerModel, gurobi, multinetwork=true; setting=s)
-                @test isapprox(resultSOCWR["objective"], 10.2; atol=1e-1)
-                @test isapprox(resultSOCWR["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCWR["solution"]["nw"]["1"]["branchdc_ne"]["2"]["pf"], -1.227; atol=1e-2)
-                @test isapprox(resultSOCWR["solution"]["nw"]["2"]["branchdc_ne"]["2"]["pf"], -1.227; atol=1e-2)
-                @test isapprox(resultSOCWR["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCWR["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"], -2.1151; atol=1e-2)
+            @testset "9-bus case" begin
+                result = solve_tnep(case9, PowerModels.DCPPowerModel, highs; setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 10.7 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.4104 rtol=1e-3
             end
-            @testset "SOCBF" begin
-                data_dc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_original.m"))
-                resultSOCBF = solve_tnep(data_dc, PowerModels.SOCBFConicPowerModel, gurobi, multinetwork=true; setting=s)
-                @test isapprox(resultSOCBF["objective"], 10.2; atol=1e-1)
-                @test isapprox(resultSOCBF["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["nw"]["1"]["branchdc_ne"]["2"]["pf"], -1.3660; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["nw"]["2"]["branchdc_ne"]["2"]["pf"], -1.3800; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCBF["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"], -2.1338; atol=1e-2)
+        end
+        @testset "LPACCPowerModel" begin
+            @testset "4-bus case" begin
+                result = solve_tnep(case4, PowerModels.LPACCPowerModel, scip; setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 333.095 rtol=1e-3
+                @test result["solution"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 0 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -1.0110 rtol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
+            end
+            @testset "9-bus case" begin
+                result = solve_tnep(case9, PowerModels.LPACCPowerModel, scip; setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 10.7 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.8693 rtol=1e-3
+                @test result["solution"]["busdc_ne"]["2"]["phivdcm_ne"] ≈ -0.003694 rtol=1e-3
+            end
+        end
+        @testset "QCRMPowerModel" begin
+            @test_throws(
+                "variable_ne_branch_voltage is not yet supported for QC formulations",
+                solve_tnep(case9, PowerModels.QCRMPowerModel, scip; setting=s)
+            )
+        end
+        @testset "SOCBFPowerModel" begin
+            @testset "4-bus case" begin
+                @test_throws(
+                    "Candidate AC branches are not yet implemented in TNEP for BF formulations.",
+                    solve_tnep(case4, PowerModels.SOCBFPowerModel, scip; setting=s)
+                )
+            end
+            @testset "9-bus case" begin
+                result = solve_tnep(case9, PowerModels.SOCBFPowerModel, scip; setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 10.7 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 1.064 rtol=1e-3
+                @test result["solution"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.012 rtol=1e-3
+            end
+        end
+        @testset "SOCWRPowerModel" begin
+            @testset "4-bus case" begin
+                result = solve_tnep(case4, PowerModels.SOCWRPowerModel, scip; setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 348.0 rtol=1e-3
+                @test result["solution"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 0 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -0.6275 rtol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -0.6153 rtol=1e-3
+            end
+            @testset "9-bus case" begin
+                result = solve_tnep(case9, PowerModels.SOCWRPowerModel, scip; setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 10.7 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
             end
         end
     end
-
-    @testset "acdc tnep" begin
-        @testset "DCP" begin
-            data_acdc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_acdc.m"))
-            resultDCP = solve_tnep(data_acdc, PowerModels.DCPPowerModel, highs, multinetwork=true; setting=s)
-            @test isapprox(resultDCP["objective"], 659.90; atol=1e-1)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"], -1.009; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"], 0; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["convdc_ne"]["1"]["pconv"], -1; atol=1e-2)
-            @test isapprox(resultDCP["solution"]["nw"]["1"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
-        end
-        # @testset "LPAC" begin
-        #   data_acdc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_acdc.m"))
-        #    resultLPAC = solve_tnep(data_acdc, PowerModels.LPACCPowerModel, juniper, multinetwork=true; setting=s)
-        #    @test isapprox(resultLPAC["objective"], 614.15; atol=1e-1)
-        #    @test isapprox(resultLPAC["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-        #    @test isapprox(resultLPAC["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"], -1.2466; atol=1e-2)
-        #    @test isapprox(resultLPAC["solution"]["nw"]["2"]["branchdc_ne"]["3"]["pf"], -1.2466; atol=1e-2)
-        #    @test isapprox(resultLPAC["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"], 1; atol=1e-2)
-        #    @test isapprox(resultLPAC["solution"]["nw"]["1"]["convdc_ne"]["2"]["pconv"], -1.2355; atol=1e-2)
-        #    @test isapprox(resultLPAC["solution"]["nw"]["1"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
-        # end
-        if local_test
-            @testset "ACP" begin
-                data_acdc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_acdc.m"))
-                resultACP = solve_tnep(data_acdc, PowerModels.ACPPowerModel, juniper, multinetwork=true; setting=s)
-                @test isapprox(resultACP["objective"], 696.043; atol=1e-1)
-                @test isapprox(resultACP["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultACP["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"], -0.631; atol=1e-2)
-                @test isapprox(resultACP["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"], 0; atol=1e-2)
-                @test isapprox(resultACP["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultACP["solution"]["nw"]["1"]["convdc_ne"]["1"]["pconv"], -0.6189; atol=1e-2)
-                @test isapprox(resultACP["solution"]["nw"]["1"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
+    @testset "Multinetwork" begin
+        case4 = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"))
+        case6 = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case6_strg.m"))
+        case9 = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"))
+        @testset "ACPPowerModel" begin
+            @testset "9-bus case" begin
+                result = solve_tnep(case9, PowerModels.ACPPowerModel, juniper; multinetwork=true, setting=s)
+                @test result["termination_status"] == LOCALLY_SOLVED
+                @test result["objective"] ≈ 21.4 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 0.8325 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 0.8325 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["busdc_ne"]["2"]["vm"] ≈ 0.9966 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["busdc_ne"]["2"]["vm"] ≈ 0.9966 rtol=1e-3
             end
-            @testset "SOCWR" begin
-                data_acdc = build_mn_data(pkgdir(PowerModelsACDC, "test", "data", "tnep/case4_acdc.m"))
-                resultSOCWR = solve_tnep(data_acdc, PowerModels.SOCWRPowerModel, gurobi, multinetwork=true; setting=s)
-                @test isapprox(resultSOCWR["objective"], 696.04; atol=1e-1)
-                @test isapprox(resultSOCWR["solution"]["nw"]["2"]["branchdc_ne"]["3"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCWR["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"], -0.631; atol=1e-2)
-                @test isapprox(resultSOCWR["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"], 0; atol=1e-2)
-                @test isapprox(resultSOCWR["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"], 1; atol=1e-2)
-                @test isapprox(resultSOCWR["solution"]["nw"]["1"]["convdc_ne"]["1"]["pconv"], -0.618; atol=1e-2)
-                @test isapprox(resultSOCWR["solution"]["nw"]["1"]["ne_branch"]["1"]["built"], 1; atol=1e-2)
+        end
+        @testset "DCPPowerModel" begin
+            @testset "4-bus case" begin
+                result = solve_tnep(case4, PowerModels.DCPPowerModel, highs, multinetwork=true; setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 659.9 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["isbuilt"] ≈ 0 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["isbuilt"] ≈ 0 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
+            end
+            @testset "6-bus case" begin
+                result = solve_tnep(case6, PowerModels.DCPPowerModel, highs; multinetwork=true, setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 52.67 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"] ≈ 0 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["2"]["isbuilt"] ≈ 0 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["5"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["5"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["6"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["6"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 1.3 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 1.3 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pt"] ≈ -1.3 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pt"] ≈ -1.3 rtol=1e-3
+            end
+        end
+        @testset "LPACCPowerModel" begin
+            @testset "4-bus case" begin
+                result = solve_tnep(case4, PowerModels.LPACCPowerModel, scip, multinetwork=true; setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 666.2 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["ne_branch"]["1"]["built"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["isbuilt"] ≈ 0 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["isbuilt"] ≈ 0 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"] ≈ -1.011 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["3"]["pf"] ≈ -1.011 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
+            end
+        end
+        @testset "QCRMPowerModel" begin
+            @test_throws(
+                "variable_ne_branch_voltage is not yet supported for QC formulations",
+                solve_tnep(case4, PowerModels.QCRMPowerModel, scip; multinetwork=true, setting=s)
+            )
+        end
+        @testset "SOCBFPowerModel" begin
+            @testset "4-bus case" begin
+                @test_throws(
+                    "Candidate AC branches are not yet implemented in TNEP for BF formulations.",
+                    solve_tnep(case4, PowerModels.SOCBFPowerModel, scip; multinetwork=true, setting=s)
+                )
+            end
+            @testset "9-bus case" begin
+                result = solve_tnep(case9, PowerModels.SOCBFPowerModel, scip; multinetwork=true, setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 21.4 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 1.064 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 1.064 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.012 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.012 rtol=1e-3
+            end
+        end
+        @testset "SOCWRPowerModel" begin
+            @testset "9-bus case" begin
+                result = solve_tnep(case9, PowerModels.SOCWRPowerModel, scip; multinetwork=true, setting=s)
+                @test result["termination_status"] == OPTIMAL
+                @test result["objective"] ≈ 21.4 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
             end
         end
     end

@@ -324,8 +324,7 @@ function ref_add_im!(ref::Dict{Symbol,Any}, data::Dict{String,<:Any})
     end
 end
 
-
-"Add refernce for SSSC"
+"Add reference for SSSC"
 function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (nw, nw_ref) in ref[:it][:pm][:nw]
         if !haskey(nw_ref, :sssc)
@@ -347,7 +346,7 @@ function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     end
 end
 
-"Add refernce for DC generators"
+"Add reference for DC generators"
 function ref_add_gendc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (nw, nw_ref) in ref[:it][:pm][:nw]
         if !haskey(nw_ref, :gendc)
@@ -365,7 +364,7 @@ function ref_add_gendc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
 end
 # # THis seems to add all the bus and arc information (nodes and edges). We should thus follow the gendc as shunt injection here
 # # All the information seems to be in nw_ref[:im]
-# "Add reference for induction machines" 
+# "Add reference for induction machines"
 # function ref_add_im!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
 #     for (nw, nw_ref) in ref[:it][:pm][:nw]
 #         if !haskey(nw_ref, :im)
@@ -381,7 +380,7 @@ end
 #          for (l,i,j) in nw_ref[:im]
 #             push!(bus_im[i], (l,i,j))
 #         end
-#         nw_ref[:bus_im]= assign_bus_generators!(nw_ref[:im], bus_im, "gen_bus") 
+#         nw_ref[:bus_im]= assign_bus_generators!(nw_ref[:im], bus_im, "gen_bus")
 #     end
 # end
 

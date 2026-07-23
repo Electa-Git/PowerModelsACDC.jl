@@ -7,39 +7,62 @@ import PowerModels
 import Ipopt
 import Juniper
 import HiGHS
+import SCIP
 
 # Settings
-local_test = false # If true, additional tests are run using commercial solvers.
+logging = false # Print logs from modeling packages and solvers to the REPL.
 
-# Silence logging within PowerModelsACDC, PowerModels and InfrastructureModels.
-silence()
+if logging
+    logger_config!("info")
+    PowerModels.logger_config!("info")
+    InfrastructureModels.logger_config!("info")
+else
+    silence(all_levels=true) # Silence logging within PowerModelsACDC, PowerModels and InfrastructureModels.
+end
 
 # Solvers
-ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" => 0)
-highs = optimizer_with_attributes(HiGHS.Optimizer)
-juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => ipopt_solver, "mip_solver" => highs, "time_limit" => 7200)
-if local_test
-    import Gurobi
-    gurobi = optimizer_with_attributes(Gurobi.Optimizer)
-end
+ipopt = optimizer_with_attributes(
+    Ipopt.Optimizer,
+    "tol" => 1e-6,
+    "print_level" => logging ? 2 : 0,
+    "sb" => "yes"
+)
+highs = optimizer_with_attributes(
+    HiGHS.Optimizer,
+    "output_flag" => logging ? true : false
+)
+juniper = optimizer_with_attributes(
+    Juniper.Optimizer,
+    "nl_solver" => ipopt,
+    "mip_solver" => highs,
+    "log_levels" => logging ? [:Table, :Info, :Options] : []
+)
+scip = optimizer_with_attributes(
+    SCIP.Optimizer,
+    "display/verblevel" => logging ? 3 : 0
+)
 
 # Functions to load test data
 include("common.jl")
 
 @testset "PowerModelsACDC" begin
 
+    # Components
+    include("conv.jl")
+    include("dcgen.jl")
+    include("im.jl")
+    include("pst.jl")
+    include("sssc.jl")
+
     # Problems
     include("pf.jl")
-    include("opf.jl")
-    include("cbaopf.jl")
-    include("tnep.jl")
     include("spf.jl")
+    include("opf.jl")
+    include("rdopf.jl")
     include("uc.jl")
-    include("strgopf.jl")
+    include("tnep.jl")
 
-    # Components
-    include("im.jl")
-
-    # Exported names
+    # Other
+    include("data.jl")
     include("export.jl")
-end
+end; # The colon suppresses output when running tests in a REPL.
