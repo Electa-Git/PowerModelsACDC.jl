@@ -1,14 +1,19 @@
 name: CI
 on:
   push:
+  pull_request:
   schedule:
-    - cron:  '0 6 * * 5' # on every Friday at 6:00
+    - cron: '0 6 * * 5' # on every Friday at 6:00
 # needed to allow julia-actions/cache to delete old caches that it has created
 permissions:
   actions: write
   contents: read
 jobs:
   test:
+    # Avoid running the job twice for same-repository PRs.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != github.repository
     name: Julia ${{ matrix.version }}${{ matrix.downgrade-compat && ' downgrade-compat' || ''}} - ${{ matrix.os }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
     strategy:
