@@ -26,156 +26,156 @@ function variable_im_rotor_inductance_flow(pm::_PM.AbstractPowerModel; kwargs...
 end
 
 "variable: `p_im[j]` for `j` in `im`"
-function variable_im_active_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_active_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     pim = _PM.var(pm, nw)[:p_im_ag] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_p_im",
-    start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0)
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_p_im",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0)
     )
 
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
-            JuMP.set_lower_bound(pim[c],  im["Pacmin"])
-            JuMP.set_upper_bound(pim[c],  im["Pacmax"])
+            JuMP.set_lower_bound(pim[c], im["Pacmin"])
+            JuMP.set_upper_bound(pim[c], im["Pacmax"])
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :p_im, _PM.ids(pm, nw, :im), pim)
+    report && _PM.sol_component_value(pm, nw, :im, :p_im, _PM.ids(pm, nw, :im), pim)
 end
 
 "variable: `qconv_ac[j]` for `j` in `im`"
-function variable_im_reactive_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_reactive_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     qim = _PM.var(pm, nw)[:q_im_ag] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_q_im",
-    start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "Q_ag", 0.0)
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_q_im",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "Q_ag", 0.0)
     )
 
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
-            JuMP.set_lower_bound(qim[c],  im["Qacmin"])
-            JuMP.set_upper_bound(qim[c],  im["Qacmax"])
+            JuMP.set_lower_bound(qim[c], im["Qacmin"])
+            JuMP.set_upper_bound(qim[c], im["Qacmax"])
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :q_im, _PM.ids(pm, nw, :im), qim)
+    report && _PM.sol_component_value(pm, nw, :im, :q_im, _PM.ids(pm, nw, :im), qim)
 end
 
 "variable: `p_im_s_to[j]` for `j` in `im`" # TODO: Ask Hakan purpose of using Pacrated instead of Pacmin
-function variable_im_stator_active_power_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_stator_active_power_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 2;
     p_s_to = _PM.var(pm, nw)[:p_im_s_to] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_p_im_s_to",
-    start = -_PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0)
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_p_im_s_to",
+        start = -_PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0)
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
-            JuMP.set_lower_bound(p_s_to[c],  -im["Pacrated"] * bigM)
-            JuMP.set_upper_bound(p_s_to[c],   im["Pacrated"] * bigM)
+            JuMP.set_lower_bound(p_s_to[c], -im["Pacrated"] * bigM)
+            JuMP.set_upper_bound(p_s_to[c], im["Pacrated"] * bigM)
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :p_im_s_to, _PM.ids(pm, nw, :im), p_s_to)
+    report && _PM.sol_component_value(pm, nw, :im, :p_im_s_to, _PM.ids(pm, nw, :im), p_s_to)
 end
 
 "variable: `q_im_s_to[j]` for `j` in `im`"
-function variable_im_stator_reactive_power_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_stator_reactive_power_to(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 2;
     q_s_to = _PM.var(pm, nw)[:q_im_s_to] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_q_im_s_to",
-    start = -_PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0) # Reactive power flow is approx air-gap power
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_q_im_s_to",
+        start = -_PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0) # Reactive power flow is approx air-gap power
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
-            JuMP.set_lower_bound(q_s_to[c],  -im["Qacrated"] * bigM)
-            JuMP.set_upper_bound(q_s_to[c],   im["Qacrated"] * bigM)
+            JuMP.set_lower_bound(q_s_to[c], -im["Qacrated"] * bigM)
+            JuMP.set_upper_bound(q_s_to[c], im["Qacrated"] * bigM)
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :q_im_s_to, _PM.ids(pm, nw, :im), q_s_to)
+    report && _PM.sol_component_value(pm, nw, :im, :q_im_s_to, _PM.ids(pm, nw, :im), q_s_to)
 end
 
 "variable: `p_im_ri_f[j]` for `j` in `im`"
-function variable_im_rotor_inductance_active_power_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_rotor_inductance_active_power_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 2;
     p_ri_f = _PM.var(pm, nw)[:p_im_ri_f] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_p_im_ri_f",
-    start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0)
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_p_im_ri_f",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0)
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
-            JuMP.set_lower_bound(p_ri_f[c],  -im["Pacrated"] * bigM)
-            JuMP.set_upper_bound(p_ri_f[c],   im["Pacrated"] * bigM)
+            JuMP.set_lower_bound(p_ri_f[c], -im["Pacrated"] * bigM)
+            JuMP.set_upper_bound(p_ri_f[c], im["Pacrated"] * bigM)
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :p_im_ri_f, _PM.ids(pm, nw, :im), p_ri_f)
+    report && _PM.sol_component_value(pm, nw, :im, :p_im_ri_f, _PM.ids(pm, nw, :im), p_ri_f)
 end
 
 "variable: `q_im_ri_f[j]` for `j` in `im`"
-function variable_im_rotor_inductance_reactive_power_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_rotor_inductance_reactive_power_from(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 2;
     q_ri_f = _PM.var(pm, nw)[:q_im_ri_f] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_q_im_ri_f",
-    start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0) # Reactive power flow is approx air-gap power (Q_ag = 0.0)
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_q_im_ri_f",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0) # Reactive power flow is approx air-gap power (Q_ag = 0.0)
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
-            JuMP.set_lower_bound(q_ri_f[c],  -im["Qacrated"] * bigM)
-            JuMP.set_upper_bound(q_ri_f[c],   im["Qacrated"] * bigM)
+            JuMP.set_lower_bound(q_ri_f[c], -im["Qacrated"] * bigM)
+            JuMP.set_upper_bound(q_ri_f[c], im["Qacrated"] * bigM)
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :q_im_ri_f, _PM.ids(pm, nw, :im), q_ri_f)
+    report && _PM.sol_component_value(pm, nw, :im, :q_im_ri_f, _PM.ids(pm, nw, :im), q_ri_f)
 end
 
 "variable: `p_im_tf_fr[j]` for `j` in `im`"
-function variable_im_to_grid_active_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_to_grid_active_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 2;
     p_s_fr = _PM.var(pm, nw)[:p_im_s_fr] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_p_im_s_fr",
-    start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0)
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_p_im_s_fr",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0)
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
-            JuMP.set_lower_bound(p_s_fr[c],  -im["Pacrated"] * bigM)
-            JuMP.set_upper_bound(p_s_fr[c],   im["Pacrated"] * bigM)
+            JuMP.set_lower_bound(p_s_fr[c], -im["Pacrated"] * bigM)
+            JuMP.set_upper_bound(p_s_fr[c], im["Pacrated"] * bigM)
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :pg, _PM.ids(pm, nw, :im), p_s_fr)
+    report && _PM.sol_component_value(pm, nw, :im, :pg, _PM.ids(pm, nw, :im), p_s_fr)
 end
 
 "variable: `q_im_s_fr[j]` for `j` in `im`"
-function variable_im_to_grid_reactive_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_to_grid_reactive_power(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 2;
     q_s_fr = _PM.var(pm, nw)[:q_im_s_fr] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_q_im_s_fr",
-    start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0) # Reactive power flow is approx air-gap power (Q_ag = 0.0)
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_q_im_s_fr",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :im, i), "P_ag", 1.0) # Reactive power flow is approx air-gap power (Q_ag = 0.0)
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
-            JuMP.set_lower_bound(q_s_fr[c],  -im["Qacrated"] * bigM)
-            JuMP.set_upper_bound(q_s_fr[c],   im["Qacrated"] * bigM)
+            JuMP.set_lower_bound(q_s_fr[c], -im["Qacrated"] * bigM)
+            JuMP.set_upper_bound(q_s_fr[c], im["Qacrated"] * bigM)
         end
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :qg, _PM.ids(pm, nw, :im), q_s_fr)
+    report && _PM.sol_component_value(pm, nw, :im, :qg, _PM.ids(pm, nw, :im), q_s_fr)
 end
 
 "variable: `pconv_dc[j]` for `j` in `im`"
-function variable_im_slip(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_slip(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
 
     slip = _PM.var(pm, nw)[:slip_im] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_slip_im",
-    start = 0.0 # Start with slip to zero
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_slip_im",
+        start = 0.0 # Start with slip to zero
     )
     # Always bound slip bcs there is no application where you would want unstable equil point
     for (c, im) in _PM.ref(pm, nw, :im)
         s_kip = im["r_r"] / (im["x_sl"]) + im["x_rl"]
         JuMP.set_lower_bound(slip[c], -s_kip) # Generator
-        JuMP.set_upper_bound(slip[c],  s_kip) # Motor
+        JuMP.set_upper_bound(slip[c], s_kip) # Motor
     end
 
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :slip, _PM.ids(pm, nw, :im), slip)
+    report && _PM.sol_component_value(pm, nw, :im, :slip, _PM.ids(pm, nw, :im), slip)
 end
 
 function variable_im_magnetisation_voltage(pm::_PM.AbstractPowerModel; kwargs...)
@@ -184,11 +184,11 @@ function variable_im_magnetisation_voltage(pm::_PM.AbstractPowerModel; kwargs...
 end
 
 "variable: `vm_m[j]` for `j` in `im`"
-function variable_im_magnetisation_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_magnetisation_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 1.2; # only internal converter voltage is strictly regulated
     vm_m = _PM.var(pm, nw)[:vm_m] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vm_m",
-    start = 1.0 #_PM.ref(pm, nw, :im, i, ""), no voltage control or information IM
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vm_m",
+        start = 1.0 #_PM.ref(pm, nw, :im, i, ""), no voltage control or information IM
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
@@ -196,23 +196,23 @@ function variable_im_magnetisation_voltage_magnitude(pm::_PM.AbstractPowerModel;
             JuMP.set_upper_bound(vm_m[c], im["Vmmax"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :vm_m, _PM.ids(pm, nw, :im), vm_m)
+    report && _PM.sol_component_value(pm, nw, :im, :vm_m, _PM.ids(pm, nw, :im), vm_m)
 end
 
 "variable: `va_m[j]` for `j` in `im`"
-function variable_im_magnetisation_voltage_angle(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_magnetisation_voltage_angle(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 2*pi; #
     va_m = _PM.var(pm, nw)[:va_m] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_va_m",
-    start = 0
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_va_m",
+        start = 0
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
             JuMP.set_lower_bound(va_m[c], -bigM)
-            JuMP.set_upper_bound(va_m[c],  bigM)
+            JuMP.set_upper_bound(va_m[c], bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :va_m, _PM.ids(pm, nw, :im), va_m)
+    report && _PM.sol_component_value(pm, nw, :im, :va_m, _PM.ids(pm, nw, :im), va_m)
 end
 
 function variable_im_magnetisation_voltage(pm::_PM.AbstractACRModel; kwargs...)
@@ -221,35 +221,35 @@ function variable_im_magnetisation_voltage(pm::_PM.AbstractACRModel; kwargs...)
 end
 
 "real part of the voltage variable `vr_m[j]` for `j` in `im`"
-function variable_im_magnetisation_voltage_real(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_magnetisation_voltage_real(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 1.2; # only internal converter voltage is strictly regulated
     vr_m = _PM.var(pm, nw)[:vr_m] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vr_m",
-    start = 1.0  #_PM.ref(pm, nw, :im, i, "Vtar")
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vr_m",
+        start = 1.0  #_PM.ref(pm, nw, :im, i, "Vtar")
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
-            JuMP.set_lower_bound(vr_m[c],  -im["Vmmax"] * bigM)
-            JuMP.set_upper_bound(vr_m[c],  im["Vmmax"] * bigM)
+            JuMP.set_lower_bound(vr_m[c], -im["Vmmax"] * bigM)
+            JuMP.set_upper_bound(vr_m[c], im["Vmmax"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :vr_m, _PM.ids(pm, nw, :im), vr_m)
+    report && _PM.sol_component_value(pm, nw, :im, :vr_m, _PM.ids(pm, nw, :im), vr_m)
 end
 
 "imaginary part of the voltage variable `vi_m[j]` for `j` in `im`"
-function variable_im_magnetisation_voltage_imaginary(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_magnetisation_voltage_imaginary(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 1.2;
     vi_m = _PM.var(pm, nw)[:vi_m] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vi_m",
-    start = 0.0
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vi_m",
+        start = 0.0
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
             JuMP.set_lower_bound(vi_m[c], -im["Vmmax"] * bigM)
-            JuMP.set_upper_bound(vi_m[c],  im["Vmmax"] * bigM)
+            JuMP.set_upper_bound(vi_m[c], im["Vmmax"] * bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :vi_m, _PM.ids(pm, nw, :im), vi_m)
+    report && _PM.sol_component_value(pm, nw, :im, :vi_m, _PM.ids(pm, nw, :im), vi_m)
 end
 
 function variable_im_airgap_voltage(pm::_PM.AbstractPowerModel; kwargs...)
@@ -258,10 +258,10 @@ function variable_im_airgap_voltage(pm::_PM.AbstractPowerModel; kwargs...)
 end
 
 "variable: `vm_ag[j]` for `j` in `im`"
-function variable_im_airgap_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_airgap_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     vm_ag = _PM.var(pm, nw)[:vm_ag] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vm_ag",
-    start = 1.0 # _PM.ref(pm, nw, :im, i, "Vtar")
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vm_ag",
+        start = 1.0 # _PM.ref(pm, nw, :im, i, "Vtar")
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
@@ -269,23 +269,23 @@ function variable_im_airgap_voltage_magnitude(pm::_PM.AbstractPowerModel; nw::In
             JuMP.set_upper_bound(vm_ag[c], im["Vmmax"])
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :vm_ag, _PM.ids(pm, nw, :im), vm_ag)
+    report && _PM.sol_component_value(pm, nw, :im, :vm_ag, _PM.ids(pm, nw, :im), vm_ag)
 end
 
 "variable: `va_ag[j]` for `j` in `im`"
-function variable_im_airgap_voltage_angle(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_airgap_voltage_angle(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     bigM = 2*pi; #
     va_ag = _PM.var(pm, nw)[:va_ag] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_va_ag",
-    start = 0
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_va_ag",
+        start = 0
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
             JuMP.set_lower_bound(va_ag[c], -bigM)
-            JuMP.set_upper_bound(va_ag[c],  bigM)
+            JuMP.set_upper_bound(va_ag[c], bigM)
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :va_ag, _PM.ids(pm, nw, :im), va_ag)
+    report && _PM.sol_component_value(pm, nw, :im, :va_ag, _PM.ids(pm, nw, :im), va_ag)
 end
 
 function variable_im_airgap_voltage(pm::_PM.AbstractACRModel; kwargs...)
@@ -294,33 +294,33 @@ function variable_im_airgap_voltage(pm::_PM.AbstractACRModel; kwargs...)
 end
 
 "real part of the voltage variable `vr_ag[j]` for `j` in `im`"
-function variable_im_airgap_voltage_real(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_airgap_voltage_real(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     vr_ag = _PM.var(pm, nw)[:vr_ag] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vr_ag",
-    start = 1.0 # _PM.ref(pm, nw, :im, i, "Vtar")
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vr_ag",
+        start = 1.0 # _PM.ref(pm, nw, :im, i, "Vtar")
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
             JuMP.set_lower_bound(vr_ag[c], -im["Vmmax"])
-            JuMP.set_upper_bound(vr_ag[c],  im["Vmmax"])
+            JuMP.set_upper_bound(vr_ag[c], im["Vmmax"])
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :vr_ag, _PM.ids(pm, nw, :im), vr_ag)
+    report && _PM.sol_component_value(pm, nw, :im, :vr_ag, _PM.ids(pm, nw, :im), vr_ag)
 end
 
 "imaginary part of the voltage variable `vi_ag[j]` for `j` in `im`"
-function variable_im_airgap_voltage_imaginary(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+function variable_im_airgap_voltage_imaginary(pm::_PM.AbstractACRModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
     vi_ag = _PM.var(pm, nw)[:vi_ag] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vi_ag",
-    start = 0.0
+        [i in _PM.ids(pm, nw, :im)], base_name="$(nw)_vi_ag",
+        start = 0.0
     )
     if bounded
         for (c, im) in _PM.ref(pm, nw, :im)
             JuMP.set_lower_bound(vi_ag[c], -im["Vmmax"])
-            JuMP.set_upper_bound(vi_ag[c],  im["Vmmax"])
+            JuMP.set_upper_bound(vi_ag[c], im["Vmmax"])
         end
     end
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :im, :vi_ag, _PM.ids(pm, nw, :im), vi_ag)
+    report && _PM.sol_component_value(pm, nw, :im, :vi_ag, _PM.ids(pm, nw, :im), vi_ag)
 end
 
 ############## Constraint template for IMs ###################################################
@@ -351,7 +351,7 @@ function constraint_im_slip(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_i
     C = im["torque"]["C"]
     m = im["torque"]["m"]
 
-    constraint_im_slip(pm, nw, i, T_0, A, B, C, m, im["r_r"] )
+    constraint_im_slip(pm, nw, i, T_0, A, B, C, m, im["r_r"])
 end
 
 ########## ACP formulation ####################################################################
@@ -410,10 +410,10 @@ end
 
 "constraints for a voltage magnitude transformer + series impedance"
 function ac_power_flow_constraints(model, g, b, gsh_fr, vm_fr, vm_to, va_fr, va_to, p_fr, p_to, q_fr, q_to)
-    c1 = JuMP.@constraint(model, p_fr ==  g*vm_fr^2 + -g*vm_fr*vm_to * cos(va_fr-va_to) + -b*vm_fr*vm_to*sin(va_fr-va_to))
-    c2 = JuMP.@constraint(model, q_fr == -b*vm_fr^2 +  b*vm_fr*vm_to * cos(va_fr-va_to) + -g*vm_fr*vm_to*sin(va_fr-va_to))
-    c3 = JuMP.@constraint(model, p_to ==  g*vm_to^2 + -g*vm_to*vm_fr  *    cos(va_to - va_fr)     + -b*vm_to*vm_fr    *sin(va_to - va_fr))
-    c4 = JuMP.@constraint(model, q_to == -b*vm_to^2 +  b*vm_to*vm_fr  *    cos(va_to - va_fr)     + -g*vm_to*vm_fr    *sin(va_to - va_fr))
+    c1 = JuMP.@constraint(model, p_fr == g * vm_fr^2 + -g * vm_fr * vm_to * cos(va_fr-va_to) + -b * vm_fr * vm_to * sin(va_fr-va_to))
+    c2 = JuMP.@constraint(model, q_fr == -b * vm_fr^2 + b * vm_fr * vm_to * cos(va_fr-va_to) + -g * vm_fr * vm_to * sin(va_fr-va_to))
+    c3 = JuMP.@constraint(model, p_to == g * vm_to^2 + -g * vm_to * vm_fr * cos(va_to-va_fr) + -b * vm_to * vm_fr * sin(va_to-va_fr))
+    c4 = JuMP.@constraint(model, q_to == -b * vm_to^2 + b * vm_to * vm_fr * cos(va_to-va_fr) + -g * vm_to * vm_fr * sin(va_to-va_fr))
     return c1, c2, c3, c4
 end
 
@@ -453,12 +453,12 @@ q_{im,ri,f}
 ```
 """
 function constraint_im_rotor_inductance(pm::_PM.AbstractACPModel, n::Int, i::Int, xc)
-    pconv_ac = _PM.var(pm, n,  :p_im_ag, i)
-    qconv_ac = _PM.var(pm, n,  :q_im_ag, i)
+    pconv_ac = _PM.var(pm, n, :p_im_ag, i)
+    qconv_ac = _PM.var(pm, n, :q_im_ag, i)
     ppr_to = - pconv_ac
     qpr_to = - qconv_ac
-    ppr_fr = _PM.var(pm, n,  :p_im_ri_f, i)
-    qpr_fr = _PM.var(pm, n,  :q_im_ri_f, i)
+    ppr_fr = _PM.var(pm, n, :p_im_ri_f, i)
+    qpr_fr = _PM.var(pm, n, :q_im_ri_f, i)
 
     vmf = _PM.var(pm, n, :vm_m, i)
     vaf = _PM.var(pm, n, :va_m, i)
@@ -470,11 +470,10 @@ function constraint_im_rotor_inductance(pm::_PM.AbstractACPModel, n::Int, i::Int
     yc = 1/(zc)
     gc = real(yc)
     bc = imag(yc)
-    JuMP.@constraint(pm.model, - pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf))
-    JuMP.@constraint(pm.model, - qconv_ac ==-bc*vmc^2 +  bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf))
-    JuMP.@constraint(pm.model, ppr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac))
-
-    JuMP.@constraint(pm.model, qpr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac))
+    JuMP.@constraint(pm.model, -pconv_ac == gc*vmc^2 + -gc*vmc*vmf*cos(vac-vaf) + -bc*vmc*vmf*sin(vac-vaf))
+    JuMP.@constraint(pm.model, -qconv_ac == -bc*vmc^2 + bc*vmc*vmf*cos(vac-vaf) + -gc*vmc*vmf*sin(vac-vaf))
+    JuMP.@constraint(pm.model, ppr_fr == gc*vmf^2 + -gc*vmf*vmc*cos(vaf-vac) + -bc*vmf*vmc*sin(vaf-vac))
+    JuMP.@constraint(pm.model, qpr_fr == -bc*vmf^2 + bc*vmf*vmc*cos(vaf-vac) + -gc*vmf*vmc*sin(vaf-vac))
 end
 
 @doc raw"""
@@ -497,8 +496,8 @@ function constraint_im_magnetisation(pm::_PM.AbstractACPModel, n::Int, i::Int, x
     vmf = _PM.var(pm, n, :vm_m, i)
 
     bv = 1/(x_m)
-    JuMP.@constraint(pm.model,   ppr_fr + ptf_to == 0 )
-    JuMP.@constraint(pm.model, qpr_fr + qtf_to +  (bv) *(vmf^2) == 0)
+    JuMP.@constraint(pm.model, ppr_fr + ptf_to == 0)
+    JuMP.@constraint(pm.model, qpr_fr + qtf_to + (bv) * (vmf^2) == 0)
 end
 
 @doc raw"""
@@ -520,13 +519,13 @@ p_{im,ag}
 q_{im,ag}=0
 ```
 """
-function constraint_im_slip(pm::_PM.AbstractACPModel, n::Int, i::Int,T_0, A, B, C, m, r_r)
+function constraint_im_slip(pm::_PM.AbstractACPModel, n::Int, i::Int, T_0, A, B, C, m, r_r)
     p = _PM.var(pm, n, :p_im_ag, i)
     q = _PM.var(pm, n, :q_im_ag, i)
     slip = _PM.var(pm, n, :slip_im, i)
     vm_ag = _PM.var(pm, n, :vm_ag, i)
 
-    JuMP.@constraint(pm.model,   T_0*(A*(1-slip)^m+B*(1-slip)+C) == (vm_ag^2)*slip/r_r)
-    JuMP.@constraint(pm.model,   p == (vm_ag^2)*slip/r_r)
-    JuMP.@constraint(pm.model,   q == 0.0)
+    JuMP.@constraint(pm.model, T_0*(A*(1-slip)^m+B*(1-slip)+C) == (vm_ag^2)*slip/r_r)
+    JuMP.@constraint(pm.model, p == (vm_ag^2)*slip/r_r)
+    JuMP.@constraint(pm.model, q == 0.0)
 end
