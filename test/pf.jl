@@ -5,6 +5,30 @@
         result = solve_acdcpf(case5, PowerModels.DCPPowerModel, highs; setting=s)
         @test result["termination_status"] == OPTIMAL
     end
+    @testset "Bus type and gen setpoints" begin
+        data = deepcopy(case5)
+        gen3 = data["gen"]["3"] = deepcopy(data["gen"]["2"])
+        gen3["index"] = 3
+        gen3["gen_bus"] = 3
+        gen3["qg"] = 0.2
+        result = solve_acdcpf(data, PowerModels.ACPPowerModel, ipopt)
+        @test result["termination_status"] == LOCALLY_SOLVED
+        # Bus 1 and gen 1: reference. Fixed variables: va, vm.
+        @test result["solution"]["bus"]["1"]["va"] ≈ 0.0 atol=1e-3 # Fixed variable.
+        @test result["solution"]["bus"]["1"]["vm"] ≈ 1.06 rtol=1e-3 # Fixed variable.
+        @test result["solution"]["gen"]["1"]["pg"] ≈ 0.9351 rtol=1e-3
+        @test result["solution"]["gen"]["1"]["qg"] ≈ 0.8877 rtol=1e-3
+        # Bus 2 and gen 2: PV. Fixed variables: vm, pg.
+        @test result["solution"]["bus"]["2"]["va"] ≈ -0.02597 rtol=1e-3
+        @test result["solution"]["bus"]["2"]["vm"] ≈ 1.0 rtol=1e-3 # Fixed variable.
+        @test result["solution"]["gen"]["2"]["pg"] ≈ 0.4 rtol=1e-3 # Fixed variable.
+        @test result["solution"]["gen"]["2"]["qg"] ≈ -0.5454 rtol=1e-3
+        # Bus 3 and gen 3: PQ. Fixed variables: pg, pq.
+        @test result["solution"]["bus"]["3"]["va"] ≈ -0.03562 rtol=1e-3
+        @test result["solution"]["bus"]["3"]["vm"] ≈ 1.016 rtol=1e-3
+        @test result["solution"]["gen"]["3"]["pg"] ≈ 0.4 rtol=1e-3 # Fixed variable.
+        @test result["solution"]["gen"]["3"]["qg"] ≈ 0.2 rtol=1e-3 # Fixed variable.
+    end
     @testset "ACPPowerModel" begin
         @testset "5-bus AC/DC case" begin
             result = solve_acdcpf(case5, PowerModels.ACPPowerModel, ipopt; setting=s)
