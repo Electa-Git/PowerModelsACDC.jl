@@ -21,7 +21,7 @@ and unit-commitment constraints. Use `pm.setting` to control optional features s
 reserve handling (`"uc_reserves"`) and cross-border flow fixing (`"fix_cross_border_flows"`).
 """
 function solve_uc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_uc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!, ref_add_gendc!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_uc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
 """
@@ -62,6 +62,7 @@ function build_uc(pm::_PM.AbstractPowerModel)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
+        variable_im(pm;nw=n)
         variable_storage_on_off(pm; nw = n)
         constraint_voltage_dc(pm; nw = n)
     end

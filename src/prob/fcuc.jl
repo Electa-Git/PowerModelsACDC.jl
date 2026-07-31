@@ -19,7 +19,7 @@ a multi-network FCUC formulation with per-hour UC submodels, contingency constra
 global objective that includes frequency-related cost terms.
 """
 function solve_fcuc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_fcuc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!, ref_add_gendc!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_fcuc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
 """
@@ -96,6 +96,7 @@ function uc_model!(pm, n; cont = ["gen", "conv"])
     variable_flexible_demand(pm; nw = n)
     variable_pst(pm; nw = n)
     variable_sssc(pm; nw = n)
+    variable_im(pm;nw=n)
     variable_storage_on_off(pm; nw = n)
     variable_contingencies(pm, nw = n)
 
