@@ -18,7 +18,7 @@ phase-shifting transformers, SSSC, flexible loads, and DC generators.
 """
 function solve_acdcopf(file::String, model_type::Type, solver; kwargs...)
     data = parse_file(file)
-    return solve_acdcopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+    return solve_acdcopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 """
     solve_acdcopf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
@@ -39,9 +39,9 @@ Chooses between single-network and multinetwork OPF build functions based on the
 """
 function solve_acdcopf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
     if haskey(data, "multinetwork") && data["multinetwork"] == true
-        return _PM.solve_model(data, model_type, solver, mp_build_acdcopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, mp_build_acdcopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
     else
-        return _PM.solve_model(data, model_type, solver, build_acdcopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+        return _PM.solve_model(data, model_type, solver, build_acdcopf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
     end
 end
 """
@@ -69,6 +69,7 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
     variable_flexible_demand(pm)
     variable_pst(pm)
     variable_sssc(pm)
+    variable_im(pm)
 
 
     objective_min_operational_cost(pm)
@@ -110,6 +111,13 @@ function build_acdcopf(pm::_PM.AbstractPowerModel)
         constraint_ohms_y_from_sssc(pm, i)
         constraint_ohms_y_to_sssc(pm, i)
         constraint_limits_sssc(pm, i)
+    end
+
+    for i in _PM.ids(pm, :im)
+        constraint_im_stator(pm, i)
+        constraint_im_rotor_inductance(pm, i)
+        constraint_im_magnetisation(pm, i)
+        constraint_im_slip(pm, i)
     end
 
     for i in _PM.ids(pm, :busdc)
@@ -166,6 +174,7 @@ function mp_build_acdcopf(pm::_PM.AbstractPowerModel)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
+        variable_im(pm; nw = n)
     end
 
 
