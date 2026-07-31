@@ -79,14 +79,14 @@ Creates variables and constraints appropriate for non-optimization power flow
   are created depending on converter `type_dc` and `type_ac`.
 """
 function build_acdcpf(pm::_PM.AbstractPowerModel)
-    _PM.variable_bus_voltage(pm, bounded = false)
-    _PM.variable_gen_power(pm, bounded = false)
-    _PM.variable_branch_power(pm, bounded = false)
-    _PM.variable_storage_power(pm, bounded = false)
+    _PM.variable_bus_voltage(pm, bounded=false)
+    _PM.variable_gen_power(pm, bounded=false)
+    _PM.variable_branch_power(pm, bounded=false)
+    _PM.variable_storage_power(pm, bounded=false)
 
     # dirty, should be improved in the future TODO
     if typeof(pm) <: _PM.SOCBFPowerModel
-        _PM.variable_branch_current(pm, bounded = false)
+        _PM.variable_branch_current(pm, bounded=false)
     end
 
     variable_active_dcbranch_flow(pm, bounded = false)
@@ -104,22 +104,21 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     constraint_voltage_dc(pm)
 
 
-    for (i,bus) in _PM.ref(pm, :ref_buses)
+    for (i, bus) in _PM.ref(pm, :ref_buses)
         @assert bus["bus_type"] == 3
         _PM.constraint_theta_ref(pm, i)
         _PM.constraint_voltage_magnitude_setpoint(pm, i)
     end
 
-    for (i, bus) in _PM.ref(pm, :bus)# _PM.ids(pm, :bus)
+    for (i, bus) in _PM.ref(pm, :bus)
         constraint_power_balance_ac(pm, i)
-        # PV Bus Constraints
-        if length(_PM.ref(pm, :bus_gens, i)) > 0 && !(i in _PM.ids(pm,:ref_buses))
+        if length(_PM.ref(pm, :bus_gens, i)) > 0 && !(i in _PM.ids(pm, :ref_buses))
             for j in _PM.ref(pm, :bus_gens, i)
                 _PM.constraint_gen_setpoint_active(pm, j)
-                if  bus["bus_type"] == 2
+                if bus["bus_type"] == 2 # PV
                     _PM.constraint_voltage_magnitude_setpoint(pm, i)
-                elseif bus["bus_type"] == 1
-                    _PM.constraint_gen_setpoint_active(pm, j)
+                elseif bus["bus_type"] == 1 # PQ
+                    _PM.constraint_gen_setpoint_reactive(pm, j)
                 end
             end
         end
@@ -205,4 +204,3 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         constraint_converter_current(pm, c)
     end
 end
-# ...existing code...
