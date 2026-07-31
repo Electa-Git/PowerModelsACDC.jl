@@ -41,7 +41,7 @@ jobs:
         with:
           version: ${{ matrix.version }}
       - uses: julia-actions/cache@v3
-      - uses: julia-actions/julia-downgrade-compat@v2
+      - uses: julia-actions/julia-downgrade-compat@v2.6.2
         if: ${{ matrix.downgrade-compat }}
         with:
           mode: 'alldeps'
