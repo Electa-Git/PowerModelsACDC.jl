@@ -46,7 +46,7 @@ mpc.dcpol=2;
 %% bus data
 %column_names%   busdc_i grid    Pdc     Vdc     basekVdc    Vdcmax  Vdcmin  Cdc
 mpc.busdc = [
-    1              1       0       1       525         1.0     1.0     0;
+    1              1       0       1       525         1.1     0.9     0;
     2              1       0       1       525         1.1     0.9     0;
     3              1       0       1       525         1.1     0.9     0;
 ];
@@ -54,7 +54,7 @@ mpc.busdc = [
 %% converters
 %column_names%   busdc_i busac_i type_dc type_ac P_g   Q_g islcc  Vtar    rtf xtf  transformer tm   bf filter    rc      xc  reactor   basekVac    Vmmax   Vmmin   Imax    status   LossA LossB  LossCrec LossCinv  droop      Pdcset    Vdcset  dVdcset Pacmax Pacmin Qacmax Qacmin
 mpc.convdc = [
-    1       1   1       1       0       0     0 1     0.01  0.01 0 1 0.01 0 0.01   0.01 0  525         1.0     1.0     50     1       0.0 0.0  0.0    0.0      0.0    0.0   1.00   0 4000 -4000 1000 -1000;
+    1       1   1       1       0       0     0 1     0.01  0.01 0 1 0.01 0 0.01   0.01 0  525         1.1     0.9     50     1       0.0 0.0  0.0    0.0      0.0    0.0   1.00   0 4000 -4000 1000 -1000;
     2       2   2       1       0       0     0 1     0.01  0.01 0 1 0.01 0 0.01   0.01 0  525         1.1     0.9     50     1       0.0 0.0  0.0    0.0      0.0    0.0   1.00   0 4000 -4000 1000 -1000;
     3       3   2       1       0       0     0 1     0.01  0.01 0 1 0.01 0 0.01   0.01 0  525         1.1     0.9     50     1       0.0 0.0  0.0    0.0      0.0    0.0   1.00   0 4000 -4000 1000 -1000;
 ];

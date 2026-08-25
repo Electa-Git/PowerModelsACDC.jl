@@ -133,8 +133,10 @@ Build the per-hour Unit Commitment (UC) submodel for network/time-index `n`.
             storage_constraints(pm, n; uc = true)
         end
 
-        for i in _PM.ids(pm, n, :zones)
-        constraint_rocof_split(pm, i; nw = n)
+        for cid in _PM.ref(pm, n, :cont_ids)
+            for i in _PM.ids(pm, n, :zones)
+                constraint_rocof_split(pm, i, cid; nw = n)
+            end
         end
     end
     objective_min_cost_uc(pm)
