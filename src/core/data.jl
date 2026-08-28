@@ -1,29 +1,58 @@
+"""
+    parse_file(file::String; <keyword arguments>)::Dict{String,Any}
+
+Parse a Matpower (`.m`) `file` into a PowerModelsACDC data dictionary.
+
+Combines [`PowerModels.parse_file`](@extref) and [`process_additional_data!`](@ref).
+Keyword arguments, if any, are forwarded to [`process_additional_data!`](@ref).
+"""
+function parse_file(file::String; kwargs...)
+    data = _PM.parse_file(file)
+    process_additional_data!(data; kwargs...)
+    return data
+end
+
 function _get_pu_bases(MVAbase, kVbase)
     eurobase = 1 #
     hourbase = 1 #
 
     Sbase = MVAbase * 1e6
-    Vbase = kVbase  * 1e3
+    Vbase = kVbase * 1e3
     #Zbase = (Vbase)^2 / (Sbase) # TODO
     kAbase = MVAbase / (sqrt(3) * kVbase)
     Zbase = 1/(kAbase^2 / MVAbase)
-    Ibase = (Sbase)   / (Vbase)
+    Ibase = (Sbase) / (Vbase)
     timebase = hourbase*3600
     Ebase = Sbase * timebase
 
-    bases = Dict{String, Any}(
-    "Z" => Zbase,         # Impedance (Ω)
-    "I" => Ibase,         # Current (A)
-    "€" => eurobase,      # Currency (€)
-    "t" => timebase,      # Time (s)
-    "S" => Sbase,         # Power (W)
-    "V" => Vbase,         # Voltage (V)
-    "E" => Ebase          # Energy (J)
+    bases = Dict{String,Any}(
+        "Z" => Zbase,         # Impedance (Ω)
+        "I" => Ibase,         # Current (A)
+        "€" => eurobase,      # Currency (€)
+        "t" => timebase,      # Time (s)
+        "S" => Sbase,         # Power (W)
+        "V" => Vbase,         # Voltage (V)
+        "E" => Ebase          # Energy (J)
     )
     return bases
 end
 
-function process_additional_data!(data; tnep = false)
+"""
+    process_additional_data!(data::Dict{String,Any}; tnep::Bool=false)
+
+Process PowerModelsACDC-specific data fields in-place.
+
+Per-unit conversion, consistency checks, and other operations are applied to
+PowerModelsACDC-specific data fields.
+
+# Arguments
+- `data::Dict{String,Any}`: a PowerModelsACDC data dictionary.
+- `tnep::Bool=false`: if true, an empty `ne_branch` dictionary is created if it does not
+  already exist.
+
+See also: [`parse_file`](@ref).
+"""
+function process_additional_data!(data::Dict{String,Any}; tnep::Bool=false)
     _to_pu!(data)
     if haskey(data, "pst")
         _process_pst_data!(data)
@@ -37,8 +66,9 @@ function process_additional_data!(data; tnep = false)
     if haskey(data, "gendc")
         _process_gendc_data!(data)
     end
-    _fix_data!(data; tnep = tnep)
+    _fix_data!(data; tnep=tnep)
     _convert_matpowerdcline_to_branchdc!(data)
+    return nothing
 end
 
 function _process_pst_data!(data)
@@ -321,7 +351,7 @@ function _to_pu_single_network!(data)
         end
     end
     if haskey(data, "busdc_ne")
-        new_busdc_ne = Dict{String, Any}()
+        new_busdc_ne = Dict{String,Any}()
         for (i, busdc) in data["busdc_ne"]
             _set_busdc_pu(busdc, MVAbase)
             new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
@@ -385,7 +415,7 @@ function _to_pu_multinetwork!(data)
         #     end
         # end
         if haskey(data["nw"][n], "busdc_ne")
-            new_busdc_ne = Dict{String, Any}()
+            new_busdc_ne = Dict{String,Any}()
             for (i, busdc) in data["nw"][n]["busdc_ne"]
                 _set_busdc_pu(busdc, MVAbase)
                 new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from exisiting dc bus numbers
@@ -412,13 +442,13 @@ function _convert_matpowerdcline_to_branchdc_single_network!(data)
     MVAbase = data["baseMVA"]
     if haskey(data, "dcline") && haskey(data["dcline"], "1")
         if !haskey(data, "convdc")
-            data["convdc"] = Dict{String, Any}()
+            data["convdc"] = Dict{String,Any}()
         end
         if !haskey(data, "branchdc")
-            data["branchdc"] = Dict{String, Any}()
+            data["branchdc"] = Dict{String,Any}()
         end
         if !haskey(data, "busdc")
-            data["busdc"] = Dict{String, Any}()
+            data["busdc"] = Dict{String,Any}()
         end
         conv_i = length(data["convdc"])
         branch_i = length(data["branchdc"])
@@ -430,7 +460,7 @@ function _convert_matpowerdcline_to_branchdc_single_network!(data)
             data["busdc"]["$bus_i"] = _get_busdc(bus_i)
 
             prev_bus = bus_i - 1
-            if haskey(data["busdc"],["$prev_bus"])
+            if haskey(data["busdc"], ["$prev_bus"])
                 data["busdc"]["$bus_i"]["basekVdc"] = data["busdc"]["$prev_bus"]["basekVdc"]
             else
                 data["busdc"]["$bus_i"]["basekVdc"] = 100 # arbitrary choice
@@ -440,7 +470,7 @@ function _convert_matpowerdcline_to_branchdc_single_network!(data)
             bus_i = bus_i + 1
             data["busdc"]["$bus_i"] = _get_busdc(bus_i)
             prev_bus = bus_i - 1
-            if haskey(data["busdc"],["$prev_bus"])
+            if haskey(data["busdc"], ["$prev_bus"])
                 data["busdc"]["$bus_i"]["basekVdc"] = data["busdc"]["$prev_bus"]["basekVdc"]
             else
                 data["busdc"]["$bus_i"]["basekVdc"] = 100 # arbitrary choice
@@ -463,13 +493,13 @@ function _convert_matpowerdcline_to_branchdc_multinetwork!(data)
         MVAbase = network["baseMVA"]
         if haskey(data["nw"][n], "dcline") && haskey(data["nw"][n]["dcline"], "1")
             if !haskey(data["nw"][n], "convdc")
-                data["nw"][n]["convdc"] = Dict{String, Any}()
+                data["nw"][n]["convdc"] = Dict{String,Any}()
             end
             if !haskey(data["nw"][n], "branchdc")
-                data["nw"][n]["branchdc"] = Dict{String, Any}()
+                data["nw"][n]["branchdc"] = Dict{String,Any}()
             end
             if !haskey(data["nw"][n], "busdc")
-                data["nw"][n]["busdc"] = Dict{String, Any}()
+                data["nw"][n]["busdc"] = Dict{String,Any}()
             end
             conv_i = length(data["nw"][n]["convdc"])
             branch_i = length(data["nw"][n]["branchdc"])
@@ -481,7 +511,7 @@ function _convert_matpowerdcline_to_branchdc_multinetwork!(data)
                 data["nw"][n]["busdc"]["$bus_i"] = _get_busdc(bus_i)
 
                 prev_bus = bus_i - 1
-                if haskey(data["nw"][n]["busdc"],["$prev_bus"])
+                if haskey(data["nw"][n]["busdc"], ["$prev_bus"])
                     data["nw"][n]["busdc"]["$bus_i"]["basekVdc"] = data["nw"][n]["busdc"]["$prev_bus"]["basekVdc"]
                 else
                     data["nw"][n]["busdc"]["$bus_i"]["basekVdc"] = 100 # arbitrary choice
@@ -491,7 +521,7 @@ function _convert_matpowerdcline_to_branchdc_multinetwork!(data)
                 bus_i = bus_i + 1
                 data["nw"][n]["busdc"]["$bus_i"] = _get_busdc(bus_i)
                 prev_bus = bus_i - 1
-                if haskey(data["nw"][n]["busdc"],["$prev_bus"])
+                if haskey(data["nw"][n]["busdc"], ["$prev_bus"])
                     data["nw"][n]["busdc"]["$bus_i"]["basekVdc"] = data["nw"][n]["busdc"]["$prev_bus"]["basekVdc"]
                 else
                     data["nw"][n]["busdc"]["$bus_i"]["basekVdc"] = 100 # arbitrary choice
@@ -511,15 +541,15 @@ function _convert_matpowerdcline_to_branchdc_multinetwork!(data)
 end
 
 
-function _fix_data!(data; tnep = false)
+function _fix_data!(data; tnep=false)
     if _IM.ismultinetwork(data)
-        _fix_data_multinetwork!(data; tnep = tnep)
+        _fix_data_multinetwork!(data; tnep=tnep)
     else
-        _fix_data_single_network!(data; tnep = tnep)
+        _fix_data_single_network!(data; tnep=tnep)
     end
 end
 
-function _fix_data_single_network!(data; tnep = false)
+function _fix_data_single_network!(data; tnep=false)
     MVAbase = data["baseMVA"]
     @assert(MVAbase>0)
     if haskey(data, "convdc")
@@ -533,7 +563,7 @@ function _fix_data_single_network!(data; tnep = false)
         end
     end
     if haskey(data, "busdc")
-        new_busdc = Dict{String, Any}()
+        new_busdc = Dict{String,Any}()
         for (i, busdc) in data["busdc"]
             new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
             new_busdc[string(new_bus)] = busdc # assigning new bus numbers: continous numbers from dc bus numbers
@@ -562,12 +592,12 @@ function _fix_data_single_network!(data; tnep = false)
     end
     if tnep
         if !haskey(data, "ne_branch")
-            data["ne_branch"] = Dict()
+            data["ne_branch"] = Dict{String,Any}()
         end
     end
 end
 
-function _fix_data_multinetwork!(data; tnep = false)
+function _fix_data_multinetwork!(data; tnep=false)
     for (n, network) in data["nw"]
         MVAbase = network["baseMVA"]
         @assert(MVAbase>0)
@@ -582,7 +612,7 @@ function _fix_data_multinetwork!(data; tnep = false)
             end
         end
         if haskey(data["nw"][n], "busdc")
-            new_busdc = Dict{String, Any}()
+            new_busdc = Dict{String,Any}()
             for (i, busdc) in data["nw"][n]["busdc"]
                 new_bus = busdc["busdc_i"] # assigning new bus numbers: continous numbers from dc bus numbers
                 new_busdc[string(new_bus)] = busdc # assigning new bus numbers: continous numbers from dc bus numbers
@@ -610,7 +640,7 @@ function _fix_data_multinetwork!(data; tnep = false)
             end
         end
         if tnep
-            if !haskey(data["nw"][n],  "ne_branch")
+            if !haskey(data["nw"][n], "ne_branch")
                 data["nw"][n]["ne_branch"] = Dict()
             end
         end
@@ -653,7 +683,7 @@ function _set_conv_pu_power(conv, MVAbase)
 end
 
 function _set_conv_pu_volt(conv, kVbase)
-    _rescale_volt = x -> x  / (kVbase)
+    _rescale_volt = x -> x / (kVbase)
     _PM._apply_func!(conv, "LossB", _rescale_volt)
 end
 
@@ -669,8 +699,8 @@ function _check_conv_parameters(conv)
     @assert(conv["LossCrec"]>=0)
     @assert(conv["LossCinv"]>=0)
     conv_id = conv["index"]
-    conv["Pacrated"] = max(abs(conv["Pacmax"]),abs(conv["Pacmin"]))
-    conv["Qacrated"] = max(abs(conv["Qacmax"]),abs(conv["Qacmin"]))
+    conv["Pacrated"] = max(abs(conv["Pacmax"]), abs(conv["Pacmin"]))
+    conv["Qacrated"] = max(abs(conv["Qacmax"]), abs(conv["Qacmin"]))
     if conv["Imax"] < sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
         @_warn("Inconsistent current limit for converter $conv_id, it will be updated.")
         conv["Imax"] = sqrt(conv["Pacrated"]^2 + conv["Qacrated"]^2)
@@ -689,7 +719,7 @@ function _check_conv_parameters(conv)
         end
         conv["Qacmax"] = conv["Pacrated"]
         conv["Qacrated"] = conv["Pacrated"]
-        conv["Qacmin"] =  0
+        conv["Qacmin"] = 0
     end
     @assert(conv["Pacmax"]>=conv["Pacmin"])
     @assert(conv["Qacmax"]>=conv["Qacmin"])
@@ -699,7 +729,7 @@ end
 
 
 function _get_branchdc(matpowerdcline, branch_i, fbusdc, tbusdc)
-    branchdc = Dict{String, Any}()
+    branchdc = Dict{String,Any}()
     branchdc["index"] = branch_i
     branchdc["fbusdc"] = fbusdc
     branchdc["tbusdc"] = tbusdc
@@ -714,7 +744,7 @@ function _get_branchdc(matpowerdcline, branch_i, fbusdc, tbusdc)
 end
 
 function _get_busdc(bus_i)
-    busdc = Dict{String, Any}()
+    busdc = Dict{String,Any}()
     busdc["index"] = bus_i
     busdc["busdc_i"] = bus_i
     busdc["grid"] = 1
@@ -727,7 +757,7 @@ function _get_busdc(bus_i)
 end
 
 function _get_converter(conv_i, dcbus, acbus, kVbaseAC, vmax, vmin, status, pac, qac, qmaxac, qminac, vmac, Imax, lossA, lossB, pmaxac, pminac)
-    conv = Dict{String, Any}()
+    conv = Dict{String,Any}()
     conv["index"] = conv_i
     conv["busdc_i"] = dcbus
     conv["busac_i"] = acbus
@@ -745,9 +775,9 @@ function _get_converter(conv_i, dcbus, acbus, kVbaseAC, vmax, vmin, status, pac,
     conv["xc"] = 0
     conv["reactor"] = 0
     conv["basekVac"] = kVbaseAC
-    conv["Vmmax"] =  vmax
-    conv["Vmmin"] =  vmin
-    conv["Imax"] =  Imax # assuming 1pu
+    conv["Vmmax"] = vmax
+    conv["Vmmin"] = vmin
+    conv["Imax"] = Imax # assuming 1pu
     conv["status"] = status
     conv["LossA"] = lossA
     conv["LossB"] = lossB
@@ -773,24 +803,24 @@ function _convert_to_dcbranch_and_converters(data, dcline, branchdc_id, conv_i, 
     branchdc = _get_branchdc(dcline, branchdc_id, fbusdc, tbusdc)
     vmaxf = data["bus"]["$fbusdc"]["vmax"]
     vminf = data["bus"]["$fbusdc"]["vmin"]
-    vmaxt =  data["bus"]["$tbusdc"]["vmax"]
-    vmint =  data["bus"]["$tbusdc"]["vmin"]
+    vmaxt = data["bus"]["$tbusdc"]["vmax"]
+    vmint = data["bus"]["$tbusdc"]["vmin"]
 
     pac = dcline["pf"]
     qac = dcline["qf"]
     vmac = dcline["vf"]
     acbus = dcline["f_bus"]
     kVbaseAC = data["bus"]["$fbusdc"]["base_kv"]
-    Imax =  sqrt(dcline["pmaxf"]^2 + dcline["qmaxf"]^2) / vminf
+    Imax = sqrt(dcline["pmaxf"]^2 + dcline["qmaxf"]^2) / vminf
     status = dcline["br_status"]
     qmaxac = dcline["qmaxf"]
     qminac = dcline["qminf"]
-    lossA = dcline["loss0"] /2
+    lossA = dcline["loss0"] / 2
     lossB = dcline["loss1"]
     vac = 1
     pmaxac = dcline["pmaxf"]
     pminac = dcline["pminf"]
-    converter1 =  _get_converter(conv_i, fbusdc, acbus, kVbaseAC, vmaxf, vminf, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
+    converter1 = _get_converter(conv_i, fbusdc, acbus, kVbaseAC, vmaxf, vminf, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
 
 
     # converter 2
@@ -800,22 +830,22 @@ function _convert_to_dcbranch_and_converters(data, dcline, branchdc_id, conv_i, 
     qac = dcline["qt"]
     vmac = dcline["vt"]
     kVbaseAC = data["bus"]["$tbusdc"]["base_kv"]
-    Imax =  sqrt(dcline["pmaxt"]^2 + dcline["qmaxt"]^2) / vmint# assuming 1pu
+    Imax = sqrt(dcline["pmaxt"]^2 + dcline["qmaxt"]^2) / vmint# assuming 1pu
     status = dcline["br_status"]
     lossA = dcline["loss0"] / 2
     lossB = 0
-    pmaxac =  dcline["pmaxt"]
-    pminac =  dcline["pmint"]
+    pmaxac = dcline["pmaxt"]
+    pminac = dcline["pmint"]
     qmaxac = dcline["qmaxt"]
     qminac = dcline["qmint"]
-    converter2 =  _get_converter(conv_i, tbusdc, acbus, kVbaseAC, vmaxt, vmint, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
+    converter2 = _get_converter(conv_i, tbusdc, acbus, kVbaseAC, vmaxt, vmint, status, pac, qac, qmaxac, qminac, vac, Imax, lossA, lossB, pmaxac, pminac)
 
     return converter1, converter2, branchdc
 end
 
-function prepare_uc_data!(data; borders = nothing, uc = false, time_interval = 1, frequency_parameters = Dict())
-    _prepare_generator_data!(data; uc = uc)
-    data["uc_parameters"] = Dict{String, Any}("time_interval" => time_interval)
+function prepare_uc_data!(data; borders=nothing, uc=false, time_interval=1, frequency_parameters=Dict())
+    _prepare_generator_data!(data; uc=uc)
+    data["uc_parameters"] = Dict{String,Any}("time_interval" => time_interval)
     data["frequency_parameters"] = frequency_parameters
 
     if !isnothing(borders)
@@ -832,31 +862,31 @@ function prepare_uc_data!(data; borders = nothing, uc = false, time_interval = 1
 
     # Add empth dictionary for PSTs
     if !haskey(data, "pst")
-        data["pst"] = Dict{String, Any}()
+        data["pst"] = Dict{String,Any}()
     end
 
     # Add empty dictionaries for HVDC if only AC grid...
     if !haskey(data, "convdc")
-        data["busdc"] = Dict{String, Any}()
-        data["convdc"] = Dict{String, Any}()
-        data["branchdc"] = Dict{String, Any}()
+        data["busdc"] = Dict{String,Any}()
+        data["convdc"] = Dict{String,Any}()
+        data["branchdc"] = Dict{String,Any}()
     end
 
     # Add empty dictionary if no AC tie lines are defined
     if !haskey(data, "tie_lines")
-        data["tie_lines"] = Dict{String, Any}()
+        data["tie_lines"] = Dict{String,Any}()
     end
 
     # Add empty dictionary if no areas are defined
     if !haskey(data, "areas")
-        data["areas"] = Dict{String, Any}()
+        data["areas"] = Dict{String,Any}()
     end
 
     return data
 end
 
 
-function _prepare_generator_data!(data; uc = false)
+function _prepare_generator_data!(data; uc=false)
     for (g, gen) in data["gen"]
         bus_id = gen["gen_bus"]
         gen["zone"] = data["bus"]["$bus_id"]["zone"]
@@ -878,7 +908,7 @@ function _prepare_generator_data!(data; uc = false)
     end
 end
 
-function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series; contingencies = nothing)
+function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series; contingencies=nothing)
     if !isnothing(contingencies)
         if contingencies["type"] == "N-1"
             number_of_contingencies = 1
@@ -911,7 +941,7 @@ function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series
         end
     end
 
-    mn_data = _PM.replicate(data, replicates; global_keys = Set{String}(["source_type", "name", "source_version", "per_unit"]))
+    mn_data = _PM.replicate(data, replicates; global_keys=Set{String}(["source_type", "name", "source_version", "per_unit"]))
 
     # Add hour_ids and contingency_ids to the data dictionary
     mn_data["hour_ids"] = hour_ids
@@ -957,7 +987,7 @@ function create_multinetwork_uc_model!(data, number_of_hours, g_series, l_series
     return mn_data
 end
 
-function prepare_redispatch_opf_data(reference_solution, grid_data; contingency = nothing, rd_cost_factor = 1, inertia_limit = nothing, zonal_input = nothing, zonal_result = nothing, zone = nothing, border_slack = nothing)
+function prepare_redispatch_opf_data(reference_solution, grid_data; contingency=nothing, rd_cost_factor=1, inertia_limit=nothing, zonal_input=nothing, zonal_result=nothing, zone=nothing, border_slack=nothing)
     grid_data_rd = deepcopy(grid_data)
 
     for (g, gen) in grid_data_rd["gen"]
@@ -989,7 +1019,7 @@ function prepare_redispatch_opf_data(reference_solution, grid_data; contingency 
     if !isnothing(contingency)
         if haskey(grid_data_rd, "borders")
             for (b, border) in grid_data_rd["borders"]
-                for (br, branch) in  border["xb_lines"]
+                for (br, branch) in border["xb_lines"]
                     if branch["index"] == contingency
                         print(b, " ", br)
                         delete!(grid_data_rd["borders"][b]["xb_lines"], br)
@@ -1004,7 +1034,7 @@ function prepare_redispatch_opf_data(reference_solution, grid_data; contingency 
         grid_data_rd["inertia_limit"] = inertia_limit
     end
 
-    if  !isnothing(zone)
+    if !isnothing(zone)
         determine_total_xb_flow!(zonal_input, grid_data_rd, grid_data_rd, zonal_result, hour, zone)
     end
 
@@ -1027,20 +1057,20 @@ function calc_branch_admittance(branch::Dict{String,<:Any}, element::String)
 end
 
 
-function create_scopf_data(data_in, number_of_hours, g_series, l_series; number_of_contingencies = length(data_in["contingencies"]))
+function create_scopf_data(data_in, number_of_hours, g_series, l_series; number_of_contingencies=length(data_in["contingencies"]))
     data = deepcopy(data_in)
     # Contruct extra_data dictionary
-    extra_data = Dict{String, Any}()
+    extra_data = Dict{String,Any}()
     extra_data["dim"] = number_of_hours * number_of_contingencies
-    extra_data["gen"] = Dict{String, Any}(g => Dict("pmax" => []) for (g, gen) in data["gen"])
-    extra_data["load"] = Dict{String, Any}(g => Dict("pd" => []) for (g, gen) in data["load"])
+    extra_data["gen"] = Dict{String,Any}(g => Dict("pmax" => []) for (g, gen) in data["gen"])
+    extra_data["load"] = Dict{String,Any}(g => Dict("pd" => []) for (g, gen) in data["load"])
 
 
     # This for loop determines which "network" belongs to an hour, and which to a contingency, for book-keeping of the network ids
     # Format: [h1, c1 ... cn, h2, c1 ... cn, .... , hn, c1 ... cn]
     hour_ids = [];
     cont_ids = [];
-    for i in 1:number_of_hours * number_of_contingencies
+    for i in 1:(number_of_hours*number_of_contingencies)
         if mod(i, number_of_contingencies) == 1
             push!(hour_ids, i)
         else
@@ -1048,11 +1078,11 @@ function create_scopf_data(data_in, number_of_hours, g_series, l_series; number_
         end
     end
 
-    data = _PM.replicate(data, number_of_hours * number_of_contingencies; global_keys = Set{String}(["source_type", "name", "source_version", "per_unit"]))
+    data = _PM.replicate(data, number_of_hours * number_of_contingencies; global_keys=Set{String}(["source_type", "name", "source_version", "per_unit"]))
 
     # This loop writes the generation and demand time series data
     iter = 0
-    for nw = 1:number_of_hours * number_of_contingencies
+    for nw = 1:(number_of_hours*number_of_contingencies)
         if mod(nw, number_of_contingencies) == 1
             iter += 1
             h_idx = Int(nw - number_of_contingencies + 1)
@@ -1076,4 +1106,3 @@ function create_scopf_data(data_in, number_of_hours, g_series, l_series; number_
 
     return data
 end
-

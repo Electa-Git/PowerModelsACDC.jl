@@ -6,8 +6,7 @@ ipopt = optimizer_with_attributes(Ipopt.Optimizer, "tol" => 1e-6, "print_level" 
 
 file = pkgdir(PowerModelsACDC, "test", "data", "case3120sp_acdc.m")
 
-data = PowerModels.parse_file(file)
-process_additional_data!(data)
+data = parse_file(file)
 s = Dict("conv_losses_mp" => true)
 
 resultAC = solve_acdcopf(file, PowerModels.ACPPowerModel, ipopt; setting=s)

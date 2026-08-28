@@ -18,15 +18,13 @@ specified PowerModels formulation and solver.
   objective value, variable values and solver termination status.
 
 # Behavior
-This function parses the provided file into a data dictionary, performs any
-additional data processing (via `process_additional_data!`) and delegates to
-`solve_acdcpf(data::Dict, ...)`. By default, reference extensions for DC grid,
-PST, SSSC, flexible loads and DC generators are applied.
+Parses the input file and delegates to `solve_acdcpf(data::Dict, ...)`.
+By default, reference extensions for DC grid, PST, SSSC, flexible loads and DC generators
+are applied.
 """
 function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
-    data = _PM.parse_file(file)
-    process_additional_data!(data)
-    return solve_acdcpf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+    data = parse_file(file)
+    return solve_acdcpf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
 """
@@ -49,7 +47,7 @@ This wrapper applies the same set of default reference extensions as the file-ba
 entrypoint. Use `ref_extensions` in `kwargs` to override or add additional references.
 """
 function solve_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
 """
@@ -81,14 +79,14 @@ Creates variables and constraints appropriate for non-optimization power flow
   are created depending on converter `type_dc` and `type_ac`.
 """
 function build_acdcpf(pm::_PM.AbstractPowerModel)
-    _PM.variable_bus_voltage(pm, bounded = false)
-    _PM.variable_gen_power(pm, bounded = false)
-    _PM.variable_branch_power(pm, bounded = false)
-    _PM.variable_storage_power(pm, bounded = false)
+    _PM.variable_bus_voltage(pm, bounded=false)
+    _PM.variable_gen_power(pm, bounded=false)
+    _PM.variable_branch_power(pm, bounded=false)
+    _PM.variable_storage_power(pm, bounded=false)
 
     # dirty, should be improved in the future TODO
     if typeof(pm) <: _PM.SOCBFPowerModel
-        _PM.variable_branch_current(pm, bounded = false)
+        _PM.variable_branch_current(pm, bounded=false)
     end
 
     variable_active_dcbranch_flow(pm, bounded = false)
@@ -99,27 +97,28 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     variable_flexible_demand(pm, bounded = false)
     variable_pst(pm, bounded = false)
     variable_sssc(pm, bounded = false)
+    variable_im(pm, bounded=false)
 
     _PM.constraint_model_voltage(pm)
+
     constraint_voltage_dc(pm)
 
 
-    for (i,bus) in _PM.ref(pm, :ref_buses)
+    for (i, bus) in _PM.ref(pm, :ref_buses)
         @assert bus["bus_type"] == 3
         _PM.constraint_theta_ref(pm, i)
         _PM.constraint_voltage_magnitude_setpoint(pm, i)
     end
 
-    for (i, bus) in _PM.ref(pm, :bus)# _PM.ids(pm, :bus)
+    for (i, bus) in _PM.ref(pm, :bus)
         constraint_power_balance_ac(pm, i)
-        # PV Bus Constraints
-        if length(_PM.ref(pm, :bus_gens, i)) > 0 && !(i in _PM.ids(pm,:ref_buses))
+        if length(_PM.ref(pm, :bus_gens, i)) > 0 && !(i in _PM.ids(pm, :ref_buses))
             for j in _PM.ref(pm, :bus_gens, i)
                 _PM.constraint_gen_setpoint_active(pm, j)
-                if  bus["bus_type"] == 2
+                if bus["bus_type"] == 2 # PV
                     _PM.constraint_voltage_magnitude_setpoint(pm, i)
-                elseif bus["bus_type"] == 1
-                    _PM.constraint_gen_setpoint_active(pm, j)
+                elseif bus["bus_type"] == 1 # PQ
+                    _PM.constraint_gen_setpoint_reactive(pm, j)
                 end
             end
         end
@@ -130,7 +129,6 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         if typeof(pm) <: _PM.SOCBFPowerModel
             _PM.constraint_power_losses(pm, i)
             _PM.constraint_voltage_magnitude_difference(pm, i)
-            _PM.constraint_branch_current(pm, i)
         else
             _PM.constraint_ohms_yt_from(pm, i)
             _PM.constraint_ohms_yt_to(pm, i)
@@ -143,6 +141,26 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     for i in _PM.ids(pm, :fixed_load)
         constraint_total_fixed_demand(pm, i)
     end
+
+    for i in _PM.ids(pm, :pst)
+        constraint_ohms_y_from_pst(pm, i)
+        constraint_ohms_y_to_pst(pm, i)
+        constraint_limits_pst(pm, i)
+    end
+    for i in _PM.ids(pm, :im)
+        constraint_im_stator(pm, i)
+        constraint_im_rotor_inductance(pm, i)
+        constraint_im_magnetisation(pm, i)
+        constraint_im_slip(pm, i)
+    end
+
+
+    for i in _PM.ids(pm, :sssc)
+        constraint_ohms_y_from_sssc(pm, i)
+        constraint_ohms_y_to_sssc(pm, i)
+        constraint_limits_sssc(pm, i)
+    end
+
 
     for i in _PM.ids(pm, :busdc)
         constraint_power_balance_dc(pm, i)
@@ -186,4 +204,3 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         constraint_converter_current(pm, c)
     end
 end
-# ...existing code...

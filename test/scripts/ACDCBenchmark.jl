@@ -94,9 +94,7 @@ function fix_things!(data)
 end
 
 for file in files
-    data = PowerModels.parse_file(file)
-    process_additional_data!(data)
-    #fix_things!(data)
+    data = parse_file(file)
 
     case = Dict{String,Any}()
     er_dict = Dict{String,Any}()

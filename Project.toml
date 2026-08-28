@@ -15,13 +15,14 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
 HiGHS = "1"
-InfrastructureModels = "0.6, 0.7"
+InfrastructureModels = "0.7.9"
 Ipopt = "1"
 JuMP = "1.15"
 Juniper = "0.9"
-Logging = "1.10.0"
+Logging = "1.10"
 NLsolve = "4.5"
-PowerModels = "0.21"
+PowerModels = "0.21.6"
+SCIP = "0.12.8"
 SparseArrays = "1"
 julia = "1.10"
 
@@ -29,7 +30,8 @@ julia = "1.10"
 HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
 Ipopt = "b6b21f68-93f8-5de0-b562-5493be1d77c9"
 Juniper = "2ddba703-00a4-53a7-87a5-e8b9971dde84"
+SCIP = "82193955-e24f-5292-bf16-6f2c5261a85f"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["HiGHS", "Ipopt", "Juniper", "Test"]
+test = ["HiGHS", "Ipopt", "Juniper", "SCIP", "Test"]

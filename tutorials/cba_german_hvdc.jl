@@ -153,7 +153,7 @@ md"""
 
 # ╔═╡ d38cb709-1fda-4b63-83a6-7406f5e34ade
 begin
-	solver = JuMP.optimizer_with_attributes(HiGHS.Optimizer, 
+	solver = JuMP.optimizer_with_attributes(HiGHS.Optimizer,
     "output_flag" => false,
     "log_to_console" => false,
 )
@@ -359,8 +359,7 @@ md"""
 begin
 	grid_data_file = joinpath(pkgdir(EUGO), "data_sources", "European_grid_no_nseh.json")
 
-	EU_grid = PM.parse_file(grid_data_file)
-	PMACDC.process_additional_data!(EU_grid)
+	EU_grid = PMACDC.parse_file(grid_data_file)
 	EUGO.add_load_and_pst_properties!(EU_grid)
 
 	zone_mapping = EUGO.map_zones()

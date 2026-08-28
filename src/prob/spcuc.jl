@@ -20,7 +20,7 @@ a multi-network SPCUC formulation with per-hour UC submodels and contingency con
 """
 
 function solve_spcuc(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
-    return _PM.solve_model(data, model_type, optimizer, build_spcuc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!, ref_add_gendc!], kwargs...)
+    return _PM.solve_model(data, model_type, optimizer, build_spcuc; ref_extensions = [add_ref_dcgrid!, ref_add_flex_load!, ref_add_pst!, ref_add_sssc!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
 
@@ -88,6 +88,7 @@ function base_uc_model!(pm, n)
         variable_flexible_demand(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
+        variable_im(pm; nw = n)
         variable_storage_on_off(pm; nw = n)
         constraint_voltage_dc(pm; nw = n)
 
@@ -200,6 +201,7 @@ function spcuc_contingency_model!(pm, n)
     variable_flexible_demand(pm; nw = n, bounded = true)
     variable_pst(pm; nw = n, bounded = false)
     variable_sssc(pm; nw = n, bounded = false)
+    variable_im(pm; nw = n, bounded = false)
     variable_storage_on_off(pm; nw = n)
     constraint_voltage_dc(pm; nw = n)
 
