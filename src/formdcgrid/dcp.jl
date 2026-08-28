@@ -4,13 +4,14 @@ sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[
 sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*1^2
 ```
 """
-function constraint_power_balance_ac(pm::_PM.AbstractDCPModel, n::Int, i::Int, bus_arcs, bus_arcs_pst, bus_arcs_sssc, bus_convs_ac, bus_arcs_sw, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
+function constraint_power_balance_ac(pm::_PM.AbstractDCPModel, n::Int, i::Int, bus_arcs, bus_arcs_pst, bus_arcs_sssc, bus_convs_ac, bus_arcs_sw, bus_gens, bus_ims, bus_storage, bus_loads, bus_gs, bus_bs)
     p    = _PM.var(pm, n, :p)
     ppst    = _PM.var(pm, n,    :ppst)
     pg   = _PM.var(pm, n,   :pg)
     pconv_grid_ac = _PM.var(pm, n,  :pconv_tf_fr)
     pflex = _PM.var(pm, n, :pflex)
     ps    = _PM.var(pm, n, :ps)
+    pim    = _PM.var(pm, n, :p_im_s_fr)
     psssc    = _PM.var(pm, n,    :psssc)
 
     cstr_p = JuMP.@constraint(pm.model,
@@ -22,6 +23,7 @@ function constraint_power_balance_ac(pm::_PM.AbstractDCPModel, n::Int, i::Int, b
         sum(pg[g] for g in bus_gens)
         - sum(ps[s] for s in bus_storage)
         - sum(pflex[d] for d in bus_loads)
+        - sum(pim[d] for d in bus_ims)
         - sum(gs for (i,gs) in bus_gs)*1^2
     )
 

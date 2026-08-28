@@ -7,8 +7,8 @@ You can read this documentation online at
 
 While developing PowerModelsACDC.jl, you can preview the documentation locally in your
 browser with live-reload capability.
-In other words, when you modify a file, every browser tab that is currently displaying the
-corresponding page is automatically refreshed.
+In other words, whenever you modify a file, every browser tab currently displaying the
+corresponding page refreshes automatically.
 
 ### Instructions for *nix
 
@@ -23,6 +23,7 @@ corresponding page is automatically refreshed.
    Pkg.activate(; temp=true)
    Pkg.develop("PowerModelsACDC")
    Pkg.add("Documenter")
+   Pkg.add("DocumenterInterLinks")
    Pkg.add("LiveServer")
    using PowerModelsACDC, LiveServer
    cd(dirname(dirname(pathof(PowerModelsACDC))))

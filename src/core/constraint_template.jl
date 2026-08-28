@@ -9,6 +9,7 @@ function constraint_power_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int
     bus_arcs_sssc = _PM.ref(pm, nw, :bus_arcs_sssc, i)
     bus_arcs_sw = _PM.ref(pm, nw, :bus_arcs_sw, i)
     bus_gens = _PM.ref(pm, nw, :bus_gens, i)
+    bus_ims = _PM.ref(pm, nw, :bus_ims, i)
     bus_loads = _PM.ref(pm, nw, :bus_loads, i)
     bus_shunts = _PM.ref(pm, nw, :bus_shunts, i)
     bus_storage = _PM.ref(pm, nw, :bus_storage, i)
@@ -20,7 +21,7 @@ function constraint_power_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int
     bus_gs = Dict(k => _PM.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
     bus_bs = Dict(k => _PM.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
 
-    constraint_power_balance_ac(pm, nw, i, bus_arcs, bus_arcs_pst, bus_arcs_sssc, bus_convs_ac, bus_arcs_sw, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
+    constraint_power_balance_ac(pm, nw, i, bus_arcs, bus_arcs_pst, bus_arcs_sssc, bus_convs_ac, bus_arcs_sw, bus_gens, bus_ims, bus_storage, bus_loads, bus_gs, bus_bs)
 end
 
 function constraint_current_balance_ac(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)

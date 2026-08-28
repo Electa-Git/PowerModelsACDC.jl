@@ -6,7 +6,7 @@ sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[
 sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*v^2
 ```
 """
-function constraint_power_balance_ac(pm::_PM.AbstractACPModel, n::Int, i::Int, bus_arcs, bus_arcs_pst, bus_arcs_sssc, bus_convs_ac, bus_arcs_sw, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
+function constraint_power_balance_ac(pm::_PM.AbstractACPModel, n::Int, i::Int, bus_arcs, bus_arcs_pst, bus_arcs_sssc, bus_convs_ac, bus_arcs_sw, bus_gens, bus_ims, bus_storage, bus_loads, bus_gs, bus_bs)
     vm   = _PM.var(pm, n, :vm, i)
     p    = _PM.var(pm, n, :p)
     q    = _PM.var(pm, n, :q)
@@ -16,6 +16,8 @@ function constraint_power_balance_ac(pm::_PM.AbstractACPModel, n::Int, i::Int, b
     qg   = _PM.var(pm, n,   :qg)
     pconv_grid_ac = _PM.var(pm, n,  :pconv_tf_fr)
     qconv_grid_ac = _PM.var(pm, n,  :qconv_tf_fr)
+    pim = _PM.var(pm, n,  :p_im_s_fr)
+    qim =  _PM.var(pm, n,  :q_im_s_fr)  
     pflex = _PM.var(pm, n, :pflex)
     qflex = _PM.var(pm, n, :qflex)
     ps    = _PM.var(pm, n, :ps)
@@ -33,6 +35,7 @@ function constraint_power_balance_ac(pm::_PM.AbstractACPModel, n::Int, i::Int, b
         sum(pg[g] for g in bus_gens)
         - sum(ps[s] for s in bus_storage)
         - sum(pflex[d] for d in bus_loads)
+        - sum(pim[i] for i in bus_ims)
         - sum(gs for (i,gs) in bus_gs)*vm^2
     )
     cstr_q = JuMP.@constraint(pm.model,
@@ -44,6 +47,7 @@ function constraint_power_balance_ac(pm::_PM.AbstractACPModel, n::Int, i::Int, b
         sum(qg[g] for g in bus_gens)
         - sum(qs[s] for s in bus_storage)
         - sum(qflex[d] for d in bus_loads)
+        - sum(qim[i] for i in bus_ims)
         + sum(bs for (i,bs) in bus_bs)*vm^2
     )
 

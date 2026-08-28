@@ -14,8 +14,7 @@ casename = "case9"
 bt = 100 ## constraint tightening setting 95, 90, 85, 80
 include(pkgdir(PowerModelsACDC, "test", "data", "tnep", "PSCC", "conv_spec.jl"))
 file = pkgdir(PowerModelsACDC, "test", "data", "tnep", "PSCC", "$casename.m")
-data1 = PowerModels.parse_file(file)
-process_additional_data!(data1)
+data1 = parse_file(file)
 data = deepcopy(data1)
 
 #increase load and generation by 3 times (except 6 and 24 bus)

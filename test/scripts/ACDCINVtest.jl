@@ -19,8 +19,7 @@ scs = optimizer_with_attributes(SCS.Optimizer, "max_iters" => 100000)
 
 file = pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_original.m")
 file_acdc = pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m")
-data = PowerModels.parse_file(file)
-process_additional_data!(data)
+data = parse_file(file)
 data_bf = data
 
 s = Dict("conv_losses_mp" => false)
@@ -69,14 +68,12 @@ resultACDC_lpac = solve_tnep(file_acdc, PowerModels.LPACCPowerModel, gurobi, set
 
 t = 1:2
 function build_mn_data(file)
-    mp_data = PowerModels.parse_file(file)
+    mp_data = parse_file(file)
     return PowerModels.replicate(mp_data, length(t); global_keys=Set{String}(["source_type", "name", "source_version", "per_unit"]))
 end
 
 data1 = build_mn_data(file)
-process_additional_data!(data1)
 data_acdc = build_mn_data(file_acdc)
-process_additional_data!(data_acdc)
 
 resultDC1 = solve_tnep(data1, PowerModels.DCPPowerModel, gurobi, multinetwork=true; setting=s)
 resultAC1 = solve_tnep(data1, PowerModels.ACPPowerModel, juniper, multinetwork=true; setting=s)

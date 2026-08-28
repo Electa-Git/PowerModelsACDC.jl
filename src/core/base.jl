@@ -306,12 +306,30 @@ function ref_add_storage!(ref::Dict{Symbol,Any}, data::Dict{String,<:Any})
     end
 end
 
-"Add refernce for SSSC"
+"Add reference for induction machine"
+function ref_add_im!(ref::Dict{Symbol,Any}, data::Dict{String,<:Any})
+    for (nw, nw_ref) in ref[:it][:pm][:nw]
+        if !haskey(nw_ref, :im)
+            nw_ref[:im] = Dict()
+            @_warn("required induction machine data not found")
+        end
+
+        nw_ref[:im] = Dict(x for x in nw_ref[:im] if (x.second["status"] == 1 in keys(nw_ref[:bus])))
+
+        bus_im = Dict((i, Int[]) for (i,bus) in nw_ref[:bus])
+        for (i, im) in nw_ref[:im]
+            push!(bus_im[im["im_bus"]], i)
+        end
+        nw_ref[:bus_ims] = bus_im
+    end
+end
+
+"Add reference for SSSC"
 function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (nw, nw_ref) in ref[:it][:pm][:nw]
         if !haskey(nw_ref, :sssc)
             nw_ref[:sssc] = Dict()
-            @_warn("required pst data not found")
+            @_warn("required sssc data not found")
         end
 
         nw_ref[:sssc] = Dict(x for x in nw_ref[:sssc] if (x.second["sssc_status"] == 1 && x.second["f_bus"] in keys(nw_ref[:bus]) && x.second["t_bus"] in keys(nw_ref[:bus])))
@@ -328,7 +346,7 @@ function ref_add_sssc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     end
 end
 
-"Add refernce for DC generators"
+"Add reference for DC generators"
 function ref_add_gendc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (nw, nw_ref) in ref[:it][:pm][:nw]
         if !haskey(nw_ref, :gendc)
