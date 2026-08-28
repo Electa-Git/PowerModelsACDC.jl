@@ -23,8 +23,7 @@ The data-based entrypoint calls `_PM.solve_model` with the IVR builder `build_ac
 (or a multi-network variant when `data["multinetwork"]` is true).
 """
 function solve_acdcopf_iv(file::String, model_type, optimizer; kwargs...)
-    data = _PM.parse_file(file)
-    process_additional_data!(data)
+    data = parse_file(file)
     return solve_acdcopf_iv(data, model_type, optimizer; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
 end
 
