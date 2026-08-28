@@ -5,12 +5,12 @@ v0.10.1 Release Notes
 - Included indcution machine model
 - Small updates on documentation
 - Optimal power flow problem using dynamic cable rating
+- Removing memeto dependency consistent with PM 
 
 
 v0.10.0 Release Notes
 
 - Consistent use of underscores
-- Removing memeto dependency consistent with PM 
 - Function namings fixed
 - Consistent use of _PM.ids
 - Added tutorials as Pluto.jl notebooks

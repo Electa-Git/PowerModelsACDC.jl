@@ -16,7 +16,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 [compat]
 HiGHS = "1"
 InfrastructureModels = "0.6, 0.7"
-Ipopt = "1"
+Ipopt = "1.4"
 JuMP = "1.15"
 Juniper = "0.9"
 Logging = "1.10.0"
