@@ -1,3 +1,12 @@
+v0.10.1 Release Notes
+
+- Updated unit tests
+- RoCoF constrained UC model
+- Included indcution machine model
+- Small updates on documentation
+- Optimal power flow problem using dynamic cable rating
+
+
 v0.10.0 Release Notes
 
 - Consistent use of underscores

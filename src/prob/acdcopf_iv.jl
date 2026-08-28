@@ -52,9 +52,9 @@ file-based wrapper.
 """
 function solve_acdcopf_iv(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
     if haskey(data, "multinetwork") && data["multinetwork"] == true
-        return _PM.solve_model(data, model_type, optimizer, mp_build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+        return _PM.solve_model(data, model_type, optimizer, mp_build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     else
-        return _PM.solve_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!], kwargs...)
+        return _PM.solve_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
     end
 end
 """
@@ -85,8 +85,6 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     _PM.variable_storage_power(pm)
     _PM.variable_gen_current(pm)
     _PM.variable_dcline_current(pm)
-
-    _PM.objective_min_fuel_and_flow_cost(pm)
 
     variable_active_dcbranch_flow(pm)
     variable_dcbranch_current(pm)
@@ -156,6 +154,8 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
             constraint_fixed_xb_flows(pm, i)
         end
     end
+
+    objective_min_operational_cost(pm)
 end
 """
     mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
@@ -270,7 +270,7 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     end
 
     # Global objective assembly (IVR-specific)
-    _PM.objective_min_fuel_and_flow_cost(pm)
+    objective_min_operational_cost(pm)
 end
 
 function add_additional_variables(pm; nw::Int = _PM.nw_id_default)
