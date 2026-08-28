@@ -1073,20 +1073,20 @@ end
 
 #### ROCOF CONSTRAINT BASED ON PRE-DEFINED SPLITS
 
-function constraint_rocof_split(pm::_PM.AbstractPowerModel, zone_id; nw::Int = _PM.nw_id_default)
-    if haskey(_PM.ref(pm, nw), :ignored_zones) && any(zone_id .== _PM.ref(pm, nw, :ignored_zones))
+function constraint_rocof_split(pm::_PM.AbstractPowerModel, zone_id, cont_id; nw::Int = _PM.nw_id_default)
+    if haskey(_PM.ref(pm, nw), :ignored_zones) && any(zone_id .== _PM.ref(pm, nw, :ignored_zones, "$cont_id"))
         # do nothing if the zone is ignored
     else
         generator_properties = Dict((i, []) for i in zone_id)
         storage_properties = Dict((i, []) for i in zone_id)
         for (g, gen) in _PM.ref(pm, nw, :gen)
-            if haskey(gen, "zone") &&  gen["zone"] == zone_id
+            if haskey(gen, "zone") &&  gen["zone"][cont_id] == zone_id
                 push!(generator_properties[zone_id], g => Dict("inertia" => gen["inertia_constants"], "rating" => gen["pmax"]))
             end
         end
 
         for (s, storage) in _PM.ref(pm, nw, :storage)
-            if haskey(storage, "zone") && storage["zone"] == zone_id
+            if haskey(storage, "zone") && storage["zone"][cont_id] == zone_id
                 push!(storage_properties[zone_id], s => Dict("inertia" => storage["inertia_constants"], "rating" => storage["thermal_rating"]))
             end
         end
@@ -1094,7 +1094,7 @@ function constraint_rocof_split(pm::_PM.AbstractPowerModel, zone_id; nw::Int = _
 
         tielines_fr =   Dict((i, []) for i in zone_id) 
         tielines_to =   Dict((i, []) for i in zone_id) 
-        for (t, tieline) in _PM.ref(pm, nw, :tie_lines)
+        for (t, tieline) in _PM.ref(pm, nw, :tie_lines, cont_id)
             line_id = tieline["line_id"]
             if haskey(tieline, "zone_fr") || haskey(tieline, "zone_to")
                 from_zone = tieline["zone_fr"]

@@ -41,7 +41,10 @@ function add_fcuc_data!(data)
         end
     end
 
-    data["ignored_zones"] = [2]
+    data["ignored_zones"] = Dict("1" => [2])
+    data["cont_ids"] = [1]
+    tielines = deepcopy(data["tie_lines"])
+    data["tie_lines"] = Dict("1" => tielines)
 
     return data, frequency_parameters
 end
