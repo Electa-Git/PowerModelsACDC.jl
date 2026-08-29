@@ -24,7 +24,7 @@ are applied.
 """
 function solve_acdcpf(file::String, model_type::Type, solver; kwargs...)
     data = parse_file(file)
-    return solve_acdcpf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
+    return solve_acdcpf(data, model_type, solver; ref_extensions=[add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
 """
@@ -47,7 +47,7 @@ This wrapper applies the same set of default reference extensions as the file-ba
 entrypoint. Use `ref_extensions` in `kwargs` to override or add additional references.
 """
 function solve_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
+    return _PM.solve_model(data, model_type, solver, build_acdcpf; ref_extensions=[add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_im!], kwargs...)
 end
 
 """
@@ -89,14 +89,14 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
         _PM.variable_branch_current(pm, bounded=false)
     end
 
-    variable_active_dcbranch_flow(pm, bounded = false)
-    variable_dcbranch_current(pm, bounded = false)
-    variable_dc_converter(pm, bounded = false)
-    variable_dcgrid_voltage_magnitude(pm, bounded = false)
-    variable_dcgenerator_power(pm; bounded = false)
-    variable_flexible_demand(pm, bounded = false)
-    variable_pst(pm, bounded = false)
-    variable_sssc(pm, bounded = false)
+    variable_active_dcbranch_flow(pm, bounded=false)
+    variable_dcbranch_current(pm, bounded=false)
+    variable_dc_converter(pm, bounded=false)
+    variable_dcgrid_voltage_magnitude(pm, bounded=false)
+    variable_dcgenerator_power(pm; bounded=false)
+    variable_flexible_demand(pm, bounded=false)
+    variable_pst(pm, bounded=false)
+    variable_sssc(pm, bounded=false)
     variable_im(pm, bounded=false)
 
     _PM.constraint_model_voltage(pm)
@@ -113,11 +113,14 @@ function build_acdcpf(pm::_PM.AbstractPowerModel)
     for (i, bus) in _PM.ref(pm, :bus)
         constraint_power_balance_ac(pm, i)
         if length(_PM.ref(pm, :bus_gens, i)) > 0 && !(i in _PM.ids(pm, :ref_buses))
-            for j in _PM.ref(pm, :bus_gens, i)
-                _PM.constraint_gen_setpoint_active(pm, j)
-                if bus["bus_type"] == 2 # PV
-                    _PM.constraint_voltage_magnitude_setpoint(pm, i)
-                elseif bus["bus_type"] == 1 # PQ
+            if bus["bus_type"] == 2 # PV
+                for j in _PM.ref(pm, :bus_gens, i)
+                    _PM.constraint_gen_setpoint_active(pm, j)
+                end
+                _PM.constraint_voltage_magnitude_setpoint(pm, i)
+            elseif bus["bus_type"] == 1 # PQ
+                for j in _PM.ref(pm, :bus_gens, i)
+                    _PM.constraint_gen_setpoint_active(pm, j)
                     _PM.constraint_gen_setpoint_reactive(pm, j)
                 end
             end
