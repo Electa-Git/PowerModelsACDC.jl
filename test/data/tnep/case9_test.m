@@ -54,9 +54,9 @@ mpc.branch = [
 %	1	startup	shutdown	n	x1	y1	...	xn	yn
 %	2	startup	shutdown	n	c(n-1)	...	c0
 mpc.gencost = [
-2	1500	0	3	0	0.0 	0; % modified
-2	1500	0	3	0	0.0 	0; % modified
-2	1500	0	3	0	0.0 	0; % modified
+2	1500	0	2	0.1 	0;
+2	1500	0	2	0.1 	0;
+2	1500	0	2	0.1 	0;
 ];
 
 
@@ -64,7 +64,7 @@ mpc.gencost = [
 %column_names%   busdc_i grid    Pdc     Vdc     basekVdc    Vdcmax  Vdcmin  Cdc
 mpc.busdc_ne = [
     1              1       0       1       345         1.1     0.9     0;
-	  2              1       0       1       345         1.1     0.9     0;
+    2              1       0       1       345         1.1     0.9     0;
 ];
 
 
