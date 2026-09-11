@@ -1,5 +1,5 @@
 @testset "Transmission Network Expansion Planning" begin
-    s = Dict("conv_losses_mp" => true)
+    s = Dict("conv_losses_mp" => false)
     case4 = parse_file(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"))
     case9 = parse_file(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"); tnep=true)
     @testset "solve_tnep(file, ...)" begin
@@ -41,8 +41,8 @@
                 @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
-                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 rtol=1e-3
-                @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -0.5118 rtol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -0.5000 rtol=1e-3
             end
             @testset "9-bus case" begin
                 result = solve_tnep(case9, PowerModels.DCPPowerModel, highs; setting=s)
@@ -51,7 +51,7 @@
                 @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
-                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.4104 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 2.500 rtol=1e-3
             end
         end
         @testset "LPACCPowerModel" begin
@@ -161,10 +161,10 @@
                 @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
                 @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
-                @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 rtol=1e-3
-                @test result["solution"]["nw"]["2"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 rtol=1e-3
-                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
-                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"] ≈ -0.5118 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["3"]["pf"] ≈ -0.5118 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["pconv"] ≈ -0.500 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["pconv"] ≈ -0.500 rtol=1e-3
             end
             @testset "6-bus case" begin
                 result = solve_tnep(case6, PowerModels.DCPPowerModel, highs; multinetwork=true, setting=s)
