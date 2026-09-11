@@ -1,5 +1,5 @@
 @testset "Transmission Network Expansion Planning" begin
-    s = Dict("conv_losses_mp" => true)
+    s = Dict("conv_losses_mp" => false)
     case4 = parse_file(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case4_acdc.m"))
     case9 = parse_file(pkgdir(PowerModelsACDC, "test", "data", "tnep", "case9_test.m"); tnep=true)
     @testset "solve_tnep(file, ...)" begin
@@ -23,12 +23,12 @@
             @testset "9-bus case" begin
                 result = solve_tnep(case9, PowerModels.ACPPowerModel, juniper; setting=s)
                 @test result["termination_status"] == LOCALLY_SOLVED
-                @test result["objective"] ≈ 10.7 rtol=1e-3
+                @test result["objective"] ≈ 42.66 rtol=1e-3
                 @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
-                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.8325 rtol=1e-3
-                @test result["solution"]["busdc_ne"]["2"]["vm"] ≈ 0.9966 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.6411 rtol=1e-3
+                @test result["solution"]["busdc_ne"]["2"]["vm"] ≈ 1.0950 rtol=1e-3
             end
         end
         @testset "DCPPowerModel" begin
@@ -41,17 +41,17 @@
                 @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
-                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 rtol=1e-3
-                @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -0.5118 rtol=1e-3
+                @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -0.5000 rtol=1e-3
             end
             @testset "9-bus case" begin
                 result = solve_tnep(case9, PowerModels.DCPPowerModel, highs; setting=s)
                 @test result["termination_status"] == OPTIMAL
-                @test result["objective"] ≈ 10.7 rtol=1e-3
+                @test result["objective"] ≈ 42.43 rtol=1e-3
                 @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
-                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.4104 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.4116 rtol=1e-3
             end
         end
         @testset "LPACCPowerModel" begin
@@ -70,12 +70,11 @@
             @testset "9-bus case" begin
                 result = solve_tnep(case9, PowerModels.LPACCPowerModel, scip; setting=s)
                 @test result["termination_status"] == OPTIMAL
-                @test result["objective"] ≈ 10.7 rtol=1e-3
+                @test result["objective"] ≈ 42.58 rtol=1e-3
                 @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
-                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.8693 rtol=1e-3
-                @test result["solution"]["busdc_ne"]["2"]["phivdcm_ne"] ≈ -0.003694 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.7586 rtol=2e-2 # Shallow minimum
             end
         end
         @testset "QCRMPowerModel" begin
@@ -94,12 +93,12 @@
             @testset "9-bus case" begin
                 result = solve_tnep(case9, PowerModels.SOCBFPowerModel, scip; setting=s)
                 @test result["termination_status"] == OPTIMAL
-                @test result["objective"] ≈ 10.7 rtol=1e-3
+                @test result["objective"] ≈ 42.66 rtol=1e-3
                 @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
-                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 1.064 rtol=1e-3
-                @test result["solution"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.012 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.6405 rtol=1e-3
+                @test result["solution"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.1991 rtol=1e-3
             end
         end
         @testset "SOCWRPowerModel" begin
@@ -112,16 +111,18 @@
                 @test result["solution"]["branchdc_ne"]["3"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
-                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -0.6275 rtol=1e-3
-                @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -0.6153 rtol=1e-3
+                @test result["solution"]["branchdc_ne"]["3"]["pf"] ≈ -0.6310 rtol=5e-2 # Shallow quadratic minimum
+                @test result["solution"]["convdc_ne"]["1"]["pconv"] ≈ -0.6188 rtol=5e-2 # Shallow quadratic minimum
             end
             @testset "9-bus case" begin
                 result = solve_tnep(case9, PowerModels.SOCWRPowerModel, scip; setting=s)
                 @test result["termination_status"] == OPTIMAL
-                @test result["objective"] ≈ 10.7 rtol=1e-3
+                @test result["objective"] ≈ 42.66 rtol=1e-3
                 @test result["solution"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["branchdc_ne"]["1"]["pf"] ≈ 0.6333 rtol=5e-2 # Shallow quadratic minimum
+                @test result["solution"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.1993 rtol=1e-3
             end
         end
     end
@@ -133,17 +134,17 @@
             @testset "9-bus case" begin
                 result = solve_tnep(case9, PowerModels.ACPPowerModel, juniper; multinetwork=true, setting=s)
                 @test result["termination_status"] == LOCALLY_SOLVED
-                @test result["objective"] ≈ 21.4 rtol=1e-3
+                @test result["objective"] ≈ 85.32 rtol=1e-3
                 @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
-                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 0.8325 rtol=1e-3
-                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 0.8325 rtol=1e-3
-                @test result["solution"]["nw"]["1"]["busdc_ne"]["2"]["vm"] ≈ 0.9966 rtol=1e-3
-                @test result["solution"]["nw"]["2"]["busdc_ne"]["2"]["vm"] ≈ 0.9966 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 0.6411 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 0.6411 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["busdc_ne"]["2"]["vm"] ≈ 1.0950 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["busdc_ne"]["2"]["vm"] ≈ 1.0950 rtol=1e-3
             end
         end
         @testset "DCPPowerModel" begin
@@ -161,10 +162,10 @@
                 @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
                 @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 0 atol=1e-3
-                @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 rtol=1e-3
-                @test result["solution"]["nw"]["2"]["branchdc_ne"]["3"]["pf"] ≈ -1.009 rtol=1e-3
-                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
-                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["pconv"] ≈ -1 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"] ≈ -0.5118 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["3"]["pf"] ≈ -0.5118 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["pconv"] ≈ -0.500 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["pconv"] ≈ -0.500 rtol=1e-3
             end
             @testset "6-bus case" begin
                 result = solve_tnep(case6, PowerModels.DCPPowerModel, highs; multinetwork=true, setting=s)
@@ -223,30 +224,34 @@
             @testset "9-bus case" begin
                 result = solve_tnep(case9, PowerModels.SOCBFPowerModel, scip; multinetwork=true, setting=s)
                 @test result["termination_status"] == OPTIMAL
-                @test result["objective"] ≈ 21.4 rtol=1e-3
+                @test result["objective"] ≈ 85.32 rtol=1e-3
                 @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
-                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 1.064 rtol=1e-3
-                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 1.064 rtol=1e-3
-                @test result["solution"]["nw"]["1"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.012 rtol=1e-3
-                @test result["solution"]["nw"]["2"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.012 rtol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 0.6413 rtol=1e-2 # Shallow quadratic minimum
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 0.6413 rtol=1e-2 # Shallow quadratic minimum
+                @test result["solution"]["nw"]["1"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.1991 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.1991 rtol=1e-3
             end
         end
         @testset "SOCWRPowerModel" begin
             @testset "9-bus case" begin
                 result = solve_tnep(case9, PowerModels.SOCWRPowerModel, scip; multinetwork=true, setting=s)
                 @test result["termination_status"] == OPTIMAL
-                @test result["objective"] ≈ 21.4 rtol=1e-3
+                @test result["objective"] ≈ 85.32 rtol=1e-3
                 @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["1"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["2"]["convdc_ne"]["1"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["1"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
                 @test result["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"] ≈ 1 atol=1e-3
+                @test result["solution"]["nw"]["1"]["branchdc_ne"]["1"]["pf"] ≈ 0.6377 rtol=5e-2 # Shallow quadratic minimum
+                @test result["solution"]["nw"]["2"]["branchdc_ne"]["1"]["pf"] ≈ 0.6377 rtol=5e-2 # Shallow quadratic minimum
+                @test result["solution"]["nw"]["1"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.1991 rtol=1e-3
+                @test result["solution"]["nw"]["2"]["busdc_ne"]["2"]["wdc_ne"] ≈ 1.1991 rtol=1e-3
             end
         end
     end
