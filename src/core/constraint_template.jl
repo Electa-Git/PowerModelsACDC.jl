@@ -53,8 +53,9 @@ end
 function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, i::Int; nw::Int=_PM.nw_id_default)
     bus_arcs_dcgrid = _PM.ref(pm, nw, :bus_arcs_dcgrid, i)
     bus_convs_dc = _PM.ref(pm, nw, :bus_convs_dc, i)
+    bus_arcs_pfc = _PM.ref(pm, nw, :bus_arcs_pfc, i)
     pd = _PM.ref(pm, nw, :busdc, i)["Pdc"]
-    constraint_current_balance_dc(pm, nw, bus_arcs_dcgrid, bus_convs_dc, pd)
+    constraint_current_balance_dc(pm, nw, bus_arcs_dcgrid, bus_convs_dc, bus_arcs_pfc, pd)
 end
 
 #

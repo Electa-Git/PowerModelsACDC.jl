@@ -73,7 +73,7 @@ function calc_gen_cost(pm::_PM.AbstractPowerModel; report::Bool=true, components
                     elseif length(gen["cost"]) == 3
                         gendc_cost[(n,i)] = gen["cost"][1]*pgdc^2 + gen["cost"][2]*pgdc + gen["cost"][3]
                     else
-                        gendccost[(n,i)] = 0.0
+                        gendc_cost[(n,i)] = 0.0
                     end
                 end
             end

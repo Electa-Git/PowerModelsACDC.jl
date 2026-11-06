@@ -66,6 +66,9 @@ function process_additional_data!(data::Dict{String,Any}; tnep::Bool=false)
     if haskey(data, "gendc")
         _process_gendc_data!(data)
     end
+    if haskey(data, "pfc")
+        process_pfc_data!(data)
+    end
     _fix_data!(data; tnep=tnep)
     _convert_matpowerdcline_to_branchdc!(data)
     return nothing
@@ -297,6 +300,59 @@ end
 
 function _rescale_dcgen_cost_model!(gendc, MVAbase)
     gendc["cost"] = [gendc["quadratic_cost"] * MVAbase^2 gendc["linear_cost"] * MVAbase gendc["idle_cost"]]
+end
+
+function process_pfc_data!(data)
+    if !haskey(data, "multinetwork") || data["multinetwork"] == false
+        to_pu_single_network_pfc!(data)
+        fix_data_single_network_pfc!(data)
+    else
+        to_pu_multi_network_pfc!(data)
+        fix_data_multi_network_pfc!(data)
+    end
+end
+
+function to_pu_single_network_pfc!(data)
+    MVAbase = data["baseMVA"]
+    for (i, pfc) in data["pfc"]
+        busdc_id = pfc["terminal1_bus"]
+        kVbase = data["busdc"][string(busdc_id)]["basekVdc"]
+        set_pfc_pu_volt!(pfc, kVbase)
+    end
+end
+
+function fix_data_single_network_pfc!(data) # Maybe not needed
+    for (i, pfc) in data["pfc"]
+        pfc["duty_cycle_min"] = 0.00
+        pfc["duty_cycle_max"] = 1.00
+    end
+end
+
+function to_pu_multi_network_pfc!(data)
+    MVAbase = data["baseMVA"]
+    for (n, network) in data["nw"]
+        MVAbase = network["baseMVA"]
+        for (i, pfc) in network[n]["pfc"]
+            busdc_id = pfc["terminal1_bus"]
+            kVbase = network[n]["busdc"][string(busdc_id)]["basekVdc"]
+            set_pfc_pu_volt!(pfc, kVbase)
+        end
+    end
+end
+
+function fix_data_multi_network_pfc!(data) # Modify similar to single network pfc
+    for (n, network) in data["nw"]
+        for (i, pfc) in network[n]data["pfc"]
+            pfc["duty_cycle_min"] = 0.00
+            pfc["duty_cycle_max"] = 1.00
+        end
+    end
+end
+
+function set_pfc_pu_volt!(pfc, kVbase)
+    rescale_volt = x -> x  / (kVbase)
+    _PM._apply_func!(pfc, "c_voltage_min", rescale_volt)
+    _PM._apply_func!(pfc, "c_voltage_max", rescale_volt)
 end
 
 ### Auxiliary functions

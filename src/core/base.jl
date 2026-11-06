@@ -412,3 +412,29 @@ function calc_buspair_parameters(buses, branches, element::String)
 
     return buspairs
 end
+
+"Add reference for PFC"
+function ref_add_pfc!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
+    for (nw, nw_ref) in ref[:it][:pm][:nw]
+        if !haskey(nw_ref, :pfc)
+            nw_ref[:pfc] = Dict()
+            @_warn("required pfc data not found")
+        end
+
+        nw_ref[:pfc] = Dict(x for x in nw_ref[:pfc] if (x.second["pfc_status"] == 1 && x.second["terminal1_bus"] in keys(nw_ref[:busdc]) && x.second["terminal2_bus"] in keys(nw_ref[:busdc]) && x.second["terminal3_bus"] in keys(nw_ref[:busdc])))
+
+        nw_ref[:arcs_from_12_pfc] = [(i, pfc["terminal1_bus"],pfc["terminal2_bus"]) for (i,pfc) in nw_ref[:pfc]]
+        nw_ref[:arcs_from_13_pfc] = [(i, pfc["terminal1_bus"],pfc["terminal3_bus"]) for (i,pfc) in nw_ref[:pfc]]
+        nw_ref[:arcs_pfc_from] = [nw_ref[:arcs_from_12_pfc]; nw_ref[:arcs_from_13_pfc]]
+        nw_ref[:arcs_to_12_pfc]   = [(i, pfc["terminal2_bus"],pfc["terminal1_bus"]) for (i,pfc) in nw_ref[:pfc]]
+        nw_ref[:arcs_to_13_pfc]   = [(i, pfc["terminal3_bus"],pfc["terminal1_bus"]) for (i,pfc) in nw_ref[:pfc]]
+        nw_ref[:arcs_pfc_to] = [nw_ref[:arcs_to_12_pfc]; nw_ref[:arcs_to_13_pfc]]
+        nw_ref[:arcs_pfc] = [nw_ref[:arcs_pfc_from]; nw_ref[:arcs_pfc_to]]
+
+        bus_arcs_pfc = Dict((i, []) for (i,busdc) in nw_ref[:busdc])
+        for (l,i,j) in nw_ref[:arcs_pfc]
+            push!(bus_arcs_pfc[i], (l,i,j))
+        end
+        nw_ref[:bus_arcs_pfc] = bus_arcs_pfc
+    end
+end

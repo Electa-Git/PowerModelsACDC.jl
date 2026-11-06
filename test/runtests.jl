@@ -53,6 +53,7 @@ include("common.jl")
     include("im.jl")
     include("pst.jl")
     include("sssc.jl")
+    include("pfc.jl")
 
     # Problems
     include("pf.jl")

@@ -24,7 +24,7 @@ The data-based entrypoint calls `_PM.solve_model` with the IVR builder `build_ac
 """
 function solve_acdcopf_iv(file::String, model_type, optimizer; kwargs...)
     data = parse_file(file)
-    return solve_acdcopf_iv(data, model_type, optimizer; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+    return solve_acdcopf_iv(data, model_type, optimizer; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_pfc!], kwargs...)
 end
 
 """
@@ -49,9 +49,9 @@ file-based wrapper.
 """
 function solve_acdcopf_iv(data::Dict{String,Any}, model_type::Type, optimizer; kwargs...)
     if haskey(data, "multinetwork") && data["multinetwork"] == true
-        return _PM.solve_model(data, model_type, optimizer, mp_build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+        return _PM.solve_model(data, model_type, optimizer, mp_build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_pfc!], kwargs...)
     else
-        return _PM.solve_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!], kwargs...)
+        return _PM.solve_model(data, model_type, optimizer, build_acdcopf_iv; ref_extensions = [add_ref_dcgrid!, ref_add_pst!, ref_add_sssc!, ref_add_flex_load!, ref_add_gendc!, ref_add_pfc!], kwargs...)
     end
 end
 """
@@ -92,6 +92,7 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     variable_load_current(pm)
     variable_pst(pm)
     variable_sssc(pm)
+    variable_pfc(pm)
 
     for i in _PM.ids(pm, :ref_buses)
         _PM.constraint_theta_ref(pm, i)
@@ -142,6 +143,12 @@ function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
         constraint_conv_reactor(pm, i)
         constraint_conv_filter(pm, i)
     end
+    for i in _PM.ids(pm, :pfc)
+        constraint_duty_cycle_pfc(pm, i)
+        constraint_pfc_current_balance(pm, i)
+        constraint_voltage_terminal_2_pfc(pm, i)
+        constraint_voltage_terminal_3_pfc(pm, i)
+    end
     if haskey(pm.setting, "fix_cross_border_flows") && pm.setting["fix_cross_border_flows"] == true
         if !haskey(pm.setting, "borders")
             borders = [i for i in _PM.ids(pm, :borders)]
@@ -191,6 +198,7 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
         variable_load_current(pm; nw = n)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
+        variable_pfc(pm; nw = n)
 
         # variable_dcbranch_temperature(pm; nw = n)
 
@@ -244,6 +252,12 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
             if haskey(_PM.ref(pm, n, :branchdc, i), "dcr") && _PM.ref(pm, n, :branchdc, i)["dcr"] == 1
                constraint_dynamic_cable_rating(pm, i; nw = n)
             end
+        end
+        for i in _PM.ids(pm, n, :pfc)
+            constraint_duty_cycle_pfc(pm, i; nw = n)
+            constraint_pfc_current_balance(pm, i; nw = n)
+            constraint_voltage_terminal_2_pfc(pm, i; nw = n)
+            constraint_voltage_terminal_3_pfc(pm, i; nw = n)
         end
         for i in _PM.ids(pm, n, :convdc)
             constraint_converter_limits(pm, i; nw = n)

@@ -131,11 +131,12 @@ end
 """
 Kirchhoff's current law constraint for DC buses in IVR models.
 """
-function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, n::Int, bus_arcs_dcgrid, bus_convs_dc, pd)
+function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, n::Int, bus_arcs_dcgrid, bus_convs_dc, bus_arcs_pfc, pd)
     igrid_dc = _PM.var(pm, n, :igrid_dc)
     iconv_dc = _PM.var(pm, n, :iconv_dc)
+    ipfc_dc  = _PM.var(pm, n, :ipfc_dc)
 
-    JuMP.@constraint(pm.model, sum(igrid_dc[a] for a in bus_arcs_dcgrid) + sum(iconv_dc[c] for c in bus_convs_dc) == 0) # deal with pd
+    JuMP.@constraint(pm.model, sum(igrid_dc[a] for a in bus_arcs_dcgrid) + sum(iconv_dc[c] for c in bus_convs_dc) + sum((ipfc_dc[a] for a in bus_arcs_pfc); init=0.0) == 0) # deal with pd
 end
 
 # Ohm's law for DC branches

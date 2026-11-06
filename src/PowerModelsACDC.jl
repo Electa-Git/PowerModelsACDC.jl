@@ -49,6 +49,7 @@ include("components/dcconverter.jl")
 include("components/storage.jl")
 include("components/xb_connections.jl")
 include("components/branch.jl")
+include("components/pfc.jl")
 
 include("formdcgrid/acp.jl")
 include("formdcgrid/acr.jl")
