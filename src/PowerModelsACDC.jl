@@ -23,6 +23,7 @@ include("core/relaxation_scheme.jl")
 include("core/util.jl")
 
 include("prob/acdcopf.jl")
+include("prob/acdcopf_iv.jl")
 include("prob/acdcpf.jl")
 include("prob/acdcopf_bf.jl")
 include("prob/tnep.jl")

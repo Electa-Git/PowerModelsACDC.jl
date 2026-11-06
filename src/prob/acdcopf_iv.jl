@@ -76,7 +76,7 @@ Build the JuMP model for a single-network IVR (current-voltage) AC/DC problem.
 - Adds objective using IVR objective primitive (`_PM.objective_min_fuel_and_flow_cost`).
 - Emits warnings for components not yet implemented in IVR (e.g., PST/SSSC handling).
 """
-function build_acdcopf_all_iv(pm::_PM.AbstractIVRModel)
+function build_acdcopf_iv(pm::_PM.AbstractIVRModel)
     _PM.variable_bus_voltage(pm)
     _PM.variable_branch_current(pm)
     _PM.variable_storage_power(pm)
@@ -192,7 +192,7 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
         variable_pst(pm; nw = n)
         variable_sssc(pm; nw = n)
 
-        # variable_dcbranch_temperature(pm; nw = n)
+        variable_dcbranch_temperature(pm; nw = n)
 
         add_additional_variables(pm; nw = n)
     end
