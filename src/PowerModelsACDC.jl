@@ -1,12 +1,11 @@
 module PowerModelsACDC
 
+import PowerModels as _PM
 import InfrastructureModels as _IM
 import JuMP
 import LinearAlgebra
 import Logging
 import NLsolve
-import PowerModels 
-const _PM = PowerModels
 import SparseArrays
 
 function __init__()
