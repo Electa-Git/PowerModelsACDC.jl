@@ -125,6 +125,8 @@ function variable_dcbranch_temperature(pm::_PM.AbstractIVRModel, ids; nw::Int=_P
 
     report && _PM.sol_component_value(pm, nw, :branchdc, :cable_cond_temp, ids, cond_temp_dc)
     report && _PM.sol_component_value(pm, nw, :branchdc, :cable_surface_temp, ids, cable_surface_temp_dc)
+    report && _PM.sol_component_value(pm, nw, :branchdc, :delta_cable_cond_temp, ids, Δ_cond_temp_dc)
+    report && _PM.sol_component_value(pm, nw, :branchdc, :delta_cable_surface_temp, ids, Δ_cable_surface_temp_dc)
 end
 
 # Kirchhoff's current law for DC nodes
