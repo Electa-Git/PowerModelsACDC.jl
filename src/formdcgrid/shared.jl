@@ -41,7 +41,7 @@ function constraint_power_balance_ac(pm::_PM.AbstractWModels, n::Int, i::Int, bu
         - sum(ps[s] for s in bus_storage)
         - sum(pflex[d] for d in bus_loads)
         - sum(pim[d] for d in bus_ims)
-        - sum(gs for (i,gs) in bus_gs)*w^2
+        - sum(gs for (i,gs) in bus_gs)*w
     )
     cstr_q = JuMP.@constraint(pm.model,
         sum(q[a] for a in bus_arcs)
@@ -53,7 +53,7 @@ function constraint_power_balance_ac(pm::_PM.AbstractWModels, n::Int, i::Int, bu
         - sum(qs[s] for s in bus_storage)
         - sum(qflex[d] for d in bus_loads)
         - sum(qim[d] for d in bus_ims)
-        + sum(bs for (i,bs) in bus_bs)*w^2
+        + sum(bs for (i,bs) in bus_bs)*w
     )
 
     if _IM.report_duals(pm)

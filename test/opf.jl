@@ -6,6 +6,20 @@
         result = solve_acdcopf(pkgdir(PowerModelsACDC, "test", "data", "case3.m"), PowerModels.DCPPowerModel, highs; setting=s)
         @test result["termination_status"] == OPTIMAL
     end
+    @testset "Bus shunt: ACR and W-space balances scale with |V|^2" begin
+        # regression for a nonzero bus shunt at bus 3 of case5: compare the ACP and ACR objectives, pin the SOCWR objective
+        case5_shunt = deepcopy(case5)
+        case5_shunt["shunt"] = Dict("1" => Dict("index" => 1, "shunt_bus" => 3, "gs" => 0.05, "bs" => 0.5, "status" => 1, "source_id" => Any["bus", 3]))
+        acp = solve_acdcopf(case5_shunt, PowerModels.ACPPowerModel, ipopt; setting=s)
+        acr = solve_acdcopf(case5_shunt, PowerModels.ACRPowerModel, ipopt; setting=s)
+        soc = solve_acdcopf(case5_shunt, PowerModels.SOCWRPowerModel, ipopt; setting=s)
+        @test acp["termination_status"] == LOCALLY_SOLVED
+        @test acr["termination_status"] == LOCALLY_SOLVED
+        @test soc["termination_status"] == LOCALLY_SOLVED
+        @test acp["objective"] ≈ 204.42 rtol=1e-3
+        @test acr["objective"] ≈ acp["objective"] rtol=1e-4   # 205.43 with the |V|^4 term
+        @test soc["objective"] ≈ 190.27 rtol=1e-3            # 189.82 with the w^2 term
+    end
     @testset "Single network" begin
         @testset "ACPPowerModel" begin
             @testset "3-bus case" begin
