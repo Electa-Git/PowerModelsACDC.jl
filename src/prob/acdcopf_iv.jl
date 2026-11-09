@@ -200,7 +200,7 @@ function mp_build_acdcopf_iv(pm::_PM.AbstractIVRModel)
         variable_sssc(pm; nw = n)
         variable_pfc(pm; nw = n)
 
-        # variable_dcbranch_temperature(pm; nw = n)
+        variable_dcbranch_temperature(pm; nw = n)
 
         add_additional_variables(pm; nw = n)
     end

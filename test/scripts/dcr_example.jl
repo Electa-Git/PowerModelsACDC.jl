@@ -46,6 +46,8 @@ function build_dcr_data(file, number_of_hours::Int, time_interval::Int)
 
             branchdc["initial_conductor_temperature"] = 12 # °C
             branchdc["initial_cable_surface_temperature"] = 12 # °C
+            branchdc["initial_delta_cable_cond_temp"] = 0.0 # °C
+            branchdc["initial_delta_cable_surface_temp"] = 0.0 # °C
 
             branchdc["dcr"] = 1
             if parse(Int, br) == 1

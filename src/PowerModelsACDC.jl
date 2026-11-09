@@ -1,11 +1,11 @@
 module PowerModelsACDC
 
+import PowerModels as _PM
 import InfrastructureModels as _IM
 import JuMP
 import LinearAlgebra
 import Logging
 import NLsolve
-import PowerModels as _PM
 import SparseArrays
 
 function __init__()
@@ -23,9 +23,9 @@ include("core/relaxation_scheme.jl")
 include("core/util.jl")
 
 include("prob/acdcopf.jl")
+include("prob/acdcopf_iv.jl")
 include("prob/acdcpf.jl")
 include("prob/acdcopf_bf.jl")
-include("prob/acdcopf_iv.jl")
 include("prob/tnep.jl")
 include("prob/sacdcpf.jl")
 include("prob/uc.jl")

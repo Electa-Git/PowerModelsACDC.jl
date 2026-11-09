@@ -296,11 +296,14 @@ end
 function constraint_dynamic_cable_rating(pm::_PM.AbstractPowerModel, i::Int, nw::Int)
     branchdc = _PM.ref(pm, nw, :branchdc, i)
     cond_temp_init = branchdc["initial_conductor_temperature"] 
-    surf_temp_init = branchdc["initial_cable_surface_temperature"]    
-    return constraint_dynamic_cable_rating(pm, i, nw, cond_temp_init, surf_temp_init)
+    surf_temp_init = branchdc["initial_cable_surface_temperature"]
+    delta_cond_temp_init = branchdc["initial_delta_cable_cond_temp"]
+    delta_surf_temp_init = branchdc["initial_delta_cable_surface_temp"]
+
+    return constraint_dynamic_cable_rating(pm, i, nw, cond_temp_init, surf_temp_init, delta_cond_temp_init, delta_surf_temp_init)
 end
 
-function constraint_dynamic_cable_rating(pm::_PM.AbstractPowerModel, i::Int, nw::Int, cond_temp_init, surf_temp_init)
+function constraint_dynamic_cable_rating(pm::_PM.AbstractPowerModel, i::Int, nw::Int, cond_temp_init, surf_temp_init, delta_cond_temp_init, delta_surf_temp_init)
     cond_temp = _PM.var(pm, nw, :cond_temp_dc, i)
     surf_temp = _PM.var(pm, nw, :cable_surface_temp_dc, i)
     Δ_cond_temp = _PM.var(pm, nw, :delta_cond_temp_dc, i)
@@ -309,8 +312,8 @@ function constraint_dynamic_cable_rating(pm::_PM.AbstractPowerModel, i::Int, nw:
     JuMP.@constraint(pm.model, cond_temp == cond_temp_init)
     JuMP.@constraint(pm.model, surf_temp == surf_temp_init)
 
-    JuMP.@constraint(pm.model, Δ_cond_temp == 0.0)
-    JuMP.@constraint(pm.model, Δ_surf_temp == 0.0)
+    JuMP.@constraint(pm.model, Δ_cond_temp == delta_cond_temp_init)
+    JuMP.@constraint(pm.model, Δ_surf_temp == delta_surf_temp_init)
 end
 
 
@@ -341,6 +344,7 @@ function constraint_dynamic_cable_rating(pm::_PM.AbstractPowerModel, i::Int, nw_
     Δ_surf_temp = _PM.var(pm, nw, :delta_cable_surface_temp_dc, i)
 
     cond_temp_ = _PM.var(pm, nw_, :cond_temp_dc, i)
+    surf_temp_ = _PM.var(pm, nw_, :cable_surface_temp_dc, i)
     Δ_cond_temp_ = _PM.var(pm, nw_, :delta_cond_temp_dc, i)
     Δ_surf_temp_ = _PM.var(pm, nw_, :delta_cable_surface_temp_dc, i)
 
