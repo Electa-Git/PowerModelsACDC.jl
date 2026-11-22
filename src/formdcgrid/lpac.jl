@@ -5,7 +5,7 @@ Shunt constraint using linearized voltage magnitude difference phi
 sum(p) + sum(pconv_grid_ac)  == sum(pg) - sum(pd) - sum(gs*(1.0 + 2*phi)
 ```
 """
-function constraint_power_balance_ac(pm::_PM.AbstractLPACModel, n::Int,  i::Int, bus_arcs, bus_arcs_pst, bus_arcs_sssc, bus_convs_ac, bus_arcs_sw, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
+function constraint_power_balance_ac(pm::_PM.AbstractLPACModel, n::Int,  i::Int, bus_arcs, bus_arcs_pst, bus_arcs_sssc, bus_convs_ac, bus_arcs_sw, bus_gens, bus_ims, bus_storage, bus_loads, bus_gs, bus_bs)
     phi = _PM.var(pm, n, :phi, i)
     p = _PM.var(pm, n, :p)
     q = _PM.var(pm, n, :q)
@@ -15,6 +15,8 @@ function constraint_power_balance_ac(pm::_PM.AbstractLPACModel, n::Int,  i::Int,
     qg = _PM.var(pm, n, :qg)
     pconv_grid_ac = _PM.var(pm, n, :pconv_tf_fr)
     qconv_grid_ac = _PM.var(pm, n, :qconv_tf_fr)
+    pim = _PM.var(pm, n,  :p_im_s_fr)
+    qim =  _PM.var(pm, n,  :q_im_s_fr)  
     pflex = _PM.var(pm, n, :pflex)
     qflex = _PM.var(pm, n, :qflex)
     ps    = _PM.var(pm, n, :ps)
@@ -31,6 +33,7 @@ function constraint_power_balance_ac(pm::_PM.AbstractLPACModel, n::Int,  i::Int,
     sum(pg[g] for g in bus_gens)
     - sum(ps[s] for s in bus_storage)
     - sum(pflex[d] for d in bus_loads)
+    - sum(pim[i] for i in bus_ims)
     - sum(gs for (i,gs) in bus_gs)*(1.0 + 2*phi)
     )
     
@@ -43,6 +46,7 @@ function constraint_power_balance_ac(pm::_PM.AbstractLPACModel, n::Int,  i::Int,
     sum(qg[g] for g in bus_gens)
     - sum(qs[s] for s in bus_storage)
     - sum(qflex[d] for d in bus_loads)
+    - sum(qim[i] for i in bus_ims)
     + sum(bs for (i,bs) in bus_bs)*(1.0 + 2*phi)
     )
     if _IM.report_duals(pm)
